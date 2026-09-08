@@ -2,14 +2,16 @@
 // Entry gate. The reference makes you draw a zero before it lets you in; ours
 // makes you close the circuit. Same idea: a gesture, not a button, and the
 // gesture is the brand.
+//
+// The gate is a *transparent* overlay — the live WebGL scene keeps running
+// behind it, and the only thing between the visitor and the world is a soft
+// vignette that keeps the prompt legible. Everything the pointer draws lands on
+// the <canvas> below, painted in src/lib/loader.ts.
 ---
 <div class="loader" id="loader" role="dialog" aria-modal="true" aria-labelledby="loader-title">
+  <canvas class="loader__ink" aria-hidden="true"></canvas>
+
   <div class="loader__stage">
-    <svg class="loader__ring" viewBox="0 0 240 240" aria-hidden="true">
-      <circle class="loader__ring-track" cx="120" cy="120" r="96" />
-      <circle class="loader__ring-arc" cx="120" cy="120" r="96" />
-      <circle class="loader__ring-head" cx="120" cy="24" r="6" />
-    </svg>
     <p class="loader__label mono-label" id="loader-title">Close the circuit</p>
     <p class="loader__sub mono-label" id="loader-sub">Loading site 01</p>
   </div>
@@ -21,60 +23,71 @@
 
 <style>
   .loader {
+    /* Ink colours, named once here so the canvas can read them back off the
+       element rather than hard-coding anything. */
+    --ink-core: var(--c-white);
+    --ink-glow: var(--c-signal);
+
     position: fixed;
     inset: 0;
     z-index: var(--z-overlay);
     display: grid;
     place-items: center;
-    background: #0a1a14;
+    /* No ground of its own: just enough fall-off at the edges to hold the
+       prompt against whatever the scene happens to be doing. */
+    background: radial-gradient(
+      120% 90% at 50% 50%,
+      transparent 28%,
+      var(--k-30) 72%,
+      var(--k-55) 100%
+    );
     touch-action: none;
     cursor: none;
+    /* A drag across the viewport must draw, not select the prompt. */
+    -webkit-user-select: none;
+    user-select: none;
     transition: opacity 0.9s var(--e-out), visibility 0.9s;
   }
   .loader.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
 
-  .loader__stage { position: relative; display: grid; place-items: center; }
+  /* The drawing surface. Pointer events stay on .loader so the whole viewport
+     is drawable; the canvas is purely a paint layer. */
+  .loader__ink {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    touch-action: none;
+  }
 
-  .loader__ring { width: min(58vmin, 320px); height: min(58vmin, 320px); overflow: visible; }
-  .loader__ring-track {
-    fill: none;
-    stroke: var(--w-10);
-    stroke-width: 1;
-  }
-  .loader__ring-arc {
-    fill: none;
-    stroke: var(--w-85);
-    stroke-width: 2;
-    stroke-linecap: round;
-    transform: rotate(-90deg);
-    transform-origin: 120px 120px;
-    filter: drop-shadow(0 0 10px #ffffff55);
-  }
-  .loader__ring-head {
-    fill: var(--c-white);
-    filter: drop-shadow(0 0 12px #ffffffaa);
-    transition: opacity var(--d-base);
+  .loader__stage {
+    position: relative;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
   }
 
   .loader__label {
-    position: absolute;
     color: var(--w-90);
     font-size: 12px;
     letter-spacing: 0.22em;
     text-align: center;
-    pointer-events: none;
+    text-shadow: 0 1px 14px var(--k-70);
     transition: opacity var(--d-base);
   }
   .loader__sub {
     position: absolute;
-    top: calc(50% + 26px);
+    top: calc(100% + 14px);
     color: var(--w-30);
     font-size: 10px;
     letter-spacing: 0.18em;
-    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity var(--d-base);
   }
   .loader.is-ready .loader__sub { opacity: 0; }
-  .loader.is-drawing .loader__label { opacity: 0.25; }
+  /* Once the pointer is down the stroke is the whole message. */
+  .loader.is-drawing .loader__label { opacity: 0.45; }
 
   .loader__skip {
     position: absolute;
@@ -92,4 +105,5 @@
   }
   .loader.is-ready .loader__skip { opacity: 1; }
   .loader__skip:hover { color: var(--w-90); border-color: var(--w-30); }
+  .loader__skip:focus-visible { color: var(--w-90); border-color: var(--w-45); }
 </style>
