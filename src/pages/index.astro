@@ -158,15 +158,18 @@ const grain =
     text-shadow: 0 2px 22px #04100ad9;
   }
   /* The headings are a clipped gradient, so text-shadow would paint a solid
-     silhouette behind them. drop-shadow works on the rendered glyphs. */
-  .stage-panel__title {
+     silhouette behind them. drop-shadow works on the rendered glyphs — but it
+     must not sit on the same element as the clip, or the two end up in
+     different rendering contexts and the text can drop out entirely. It goes
+     on the mask span. */
+  .stage-panel__title .line {
     filter: drop-shadow(0 2px 20px #04100ae6);
   }
   :global([data-chrome='dark']) .stage-panel__kicker,
   :global([data-chrome='dark']) .stage-panel__lede {
     text-shadow: 0 2px 22px #ffffffd9;
   }
-  :global([data-chrome='dark']) .stage-panel__title {
+  :global([data-chrome='dark']) .stage-panel__title .line {
     filter: drop-shadow(0 2px 20px #ffffffe6);
   }
 

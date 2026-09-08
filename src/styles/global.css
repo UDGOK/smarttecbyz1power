@@ -315,6 +315,84 @@ body[data-virtual-scroll] { overflow: hidden; height: 100svh; }
 body[data-virtual-scroll] .stage-scroll { height: 100svh; }
 
 /* ---- Silver shimmer ----
+   The reference's own treatment: the text is a clipped gradient rather than a
+   fill, swept across on a nine-second loop.
+
+   It is behind @supports and it never removes the text colour on its own,
+   because the failure mode is brutal: `-webkit-text-fill-color: transparent`
+   with a background that does not paint leaves the heading completely
+   invisible rather than merely unstyled. The solid colour stays underneath so
+   there is always something to see. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .silver {
+    background-image: linear-gradient(
+      100deg,
+      var(--w-70) 0% 35%,
+      var(--c-white) 50%,
+      var(--w-70) 65% 100%
+    );
+    background-size: 200%;
+    background-repeat: repeat;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: silver-sweep 9s linear infinite;
+  }
+  [data-chrome='dark'] .silver {
+    background-image: linear-gradient(
+      100deg,
+      var(--k-55) 0% 35%,
+      var(--c-carbon) 50%,
+      var(--k-55) 65% 100%
+    );
+  }
+}
+
+@keyframes silver-sweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .silver { animation: none; background-position: 50% 0; }
+}
+
+/* ---- Pointer pass-through on the cinematic route ----
+   `main` covers the document above the WebGL canvas, so by default it eats
+   every pointer event before the scene sees one. Events fall through, and are
+   handed back only to the things that want them.
+
+   These rules MUST live here, unscoped. In a component's scoped <style>,
+   `main > *` compiles to `main[cid] > *[cid]`, and imported components carry
+   their own scope id rather than the page's — so the selector matches nothing
+   and the whole chrome layer stops taking clicks. */
+body[data-experience] main { pointer-events: none; }
+body[data-experience] main > * { pointer-events: auto; }
+
+/* The campus hands the pointer to the model instead. */
+body[data-experience] main > #campus-ui,
+body[data-experience] main > [data-stage='campus'] { pointer-events: none; }
+
+/* …except the controls that sit on top of it. */
+.campus-controls,
+.campus-legend,
+.campus-legend__btn,
+.campus-hotspot { pointer-events: auto; }
+
+/* The hidden attribute must win over any display a component sets on itself.
+   Without this, a component that styles its own display keeps occupying the
+   layout — and if it is a full-bleed overlay, it silently eats every click
+   underneath it. */
+[hidden] { display: none !important; }
+
+/* ---- Virtual scroll ----
+   While the damped scroll manager owns the journey the document itself must
+   not scroll, or the two compete and the page jitters. The stage tracks
+   collapse to one viewport; they are restored the moment the campus hands
+   control back so the configurator and reading path below are reachable. */
+body[data-virtual-scroll] { overflow: hidden; height: 100svh; }
+body[data-virtual-scroll] .stage-scroll { height: 100svh; }
+
+/* ---- Silver shimmer ----
    The reference's own treatment, transcribed from its stylesheet: the text is
    a clipped gradient rather than a fill, and the gradient is twice the width
    of the box so it can be swept across. Nine seconds, linear, forever. */
