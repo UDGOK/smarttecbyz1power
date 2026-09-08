@@ -12,18 +12,23 @@ npm run build      # -> dist/
 
 Output is fully static: 7 HTML pages plus hashed assets under `dist/_astro/`.
 
-## Hosting
+## Hosting — Vercel
 
-Either works; pick one and set it up once.
+`vercel.json` is committed and carries the build settings and cache headers,
+so the project needs no dashboard configuration beyond connecting the repo.
 
-**Cloudflare Pages**
-- Build command `npm run build`, output directory `dist`
-- Node 22
-- Nothing else — there is no adapter and no SSR
+```bash
+npm i -g vercel
+vercel link          # once, to connect this directory to the project
+vercel --prod        # or just push to main once the Git integration is on
+```
 
-**Vercel**
-- Framework preset: Astro. Build `npm run build`, output `dist`
-- Node 22
+- Framework preset resolves to Astro; build `npm run build`, output `dist`
+- Set Node to 22 in Project Settings → General → Node.js Version
+- Static output, no adapter, no SSR, no serverless functions
+
+Environment variables go in Project Settings → Environment Variables. Every
+one of them is optional today — see the table below.
 
 ## Environment
 
@@ -38,13 +43,9 @@ the site builds and runs with all of them empty, and simply does less:
 
 ## Caching
 
-`dist/_astro/*` is content-hashed — cache immutably for a year. HTML should be
-revalidated, since content changes without the asset hashes moving.
-
-```
-/_astro/*   Cache-Control: public, max-age=31536000, immutable
-/*.html     Cache-Control: public, max-age=0, must-revalidate
-```
+Handled by `vercel.json`. `dist/_astro/*` and `/assets/fonts/*` are
+content-addressed or stable, so both are served immutable for a year; HTML
+revalidates, since content changes without the asset hashes moving.
 
 ## Performance budgets
 
@@ -67,3 +68,5 @@ so there is nothing to download before the first screen is meaningful.
   validate and confirm client-side only.
 - No analytics, no error monitoring, no CMS.
 - No audio files; every track is a WebAudio synth voice.
+- Three licensed display faces are not in the repo. See
+  `public/assets/fonts/README.md` — dropping them in needs no code change.

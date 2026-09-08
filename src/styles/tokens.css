@@ -51,13 +51,22 @@
   --chrome-veil:    #14141aa6;
 
   /* --- Type --- */
-  /* The reference licenses PP Supply Mono, STK Bureau Serif and Bethany
-     Elingston. These are the closest freely licensable faces by contrast,
-     axis and register — not by name. */
-  --f-mono:    'Google Sans Code', ui-monospace, 'SF Mono', monospace;
-  --f-sans:    Inter, system-ui, -apple-system, sans-serif;
-  --f-display: 'Bodoni Moda', 'Didot', 'Times New Roman', serif;
+  /* Each stack names the reference's own face first, then the closest
+     freely licensable stand-in. The commercial faces are declared in
+     fonts.css against files that are not in the repo, so these resolve to
+     the stand-in until someone drops the licensed files in — at which
+     point the type becomes an exact match with no code change.
+
+     Google Sans Code, Google Sans Flex, Inter, Newsreader and Caveat are
+     the faces the reference loads from Google Fonts; those are exact. */
+  --f-mono:    'PP Supply Mono', 'Google Sans Code', ui-monospace, 'SF Mono', monospace;
+  --f-sans:    'PP Supply Sans', 'Google Sans Flex', Inter, system-ui, -apple-system, sans-serif;
+  --f-display: 'STK Bureau Serif', 'Bodoni Moda', Didot, 'Times New Roman', serif;
   --f-script:  'Pinyon Script', 'Bodoni Moda', cursive;
+  /* The reference's editorial serif, used verbatim. */
+  --f-editorial: Newsreader, Georgia, serif;
+  /* Its handwritten annotation face, used verbatim. */
+  --f-hand:    Caveat, 'Bradley Hand', cursive;
 
   --t-micro: 10px;   /* ruler ticks, stage labels */
   --t-label: 11px;   /* nav, badges */

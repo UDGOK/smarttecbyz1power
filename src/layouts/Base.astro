@@ -1,5 +1,24 @@
 ---
+import fs from 'node:fs';
+import path from 'node:path';
 import '../styles/global.css';
+
+/**
+ * The reference's three commercial faces. We cannot ship them, but every token
+ * stack already names them first — so the moment the licensed files are dropped
+ * into public/assets/fonts the type becomes an exact match.
+ *
+ * The @font-face rules are emitted only for files that actually exist at build
+ * time. Declaring them unconditionally would 404 on every page view.
+ */
+const LICENSED_FACES = [
+  { family: 'PP Supply Mono', file: 'PPSupplyMono-Regular.otf' },
+  { family: 'PP Supply Sans', file: 'PPSupplySans-Regular.otf' },
+  { family: 'STK Bureau Serif', file: 'STKBureau-SerifBook.otf' },
+] as const;
+
+const fontDir = path.join(process.cwd(), 'public', 'assets', 'fonts');
+const licensed = LICENSED_FACES.filter((f) => fs.existsSync(path.join(fontDir, f.file)));
 
 interface Props {
   title: string;
@@ -20,6 +39,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
+    {licensed.length > 0 && (
+      <style set:html={licensed
+        .map((f) => `@font-face{font-family:'${f.family}';src:url('/assets/fonts/${f.file}') format('opentype');font-weight:400;font-style:normal;font-display:swap}`)
+        .join('')} />
+    )}
+
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -27,9 +52,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- The five faces the reference itself loads from Google Fonts, matched
+         exactly, plus the two stand-ins for its commercial display faces.
+         See public/assets/fonts/README.md. -->
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Google+Sans+Code:wght@400;700&family=Inter:wght@400;500;600&family=Pinyon+Script&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Caveat:wght@700&family=Google+Sans+Code:wght@400;700&family=Google+Sans+Flex:wght@400;500;600&family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&family=Pinyon+Script&display=swap"
     />
   </head>
   <body data-experience={experience ? '' : undefined}>

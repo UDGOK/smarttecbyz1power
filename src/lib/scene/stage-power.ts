@@ -54,7 +54,7 @@ const CAB_W = 1.55;
 const CAB_H = 3.0;
 const CAB_D = 1.9;
 
-const XFMR = new THREE.Vector3(9.0, 0, -9.0); // 3 MVA, foreground right
+const XFMR = new THREE.Vector3(8.2, 0, -9.0); // 3 MVA, foreground right
 const XFMR_W = 5.0;
 const XFMR_H = 4.2;
 const XFMR_D = 3.2;
@@ -1275,22 +1275,25 @@ export class PowerStage implements StageScene {
     this.charge += (target - this.charge) * k;
     this.uCharge.value = this.charge;
 
-    // Scroll walks the camera in among the rows and drops it toward the dirt.
-    // The dolly is user-driven, so it survives reduced motion; only the idle
+    // Scroll cranes over the plant rather than pushing into it: rising and
+    // easing forward while the aim drops and pulls back onto the bank keeps
+    // every part of the arrangement inside the frame the whole way down the
+    // track. A straight dolly walks the transformer off the right edge.
+    // The move is user-driven, so it survives reduced motion; only the idle
     // breathing on top of it is switched off.
     const p = scroll;
     const driftX = still ? 0 : Math.sin(elapsed * 0.13) * 0.5;
     const driftY = still ? 0 : Math.sin(elapsed * 0.21) * 0.09;
     ctx.camera.position.set(
       this.baseCam.x + driftX,
-      this.baseCam.y - p * 1.4 + driftY,
+      this.baseCam.y + p * 2.6 + driftY,
       this.baseCam.z - p * this.dollyZ,
     );
     ctx.camera.rotation.z = p * 0.02;
     ctx.camera.lookAt(
       this.baseLook.x,
-      this.baseLook.y + p * 0.9,
-      this.baseLook.z - p * 6.0,
+      this.baseLook.y - p * 1.0,
+      this.baseLook.z + p * 8.0,
     );
   }
 
@@ -1359,13 +1362,15 @@ export class PowerStage implements StageScene {
 
   frame(ctx: SceneContext): void {
     this.ctx = ctx;
-    const narrow = ctx.width < 700;
     const cam = ctx.camera;
 
     this.uRes.value.set(Math.max(1, ctx.width), Math.max(1, ctx.height));
     this.uPixelRatio.value = ctx.renderer.getPixelRatio();
 
     const aspect = Math.max(0.25, ctx.width / Math.max(1, ctx.height));
+    // Portrait is a shape, not a width: a tall desktop window crops the plant
+    // exactly the way a phone does, so it gets the portrait composition too.
+    const narrow = ctx.width < 700 || aspect < 1.1;
 
     // Portrait is re-composed, not shrunk: a much wider lens, the camera
     // higher and further back, and the aim dropped so the horizon lifts into
@@ -1377,19 +1382,19 @@ export class PowerStage implements StageScene {
       // the rows fill the bottom.
       this.baseCam.set(-1.0, 11.5, 38);
       this.baseLook.set(-1.0, 2.6, -20);
-      this.dollyZ = 9;
+      this.dollyZ = 5;
       cam.fov = 66;
     } else {
       this.baseCam.set(0, 8.5, 18);
       this.baseLook.set(0, 2.2, -32);
-      this.dollyZ = 15;
+      this.dollyZ = 6;
       // This composition is read left to right — bank, duct, transformer — so
       // it is the *horizontal* angle that has to stay put. Solving the vertical
       // fov from the aspect keeps the plant off the frame edges on a 4:3 or a
       // half-width window instead of cropping it the way a fixed fov would.
       const tanH = 0.58;
       cam.fov = THREE.MathUtils.clamp(
-        THREE.MathUtils.radToDeg(2 * Math.atan(tanH / aspect)), 33, 54,
+        THREE.MathUtils.radToDeg(2 * Math.atan(tanH / aspect)), 33, 58,
       );
     }
 
@@ -1407,8 +1412,8 @@ export class PowerStage implements StageScene {
     // not jump the camera back to the top of the track.
     if (this.scroll > 0) {
       cam.position.z = this.baseCam.z - this.scroll * this.dollyZ;
-      cam.position.y = this.baseCam.y - this.scroll * 1.4;
-      cam.lookAt(this.baseLook.x, this.baseLook.y + this.scroll * 0.9, this.baseLook.z - this.scroll * 6.0);
+      cam.position.y = this.baseCam.y + this.scroll * 2.6;
+      cam.lookAt(this.baseLook.x, this.baseLook.y - this.scroll * 1.0, this.baseLook.z + this.scroll * 8.0);
     }
   }
 
