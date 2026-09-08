@@ -71,7 +71,14 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
             io.unobserve(entries[i].target);
           }
         }
-      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.04 });
+        /* Fire *before* the block enters, not after. With a negative bottom
+           margin and a 4% threshold a section had to be roughly 130px into
+           view to reveal — so a heading sat on screen blank and then snapped
+           in, which reads as the heading having disappeared. Especially now
+           that a fast scroll actually covers ground. A positive bottom margin
+           extends the root below the fold, so a block is already revealed by
+           the time it is visible. */
+      }, { rootMargin: '0px 0px 22% 0px', threshold: 0 });
       var start = function () {
         var els = document.querySelectorAll('[data-reveal]');
         for (var i = 0; i < els.length; i++) io.observe(els[i]);
