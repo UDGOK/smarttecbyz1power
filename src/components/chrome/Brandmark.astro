@@ -1,0 +1,22 @@
+---
+import { company } from '../../data/site';
+---
+<a class="brandmark" href="/" aria-label={`${company.full} — home`}>
+  <svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
+    <circle cx="20" cy="20" r="19" fill="none" stroke="currentColor" stroke-width="1.25" opacity="0.55" />
+    <path d="M12 14h16l-11 12h11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>
+</a>
+
+<style>
+  .brandmark {
+    position: fixed;
+    top: var(--chrome-inset);
+    left: var(--chrome-inset);
+    z-index: var(--z-chrome);
+    display: flex;
+    color: var(--chrome-fg-loud);
+    transition: transform var(--d-fast) var(--e-out), color var(--d-base);
+  }
+  .brandmark:hover { transform: rotate(-8deg) scale(1.06); }
+</style>

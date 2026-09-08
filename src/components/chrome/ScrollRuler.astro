@@ -1,0 +1,125 @@
+---
+import { stages } from '../../data/site';
+---
+<div class="scroll-ruler" role="group" aria-label="Stage navigation">
+  <div class="scroll-ruler-track" aria-hidden="true">
+    {stages.map((s) => (
+      <div class="ruler-segment" data-stage={s.id}>
+        {Array.from({ length: 12 }).map((_, i) => (
+          <span class={`ruler-tick ${i === 0 ? 'major' : 'minor'}`} />
+        ))}
+      </div>
+    ))}
+  </div>
+  <div class="scroll-ruler-indicator" aria-hidden="true"></div>
+  <output class="scroll-ruler-readout mono-label" id="ruler-readout" aria-live="polite">-100 BP</output>
+  <nav class="scroll-ruler-nav">
+    {stages.map((s) => (
+      <button type="button" class="scroll-ruler-nav-btn" data-goto={s.id} aria-label={`Go to stage ${s.ruler}`}>
+        <span class="scroll-ruler-nav-line" aria-hidden="true"></span>
+        <span class="scroll-ruler-nav-label">{s.ruler}</span>
+      </button>
+    ))}
+  </nav>
+</div>
+
+<style>
+  .scroll-ruler {
+    position: fixed;
+    top: var(--chrome-inset);
+    left: 50%;
+    transform: translateX(-50%);
+    width: var(--ruler-w);
+    height: var(--ruler-h);
+    z-index: var(--z-chrome);
+    pointer-events: auto;
+    -webkit-mask-image: linear-gradient(90deg, #0000 0%, #000 8%, #000 92%, #0000 100%);
+    mask-image: linear-gradient(90deg, #0000 0%, #000 8%, #000 92%, #0000 100%);
+  }
+  .scroll-ruler-track {
+    position: absolute;
+    inset: 0 auto auto 0;
+    display: flex;
+    height: 18px;
+    will-change: transform;
+  }
+  .ruler-segment { display: flex; gap: 10px; padding-right: 10px; }
+  .ruler-tick { width: 1px; background: var(--chrome-line); opacity: 0.55; }
+  .ruler-tick.minor { height: 6px; }
+  .ruler-tick.major { height: 14px; opacity: 0.9; }
+
+  .scroll-ruler-indicator {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 18px;
+    background: var(--chrome-fg-loud);
+    transition: background var(--d-base);
+  }
+  .scroll-ruler-readout {
+    position: absolute;
+    top: 26px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--chrome-fg);
+    white-space: nowrap;
+  }
+
+  /* The tick track and the jump buttons occupy the same space and swap on hover. */
+  .scroll-ruler-nav {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 26px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .scroll-ruler:hover .scroll-ruler-nav,
+  .scroll-ruler:focus-within .scroll-ruler-nav { opacity: 1; pointer-events: auto; }
+  .scroll-ruler:hover .scroll-ruler-track,
+  .scroll-ruler:focus-within .scroll-ruler-track { opacity: 0; }
+  .scroll-ruler-track { transition: opacity 0.25s; }
+
+  .scroll-ruler-nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 0 2px;
+    margin: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--chrome-fg);
+    transition: color var(--d-fast);
+  }
+  .scroll-ruler-nav-btn:hover { color: var(--chrome-fg-loud); }
+  .scroll-ruler-nav-line {
+    width: 28px;
+    height: 1px;
+    background: var(--chrome-line);
+    transition: width var(--d-fast), background var(--d-fast), height var(--d-fast);
+  }
+  .scroll-ruler-nav-btn:hover .scroll-ruler-nav-line,
+  .scroll-ruler-nav-btn[aria-current='true'] .scroll-ruler-nav-line {
+    width: 40px;
+    height: 2px;
+    background: var(--chrome-fg-loud);
+  }
+
+  @media (max-width: 640px) {
+    /* Leave the badge and brandmark their corners rather than overlapping them. */
+    .scroll-ruler { width: 150px; }
+    .scroll-ruler-nav { gap: 10px; }
+    .scroll-ruler-nav-line { width: 16px; }
+  }
+</style>

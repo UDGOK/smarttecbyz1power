@@ -1,0 +1,95 @@
+---
+// Floating capture bar, pinned bottom-centre like the reference's beta bar.
+// Posts to a form endpoint — see README for wiring. [PLACEHOLDER: endpoint]
+---
+<form class="cta-bar" id="reserve-form" method="post" action="/api/reserve" novalidate>
+  <button type="button" class="cta-bar__back" aria-label="Previous stage" data-back>
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M19 12H5M12 19l-7-7 7-7" />
+    </svg>
+  </button>
+  <label class="visually-hidden" for="reserve-email">Work email</label>
+  <input
+    class="cta-bar__input"
+    id="reserve-email"
+    name="email"
+    type="email"
+    inputmode="email"
+    autocomplete="email"
+    placeholder="work email"
+    required
+  />
+  <button type="submit" class="cta-bar__submit">Reserve capacity</button>
+  <p class="cta-bar__msg mono-label" id="reserve-msg" role="status"></p>
+</form>
+
+<style>
+  .cta-bar {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: var(--z-chrome);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: min(540px, calc(100vw - 32px));
+    padding: 7px 7px 7px 10px;
+    border-radius: var(--r-pill);
+    background: var(--c-white);
+    box-shadow: 0 8px 40px #0000002e;
+  }
+  .cta-bar__back {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 38px; height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: #f1f1ef;
+    color: var(--c-carbon);
+    cursor: pointer;
+    transition: background var(--d-fast);
+  }
+  .cta-bar__back:hover { background: #e4e4e1; }
+  .cta-bar__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    background: none;
+    outline: none;
+    font-family: var(--f-sans);
+    font-size: var(--t-read);
+    color: var(--c-carbon);
+  }
+  .cta-bar__input::placeholder { color: #9a9a95; }
+  .cta-bar__submit {
+    flex: 0 0 auto;
+    padding: 11px 20px;
+    border: none;
+    border-radius: var(--r-pill);
+    background: var(--c-carbon);
+    color: var(--c-white);
+    font-family: var(--f-sans);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--d-fast), transform var(--d-fast) var(--e-out);
+  }
+  .cta-bar__submit:hover { background: #34302f; transform: translateY(-1px); }
+  .cta-bar__msg {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    color: var(--chrome-fg-loud);
+    white-space: nowrap;
+  }
+  .cta-bar__msg:empty { display: none; }
+
+  @media (max-width: 520px) {
+    .cta-bar { gap: 6px; padding: 6px 6px 6px 8px; }
+    .cta-bar__submit { padding: 11px 14px; font-size: 13px; }
+  }
+</style>

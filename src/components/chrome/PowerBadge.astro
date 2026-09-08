@@ -1,0 +1,36 @@
+---
+// The reference gamifies progress with an XP counter. Ours counts the thing a
+// colocation buyer actually cares about: how much of the site is committed.
+---
+<div class="power-badge" aria-live="polite">
+  <span class="power-badge__bolt" aria-hidden="true">
+    <svg viewBox="0 0 12 16" width="11" height="14" fill="currentColor"><path d="M7 0 0 9h4l-1 7 8-10H7l1-6Z"/></svg>
+  </span>
+  <span class="power-badge__value" id="power-value">0</span>
+  <span class="power-badge__unit">kW</span>
+  <span class="visually-hidden">of Phase 1A capacity introduced so far</span>
+</div>
+
+<style>
+  .power-badge {
+    position: fixed;
+    top: var(--chrome-inset);
+    right: var(--chrome-inset);
+    z-index: var(--z-chrome);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 15px;
+    border-radius: var(--r-pill);
+    background: var(--chrome-veil);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    font-family: var(--f-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--ls-mid);
+    color: var(--chrome-fg-loud);
+  }
+  .power-badge__bolt { color: var(--c-gold); display: flex; }
+  .power-badge__value { font-variant-numeric: tabular-nums; font-weight: 700; }
+  .power-badge__unit { color: var(--chrome-fg); }
+</style>

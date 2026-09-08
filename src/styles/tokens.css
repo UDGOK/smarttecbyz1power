@@ -1,0 +1,103 @@
+/* ============================================================
+   SmartTec by Z1Power — design tokens
+   Palette and type scale read from why.zero.university (reference),
+   re-pointed at an energy/compute subject.
+   ============================================================ */
+
+:root {
+  /* --- Ground colours: one per narrative stage --- */
+  --c-land:      #1c4839; /* stage 1 — the land (reference body ground) */
+  --c-land-deep: #123027;
+  --c-wait:      #8c110c; /* stage 2 — the interconnection queue */
+  --c-wait-deep: #4d0806;
+  --c-power:     #f2b705; /* stage 3 — solar + storage */
+  --c-power-deep:#7a5a02;
+  --c-machine:   #10161f; /* stage 4 — the compute hall */
+  --c-machine-deep:#070a0f;
+  --c-campus:    #eef1ef; /* stage 5 — daylight campus */
+
+  /* --- Brand --- */
+  --c-signal:  #7be88a;  /* live / online / go */
+  --c-moss:    #2d6a54;
+  --c-gold:    #ffc832;  /* stored energy, XP */
+  --c-carbon:  #1f1d1e;
+  --c-white:   #ffffff;
+
+  /* --- White alpha ladder: UI that floats over any scene --- */
+  --w-04: #ffffff0a;
+  --w-08: #ffffff14;
+  --w-10: #ffffff1a;
+  --w-25: #ffffff40;
+  --w-30: #ffffff4d;
+  --w-45: #ffffff73;
+  --w-50: #ffffff80;
+  --w-55: #ffffff8c;
+  --w-70: #ffffffb3;
+  --w-85: #ffffffd9;
+  --w-90: #ffffffe6;
+  --w-95: #fffffff2;
+
+  /* --- Black alpha ladder: same chrome, inverted on light stages --- */
+  --k-06: #0000000f;
+  --k-30: #0000004d;
+  --k-40: #0006;
+  --k-55: #0000008c;
+  --k-70: #000000b3;
+
+  /* --- Chrome tint: flipped per stage by [data-chrome] --- */
+  --chrome-fg:      var(--w-70);
+  --chrome-fg-loud: var(--w-95);
+  --chrome-line:    var(--w-55);
+  --chrome-veil:    #14141aa6;
+
+  /* --- Type --- */
+  --f-mono:    'Google Sans Code', ui-monospace, 'SF Mono', monospace;
+  --f-sans:    'Google Sans Flex', Inter, system-ui, -apple-system, sans-serif;
+  --f-display: 'Newsreader', 'Times New Roman', Georgia, serif;
+  --f-script:  'Caveat', 'Newsreader', cursive;
+
+  --t-micro: 10px;   /* ruler ticks, stage labels */
+  --t-label: 11px;   /* nav, badges */
+  --t-ui:    12px;   /* buttons */
+  --t-read:  15px;
+  --t-lede:  clamp(1.05rem, 0.9rem + 0.6vw, 1.4rem);
+  --t-display: clamp(2.6rem, 1.1rem + 5.4vw, 6.25rem);
+
+  --ls-wide: 0.12em;  /* the reference's signature UI tracking */
+  --ls-mid:  0.08em;
+  --ls-tight:0.05em;
+
+  /* --- Space (4px base) --- */
+  --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px; --s-9: 96px;
+
+  /* --- Radii --- */
+  --r-pill: 999px;
+  --r-card: 16px;
+  --r-sm:   8px;
+
+  /* --- Motion --- */
+  --d-fast:  0.2s;
+  --d-base:  0.4s;
+  --d-slow:  0.8s;
+  --d-stage: 1.6s;
+  --e-out:   cubic-bezier(0.22, 1, 0.36, 1);
+  --e-inout: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* --- Layout --- */
+  --chrome-inset: 16px;
+  --ruler-w: 300px;
+  --ruler-h: 60px;
+  --z-canvas: 0;
+  --z-content: 5;
+  --z-chrome: 10;
+  --z-overlay: 20;
+}
+
+/* Light stages invert the entire chrome layer in one place. */
+[data-chrome='dark'] {
+  --chrome-fg:      var(--k-55);
+  --chrome-fg-loud: var(--c-carbon);
+  --chrome-line:    var(--k-40);
+  --chrome-veil:    #ffffffcc;
+}

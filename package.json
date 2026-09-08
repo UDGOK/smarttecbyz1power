@@ -1,0 +1,23 @@
+{
+  "name": "smarttec-by-z1power",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check"
+  },
+  "dependencies": {
+    "astro": "^5.14.1",
+    "gsap": "^3.13.0",
+    "howler": "^2.2.4",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@types/howler": "^2.2.12",
+    "@types/three": "^0.180.0",
+    "typescript": "^5.9.2"
+  }
+}
