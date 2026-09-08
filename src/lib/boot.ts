@@ -82,7 +82,9 @@ export function boot(): void {
   const canvas = document.querySelector<HTMLCanvasElement>('#experience-canvas');
   const root = document.querySelector<HTMLElement>('[data-stage-root]');
   const holdSlot = document.querySelector<HTMLElement>('#hold-slot');
-  if (!canvas || !root || !holdSlot) return;
+  // holdSlot is vestigial — the hold button was replaced by scroll — so it
+  // must not be able to take the whole experience down by being absent.
+  if (!canvas || !root) return;
 
   document.documentElement.classList.add('js-ready');
 
@@ -92,7 +94,7 @@ export function boot(): void {
 
   const canvasEl: HTMLCanvasElement = canvas;
   const rootEl: HTMLElement = root;
-  const slot: HTMLElement = holdSlot;
+  const slot: HTMLElement | null = holdSlot;
 
   const readout = document.querySelector<HTMLElement>('#ruler-readout');
   const rulerTrack = document.querySelector<HTMLElement>('.scroll-ruler-track');
@@ -344,7 +346,9 @@ export function boot(): void {
     });
 
     crossing = false;
-    reveal(next);
+    // Let the world resolve a little before the copy lands on it — arriving
+    // together meant a second of flat colour with the headline already there.
+    window.setTimeout(() => reveal(next), reduced ? 0 : 430);
     if (stages[next + 1]) warmScene(stages[next + 1].scene);
     if (to.scene === 'campus') enterCampus();
 
@@ -454,6 +458,8 @@ export function boot(): void {
   let campusPull = 0;
   const campusWheel = (e: WheelEvent): void => {
     if (swapping || stages[current]?.scene !== 'campus') return;
+    // A pinch-zoom arrives as ctrl+wheel and belongs to the model, not to us.
+    if (e.ctrlKey || e.metaKey) { campusPull = 0; return; }
     if (window.scrollY > 2 || e.deltaY >= 0) { campusPull = 0; return; }
     campusPull += -e.deltaY;
     if (campusPull > 260 && performance.now() > lockedUntil) {
@@ -633,7 +639,13 @@ export function boot(): void {
   applyChrome(0);
   showPanel(0);
   setPower(0);
-  gsap.set(rootEl.querySelectorAll('.line__inner'), { yPercent: 115, opacity: 0 });
+  // Only pre-hide when something is going to animate it back. Under reduced
+  // motion the char treatments deliberately do not split, so anything hidden
+  // here would never be cleared — which is exactly the "left invisible" case
+  // the reduced-motion path exists to avoid.
+  if (!reduced) {
+    gsap.set(rootEl.querySelectorAll('.line__inner'), { yPercent: 115, opacity: 0 });
+  }
 
   // The gate is transparent and the world renders behind it, so the scene is
   // the first screen — not something deferred until after it. Three.js is

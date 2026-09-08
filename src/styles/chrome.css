@@ -1112,9 +1112,12 @@
    narrow viewport is the layout we actually ship to phones and is the one a
    desktop browser can be made to reproduce — so the fix is verifiable. */
 @media (pointer: coarse), (max-width: 640px) {
+  /* .brandmark and .menu-toggle are deliberately NOT in this list: they are
+     already position: fixed, and overriding that to relative turns their inset
+     into a relative offset — which threw the menu toggle, the only route to
+     the content pages, 124px off the left of the screen. A fixed element is
+     already a positioning context, so ::after works without any help. */
   .scroll-ruler-nav-btn,
-  .brandmark,
-  .menu-toggle,
   .cta-bar__back,
   .cta-bar__submit,
   .campus-btn,
@@ -1151,4 +1154,16 @@
   /* The field itself was 21px tall inside a taller pill — the pill looked
      tappable, the input was not. */
   .cta-bar__input { padding-block: 13px; }
+}
+
+/* Hotspots are 13px dots on every pointer, not just coarse ones. */
+.campus-hotspot { position: relative; }
+.campus-hotspot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  transform: translate(-50%, -50%);
 }

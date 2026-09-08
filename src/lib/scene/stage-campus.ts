@@ -974,6 +974,15 @@ export class CampusScene implements StageScene {
 
   private onWheel = (e: WheelEvent): void => {
     if (!this.interactive) return;
+    // Plain wheel belongs to the page: the canvas is fixed and covers the
+    // viewport, so swallowing it made the configurator and the whole reading
+    // path below the campus unreachable by mouse, and a wheel-up meant to zoom
+    // in ejected the visitor back to the previous stage instead.
+    //
+    // A trackpad pinch arrives as a wheel event with ctrlKey set, which is
+    // exactly the gesture that should zoom — so claim that one and nothing
+    // else. The +/- controls and touch pinch cover the rest.
+    if (!e.ctrlKey && !e.metaKey) return;
     e.preventDefault();
     // deltaMode 1 is lines, 2 is pages — normalise both to something like px.
     const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 100 : 1;
