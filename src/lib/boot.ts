@@ -287,7 +287,10 @@ export function boot(): void {
     if (to.scene === 'campus') enterCampus();
 
     swapping = false;
-    onScroll();
+    // Next frame: the scroll reset and the panel swap must both have settled
+    // before the parallax is recomputed, or the incoming panel inherits the
+    // outgoing one's progress and arrives faded out.
+    requestAnimationFrame(onScroll);
   }
 
   async function goToStage(index: number): Promise<void> {
@@ -315,7 +318,7 @@ export function boot(): void {
     if (to.scene === 'campus') enterCampus(); else exitCampus();
 
     swapping = false;
-    onScroll();
+    requestAnimationFrame(onScroll);
   }
 
   // --- Campus ------------------------------------------------------------

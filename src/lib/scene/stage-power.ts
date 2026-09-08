@@ -26,7 +26,7 @@ import type { SceneContext, StageScene, TierSettings } from './types';
  * ------------------------------------------------------------------ */
 
 /** Direction *toward* the low sun. Just above the horizon, left of the axis. */
-const SUN = new THREE.Vector3(-0.24, 0.085, -1).normalize();
+const SUN = new THREE.Vector3(-0.24, 0.032, -1).normalize();
 /** Same azimuth the sky shader derives from a view ray, so shafts line up. */
 const SUN_AZ = Math.atan2(SUN.x, -SUN.z) / (Math.PI * 2) + 0.5;
 
@@ -38,7 +38,7 @@ const FIELD_X1 = 104;
 const FIELD_COLS = Math.round((FIELD_X1 - FIELD_X0) / COL_SPACING) + 1;
 const PANEL_W = 4.2;
 const PANEL_H = 2.0;
-const PANEL_TILT = 0.4;     // radians off horizontal, tipped toward the sun
+const PANEL_TILT = 0.24;    // radians off horizontal, tipped toward the sun
 const TORQUE_TUBE_Y = 1.55;
 
 /** Graded clearing the plant stands in — no tracker is built inside it. */
@@ -48,13 +48,13 @@ const CLEAR_Z0 = -27;
 const CLEAR_Z1 = 8;
 
 const BANK_Z = -20;         // the cabinet bank, silhouetted against the field
-const BANK_X0 = -19;
-const BANK_X1 = -3;
+const BANK_X0 = -16.5;
+const BANK_X1 = -3.5;
 const CAB_W = 1.55;
 const CAB_H = 3.0;
 const CAB_D = 1.9;
 
-const XFMR = new THREE.Vector3(11.5, 0, -6.5); // 3 MVA, foreground right
+const XFMR = new THREE.Vector3(9.0, 0, -9.0); // 3 MVA, foreground right
 const XFMR_W = 5.0;
 const XFMR_H = 4.2;
 const XFMR_D = 3.2;
@@ -66,7 +66,7 @@ const C_GOLD = '#f2b705';       // --c-power
 const C_GOLD_DEEP = '#7a5a02';  // --c-power-deep
 const C_EMBER = '#ffc832';      // --c-gold, stored energy
 const C_NIGHT = '#06070a';
-const C_DIRT = '#1c1207';
+const C_DIRT = '#2e2010';
 const C_MACHINE = '#10161f';    // --c-machine, the world we dissolve toward
 const C_BLUE = '#3f7fd0';
 
@@ -103,8 +103,12 @@ const NOISE = /* glsl */ `
 const COOL = /* glsl */ `
   vec3 coolDown(vec3 c, vec3 machine, vec3 blue, float m){
     float lum = dot(c, vec3(0.299, 0.587, 0.114));
-    vec3 cool = machine * (0.35 + lum * 0.9) + lum * blue * 1.25;
-    return mix(c, cool, m);
+    vec3 cool = machine * (0.40 + lum * 0.9) + lum * blue * 0.95;
+    // Bias the crossfade early. A linear gold-to-blue mix spends its whole
+    // middle sitting on neutral mud; front-loading it means the world has
+    // visibly turned cold by the time the ring is half held.
+    float k = pow(clamp(m, 0.0, 1.0), 0.55);
+    return mix(c, cool, k) * (1.0 - 0.18 * m);
   }
 `;
 
@@ -162,19 +166,31 @@ const SKY_FRAG = /* glsl */ `
     // the whole gold budget. Anything below the horizon is ground haze — the
     // dirt plane is drawn over it, this only has to hide the seam.
     vec3 high = uNight;
-    vec3 low  = mix(uGoldDeep * 0.55, uGold * 0.22, 0.5);
-    vec3 col  = mix(low, high, smoothstep(-0.01, 0.42, el));
-    col = mix(uGoldDeep * 0.28, col, smoothstep(-0.10, 0.015, el));
+    vec3 low  = mix(uGoldDeep * 0.95, uGold * 0.34, 0.45);
+    vec3 col  = mix(low, high, smoothstep(-0.012, 0.30, el));
 
-    // The sun: a hard small disc, a tight bloom, and a wide horizontal smear
-    // so it reads as sitting *in* the haze rather than pasted on it.
-    float sd = max(dot(d, uSun), 0.0);
-    float disc = smoothstep(0.99930, 0.99978, sd);
-    float bloom = pow(sd, 90.0) * 0.85 + pow(sd, 9.0) * 0.14;
-    float smear = pow(max(1.0 - abs(el - uSun.y) * 9.0, 0.0), 3.0)
-                * pow(max(1.0 - abs(az - uSunAz) * 2.2, 0.0), 2.0);
-    col += (disc * 2.6 + bloom) * uGold;
-    col += smear * uGoldDeep * 0.9;
+    // A dust layer on the section line. It lifts the last two degrees of sky,
+    // gives the horizon an edge to be an edge against, and is what the sun
+    // has to burn through on its way down.
+    float haze = smoothstep(0.085, 0.002, el);
+    col = mix(col, mix(uGoldDeep * 0.80, uGold * 0.26, 0.4), haze * 0.65);
+    col = mix(uGoldDeep * 0.34, col, smoothstep(-0.12, 0.004, el));
+
+    // The sun, scattered over five decades of falloff instead of stamped as a
+    // disc: a core, a corona, a glow, and a wash that reaches half the sky.
+    // The lower limb is eaten by the same haze, so it sets *into* the horizon.
+    float sd  = max(dot(d, uSun), 0.0);
+    float ext = smoothstep(0.004, 0.036, el);
+    float disc = smoothstep(0.99948, 0.99986, sd);
+    float scatter = pow(sd, 2400.0) * 1.30
+                  + pow(sd,  320.0) * 0.80
+                  + pow(sd,   60.0) * 0.42
+                  + pow(sd,   14.0) * 0.24
+                  + pow(sd,    3.0) * 0.06;
+    float smear = pow(max(1.0 - abs(el - uSun.y) * 7.0, 0.0), 3.0)
+                * pow(max(1.0 - abs(az - uSunAz) * 1.7, 0.0), 2.0);
+    col += (disc * 1.35 * ext + scatter * (0.30 + 0.70 * ext)) * uGold;
+    col += smear * uGoldDeep * 1.15;
 
     // Volumetric shafts — the same five-tap loop as the land, but rooted on the
     // sun's azimuth instead of scattered across the frame.
@@ -188,14 +204,14 @@ const SKY_FRAG = /* glsl */ `
       shafts += band * (0.35 + 0.65 * hash1(fi * 77.7));
     }
     shafts *= smoothstep(-0.02, 0.60, el) * (0.55 + 0.45 * uFog);
-    col += shafts * uGold * 0.42;
+    col += shafts * uGold * 0.55;
 
     col = coolDown(col, uMachine, uBlue, uMix);
     col += grain(gl_FragCoord.xy, uTime) * 0.03;
 
     // Vignette, so the floating chrome always has contrast to sit on.
     vec2 c = gl_FragCoord.xy / max(uRes, vec2(1.0)) - 0.5;
-    col *= 1.0 - dot(c, c) * 0.85;
+    col *= 1.0 - dot(c, c) * 0.92;
 
     gl_FragColor = vec4(col, 1.0);
   }
@@ -245,29 +261,34 @@ const GROUND_FRAG = /* glsl */ `
     float dist = length(toCam);
     vec3 V = toCam / max(dist, 0.001);
 
-    // Graded dirt, darkest under the camera so the lede and the hold ring
-    // always land on near-black ground.
+    // Graded dirt lit by the whole gold sky, not by one lamp — a flat plane
+    // under a sunset collects a lot of skylight, and without it the plant
+    // reads as floating in black.
     float h = clamp(vH * 1.4 + 0.5, 0.0, 1.0);
-    vec3 col = mix(uDirt * 0.35, uDirt, smoothstep(0.25, 0.9, h));
+    vec3 col = mix(uDirt * 0.62, uDirt * 1.30, smoothstep(0.20, 0.92, h));
+    col += uGoldDeep * 0.30;
 
-    // Grazing rake toward the sun: the ground only brightens where you are
-    // looking down the sun's azimuth.
+    // Grazing rake toward the sun: the section brightens hard where you look
+    // down the sun's azimuth, which is what separates ground from sky.
     vec3 sunFlat = normalize(vec3(uSun.x, 0.0, uSun.z));
     float rake = pow(max(dot(-V, sunFlat), 0.0), 3.0);
-    col += rake * uGoldDeep * 0.55 * smoothstep(20.0, 140.0, dist);
+    col += rake * uGoldDeep * 1.15 * smoothstep(8.0, 95.0, dist);
 
     // Base distance fade is always on — it is what hides the far edge of the
     // geometry. uFog only adds the extra volumetric lift on top.
-    float fade = smoothstep(30.0, 175.0, dist);
-    vec3 horizon = mix(uGoldDeep * 0.30, uGold * 0.16, 0.5);
+    float fade = smoothstep(30.0, 178.0, dist);
+    vec3 horizon = mix(uGoldDeep * 0.62, uGold * 0.22, 0.45);
     col = mix(col, horizon, fade * (0.72 + 0.28 * uFog));
-    col += uFog * smoothstep(60.0, 190.0, dist) * uGoldDeep * 0.18;
+    col += uFog * smoothstep(60.0, 190.0, dist) * uGoldDeep * 0.22;
+
+    // The last few metres fall away so white type always has black to sit on.
+    col *= 0.42 + 0.58 * smoothstep(5.0, 34.0, dist);
 
     col = coolDown(col, uMachine, uBlue, uMix);
     col += grain(gl_FragCoord.xy, uTime) * 0.028;
 
     vec2 c = gl_FragCoord.xy / max(uRes, vec2(1.0)) - 0.5;
-    col *= 1.0 - dot(c, c) * 0.9;
+    col *= 1.0 - dot(c, c) * 0.75;
 
     gl_FragColor = vec4(col, 1.0);
   }
@@ -319,6 +340,7 @@ const PANEL_FRAG = /* glsl */ `
   uniform vec3  uGold;
   uniform vec3  uGoldDeep;
   uniform vec3  uGlass;
+  uniform vec3  uSky;
   uniform vec3  uMachine;
   uniform vec3  uBlue;
   varying vec3  vW;
@@ -338,50 +360,59 @@ const PANEL_FRAG = /* glsl */ `
     vec3 toCam = cameraPosition - vW;
     float dist = length(toCam);
     vec3 V = toCam / max(dist, 0.001);
-    vec3 N = normalize(vN);
-    vec3 T = normalize(vT);
+    vec3 Ng = normalize(vN);          // the glass side, always
+    vec3 N  = gl_FrontFacing ? Ng : -Ng;
+    vec3 T  = normalize(vT);
 
-    float NoL = max(dot(N, uSun), 0.0);
+    // The array is tipped away from us, toward a sun sitting on the horizon.
+    // So the glass is fully lit and we are looking at the backs of the rows —
+    // which is exactly what a tracker field looks like into a low sun.
+    float NoL = max(dot(Ng, uSun), 0.0);
     float NoV = max(dot(N, V), 0.0);
 
-    // Cell grid and busbars.
     vec2 g = abs(fract(vUv * vec2(6.0, 3.0)) - 0.5);
     float cell = 1.0 - smoothstep(0.40, 0.49, max(g.x, g.y)) * 0.55;
-    float bus  = 1.0 - smoothstep(0.006, 0.016, abs(vUv.y - 0.5)) * 0.5;
-
-    vec3 col = uGlass * (0.30 + 0.75 * NoL) * cell * bus;
-    col += max(N.y, 0.0) * uGoldDeep * 0.09;   // ambient off the gold sky
-
-    // Glass is a mirror before it is a colour. Reflect the view and probe the
-    // same sky the backdrop draws: black overhead, gold at the horizon, one hot
-    // lobe where the sun sits. This is what makes the near rows read as dark
-    // slate and the far rows — where the reflection grazes the horizon — burn
-    // into a single sheet of light.
-    vec3 R = reflect(-V, N);
-    vec3 sky = mix(uGoldDeep * 0.85, vec3(0.0), smoothstep(-0.02, 0.45, R.y));
-    sky = mix(uGoldDeep * 0.10, sky, smoothstep(-0.25, -0.02, R.y)); // ground side
-    float rs = max(dot(R, uSun), 0.0);
-
-    // Anisotropy: the cells are laminated in strips, so the sun's reflected
-    // image is smeared along the panel's long axis instead of staying a point.
-    // Compressing R across T is the cheap way to say that.
-    float RoT = dot(R, T);
-    float rsAniso = max(rs - abs(RoT) * 0.55, 0.0) / max(1.0 - abs(RoT) * 0.55, 0.001);
-    sky += pow(rsAniso, 24.0) * uGold * 5.5;
-    sky += pow(rs, 4.0) * uGold * 0.30;
-
-    // Schlick. The whole field pivots on this term.
-    float fres = 0.045 + 0.955 * pow(1.0 - NoV, 5.0);
-    // Per-panel phase, so the array scintillates as the camera dollies rather
-    // than flaring as one slab.
-    float shim = 0.80 + 0.20 * sin(uTime * 1.7 + vSeed * 41.0);
-    col += sky * fres * 1.9 * shim;
-
-    // Aluminium frame — the part that still catches light head-on, and what
-    // keeps the near rows from disappearing into the dirt.
     vec2 e = abs(vUv - 0.5);
     float frame = smoothstep(0.448, 0.488, max(e.x, e.y));
-    col = mix(col, uGoldDeep * (0.55 + 1.5 * NoL) + uGold * 0.05, frame);
+    // Per-panel phase, so the array scintillates as the camera dollies rather
+    // than flaring as one slab.
+    float shim = 0.78 + 0.22 * sin(uTime * 1.7 + vSeed * 41.0);
+
+    vec3 col;
+    if (gl_FrontFacing) {
+      // Glass. Reflect the view and probe the same sky the backdrop draws:
+      // black overhead, gold at the horizon, one hot lobe on the sun.
+      float bus = 1.0 - smoothstep(0.006, 0.016, abs(vUv.y - 0.5)) * 0.5;
+      col = uGlass * (0.40 + 0.70 * NoL) * cell * bus;
+      // Hemisphere: cool slate off the upper sky, gold off the horizon.
+      col += mix(uSky * 0.30, uGoldDeep * 0.45, 0.35) * (0.35 + 0.65 * max(N.y, 0.0));
+
+      vec3 R = reflect(-V, N);
+      vec3 sky = mix(uGoldDeep * 0.85, vec3(0.0), smoothstep(-0.02, 0.45, R.y));
+      sky = mix(uGoldDeep * 0.10, sky, smoothstep(-0.25, -0.02, R.y));
+
+      // Anisotropy: the cells are laminated in strips, so the sun's reflected
+      // image smears along the panel's long axis instead of staying a point.
+      float rs = max(dot(R, uSun), 0.0);
+      float RoT = abs(dot(R, T));
+      float rsA = max(rs - RoT * 0.55, 0.0) / max(1.0 - RoT * 0.55, 0.001);
+      sky += pow(rsA, 24.0) * uGold * 5.0;
+      sky += pow(rs, 4.0) * uGold * 0.30;
+
+      float fres = 0.045 + 0.955 * pow(1.0 - NoV, 5.0);
+      col += sky * fres * 1.9 * shim;
+      col = mix(col, uGoldDeep * (0.55 + 1.5 * NoL) + uGold * 0.05, frame);
+    } else {
+      // Backsheet: matte, near-black, with the sun bleeding around the frame.
+      col = uGlass * (0.42 + 0.55 * NoV) * (0.85 + 0.15 * cell);
+      col += uSky * 0.17 + uGoldDeep * 0.13;
+      col += frame * (uGoldDeep * (0.55 + 1.3 * NoL) + uGold * NoL * 0.40);
+    }
+
+    // The signature of a backlit array: the far edge of every module burns as
+    // a hard line, and thirty of those lines stack into the horizon.
+    float lip = smoothstep(0.84, 1.0, vUv.y) * (0.35 + 1.9 * NoL);
+    col += lip * mix(uGoldDeep, uGold, 0.65) * (0.45 + 0.75 * shim);
 
     float fade = smoothstep(uFar * 0.45, uFar, dist);
     vec3 horizon = mix(uGoldDeep * 0.30, uGold * 0.16, 0.5);
@@ -448,17 +479,17 @@ const METAL_FRAG = /* glsl */ `
 
     // Painted steel: a lambert term for the sun-facing sides, a hard rim where
     // the low sun catches an edge, and a sky term so the tops are not black.
-    vec3 col = uBody * (0.16 + 0.9 * NoL);
-    float rim = pow(1.0 - max(dot(N, V), 0.0), 3.5);
-    col += rim * uGoldDeep * (0.35 + 0.9 * NoL);
-    col += max(N.y, 0.0) * uGoldDeep * 0.16;
+    vec3 col = uBody * (0.45 + 1.0 * NoL);
+    float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0);
+    col += rim * uGoldDeep * (0.55 + 1.0 * NoL);
+    col += (0.35 + 0.65 * max(N.y, 0.0)) * uGoldDeep * 0.26;
 
     // Optional pressed ribs, for the cabinet doors and the tank sides.
     float ribs = 1.0 - uRibs * smoothstep(0.42, 0.5, abs(fract(vUv.x * 9.0) - 0.5)) * 0.35;
     col *= ribs;
 
     float fade = smoothstep(45.0, 150.0, length(cameraPosition - vW));
-    col = mix(col, uGoldDeep * 0.3, fade * (0.6 + 0.4 * uFog));
+    col = mix(col, uGoldDeep * 0.55, fade * (0.6 + 0.4 * uFog));
 
     col = coolDown(col, uMachine, uBlue, uMix);
     gl_FragColor = vec4(col, 1.0);
@@ -577,7 +608,7 @@ const DUCT_FRAG = /* glsl */ `
 
     vec3 N = normalize(vN);
     float NoL = max(dot(N, normalize(vec3(-0.24, 0.085, -1.0))), 0.0);
-    vec3 col = uBody * (0.18 + 0.7 * NoL);
+    vec3 col = uBody * (0.55 + 0.9 * NoL) + vec3(0.035, 0.025, 0.010);
 
     // Three pulses chasing along the run. They only appear once the bank has
     // something to give.
@@ -703,6 +734,8 @@ export class PowerStage implements StageScene {
   private panels: THREE.InstancedMesh | null = null;
   private posts: THREE.InstancedMesh | null = null;
   private postMat: THREE.ShaderMaterial | null = null;
+  private shadowMat: THREE.ShaderMaterial | null = null;
+  private shadowStripeMat: THREE.ShaderMaterial | null = null;
   private flow: THREE.Points | null = null;
   private shadows: THREE.Group | null = null;
   private trackers = 0;
@@ -840,7 +873,7 @@ export class PowerStage implements StageScene {
       : this.keep(new THREE.ShaderMaterial({
         vertexShader: PANEL_VERT,
         fragmentShader: PANEL_FRAG,
-        side: THREE.FrontSide,
+        side: THREE.DoubleSide,
         uniforms: {
           uTime: this.uTime,
           uMix: this.uMix,
@@ -849,7 +882,8 @@ export class PowerStage implements StageScene {
           uSun: { value: SUN.clone() },
           uGold: { value: new THREE.Color(C_GOLD) },
           uGoldDeep: { value: new THREE.Color(C_GOLD_DEEP) },
-          uGlass: { value: new THREE.Color('#0a101c') },
+          uGlass: { value: new THREE.Color('#1a2434') },
+          uSky: { value: new THREE.Color('#39485c') },
           uMachine: { value: new THREE.Color(C_MACHINE) },
           uBlue: { value: new THREE.Color(C_BLUE) },
         },
@@ -865,8 +899,8 @@ export class PowerStage implements StageScene {
 
     // Posts: one steel pile per tracker. Cheap, and without them the array
     // floats instead of standing on the section.
-    const postGeo = this.keep(new THREE.BoxGeometry(0.16, TORQUE_TUBE_Y + 0.5, 0.16));
-    const postMat = this.postMat ?? this.keep(this.metalMaterial('#2b2318', 0));
+    const postGeo = this.keep(new THREE.BoxGeometry(0.12, TORQUE_TUBE_Y, 0.12));
+    const postMat = this.postMat ?? this.keep(this.metalMaterial('#231b0f', 0));
     this.postMat = postMat;
     const posts = new THREE.InstancedMesh(postGeo, postMat, count);
     posts.frustumCulled = false;
@@ -884,7 +918,7 @@ export class PowerStage implements StageScene {
       mesh.setMatrixAt(i, m);
 
       q.identity();
-      p.set(x, (TORQUE_TUBE_Y + 0.5) * 0.5 - 0.25, z);
+      p.set(x, TORQUE_TUBE_Y * 0.5, z);
       m.compose(p, q, s);
       posts.setMatrixAt(i, m);
 
@@ -912,9 +946,9 @@ export class PowerStage implements StageScene {
     const span = BANK_X1 - BANK_X0;
     const step = span / Math.max(1, cabinets - 1);
 
-    const bodyMat = this.keep(this.metalMaterial('#171a1e', 1));
-    const tankMat = this.keep(this.metalMaterial('#1d1a16', 0.55));
-    const trimMat = this.keep(this.metalMaterial('#3a3026', 0));
+    const bodyMat = this.keep(this.metalMaterial('#20242b', 1));
+    const tankMat = this.keep(this.metalMaterial('#282219', 0.55));
+    const trimMat = this.keep(this.metalMaterial('#332a20', 0));
 
     /* Cabinets ---------------------------------------------------- */
     const cabGeo = this.keep(new THREE.BoxGeometry(CAB_W, CAB_H, CAB_D));
@@ -1179,20 +1213,22 @@ export class PowerStage implements StageScene {
   private buildShadows(settings: TierSettings): void {
     if (!settings.shadows) return;
     const group = new THREE.Group();
-    const mat = this.keep(new THREE.ShaderMaterial({
+    const mat = this.shadowMat ?? this.keep(new THREE.ShaderMaterial({
       vertexShader: SHADOW_VERT,
       fragmentShader: SHADOW_FRAG,
       transparent: true,
       depthWrite: false,
       uniforms: { uMix: this.uMix, uStripe: { value: 0 } },
     }));
-    const stripeMat = this.keep(new THREE.ShaderMaterial({
+    this.shadowMat = mat;
+    const stripeMat = this.shadowStripeMat ?? this.keep(new THREE.ShaderMaterial({
       vertexShader: SHADOW_VERT,
       fragmentShader: SHADOW_FRAG,
       transparent: true,
       depthWrite: false,
       uniforms: { uMix: this.uMix, uStripe: { value: 1 } },
     }));
+    this.shadowStripeMat = stripeMat;
 
     const rows = this.rowsFor(settings);
     const back = FIELD_Z_NEAR - (rows - 1) * ROW_SPACING - 4;
@@ -1307,6 +1343,14 @@ export class PowerStage implements StageScene {
     // tiers that cannot afford them.
     if (this.shadows) {
       this.root.remove(this.shadows);
+      // Materials are cached across tiers; only the patches themselves are
+      // re-cut, so they have to be released here or a tier churn leaks them.
+      this.shadows.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        if (!mesh.isMesh) return;
+        this.untrack(mesh.geometry);
+        mesh.geometry.dispose();
+      });
       this.disposeGroup(this.shadows);
       this.shadows = null;
     }
@@ -1321,26 +1365,39 @@ export class PowerStage implements StageScene {
     this.uRes.value.set(Math.max(1, ctx.width), Math.max(1, ctx.height));
     this.uPixelRatio.value = ctx.renderer.getPixelRatio();
 
+    const aspect = Math.max(0.25, ctx.width / Math.max(1, ctx.height));
+
     // Portrait is re-composed, not shrunk: a much wider lens, the camera
     // higher and further back, and the aim dropped so the horizon lifts into
     // the upper third and the rows fill the bottom of a tall frame.
     if (narrow) {
-      this.baseCam.set(0, 9.6, 21);
-      this.baseLook.set(0, 1.4, -26);
-      this.dollyZ = 12;
-      cam.fov = 62;
+      // A tall frame cannot hold the plant at the desktop distance, so portrait
+      // steps back and climbs instead of cropping: bank, duct and transformer
+      // all stay inside the width, the horizon lifts into the upper third, and
+      // the rows fill the bottom.
+      this.baseCam.set(-1.0, 11.5, 38);
+      this.baseLook.set(-1.0, 2.6, -20);
+      this.dollyZ = 9;
+      cam.fov = 66;
     } else {
-      this.baseCam.set(0, 7.4, 18);
-      this.baseLook.set(0, 2.6, -34);
+      this.baseCam.set(0, 8.5, 18);
+      this.baseLook.set(0, 2.2, -32);
       this.dollyZ = 15;
-      cam.fov = 40;
+      // This composition is read left to right — bank, duct, transformer — so
+      // it is the *horizontal* angle that has to stay put. Solving the vertical
+      // fov from the aspect keeps the plant off the frame edges on a 4:3 or a
+      // half-width window instead of cropping it the way a fixed fov would.
+      const tanH = 0.58;
+      cam.fov = THREE.MathUtils.clamp(
+        THREE.MathUtils.radToDeg(2 * Math.atan(tanH / aspect)), 33, 54,
+      );
     }
 
     // The sky sphere sits at 300; the host's default far plane does not know
     // about it, so this stage owns the frustum while it is on screen.
     cam.near = 0.5;
     cam.far = 620;
-    cam.aspect = Math.max(0.1, ctx.width / Math.max(1, ctx.height));
+    cam.aspect = aspect;
     cam.position.copy(this.baseCam);
     cam.rotation.z = 0;
     cam.lookAt(this.baseLook);
@@ -1364,6 +1421,8 @@ export class PowerStage implements StageScene {
     this.panels = null;
     this.posts = null;
     this.postMat = null;
+    this.shadowMat = null;
+    this.shadowStripeMat = null;
     this.flow = null;
     this.shadows = null;
     this.cabinetPos = [];

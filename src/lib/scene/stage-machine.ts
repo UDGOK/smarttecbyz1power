@@ -289,6 +289,7 @@ const COOLANT_FRAG = /* glsl */ `
   uniform float uAxis;    // 0 = flow along uv.x (tubes), 1 = along uv.y (drops)
   uniform float uDir;     // +1 supply, -1 return
   uniform float uRepeat;
+  uniform float uGain;
   uniform vec3  uTintA;
   uniform vec3  uTintB;
 
@@ -309,8 +310,11 @@ const COOLANT_FRAG = /* glsl */ `
     slug = pow(slug, 2.4);
 
     vec3  col = mix(uTintA, uTintB, slug * 0.75);
-    float a   = 0.13 + 0.30 * fres + 0.42 * slug;
+    float a   = (0.070 + 0.150 * fres + 0.260 * slug) * uGain;
 
+    // Overhead distribution should stay overhead. Anything closer than a few
+    // metres is pipework crossing the lens, so fade it out entirely.
+    a *= smoothstep(3.5, 8.0, vView);
     a *= exp(-vView * 0.042 * uFog);
     a *= 1.0 - smoothstep(0.10, 0.80, uWorld);
     col = mix(col, vec3(1.0), uWorld * 0.4);
@@ -483,22 +487,28 @@ const HALL_FRAG = /* glsl */ `
     float floorward = step(vPosW.y, uCeil * 0.5);
     float ax = abs(vPosW.x);
 
-    vec3 col = mix(uDeep, uGraphite, mix(0.35, 0.72, floorward));
+    // The floor carries the depth cue in this shot, so it is lifted well clear
+    // of the ceiling: a sealed screed reading two stops above the void.
+    vec3 col = mix(uDeep, uGraphite, mix(0.30, 1.30, floorward));
 
-    // 600mm floor tiles. Barely there — just enough to give the dolly a scale.
+    // 600mm floor tiles — the only thing in the room that measures the dolly.
     vec2 g = abs(fract(vPosW.xz / 0.6) - 0.5);
-    float grid = smoothstep(0.02, 0.0, min(g.x, g.y));
-    col += grid * uGraphite * 0.55 * floorward;
+    float grid = smoothstep(0.024, 0.004, min(g.x, g.y));
+    col += grid * uGraphite * 1.05 * floorward;
 
     // The doors, smeared into the sealed floor. Jittered along z so it reads
     // as spilled LED light rather than a painted stripe.
-    float band = 1.0 - smoothstep(0.0, 1.25, abs(ax - uAisle));
+    float band = 1.0 - smoothstep(0.0, 1.45, abs(ax - uAisle));
     float spill = 0.5 + 0.5 * sin(vPosW.z * 3.3 + uTime * 0.7);
-    col += uCyan * band * band * (0.055 + 0.045 * spill) * mix(0.35, 1.0, floorward);
+    col += uCyan * band * band * (0.085 + 0.060 * spill) * mix(0.30, 1.0, floorward);
+
+    // A long specular sheen straight down the centre of the cold aisle.
+    float sheen = 1.0 - smoothstep(0.0, uAisle * 1.15, ax);
+    col += uCyan * sheen * sheen * 0.030 * floorward;
 
     // Contact shading under the rack line: the racks must sit, not hover.
-    float contact = 1.0 - smoothstep(0.0, 0.55, ax - uAisle);
-    col *= 1.0 - contact * 0.55 * uContact * floorward;
+    float contact = 1.0 - smoothstep(0.0, 0.50, ax - uAisle);
+    col *= 1.0 - contact * 0.42 * uContact * floorward;
 
     vec3 far = mix(uDeep, uCampus, uWorld * 0.85);
     col = mix(col, far, 1.0 - exp(-vView * 0.058 * uFog));
@@ -517,35 +527,76 @@ const WALL_FRAG = /* glsl */ `
   precision highp float;
   uniform float uTime;
   uniform float uWorld;
+  uniform float uFog;
+  uniform float uAisle;
   uniform vec3  uDeep;
+  uniform vec3  uGraphite;
   uniform vec3  uCyan;
   uniform vec3  uCampus;
-  varying vec2 vUv;
+
+  varying vec2  vUv;
+  varying vec3  vPosW;
+  varying float vView;
 
   void main(){
-    vec2 p = vUv - vec2(0.5, 0.36);
+    float ax = abs(vPosW.x);
 
-    // At rest: a dark end wall with the aisle light dying against it.
-    vec3 col = uDeep + uCyan * 0.05 * (1.0 - smoothstep(0.0, 0.45, length(p * vec2(1.0, 1.6))));
+    // At rest this is just the end of the room: the same graphite as the
+    // ceiling, panelised, with the aisle light dying against it. It must never
+    // read as a lighter rectangle sitting in the middle of the corridor.
+    vec3 col = mix(uDeep, uGraphite, 0.30);
 
-    // Turning over: the wall opens. Stage 5 is daylight, so the corridor
-    // should end in an aperture that grows rather than a cross-fade.
-    float ap = smoothstep(0.02 + 0.90 * (1.0 - uWorld), 0.0, length(p * vec2(1.0, 1.35)));
-    col = mix(col, uCampus, clamp(ap * (0.25 + uWorld), 0.0, 1.0));
-    col = mix(col, uCampus, smoothstep(0.75, 1.0, uWorld));
+    // Panel seams and a datum line, at the hall's own scale.
+    float seam = smoothstep(0.030, 0.0, abs(fract(vPosW.x / 1.2 + 0.5) - 0.5) * 1.2);
+    float band = smoothstep(0.030, 0.0, abs(fract(vPosW.y / 0.9 + 0.5) - 0.5) * 0.9);
+    col += (seam + band * 0.7) * uGraphite * 0.28;
+
+    // Skirting where the wall meets the floor, so the corridor visibly ends
+    // on the ground plane instead of floating.
+    col *= 0.55 + 0.45 * smoothstep(0.0, 0.22, vPosW.y);
+
+    // The last of the aisle light, pooled low and centred.
+    float pool = (1.0 - smoothstep(0.0, uAisle * 2.4, ax)) * (1.0 - smoothstep(0.0, 2.2, vPosW.y));
+    col += uCyan * pool * pool * 0.055;
+
+    // Converge on exactly the colour the racks and floor fade to, so the join
+    // at the vanishing point is invisible.
+    vec3 far = mix(uDeep, uCampus, uWorld * 0.85);
+    col = mix(col, far, 0.62);
+
+    // Soft-edged, so the plane never shows its own rectangle against whatever
+    // the host clears the frame to.
+    float a = smoothstep(0.0, 0.12, vUv.x) * smoothstep(1.0, 0.88, vUv.x)
+            * smoothstep(1.0, 0.72, vUv.y);
+
+    // The aperture. Shut at rest — it only opens as the hold ring turns the
+    // world over toward the daylight campus.
+    float w  = smoothstep(0.06, 1.0, uWorld);
+    vec2  q  = vUv - vec2(0.5, 0.16);
+    float ap = smoothstep(0.02 + 0.85 * w, 0.0, length(q * vec2(1.0, 2.6)));
+    col = mix(col, uCampus, ap * w);
+    a = max(a, ap * w);
+    col = mix(col, uCampus, smoothstep(0.80, 1.0, uWorld));
 
     float n = fract(sin(dot(gl_FragCoord.xy + uTime, vec2(12.9898, 78.233))) * 43758.5453);
-    col += (n - 0.5) * 0.02;
+    col += (n - 0.5) * 0.022;
 
-    gl_FragColor = vec4(col, 1.0);
+    if (a < 0.004) discard;
+    gl_FragColor = vec4(col, a);
   }
 `;
 
 const WALL_VERT = /* glsl */ `
-  varying vec2 vUv;
+  varying vec2  vUv;
+  varying vec3  vPosW;
+  varying float vView;
   void main(){
     vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    vec4 world = modelMatrix * vec4(position, 1.0);
+    vPosW = world.xyz;
+    vec4 mv = viewMatrix * world;
+    vView = -mv.z;
+    gl_Position = projectionMatrix * mv;
   }
 `;
 
@@ -621,7 +672,9 @@ const RACK_W = 0.60;   // door width, along the corridor
 const RACK_D = 1.05;   // depth, away from the aisle
 const RACK_H = 2.05;
 const PITCH = 0.68;    // rack centre to rack centre
-const CEIL_Y = 3.45;
+const CEIL_Y = 3.55;
+const TUBE_Y = 3.02;   // overhead coolant run, well clear of the rack tops
+const TUBE_Z0 = -3.2;  // where the run starts — never in front of the camera
 
 /* -------------------------------------------------------------------- scene */
 
@@ -649,6 +702,7 @@ export class MachineScene implements StageScene {
   private floorMesh: THREE.Mesh | null = null;
   private ceilMesh: THREE.Mesh | null = null;
   private hallMat: THREE.ShaderMaterial | null = null;
+  private wallMat: THREE.ShaderMaterial | null = null;
 
   private worldMix = 0;
   private scroll = 0;
@@ -658,7 +712,7 @@ export class MachineScene implements StageScene {
   // shrinking the desktop composition down to a letterbox.
   private aisleHalf = 1.80;
   private narrow = false;
-  private camY = 1.34;
+  private camY = 1.56;
   private startZ = 2.6;
   private travel = 12;
 
@@ -751,20 +805,27 @@ export class MachineScene implements StageScene {
 
     // The end of the aisle. A wall rather than clear colour, so this stage
     // never has to reach into the renderer the host owns.
-    const wallGeo = this.track(new THREE.PlaneGeometry(16, 9, 1, 1));
+    const wallGeo = this.track(new THREE.PlaneGeometry(18, 10, 1, 1));
     const wallMat = this.mat(new THREE.ShaderMaterial({
       vertexShader: WALL_VERT,
       fragmentShader: WALL_FRAG,
+      transparent: true,
+      depthWrite: false,
       uniforms: {
         uTime: { value: 0 },
         uWorld: { value: 0 },
+        uFog: { value: this.plan.fog },
+        uAisle: { value: this.aisleHalf },
         uDeep: { value: new THREE.Color(PAL.deep) },
+        uGraphite: { value: new THREE.Color(PAL.machine) },
         uCyan: { value: new THREE.Color(PAL.cyan) },
         uCampus: { value: new THREE.Color(PAL.campus) },
       },
     }));
+    this.wallMat = wallMat;
     this.wall = new THREE.Mesh(wallGeo, wallMat);
-    this.wall.position.set(0, 1.6, -this.corridorLen - 2.2);
+    // Geometry is centred, so sitting it at y = 5 puts its base on the floor.
+    this.wall.position.set(0, 5, -this.corridorLen - 2.2);
     this.wall.frustumCulled = false;
 
     this.root.add(this.floorMesh, this.ceilMesh, this.wall);
@@ -854,7 +915,7 @@ export class MachineScene implements StageScene {
     const len = this.corridorLen;
     const seg = Math.max(12, this.plan.racksPerRow * 2);
 
-    const makeMat = (dir: number, axis: number, a: string, b: string, repeat: number) =>
+    const makeMat = (dir: number, axis: number, a: string, b: string, repeat: number, gain: number) =>
       this.mat(new THREE.ShaderMaterial({
         vertexShader: COOLANT_VERT,
         fragmentShader: COOLANT_FRAG,
@@ -868,6 +929,7 @@ export class MachineScene implements StageScene {
           uAxis: { value: axis },
           uDir: { value: dir },
           uRepeat: { value: repeat },
+          uGain: { value: gain },
           uTintA: { value: new THREE.Color(a) },
           uTintB: { value: new THREE.Color(b) },
         },
@@ -875,17 +937,19 @@ export class MachineScene implements StageScene {
 
     // Supply runs cold toward the far end; return runs warm back toward us.
     this.builtAisleHalf = this.aisleHalf;
-    const supply = makeMat(1, 0, PAL.coolant, PAL.ice, 26);
-    const ret = makeMat(-1, 0, PAL.ret, PAL.gold, 22);
+    const supply = makeMat(1, 0, PAL.coolant, PAL.ice, 26, 1);
+    const ret = makeMat(-1, 0, PAL.ret, PAL.gold, 22, 0.85);
 
     for (const sgn of [-1, 1]) {
-      for (const [mat, off, r] of [[supply, 0.30, 0.055], [ret, 0.64, 0.048]] as const) {
+      for (const [mat, off, r] of [[supply, 0.30, 0.022], [ret, 0.62, 0.019]] as const) {
         const pts: THREE.Vector3[] = [];
         for (let i = 0; i <= seg; i++) {
           const t = i / seg;
-          const z = 0.4 - t * (len + 1.6);
+          // The run begins well down the hall, not at the lens: at rest the
+          // camera should be looking *under* it, never through it.
+          const z = TUBE_Z0 - t * (len + TUBE_Z0 + 1.6);
           // A hair of sag between hangers. Perfectly straight pipe looks CG.
-          const y = 2.72 + Math.sin(t * seg * 0.9) * 0.012;
+          const y = TUBE_Y + Math.sin(t * seg * 0.9) * 0.010;
           pts.push(new THREE.Vector3(sgn * (this.aisleHalf + off), y, z));
         }
         const curve = new THREE.CatmullRomCurve3(pts);
@@ -900,8 +964,8 @@ export class MachineScene implements StageScene {
 
     // One drop per rack, manifold down to the cold plates.
     const n = this.plan.racksPerRow * 2;
-    const dropGeo = this.track(new THREE.CylinderGeometry(0.017, 0.017, 0.72, 6, 1, true));
-    const dropMat = makeMat(1, 1, PAL.coolant, PAL.ice, 4);
+    const dropGeo = this.track(new THREE.CylinderGeometry(0.013, 0.013, TUBE_Y - RACK_H, 6, 1, true));
+    const dropMat = makeMat(1, 1, PAL.coolant, PAL.ice, 5, 0.60);
     this.drops = new THREE.InstancedMesh(dropGeo, dropMat, n);
     this.drops.frustumCulled = false;
     this.drops.renderOrder = 1;
@@ -1057,9 +1121,12 @@ export class MachineScene implements StageScene {
         const left = i % 2 === 0;
         const idx = Math.floor(i / 2);
         const z = -(0.7 + idx * PITCH);
-        d.position.set((left ? -1 : 1) * (half + 0.30), 2.36, z);
+        d.position.set((left ? -1 : 1) * (half + 0.30), (TUBE_Y + RACK_H) / 2, z);
         d.rotation.set(0, 0, 0);
-        d.scale.set(1, 1, 1);
+        // Racks in front of where the run starts get no drop, so a manifold
+        // never hangs from nothing.
+        const on = z <= TUBE_Z0 ? 1 : 0;
+        d.scale.set(on, on, on);
         d.updateMatrix();
         this.drops.setMatrixAt(i, d.matrix);
       }
@@ -1092,6 +1159,7 @@ export class MachineScene implements StageScene {
     }
 
     if (this.hallMat) this.hallMat.uniforms.uAisle!.value = half;
+    if (this.wallMat) this.wallMat.uniforms.uAisle!.value = half;
   }
 
   /** Aisle half-width baked into the tube curves at build time. */
@@ -1135,7 +1203,7 @@ export class MachineScene implements StageScene {
 
     cam.position.set(swayX, this.camY + bobY, z);
     cam.rotation.z = Math.sin(t * 0.13) * 0.004;
-    cam.lookAt(swayX * 0.4, this.camY - 0.10 + bobY, z - 8);
+    cam.lookAt(swayX * 0.4, this.camY - 0.34 + bobY, z - 8);
   }
 
   setWorldMix(t: number): void {
@@ -1168,7 +1236,9 @@ export class MachineScene implements StageScene {
     // the corridor still fills the frame with racks. The desktop framing is
     // not scaled down — it is re-composed.
     this.aisleHalf = narrow ? 1.26 : 1.80;
-    this.camY = narrow ? 1.28 : 1.34;
+    // Eye line lifted and the lens aimed a little further down the floor, so
+    // the aisle reads as a floor receding rather than a slot of racks.
+    this.camY = narrow ? 1.46 : 1.56;
 
     ctx.camera.fov = narrow ? 76 : 52;
     ctx.camera.aspect = ctx.height > 0 ? ctx.width / ctx.height : 1;
@@ -1203,6 +1273,7 @@ export class MachineScene implements StageScene {
     this.floorMesh = null;
     this.ceilMesh = null;
     this.hallMat = null;
+    this.wallMat = null;
   }
 
   dispose(): void {
