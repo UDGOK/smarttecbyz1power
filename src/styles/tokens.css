@@ -50,7 +50,8 @@
 
   /* --- Brand --- */
   --c-signal:  #7be88a;  /* live / online / go — ref ::selection background */
-  --c-moss:    #2d6a54;  /* ref: the accent its chrome takes on light stages */
+  --c-moss:    #2d6a54;
+  --c-moss-deep: #1a6e48; /* the reference's third green */  /* ref: the accent its chrome takes on light stages */
   --c-gold:    #ffc832;  /* stored energy, XP — ref xpStrokeGlow border */
   --c-amber:   #ffbe28;  /* ref: the warmer half of that glow, used in its shadow */
   --c-carbon:  #1f1d1e;  /* ref ::selection foreground */

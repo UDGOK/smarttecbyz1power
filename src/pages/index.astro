@@ -44,11 +44,11 @@ const grain =
           <p class="stage-panel__kicker mono-label"><span class="line"><span class="line__inner">{stage.kicker}</span></span></p>
 
           {i === 0 ? (
-            <h1 class="stage-panel__title">
+            <h1 class="stage-panel__title silver">
               {stage.title.split('\n').map((l) => <span class="line"><span class="line__inner">{l}</span></span>)}
             </h1>
           ) : (
-            <h2 class="stage-panel__title">
+            <h2 class="stage-panel__title silver">
               {stage.title.split('\n').map((l) => <span class="line"><span class="line__inner">{l}</span></span>)}
             </h2>
           )}
@@ -151,18 +151,22 @@ const grain =
      or a lit form can land anywhere. A soft shadow keeps every line readable
      without putting a plate behind the type. */
   .stage-panel__kicker,
-  .stage-panel__title,
-  h2.stage-panel__title,
   .stage-panel__lede {
     /* One tight shadow only. A second wide one merged across the glyphs
        and read as a rectangular plate behind the line. */
     text-shadow: 0 2px 22px #04100ad9;
   }
+  /* The headings are a clipped gradient, so text-shadow would paint a solid
+     silhouette behind them. drop-shadow works on the rendered glyphs. */
+  .stage-panel__title {
+    filter: drop-shadow(0 2px 20px #04100ae6);
+  }
   :global([data-chrome='dark']) .stage-panel__kicker,
-  :global([data-chrome='dark']) .stage-panel__title,
-  :global([data-chrome='dark']) h2.stage-panel__title,
   :global([data-chrome='dark']) .stage-panel__lede {
     text-shadow: 0 2px 22px #ffffffd9;
+  }
+  :global([data-chrome='dark']) .stage-panel__title {
+    filter: drop-shadow(0 2px 20px #ffffffe6);
   }
 
   .stage-panel__kicker { margin: 0 0 var(--s-5); }

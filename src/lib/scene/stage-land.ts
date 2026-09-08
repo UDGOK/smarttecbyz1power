@@ -727,7 +727,7 @@ export class LandScene implements StageScene {
   // Preallocated scratch — update() and setWorldMix() must never allocate.
   private tmp = new THREE.Vector3();
   private tmp2 = new THREE.Vector2();
-  private moteLand = new THREE.Color('#cfe6d4');
+  private moteLand = new THREE.Color('#d4f6eb');
   private moteWait = new THREE.Color('#f0a58c');
 
   // Camera composition, set by frame() and dollied by update(). The pitch is
@@ -750,9 +750,9 @@ export class LandScene implements StageScene {
     // number and is exactly reversible.
     const light = { value: new THREE.Color('#f0d9ae') };
     const lightW = { value: new THREE.Color('#ff8a5c') };
-    const cool = { value: new THREE.Color('#a2c8a8') };
+    const cool = { value: new THREE.Color('#70af9c') };
     const coolW = { value: new THREE.Color('#c04a30') };
-    const haze = { value: new THREE.Color('#a9c2b0') };
+    const haze = { value: new THREE.Color('#b3ded1') };
     const hazeW = { value: new THREE.Color('#9c3a24') };
     // The one hue in the frame that the dawn does not already own.
     const chargeA = { value: new THREE.Color('#5fe0d0') };
@@ -772,7 +772,7 @@ export class LandScene implements StageScene {
         uResolution: this.uRes,
         uHorizon: this.uHorizon,
         uSunScreen: this.uSunScreen,
-        uSkyHigh: { value: new THREE.Color('#476760') },
+        uSkyHigh: { value: new THREE.Color('#4e9782') },
         uSkyHighW: { value: new THREE.Color('#2a0705') },
         uSkyLow: haze,
         uSkyLowW: hazeW,
@@ -804,11 +804,11 @@ export class LandScene implements StageScene {
         uAmp: { value: AMP },
         uKnoll: { value: KNOLL },
         uKnollR: { value: KNOLL_R },
-        uShadow: { value: new THREE.Color('#1a392c') },
+        uShadow: { value: new THREE.Color('#1c4839') },
         uShadowW: { value: new THREE.Color('#2a0503') },
-        uGrass: { value: new THREE.Color('#35603f') },
+        uGrass: { value: new THREE.Color('#356f5e') },
         uGrassW: { value: new THREE.Color('#4d0806') },
-        uDry: { value: new THREE.Color('#8ba585') },
+        uDry: { value: new THREE.Color('#91c7b7') },
         uDryW: { value: new THREE.Color('#8c110c') },
         uLight: light,
         uLightW: lightW,
@@ -835,7 +835,7 @@ export class LandScene implements StageScene {
         uTime: this.uTime,
         uWorld: this.uWorld,
         uSunDir: this.uSunDir,
-        uBase: { value: new THREE.Color('#1d4038') },
+        uBase: { value: new THREE.Color('#1c4839') },
         uBaseW: { value: new THREE.Color('#33060a') },
         uTip: { value: new THREE.Color('#b5cf8c') },
         uTipW: { value: new THREE.Color('#c8321c') },

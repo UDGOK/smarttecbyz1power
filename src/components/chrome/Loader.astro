@@ -1,109 +1,107 @@
 ---
-// Entry gate. The reference makes you draw a zero before it lets you in; ours
-// makes you close the circuit. Same idea: a gesture, not a button, and the
-// gesture is the brand.
-//
-// The gate is a *transparent* overlay — the live WebGL scene keeps running
-// behind it, and the only thing between the visitor and the world is a soft
-// vignette that keeps the prompt legible. Everything the pointer draws lands on
-// the <canvas> below, painted in src/lib/loader.ts.
+import { company } from '../../data/site';
 ---
-<div class="loader" id="loader" role="dialog" aria-modal="true" aria-labelledby="loader-title">
-  <canvas class="loader__ink" aria-hidden="true"></canvas>
-
-  <div class="loader__stage">
-    <p class="loader__label mono-label" id="loader-title">Close the circuit</p>
-    <p class="loader__sub mono-label" id="loader-sub">Loading site 01</p>
+<div class="intro" id="loader" role="status" aria-live="polite">
+  <div class="intro__stage">
+    <p class="intro__line" id="loader-title">
+      <span class="intro__mask"><span class="intro__word silver">SmartTec</span></span>
+      <span class="intro__mask"><span class="intro__word intro__word--by">by {company.parent}</span></span>
+    </p>
+    <p class="intro__sub mono-label" id="loader-sub">
+      <span class="intro__mask intro__mask--sub"><span class="intro__word">Neo compute and colocation</span></span>
+    </p>
+    <span class="intro__rule" aria-hidden="true"></span>
   </div>
 
-  <button type="button" class="loader__skip mono-label" id="loader-skip">
-    Enter without the gesture
-  </button>
+  <button type="button" class="intro__skip mono-label" id="loader-skip">Enter</button>
 </div>
 
 <style>
-  .loader {
-    /* Ink colours, named once here so the canvas can read them back off the
-       element rather than hard-coding anything. */
-    --ink-core: var(--c-white);
-    --ink-glow: var(--c-signal);
-
+  .intro {
     position: fixed;
     inset: 0;
     z-index: var(--z-overlay);
     display: grid;
     place-items: center;
-    /* No ground of its own: just enough fall-off at the edges to hold the
-       prompt against whatever the scene happens to be doing. */
-    background: radial-gradient(
-      120% 90% at 50% 50%,
-      transparent 28%,
-      var(--k-30) 72%,
-      var(--k-55) 100%
-    );
-    touch-action: none;
-    cursor: none;
-    /* A drag across the viewport must draw, not select the prompt. */
-    -webkit-user-select: none;
-    user-select: none;
+    /* Transparent over the world, as the reference's own gate is — only a
+       vignette, so the scene reads through it from the first frame. */
+    background: radial-gradient(120% 90% at 50% 50%, transparent 24%, var(--k-30) 70%, var(--k-55) 100%);
     transition: opacity 0.9s var(--e-out), visibility 0.9s;
   }
-  .loader.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
+  .intro.is-done { opacity: 0; visibility: hidden; pointer-events: none; }
+  .intro[hidden] { display: none; }
 
-  /* The drawing surface. Pointer events stay on .loader so the whole viewport
-     is drawable; the canvas is purely a paint layer. */
-  .loader__ink {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    touch-action: none;
-  }
+  .intro__stage { display: grid; justify-items: center; gap: var(--s-4); padding: var(--s-5); }
 
-  .loader__stage {
-    position: relative;
-    display: grid;
-    place-items: center;
-    pointer-events: none;
-  }
-
-  .loader__label {
-    color: var(--w-90);
-    font-size: 12px;
-    letter-spacing: 0.22em;
+  .intro__line {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 0.28em;
+    margin: 0;
+    font-family: var(--f-display);
+    font-weight: var(--fw-display);
+    font-size: clamp(2.4rem, 1rem + 6.2vw, 6.4rem);
+    line-height: 0.94;
+    letter-spacing: var(--ls-display);
+    color: var(--w-95);
     text-align: center;
-    text-shadow: 0 1px 14px var(--k-70);
-    transition: opacity var(--d-base);
   }
-  .loader__sub {
-    position: absolute;
-    top: calc(100% + 14px);
-    color: var(--w-30);
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    white-space: nowrap;
-    transition: opacity var(--d-base);
+  .intro__word--by {
+    /* The parent name sits back so the product name carries the line. */
+    font-size: 0.42em;
+    align-self: end;
+    padding-bottom: 0.34em;
+    color: var(--w-45);
+    letter-spacing: 0.02em;
   }
-  .loader.is-ready .loader__sub { opacity: 0; }
-  /* Once the pointer is down the stroke is the whole message. */
-  .loader.is-drawing .loader__label { opacity: 0.45; }
 
-  .loader__skip {
+  .intro__sub { color: var(--w-55); letter-spacing: 0.24em; }
+
+  /* Each word rises out of its own mask. */
+  .intro__mask { display: inline-block; overflow: hidden; vertical-align: bottom; }
+  .intro__mask--sub { overflow: hidden; }
+  .intro__word {
+    display: inline-block;
+    transform: translateY(115%);
+    opacity: 0;
+  }
+  .intro.is-in .intro__word {
+    transform: translateY(0);
+    opacity: 1;
+    transition: transform 0.75s var(--e-osmo), opacity 0.5s var(--e-p2);
+  }
+  .intro.is-in .intro__mask:nth-child(2) .intro__word { transition-delay: 0.09s; }
+  .intro.is-in .intro__sub .intro__word { transition-delay: 0.24s; }
+
+  .intro__rule {
+    width: 0;
+    height: 1px;
+    background: var(--w-30);
+    transition: width 0.9s var(--e-osmo) 0.34s;
+  }
+  .intro.is-in .intro__rule { width: min(46vw, 420px); }
+
+  .intro__skip {
     position: absolute;
     bottom: 34px;
     left: 50%;
     transform: translateX(-50%);
-    padding: 9px 18px;
-    border: 1px solid var(--w-10);
+    padding: 11px 22px;
+    border: 1px solid var(--chrome-hairline);
     border-radius: var(--r-pill);
     background: none;
     color: var(--w-45);
     cursor: pointer;
     opacity: 0;
-    transition: opacity var(--d-base), color var(--d-fast), border-color var(--d-fast);
+    transition: opacity var(--d-mid) var(--e-p2), color var(--d-quick) var(--e-p2),
+                border-color var(--d-quick) var(--e-p2);
   }
-  .loader.is-ready .loader__skip { opacity: 1; }
-  .loader__skip:hover { color: var(--w-90); border-color: var(--w-30); }
-  .loader__skip:focus-visible { color: var(--w-90); border-color: var(--w-45); }
+  .intro.is-ready .intro__skip { opacity: 1; }
+  .intro__skip:hover { color: var(--w-90); border-color: var(--w-30); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .intro__word { transform: none; opacity: 1; }
+    .intro__rule { width: min(46vw, 420px); transition: none; }
+  }
 </style>
