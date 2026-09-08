@@ -906,3 +906,113 @@
 @media (prefers-reduced-motion: reduce) {
   .cta-bar.is-submitting .cta-bar__spinner { animation: none; }
 }
+
+/* ---- Site menu ---------------------------------------------------------
+   The cinematic route needs a way out of itself. */
+.menu-toggle {
+  position: fixed;
+  top: var(--chrome-inset);
+  right: calc(var(--chrome-inset) + 108px);
+  z-index: var(--z-chrome);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--chrome-veil);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: var(--chrome-fg-loud);
+  cursor: pointer;
+  transition: transform var(--d-fast) var(--e-out), background var(--d-fast);
+}
+.menu-toggle:hover { transform: translateY(-1px); }
+.menu-toggle__bars { display: grid; gap: 3px; width: 13px; }
+.menu-toggle__bars i {
+  display: block;
+  height: 1.5px;
+  background: currentColor;
+  transition: transform var(--d-fast) var(--e-out);
+}
+.menu-toggle[aria-expanded='true'] .menu-toggle__bars i:first-child { transform: translateY(2.25px) rotate(45deg); }
+.menu-toggle[aria-expanded='true'] .menu-toggle__bars i:last-child { transform: translateY(-2.25px) rotate(-45deg); }
+
+.menu {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-overlay) - 1);
+  display: grid;
+  place-items: center;
+  padding: var(--s-8) var(--s-5);
+  background: #05100af2;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  opacity: 0;
+  transition: opacity var(--d-base) var(--e-out);
+}
+.menu.is-open { opacity: 1; }
+/* `display: grid` above defeats the hidden attribute, so a closed menu was
+   still a full-viewport layer sitting over the chrome and eating its clicks. */
+.menu[hidden] { display: none; }
+[data-chrome='dark'] .menu { background: #eef1eff2; }
+
+.menu__inner { width: min(880px, 100%); }
+.menu__eyebrow { color: var(--chrome-fg); margin: 0 0 var(--s-4); }
+.menu__eyebrow--second { margin-top: var(--s-8); }
+
+.menu__list { list-style: none; margin: 0; padding: 0; }
+.menu__item { border-top: 1px solid var(--chrome-line); }
+.menu__item:last-child { border-bottom: 1px solid var(--chrome-line); }
+
+.menu__link {
+  display: grid;
+  grid-template-columns: 3rem 1fr auto;
+  align-items: baseline;
+  gap: var(--s-4);
+  padding: clamp(10px, 1.6vw, 18px) 4px;
+  text-decoration: none;
+  color: var(--chrome-fg-loud);
+  transition: padding-left var(--d-fast) var(--e-out), color var(--d-fast);
+}
+.menu__link:hover { padding-left: 16px; }
+.menu__n { color: var(--chrome-fg); }
+.menu__label {
+  font-family: var(--f-display);
+  font-weight: var(--fw-display);
+  font-size: clamp(1.7rem, 1rem + 2.6vw, 3.2rem);
+  line-height: 1;
+  letter-spacing: var(--ls-display);
+}
+.menu__note { color: var(--chrome-fg); text-align: right; }
+
+.menu__stages { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.menu__stage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border: 1px solid var(--chrome-line);
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--chrome-fg);
+  cursor: pointer;
+  transition: color var(--d-fast), border-color var(--d-fast);
+}
+.menu__stage:hover { color: var(--chrome-fg-loud); border-color: var(--chrome-fg-loud); }
+.menu__stage-name { opacity: 0.65; }
+
+@media (max-width: 640px) {
+  .menu-toggle { right: calc(var(--chrome-inset) + 92px); padding: 9px 12px; }
+  .menu-toggle__label { display: none; }
+  .menu__note { display: none; }
+  .menu__link { grid-template-columns: 2.4rem 1fr; }
+  .menu__stage-name { display: none; }
+}
+
+/* Touch has no hover, so the ruler's jump labels could never be revealed.
+   Show them permanently where hover does not exist. */
+@media (hover: none) {
+  .scroll-ruler-nav { opacity: 1; pointer-events: auto; }
+  .scroll-ruler-track { opacity: 0; }
+}

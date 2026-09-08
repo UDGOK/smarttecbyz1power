@@ -405,6 +405,43 @@ export function boot(): void {
     });
   });
 
+  // --- Site menu ---------------------------------------------------------
+  const menuToggle = document.querySelector<HTMLButtonElement>('#menu-toggle');
+  const menu = document.querySelector<HTMLElement>('#site-menu');
+
+  function setMenu(open: boolean): void {
+    if (!menu || !menuToggle) return;
+    menuToggle.setAttribute('aria-expanded', String(open));
+    if (open) {
+      menu.hidden = false;
+      requestAnimationFrame(() => menu.classList.add('is-open'));
+      menu.querySelector<HTMLElement>('a, button')?.focus();
+    } else {
+      menu.classList.remove('is-open');
+      window.setTimeout(() => { menu.hidden = true; }, 400);
+      menuToggle.focus();
+    }
+  }
+
+  menuToggle?.addEventListener('click', () => {
+    audio.unlock();
+    audio.play('click');
+    setMenu(menuToggle.getAttribute('aria-expanded') !== 'true');
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && menuToggle?.getAttribute('aria-expanded') === 'true') setMenu(false);
+  });
+
+  menu?.querySelectorAll<HTMLElement>('[data-menu-stage]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const i = Number(btn.dataset.menuStage);
+      audio.play('click');
+      setMenu(false);
+      void goToStage(i);
+    });
+  });
+
   // --- Navigation --------------------------------------------------------
   rootEl.querySelectorAll<HTMLElement>('[data-goto]').forEach((btn, index) => {
     btn.addEventListener('click', () => {

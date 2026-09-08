@@ -5,6 +5,7 @@ import PowerBadge from '../components/chrome/PowerBadge.astro';
 import Brandmark from '../components/chrome/Brandmark.astro';
 import CtaBar from '../components/chrome/CtaBar.astro';
 import Loader from '../components/chrome/Loader.astro';
+import SiteMenu from '../components/chrome/SiteMenu.astro';
 import Configurator from '../components/Configurator.astro';
 import { company, site, stages } from '../data/site';
 
@@ -27,6 +28,7 @@ const grain =
     <Brandmark />
     <ScrollRuler />
     <PowerBadge />
+    <SiteMenu />
 
     {stages.map((stage, i) => (
       <section
@@ -119,18 +121,11 @@ const grain =
   }
   :global([data-chrome='dark']) .scrim { opacity: 0.25; }
 
-  main {
-    position: relative;
-    z-index: var(--z-content);
-    pointer-events: none;
-  }
-  main > * { pointer-events: auto; }
-  /* These two must stay transparent, and they have to out-specify the rule
-     above: Astro scopes `main > *` as `main[cid] > *[cid]`, which outweighs a
-     plain scoped class or attribute selector. Matching its shape, plus an id,
-     is what actually wins. */
-  main > #campus-ui { pointer-events: none; }
-  main > [data-stage='campus'] { pointer-events: none; }
+  /* Pointer pass-through lives in global.css, unscoped. Written here, Astro
+     compiles `main > *` to `main[cid] > *[cid]` — and imported components
+     carry their OWN scope id, not this page's, so the rule silently matched
+     nothing and every piece of chrome went dead. */
+  main { position: relative; z-index: var(--z-content); }
 
   .stage-scroll { height: var(--scroll-vh, 250vh); }
 

@@ -1,0 +1,53 @@
+---
+// The cinematic route had no way out of itself — no path to the reading and
+// conversion pages. This is it: a quiet toggle that opens a full-bleed index.
+import { stages } from '../../data/site';
+
+const links = [
+  { href: '/site', label: 'Site 01', note: 'Mead, Oklahoma' },
+  { href: '/power', label: 'Power', note: 'Behind the meter' },
+  { href: '/colocation', label: 'Colocation', note: 'Capacity and terms' },
+  { href: '/compute', label: 'Compute', note: 'Phase 1A hardware' },
+  { href: '/about', label: 'About', note: 'SmartTec by Z1Power' },
+  { href: '/contact', label: 'Contact', note: 'Reserve capacity' },
+];
+---
+<button
+  type="button"
+  class="menu-toggle mono-label"
+  id="menu-toggle"
+  aria-expanded="false"
+  aria-controls="site-menu"
+>
+  <span class="menu-toggle__bars" aria-hidden="true"><i></i><i></i></span>
+  <span class="menu-toggle__label">Menu</span>
+</button>
+
+<div class="menu" id="site-menu" hidden>
+  <nav class="menu__inner" aria-label="Site">
+    <p class="menu__eyebrow mono-label">Pages</p>
+    <ul class="menu__list">
+      {links.map((l, i) => (
+        <li class="menu__item">
+          <a class="menu__link" href={l.href}>
+            <span class="menu__n mono-label">{String(i + 1).padStart(2, '0')}</span>
+            <span class="menu__label">{l.label}</span>
+            <span class="menu__note mono-label">{l.note}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <p class="menu__eyebrow mono-label menu__eyebrow--second">Chapters</p>
+    <ul class="menu__stages">
+      {stages.map((s, i) => (
+        <li>
+          <button type="button" class="menu__stage mono-label" data-menu-stage={i}>
+            <span>{s.ruler}</span>
+            <span class="menu__stage-name">{s.kicker}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</div>

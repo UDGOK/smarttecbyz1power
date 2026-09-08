@@ -277,3 +277,31 @@ body:has(#loader:not(.is-done)) [data-scroll-cue] {
   pointer-events: none !important;
 }
 body .cta-bar { transition: opacity var(--d-slow) var(--e-out); }
+
+/* ---- Pointer pass-through on the cinematic route ----
+   `main` covers the document above the WebGL canvas, so by default it eats
+   every pointer event before the scene sees one. Events fall through, and are
+   handed back only to the things that want them.
+
+   These rules MUST live here, unscoped. In a component's scoped <style>,
+   `main > *` compiles to `main[cid] > *[cid]`, and imported components carry
+   their own scope id rather than the page's — so the selector matches nothing
+   and the whole chrome layer stops taking clicks. */
+body[data-experience] main { pointer-events: none; }
+body[data-experience] main > * { pointer-events: auto; }
+
+/* The campus hands the pointer to the model instead. */
+body[data-experience] main > #campus-ui,
+body[data-experience] main > [data-stage='campus'] { pointer-events: none; }
+
+/* …except the controls that sit on top of it. */
+.campus-controls,
+.campus-legend,
+.campus-legend__btn,
+.campus-hotspot { pointer-events: auto; }
+
+/* The hidden attribute must win over any display a component sets on itself.
+   Without this, a component that styles its own display keeps occupying the
+   layout — and if it is a full-bleed overlay, it silently eats every click
+   underneath it. */
+[hidden] { display: none !important; }
