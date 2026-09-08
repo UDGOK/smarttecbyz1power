@@ -162,6 +162,22 @@ const grain =
     will-change: transform, opacity;
   }
 
+  /* The scene behind the copy is not a controlled surface — a bright caustic
+     or a lit form can land anywhere. A soft shadow keeps every line readable
+     without putting a plate behind the type. */
+  .stage-panel__kicker,
+  .stage-panel__title,
+  h2.stage-panel__title,
+  .stage-panel__lede {
+    text-shadow: 0 1px 18px #05100bb3, 0 0 46px #05100b80;
+  }
+  :global([data-chrome='dark']) .stage-panel__kicker,
+  :global([data-chrome='dark']) .stage-panel__title,
+  :global([data-chrome='dark']) h2.stage-panel__title,
+  :global([data-chrome='dark']) .stage-panel__lede {
+    text-shadow: 0 1px 18px #ffffffb3, 0 0 46px #ffffff80;
+  }
+
   .stage-panel__kicker { margin: 0 0 var(--s-5); }
 
   .stage-panel__title,

@@ -265,3 +265,15 @@ a { color: inherit; }
   transition: color var(--d-fast), background var(--d-fast);
 }
 .campus-legend__btn:hover { color: var(--chrome-fg-loud); background: var(--chrome-veil); }
+
+/* ---- Gate suppression ----
+   Nothing to capture and nothing to advance until the visitor is through the
+   gate. The skip control sits where the capture bar lives, so they collide
+   otherwise. Driven off the gate's own state rather than a second class. */
+body:has(#loader:not(.is-done)) .cta-bar,
+body:has(#loader:not(.is-done)) .hold-slot,
+body:has(#loader:not(.is-done)) [data-scroll-cue] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+body .cta-bar { transition: opacity var(--d-slow) var(--e-out); }
