@@ -27,7 +27,13 @@ export interface TrackOptions {
 const REGISTRY: Record<string, TrackOptions> = {
   'stage-land-ambient':   { type: 'ambient', loop: true, volume: 0.5, synth: { wave: 'sine',     from: 110, to: 110, duration: 0 } },
   'stage-wait-ambient':   { type: 'ambient', loop: true, volume: 0.5, synth: { wave: 'sawtooth', from: 70,  to: 70,  duration: 0 } },
+  'stage-power-ambient':  { type: 'ambient', loop: true, volume: 0.5, synth: { wave: 'triangle', from: 146, to: 146, duration: 0 } },
+  'stage-machine-ambient':{ type: 'ambient', loop: true, volume: 0.5, synth: { wave: 'sine',     from: 55,  to: 55,  duration: 0 } },
+  'stage-campus-ambient': { type: 'ambient', loop: true, volume: 0.5, synth: { wave: 'sine',     from: 196, to: 196, duration: 0 } },
   'hold-button':          { type: 'fx', volume: 0.85, holdRateScale: 1, synth: { wave: 'triangle', from: 220, to: 660, duration: 1.2 } },
+  'energise':             { type: 'fx', volume: 0.8,  synth: { wave: 'sawtooth', from: 120, to: 900, duration: 0.9 } },
+  'power-on':             { type: 'fx', volume: 0.8,  synth: { wave: 'square',   from: 90,  to: 520, duration: 0.7 } },
+  'xp-topup':             { type: 'fx', volume: 0.55, synth: { wave: 'sine',     from: 660, to: 1320, duration: 0.22 } },
   'click':                { type: 'fx', volume: 0.6,  synth: { wave: 'square',   from: 880, to: 440, duration: 0.06 } },
   'whoosh':               { type: 'fx', volume: 0.7,  synth: { wave: 'sine',     from: 400, to: 60,  duration: 0.5 } },
 };

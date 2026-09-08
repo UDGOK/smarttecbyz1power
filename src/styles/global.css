@@ -5,7 +5,9 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  /* Deliberately NOT height:100% — combined with overflow-x it makes <body>
+     the scroll container, which kills window scroll events and sticky. */
+  min-height: 100%;
   background: var(--c-land-deep);
   color: var(--w-90);
   font-family: var(--f-sans);
@@ -15,8 +17,9 @@ html, body {
   text-rendering: optimizeLegibility;
 }
 
-/* The cinematic route owns the viewport; content routes scroll normally. */
-body[data-experience] { overflow-x: hidden; }
+/* `clip` rather than `hidden`: it suppresses horizontal overflow without
+   turning <body> into a scroll container. */
+body[data-experience] { overflow-x: clip; }
 
 img, video, canvas { display: block; max-width: 100%; }
 
@@ -207,3 +210,38 @@ html.has-custom-cursor * { cursor: none !important; }
 /* ---- Masked line reveal ---- */
 .line { display: block; overflow: hidden; }
 .line__inner { display: block; will-change: transform; }
+
+/* ---- Stage-advance flash ---- */
+/* The reference punctuates every milestone with a full-bleed ripple. Ours
+   fires on stage advance and on capacity milestones. */
+.flash {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0;
+}
+.flash.is-firing { animation: flash-white 1.4s var(--e-out) forwards; }
+[data-chrome='dark'] .flash.is-firing { animation-name: flash-black; }
+
+@keyframes flash-white {
+  0%   { opacity: 0;    background: radial-gradient(circle at 50% 60%, #ffffff00 0%, #ffffff00 100%); }
+  12%  { opacity: 0.85; background: radial-gradient(circle at 50% 60%, #ffffffcc 0%, #ffffff00 55%); }
+  100% { opacity: 0;    background: radial-gradient(circle at 50% 60%, #ffffff00 0%, #ffffff00 100%); }
+}
+@keyframes flash-black {
+  0%   { opacity: 0;    background: radial-gradient(circle at 50% 60%, #00000000 0%, #00000000 100%); }
+  12%  { opacity: 0.7;  background: radial-gradient(circle at 50% 60%, #000000b3 0%, #00000000 55%); }
+  100% { opacity: 0;    background: radial-gradient(circle at 50% 60%, #00000000 0%, #00000000 100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flash.is-firing { animation: none; }
+}
+
+/* Badge reacts when capacity is committed. */
+.power-badge.is-topup { animation: badge-pop 0.6s var(--e-out); }
+@keyframes badge-pop {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.13); }
+  100% { transform: scale(1); }
+}

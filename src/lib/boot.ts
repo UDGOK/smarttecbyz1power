@@ -90,6 +90,24 @@ export function boot(): void {
     if (powerValue) powerValue.textContent = String(Math.round(PHASE_1A_KW * fraction));
   }
 
+  /** Full-bleed ripple, the reference's punctuation for a milestone. */
+  function flash(): void {
+    const el = document.querySelector<HTMLElement>('#flash');
+    if (!el || reduced) return;
+    el.classList.remove('is-firing');
+    void el.offsetWidth; // restart the animation
+    el.classList.add('is-firing');
+  }
+
+  function topupBadge(): void {
+    const badge = document.querySelector<HTMLElement>('.power-badge');
+    if (!badge || reduced) return;
+    badge.classList.remove('is-topup');
+    void badge.offsetWidth;
+    badge.classList.add('is-topup');
+    audio.play('xp-topup');
+  }
+
   // --- Masked line reveal ----------------------------------------------
   function reveal(index: number): void {
     const panel = panels[index];
@@ -183,6 +201,8 @@ export function boot(): void {
     if (!panels[next]) return;
     audio.stop('stage-land-ambient', { fadeOut: 0.6 });
     audio.play('whoosh');
+    flash();
+    topupBadge();
     slot.classList.remove('is-armed');
 
     current = next;
