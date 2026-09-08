@@ -138,7 +138,12 @@ function run(): void {
    */
   const nativeScroll = window.matchMedia('(pointer: coarse)').matches;
 
-  const scroller = new ScrollManager({ reducedMotion: reduced });
+  // `touch: false` on the spine is load-bearing, not tidiness: the manager
+  // binds a non-passive touchmove that calls preventDefault, and it does so on
+  // construction regardless of whether it is ever enabled. Built with touch
+  // bound, it silently ate every finger drag on the page.
+  const scroller = new ScrollManager({ reducedMotion: reduced, touch: !nativeScroll });
+  if (nativeScroll) scroller.disable();
   const rig = new CameraRig({ reducedMotion: reduced });
   // Deliberately NOT armed here. `data-virtual-scroll` sets overflow: hidden,
   // so arming it before the scroller is actually running means any later

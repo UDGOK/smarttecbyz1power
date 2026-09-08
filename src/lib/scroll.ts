@@ -137,6 +137,19 @@ export interface ScrollManagerOptions {
   target?: Window | HTMLElement;
   /** Bind keyboard navigation. Defaults to true — turning it off is an a11y regression. */
   keyboard?: boolean;
+  /**
+   * Bind touch. Defaults to true. Set false on any route where the document
+   * does its own scrolling.
+   *
+   * This is not a preference. `onTouchMove` is bound non-passively and cancels
+   * the event, because a virtual scroller has to stop the page moving
+   * underneath it — so a manager that is merely constructed, never enabled and
+   * never used still kills every finger drag on the page. That shipped: the
+   * phone could not be scrolled at all, while `window.scrollBy` kept working,
+   * so every automated check passed. Not binding is the only version of this
+   * that cannot be got wrong by forgetting a call.
+   */
+  touch?: boolean;
   /** Arrow-key step as a fraction of the scroll length. Default 0.04. */
   lineStepFraction?: number;
   /** Page/Space step as a fraction of the scroll length. Default 0.2. */
@@ -192,6 +205,7 @@ export class ScrollManager {
 
   private readonly target: Window | HTMLElement;
   private readonly keyboard: boolean;
+  private readonly touch: boolean;
   private readonly lineStepFraction: number;
   private readonly pageStepFraction: number;
   private destroyed = false;
@@ -201,6 +215,7 @@ export class ScrollManager {
     this._smoothSpeed = rateFromLerp(SCROLL_CONFIG.SCROLL_LERP);
     this._velocitySpeed = rateFromLerp(SCROLL_CONFIG.SCROLL_VELOCITY_SMOOTHING);
     this.keyboard = opts.keyboard ?? true;
+    this.touch = opts.touch ?? true;
     this.lineStepFraction = opts.lineStepFraction ?? KEY_LINE_FRACTION;
     this.pageStepFraction = opts.pageStepFraction ?? KEY_PAGE_FRACTION;
 
@@ -243,12 +258,15 @@ export class ScrollManager {
     // Wheel is passive: the document has nothing to scroll, so there is
     // nothing to preventDefault, and we keep the fast path.
     t.addEventListener('wheel', this.onWheel as EventListener, { passive: true });
-    t.addEventListener('touchstart', this.onTouchStart as EventListener, { passive: true });
-    // Touchmove must be non-passive — this one really does have to cancel the
-    // browser's own overscroll/rubber-band.
-    t.addEventListener('touchmove', this.onTouchMove as EventListener, { passive: false });
-    t.addEventListener('touchend', this.onTouchEnd as EventListener, { passive: true });
-    t.addEventListener('touchcancel', this.onTouchEnd as EventListener, { passive: true });
+    if (this.touch) {
+      t.addEventListener('touchstart', this.onTouchStart as EventListener, { passive: true });
+      // Touchmove must be non-passive — this one really does have to cancel the
+      // browser's own overscroll/rubber-band. Which is exactly why it is not
+      // bound at all unless this manager is the thing that scrolls.
+      t.addEventListener('touchmove', this.onTouchMove as EventListener, { passive: false });
+      t.addEventListener('touchend', this.onTouchEnd as EventListener, { passive: true });
+      t.addEventListener('touchcancel', this.onTouchEnd as EventListener, { passive: true });
+    }
     if (this.keyboard) {
       t.addEventListener('keydown', this.onKeyDown as EventListener);
     }
