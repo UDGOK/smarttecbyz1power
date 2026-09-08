@@ -382,4 +382,13 @@ const headroomFactor = power.headroom.split(' ')[0];
   @media (prefers-reduced-motion: reduce) {
     .form__submit:hover .form__submit-arrow { transform: none; }
   }
+
+  /* Touch targets, placed last so source order carries them. Measured on
+     WebKit at an iPhone 14 profile: the fields came out at 42.3px and the
+     submit at 43px — short by a whisker, but short. */
+  @media (pointer: coarse), (max-width: 760px) {
+    .field__input { padding-block: 13px; }
+    /* .btn also sets padding, so match its specificity to win. */
+    .btn.form__submit { padding-block: 17px; }
+  }
 </style>
