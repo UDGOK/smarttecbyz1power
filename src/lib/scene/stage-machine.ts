@@ -108,6 +108,7 @@ const RACK_FRAG = /* glsl */ `
   uniform float uWorld;
   uniform float uFog;
   uniform float uRackH;
+  uniform float uTraffic;
   uniform vec3  uGraphite;
   uniform vec3  uDeep;
   uniform vec3  uCyan;
@@ -150,6 +151,22 @@ const RACK_FRAG = /* glsl */ `
     float bar = 1.0 - smoothstep(0.0, 0.012, abs(y01 - 0.935));
     col += front * bar * uCyan * 0.85 * load;
 
+    // Power draw. A band of current climbing the cabinet as a job lands on it,
+    // clocked off the same per-rack `load` the door LEDs already run from, so
+    // the busiest cabinets surge most often and hardest. The phase is seeded
+    // per rack, which means under reduced motion (uTime pinned at 0) the hall
+    // holds a still frame with the surges frozen at forty different heights
+    // rather than all forty racks flashing on one line.
+    float sPhase = fract(uTime * (0.11 + 0.13 * load) + hash11(vSeed * 5.09));
+    float sHead  = sPhase * 1.30 - 0.15;
+    float surge  = smoothstep(0.14, 0.0, abs(y01 - sHead));
+    // Squared for a hard crest, gated at both ends of the sweep so it reads as
+    // a discrete event with a gap after it rather than a travelling sine.
+    surge *= surge * smoothstep(0.0, 0.10, sPhase) * smoothstep(1.0, 0.86, sPhase);
+    // Capped at ~0.5 of the cyan accent: the crest kisses the 0.62 bloom
+    // threshold this stage is graded at without ever clipping the door white.
+    col += front * surge * load * uCyan * (0.16 + 0.34 * uTraffic);
+
     // Plinth shadow: the racks should feel heavy where they meet the floor.
     col *= 0.35 + 0.65 * smoothstep(0.0, 0.09, y01);
 
@@ -180,12 +197,16 @@ const LED_VERT = /* glsl */ `
   attribute float aSeed;
   attribute float aRate;
   attribute float aKind;
+  attribute float aRack;   // the parent rack's own iSeed
+  attribute float aY01;    // height up that rack, 0..1
 
   varying vec2  vUv;
   varying float vSeed;
   varying float vRate;
   varying float vKind;
   varying float vView;
+  varying float vRack;
+  varying float vY01;
 
   void main(){
     mat4 im = mat4(1.0);
@@ -193,6 +214,7 @@ const LED_VERT = /* glsl */ `
       im = instanceMatrix;
     #endif
     vUv = uv; vSeed = aSeed; vRate = aRate; vKind = aKind;
+    vRack = aRack; vY01 = aY01;
     vec4 mv = modelViewMatrix * im * vec4(position, 1.0);
     vView = -mv.z;
     gl_Position = projectionMatrix * mv;
@@ -204,6 +226,7 @@ const LED_FRAG = /* glsl */ `
   uniform float uTime;
   uniform float uWorld;
   uniform float uFog;
+  uniform float uTraffic;
   uniform vec3  uCyan;
   uniform vec3  uIce;
   uniform vec3  uGold;
@@ -213,6 +236,8 @@ const LED_FRAG = /* glsl */ `
   varying float vRate;
   varying float vKind;
   varying float vView;
+  varying float vRack;
+  varying float vY01;
 
   ${NOISE}
 
@@ -235,6 +260,18 @@ const LED_FRAG = /* glsl */ `
       // Attention. Rare, slower, and the only place gold appears in the hall.
       level = 0.30 + 0.70 * pow(0.5 + 0.5 * sin(t * 0.9), 6.0);
     }
+
+    // Sympathetic surge. When the cabinet's current pulse sweeps past this
+    // LED's height the row lifts with it — same `load`, same clock and same
+    // seed as RACK_FRAG, so the door and its lights read as one event instead
+    // of two effects running side by side. This only ever adds to `level`;
+    // every light keeps the rate, kind and phase it was built with.
+    float rLoad  = 0.42 + 0.58 * hash11(vRack * 7.31);
+    float sPhase = fract(uTime * (0.11 + 0.13 * rLoad) + hash11(vRack * 5.09));
+    float sHead  = sPhase * 1.30 - 0.15;
+    float surge  = smoothstep(0.16, 0.0, abs(vY01 - sHead));
+    surge *= surge * smoothstep(0.0, 0.10, sPhase) * smoothstep(1.0, 0.86, sPhase);
+    level = min(1.0, level + surge * rLoad * (0.18 + 0.42 * uTraffic));
 
     // Rounded capsule with a soft bloom around it.
     vec2  p    = (vUv - 0.5) * vec2(1.0, 2.30);
@@ -635,6 +672,206 @@ const MOTE_FRAG = /* glsl */ `
     float a = m * vAlpha * 0.36 * (1.0 - smoothstep(0.1, 0.85, uWorld));
     if (a < 0.003) discard;
     gl_FragColor = vec4(uTint, a);
+  }
+`;
+
+/* --- the fabric: fibre runs and the packets on them ---------------------- */
+
+/*
+ * One mesh draws both. A path is a straight or bowed segment between two
+ * points, handed to the shader as instance attributes rather than baked into
+ * geometry, so the same 12-segment ribbon serves as a fibre run (spanning the
+ * whole path) and as a packet (spanning a 26cm window sliding along it). That
+ * keeps the entire data-movement layer at one draw call, and it guarantees the
+ * packets ride exactly on the runs, because they are solving the same curve.
+ *
+ * Nothing here integrates: the head of a packet is `fract(phase + t * speed)`
+ * and the traffic level is read straight off `scroll`, so scrubbing backwards
+ * quietens the hall exactly as scrubbing forward filled it, and reduced motion
+ * (uTime pinned at 0 by the host) leaves every packet parked at its own seeded
+ * phase — spread along the fabric, simply not moving.
+ */
+
+const FABRIC_VERT = /* glsl */ `
+  attribute vec3  aFrom;
+  attribute vec3  aTo;
+  attribute float aBow;
+  attribute float aKind;    // 0 = fibre run, 1 = packet
+  attribute float aPhase;
+  attribute float aRank;    // traffic level at which this instance wakes
+  attribute float aSeed;
+
+  uniform float uTime;
+  uniform float uWorld;
+  uniform float uTraffic;
+  uniform float uPx;        // view-space size of one drawing-buffer pixel, per unit depth
+  uniform float uFibreW;
+  uniform float uPacketW;
+  uniform float uStreakLen;
+  uniform float uSpeed;
+
+  varying float vS;
+  varying float vAlong;
+  varying float vAcross;
+  varying float vKind;
+  varying float vSeed;
+  varying float vView;
+  varying float vAtten;
+  varying float vGain;
+  varying float vBurst;
+
+  float h11(float n){ return fract(sin(n * 17.13) * 43758.5453123); }
+
+  vec3 pathAt(float t){
+    vec3 p = mix(aFrom, aTo, t);
+    // Cross-aisle links bow up over the cold aisle, so a hop between rows
+    // reads as a hop and not as a wire strung through the lens.
+    p.y += aBow * 4.0 * t * (1.0 - t);
+    return p;
+  }
+
+  void main(){
+    vKind   = aKind;
+    vSeed   = aSeed;
+    vAlong  = uv.x;
+    vAcross = uv.y;
+
+    // Traffic gate. Ranks are spread 0..1, so raising uTraffic wakes the
+    // fabric progressively instead of switching it on.
+    vGain = smoothstep(aRank, aRank + 0.08, uTraffic);
+
+    float len3 = max(length(aTo - aFrom), 0.05);
+
+    // Link saturation. A windowed hash makes this a rare, short, discrete
+    // event on one path rather than a modulation running on all of them.
+    float win   = floor(uTime * 0.31 + aSeed * 6.0);
+    float bt    = fract(uTime * 0.31 + aSeed * 6.0);
+    float burst = step(0.87, h11(win + aSeed * 53.0)) * pow(max(0.0, 1.0 - bt * 4.5), 2.0);
+    vBurst = burst;
+
+    float t;
+    if (aKind < 0.5) {
+      t = uv.x;                       // the run spans its whole path
+    } else {
+      // Speed and streak are specified in metres, then divided by the path
+      // length, so a 90cm riser and a 13m aisle run carry packets of the same
+      // physical size travelling at the same physical speed.
+      float sp   = uSpeed * (0.55 + 0.95 * h11(aSeed * 11.7)) / len3;
+      float head = fract(aPhase + uTime * sp * (1.0 + burst * 1.8));
+      float len  = (uStreakLen * (0.7 + 0.7 * h11(aSeed * 3.1))) / len3;
+      t = mix(head - len, head, uv.x);
+    }
+    vS = t;
+
+    vec4 mv  = modelViewMatrix * vec4(pathAt(t), 1.0);
+    vec4 mvn = modelViewMatrix * vec4(pathAt(t + 0.02), 1.0);
+    vView = -mv.z;
+
+    // Ribbon billboarded in view space along its own direction of travel.
+    // Constant world thickness, floored at ~1.7 drawing-buffer pixels so a
+    // hairline cannot scintillate on a renderer built with antialias:false —
+    // with alpha scaled back by exactly the widening, so a distant run loses
+    // brightness rather than gaining it.
+    vec2  d2  = mvn.xy - mv.xy;
+    float dl  = length(d2);
+    vec2  dir = dl > 1e-5 ? d2 / dl : vec2(1.0, 0.0);
+    vec2  nrm = vec2(-dir.y, dir.x);
+
+    float wWorld = mix(uFibreW, uPacketW, step(0.5, aKind));
+    float w      = max(wWorld, max(vView, 0.05) * uPx);
+    vAtten       = wWorld / w;
+
+    mv.xy += nrm * (uv.y - 0.5) * w;
+
+    // A dormant instance is thrown outside the frustum whole. This is the
+    // cheapest cull there is: no fragment is ever raised for it, which is what
+    // keeps the fill-rate cost of this layer proportional to `uTraffic` on a
+    // phone rather than to the instance count.
+    if (vGain <= 0.002 || uWorld > 0.94) {
+      gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+      return;
+    }
+
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+const FABRIC_FRAG = /* glsl */ `
+  precision highp float;
+  uniform float uTime;
+  uniform float uWorld;
+  uniform float uFog;
+  uniform float uTraffic;
+  uniform float uNear;
+  uniform float uFar;
+  uniform vec3  uCyan;
+  uniform vec3  uIce;
+  uniform vec3  uGold;
+
+  varying float vS;
+  varying float vAlong;
+  varying float vAcross;
+  varying float vKind;
+  varying float vSeed;
+  varying float vView;
+  varying float vAtten;
+  varying float vGain;
+  varying float vBurst;
+
+  void main(){
+    float across = 1.0 - abs(vAcross * 2.0 - 1.0);
+    vec3  col;
+    float a;
+
+    if (vKind < 0.5) {
+      // The run itself: structure, not an effect. Nearly dark at rest, with a
+      // light walking it, and the whole length flashing when the link saturates.
+      float pulse = 0.0;
+      for (int i = 0; i < 2; i++) {
+        float fi = float(i);
+        float ph = fract(uTime * (0.15 + 0.11 * fi) + vSeed * (3.0 + fi * 7.0));
+        pulse += smoothstep(0.11, 0.0, abs(vS - ph));
+      }
+      pulse = min(pulse, 1.0);
+      col = mix(uCyan, uIce, min(1.0, pulse * 0.55 + vBurst * 0.8));
+      a   = pow(across, 1.5)
+          * (0.040 + 0.045 * uTraffic
+             + 0.150 * pulse * (0.35 + 0.65 * uTraffic)
+             + 0.420 * vBurst);
+      // Only a saturation burst is allowed over the 0.62 bloom threshold.
+      a = min(a, 0.62);
+    } else {
+      // A quantum with a short wake. Hard head, sixth-power falloff: it has to
+      // read as one thing arriving, never as a smear of light.
+      float s     = clamp(vAlong, 0.0, 1.0);
+      float head  = pow(s, 6.0);
+      float wake  = pow(s, 1.6) * 0.16;
+      float shape = (head + wake) * pow(across, 1.8);
+      col = mix(uCyan, uIce, 0.30 + 0.55 * head);
+      // The one attention colour in the hall, on about one packet in thirty.
+      col = mix(col, uGold, step(0.966, vSeed) * 0.65);
+      a   = shape * (0.42 + 0.26 * uTraffic + 0.30 * vBurst);
+      // Peak add is ~0.72 x a sub-unity tint, so a packet sits around 0.8 over
+      // the aisle floor: comfortably above the 0.62 threshold this stage is
+      // graded at, comfortably below clipping to white.
+      a = min(a, 0.72);
+    }
+
+    // Fade both ends of the run so nothing pops into existence in mid-air.
+    a *= smoothstep(0.0, 0.035, vS) * smoothstep(1.0, 0.962, vS);
+    a *= vGain * vAtten;
+    // Off the lens at the near end, into the haze at the far. Both are
+    // re-composed for portrait, where the copy owns the middle of the frame
+    // and the traffic has to live in the near bands above and below the type.
+    a *= smoothstep(uNear * 0.25, uNear, vView);
+    a *= exp(-vView * uFar * uFog);
+    a *= 1.0 - smoothstep(0.05, 0.75, uWorld);
+    col = mix(col, vec3(1.0), uWorld * 0.35);
+
+    // Discards the transparent margin of every ribbon, which is most of the
+    // quad — the blend unit never touches those fragments.
+    if (a < 0.005) discard;
+    gl_FragColor = vec4(col, a);
   }
 `;
 
