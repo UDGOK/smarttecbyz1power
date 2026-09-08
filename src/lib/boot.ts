@@ -15,6 +15,7 @@ import { prefersReducedMotion } from './hold-button';
 import { initLoader } from './loader';
 import { initCursor } from './cursor';
 import { initConfigurator } from './configurator';
+import { revealLines, scramble } from './type-motion';
 import { audio } from './audio';
 import { stages, ENTRY_MIX } from '../data/site';
 
@@ -144,13 +145,15 @@ export function boot(): void {
   function reveal(index: number): void {
     const panel = panels[index];
     if (!panel) return;
-    const inners = panel.querySelectorAll<HTMLElement>('.line__inner');
-    if (reduced) { gsap.set(inners, { yPercent: 0, opacity: 1 }); return; }
-    gsap.fromTo(
-      inners,
-      { yPercent: 115, opacity: 0 },
-      { yPercent: 0, opacity: 1, duration: 1.15, ease: 'expo.out', stagger: 0.075, delay: 0.15 },
-    );
+
+    // The mono kicker resolves out of noise; the display lines rise out of
+    // their masks. Two different arrivals rather than the same one twice.
+    const kicker = panel.querySelector<HTMLElement>('.stage-panel__kicker');
+    if (kicker) scramble(kicker, { duration: 0.85, delay: 0.1, from: 'start' });
+
+    for (const el of panel.querySelectorAll<HTMLElement>('.stage-panel__title, .stage-panel__lede')) {
+      revealLines(el, { delay: el.matches('.stage-panel__lede') ? 0.34 : 0.16 });
+    }
   }
 
   // --- Scroll ------------------------------------------------------------
