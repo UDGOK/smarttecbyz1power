@@ -84,6 +84,91 @@ const C_CONCRETE = '#c6c4bb';
 const C_STEEL = '#9aa2a4';
 
 /* ============================================================
+   Electricity. The site's own power drawn as its real service
+   route: array -> storage bus -> transformer -> Building 1.
+
+   Daylight is the hard case. Additive glow over a #e4ebe9 sky is
+   invisible: the background already sits near 1.0, so anything
+   added clips to white and reads as haze — which is precisely
+   what bloomStrength 0.45 was chosen to avoid. So none of this is
+   additive. The run is a DARK tape and the packets riding it are
+   saturated and opaque, so the contrast is value and hue against
+   a fixed dark substrate rather than luminance against a bright
+   sky. That is what survives both a calibrated monitor and a
+   phone held outdoors.
+   ============================================================ */
+
+const RUN_Y = 0.45;        // cable tray height: clears both concrete pads
+const RUN_ROOF_Y = 7.0;    // just proud of Building 1's parapet cap
+const TRUNK_Z = 17.6;      // the yard bus, drawn along the FRONT of the storage pad
+const RUN_HALF = 0.34;     // tape half-width at the desktop framing
+
+const C_CONDUIT = '#39423e';     // the tape — dark, so packets always read on it
+const C_PACKET_COOL = '#8fc9f0'; // generation side: cool, unconverted
+const C_PACKET_HOT = '#ff9c1e';  // load side: converted, hot
+const C_FIELD = '#ff8c12';       // the transformer's field
+const C_PHASE_LO = '#d9822b';
+const C_PHASE_HI = '#fff2d6';
+const C_PLUME = '#ffb445';       // Building 1 rejecting the heat it is making
+
+/** The service run, in flow order. Packets ride exactly this polyline. */
+const RUN_PATH: readonly (readonly [number, number, number])[] = [
+  [10, RUN_Y, -28],           // combiner at the south edge of the array
+  [10, RUN_Y, TRUNK_Z],       // south down the alley between Buildings 2 and 3
+  [-26, RUN_Y, TRUNK_Z],      // west along the yard bus, across the cabinet fronts
+  [-26, RUN_Y, -1.5],         // north THROUGH the transformer tank, on to the hall
+  [-26, RUN_ROOF_Y, -1.5],    // riser up the south wall of Building 1
+  [-26.5, RUN_ROOF_Y, -9.2],  // across the roof into the cooling plant
+];
+
+/** One three-phase cycle per 1/FIELD_HZ seconds, shared by rings and bushings. */
+const FIELD_HZ = 0.42;
+const UNIT_X = new THREE.Vector3(1, 0, 0);
+const UP_Y = new THREE.Vector3(0, 1, 0);
+const UP_Z = new THREE.Vector3(0, 0, 1);
+
+const FIELD_VERT = /* glsl */ `
+  varying vec2 vUv;
+  void main(){
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const FIELD_FRAG = /* glsl */ `
+  precision mediump float;
+  uniform float uTime;
+  uniform float uGain;
+  uniform float uFade;
+  uniform float uBand;
+  uniform vec3  uColor;
+  varying vec2  vUv;
+
+  // A raw ShaderMaterial writes straight into the post chain's linear HDR
+  // buffer, which is encoded once at the very end. A colour handed over from
+  // THREE.Color is already linear, so nothing to convert — but the blend has to
+  // happen in that same space, which is why this is a plain alpha blend and not
+  // an additive one.
+  void main(){
+    vec2 d = vUv - 0.5;
+    float r = length(d) * 2.0;
+    // Bound the fill: everything outside the disc is thrown away before it can
+    // cost a blend. The quad is 26 units across and nothing else stacks on it.
+    if (r > 1.0) discard;
+
+    // One expanding ring per phase of the 208V three-phase board, 120 degrees
+    // apart — the same three the bushings above are pulsing on.
+    float a = 0.0;
+    for (int k = 0; k < PHASES; k++){
+      float p = fract(uTime * 0.42 + float(k) / float(PHASES));
+      a += smoothstep(uBand, 0.0, abs(r - p)) * (1.0 - 0.55 * p);
+    }
+    a *= (1.0 - smoothstep(0.55, 1.0, r)) * uGain * uFade;
+    gl_FragColor = vec4(uColor, clamp(a, 0.0, 1.0) * 0.8);
+  }
+`;
+
+/* ============================================================
    Camera rig limits. The whole point of this stage is that it
    is explorable, and the whole risk is that the visitor orbits
    under the ground or out to a horizon of nothing. Everything
@@ -326,6 +411,7 @@ function rng(seed: number): () => number {
 }
 
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
+const smooth01 = (x: number) => { const t = clamp(x, 0, 1); return t * t * (3 - 2 * t); };
 
 export class CampusScene implements StageScene {
   readonly id = 'campus';
@@ -389,6 +475,36 @@ export class CampusScene implements StageScene {
   private fill!: THREE.DirectionalLight;
   private contactMat!: THREE.MeshBasicMaterial;
 
+  // --- Electricity -------------------------------------------------------
+  private conduit: THREE.Mesh | null = null;
+  private packets: THREE.InstancedMesh | null = null;
+  private phaseCaps: THREE.InstancedMesh | null = null;
+  private plume: THREE.InstancedMesh | null = null;
+  private fieldRing: THREE.Mesh | null = null;
+  private fieldMat: THREE.ShaderMaterial | null = null;
+  /** The polyline packets ride, with cumulative arc length at each waypoint. */
+  private runPts: THREE.Vector3[] = [];
+  private runCum: number[] = [];
+  private runTotal = 1;
+  private runSplit = 0;
+  /** Four floats per plume mote: x, z, phase, size. */
+  private plumeSeeds = new Float32Array(0);
+  /**
+   * Screen-size compensation. Portrait fits the whole parcel from ~330 units
+   * out where landscape sits at ~150, so a tape cut for the desktop framing
+   * would be under a pixel wide on a phone. Every cross-section below is
+   * multiplied by this, which holds the electricity at a roughly constant
+   * SCREEN size while the model itself stays honest.
+   */
+  private espScale = 1;
+  /**
+   * Extra over-compensation for the small elements. A tape that halves in
+   * screen width only gets fainter; a packet that halves stops existing, so
+   * the dots have to gain more than the line does.
+   */
+  private espBoost = 1;
+  private builtEspScale = 1;
+
   // --- Bookkeeping -------------------------------------------------------
   private geometries: THREE.BufferGeometry[] = [];
   private materials: THREE.Material[] = [];
@@ -434,6 +550,20 @@ export class CampusScene implements StageScene {
   private v3 = new THREE.Vector3();
   private spherical = new THREE.Spherical();
 
+  // Scratch for the electricity — update() runs this every frame and must not
+  // allocate any more than the projection does.
+  private packDummy = new THREE.Object3D();
+  private pPos = new THREE.Vector3();
+  private pDir = new THREE.Vector3();
+  private pSide = new THREE.Vector3();
+  private tapeB = new THREE.Vector3();
+  private pQuat = new THREE.Quaternion();
+  private pCol = new THREE.Color();
+  private colCool = new THREE.Color(C_PACKET_COOL);
+  private colHot = new THREE.Color(C_PACKET_HOT);
+  private colPhaseLo = new THREE.Color(C_PHASE_LO);
+  private colPhaseHi = new THREE.Color(C_PHASE_HI);
+
   /* ==========================================================
      StageScene
      ========================================================== */
@@ -463,6 +593,10 @@ export class CampusScene implements StageScene {
     this.buildBattery();
     this.buildSolar(settings);
     this.buildScatter(settings);
+    this.buildPowerRun();
+    this.buildTransformerField(settings);
+    this.buildPacketStream(settings);
+    this.buildPlume(settings);
     this.applyTier(settings, ctx);
 
     this.bindPointer(ctx);
@@ -491,9 +625,18 @@ export class CampusScene implements StageScene {
       // The Phase 1A beacon, and a breath on the lit bay of Building 1.
       const pulse = 0.5 + 0.5 * Math.sin(elapsed * 2.1);
       (this.beacon.material as THREE.MeshBasicMaterial).opacity = (0.35 + pulse * 0.65) * (1 - this.arrive);
-      (this.glow.material as THREE.MeshBasicMaterial).opacity = (0.62 + pulse * 0.12) * (1 - this.arrive);
+      // Building 1 is the only hall with a load on it, so its lit bay carries a
+      // switching rhythm rather than a breath — it never settles the way an
+      // empty shell would.
+      const load = 0.5 + 0.5 * Math.sin(elapsed * 0.93) * Math.sin(elapsed * 0.37 + 1.7);
+      (this.glow.material as THREE.MeshBasicMaterial).opacity =
+        (0.54 + pulse * 0.10 + load * 0.16) * (1 - this.arrive);
       if (this.motes) this.motes.rotation.y = elapsed * 0.012;
     }
+
+    // Electricity runs on `t`, which the host pins to 0 under reduced motion —
+    // so this same pass lays out a static, fully distributed frame there.
+    this.updateEnergy(t, clamp(scroll, 0, 1));
 
     // Critically-damped-enough smoothing, frame-rate independent.
     const k = ctx.reducedMotion ? 1 : 1 - Math.exp(-dt * 7.5);
@@ -522,6 +665,8 @@ export class CampusScene implements StageScene {
       m.visible = m.opacity > 0.004;
     }
 
+    if (this.fieldMat) this.fieldMat.uniforms.uFade.value = 1 - a;
+
     // Daylight itself arrives: the sun comes up as the dark world lets go.
     const lit = 1 - a;
     this.key.intensity = 2.15 * lit;
@@ -543,6 +688,8 @@ export class CampusScene implements StageScene {
     this.rebuildGroundGeometry(settings);
     this.buildSolar(settings);
     this.buildScatter(settings);
+    this.buildPacketStream(settings);
+    this.buildPlume(settings);
     this.applyTier(settings, ctx);
     this.setWorldMix(this.arrive);
   }
@@ -588,6 +735,13 @@ export class CampusScene implements StageScene {
       this.goalRadius = clamp(this.goalRadius, RADIUS_MIN, RADIUS_MAX);
     }
 
+    // Portrait fits the parcel from more than twice as far out, so the
+    // electricity is re-cut to hold its screen presence rather than its world
+    // size — otherwise the run is a sub-pixel line on a 390 px screen.
+    this.espScale = clamp(this.baseRadius / 150, 1, 2.4);
+    this.espBoost = 1 + 0.4 * (this.espScale - 1);
+    this.syncEnergyScale();
+
     ctx.camera.updateProjectionMatrix();
     this.applyCamera(ctx);
   }
@@ -619,6 +773,19 @@ export class CampusScene implements StageScene {
     this.solar = null;
     this.scrub = null;
     this.motes = null;
+    this.packets?.dispose();
+    this.phaseCaps?.dispose();
+    this.plume?.dispose();
+    this.conduit = null;
+    this.packets = null;
+    this.phaseCaps = null;
+    this.plume = null;
+    this.fieldRing = null;
+    this.fieldMat = null;
+    this.runPts = [];
+    this.runCum = [];
+    this.plumeSeeds = new Float32Array(0);
+    this.builtEspScale = 1;
     this.ctx = null;
     this.built = false;
   }
@@ -1297,6 +1464,360 @@ export class CampusScene implements StageScene {
     this.root.add(this.motes);
   }
 
+  /* ==========================================================
+     Electricity. Five draw calls carry the whole of it: the run,
+     the packets on it, the transformer's field, its three phase
+     coronas, and the heat coming off Building 1.
+     ========================================================== */
+
+  /**
+   * The service run itself — a dark tape from the array, along the yard bus
+   * past the LFP cabinets, through the transformer and up into Building 1,
+   * with a combiner across the array's south edge and a tap into every
+   * cabinet. One merged geometry, one draw call, cut once; only its width is
+   * re-derived when the viewport changes.
+   */
+  private buildPowerRun(): void {
+    this.runPts = RUN_PATH.map((p) => new THREE.Vector3(p[0], p[1], p[2]));
+    // Cumulative arc length, so a packet's progress is measured in metres of
+    // cable. Progress measured in waypoints would make it sprint the corners.
+    this.runCum = [0];
+    let total = 0;
+    for (let i = 1; i < this.runPts.length; i++) {
+      total += this.runPts[i]!.distanceTo(this.runPts[i - 1]!);
+      this.runCum.push(total);
+    }
+    this.runTotal = Math.max(total, 1e-3);
+
+    // Where the run passes through the transformer tank, found by walking it
+    // rather than pinned to a waypoint index: the turn happens inside the
+    // steel, so the packets' colour change is hidden there and reads as
+    // conversion rather than as a cross-fade.
+    let best = Infinity;
+    this.runSplit = this.runTotal * 0.5;
+    for (let k = 0; k <= 400; k++) {
+      const at = (k / 400) * this.runTotal;
+      this.samplePath(at, this.pPos, this.pDir);
+      const dx = this.pPos.x - TRANSFORMER_P.x;
+      const dz = this.pPos.z - TRANSFORMER_P.z;
+      const d2 = dx * dx + dz * dz;
+      if (d2 < best) { best = d2; this.runSplit = at; }
+    }
+
+    this.conduit = new THREE.Mesh(
+      this.runGeometry(),
+      this.mat(new THREE.MeshBasicMaterial({
+        color: new THREE.Color(C_CONDUIT),
+        transparent: true,
+        depthWrite: false,
+        // The tape lies a few centimetres over a flat pad; without this the
+        // two fight for the depth buffer at the far end of the parcel.
+        polygonOffset: true,
+        polygonOffsetFactor: -2,
+        polygonOffsetUnits: -4,
+      }), 1),
+    );
+    this.conduit.renderOrder = 2;
+    this.root.add(this.conduit);
+  }
+
+  private runGeometry(): THREE.BufferGeometry {
+    const pos: number[] = [];
+    const idx: number[] = [];
+    const half = RUN_HALF * this.espScale;
+
+    this.tape(this.runPts, half, pos, idx);
+    // Combiner across the south edge of the array.
+    this.tape([new THREE.Vector3(2, RUN_Y, -28), new THREE.Vector3(18, RUN_Y, -28)], half, pos, idx);
+    // A tap off the yard bus into each of the six LFP cabinets.
+    for (let i = 0; i < 6; i++) {
+      const x = BATTERY_P.x + (-8.0 + i * 3.2);
+      this.tape([new THREE.Vector3(x, RUN_Y, TRUNK_Z), new THREE.Vector3(x, RUN_Y, 15.0)], half, pos, idx);
+    }
+
+    const g = this.geo(new THREE.BufferGeometry());
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx);
+    g.computeBoundingSphere();
+    return g;
+  }
+
+  /** Append one polyline to the tape buffers as a flat quad strip. */
+  private tape(pts: THREE.Vector3[], half: number, pos: number[], idx: number[]): void {
+    const a = this.pPos;
+    const b = this.tapeB;
+    const dir = this.pDir;
+    const side = this.pSide;
+    for (let i = 0; i < pts.length - 1; i++) {
+      a.copy(pts[i]!);
+      b.copy(pts[i + 1]!);
+      dir.subVectors(b, a);
+      const len = dir.length();
+      if (len < 1e-4) continue;
+      dir.divideScalar(len);
+      // A yard run is a tape lying flat on the ground; a riser is the same tape
+      // lying on the wall. Pick the plane the segment actually lives in.
+      side.crossVectors(dir, Math.abs(dir.y) > 0.7 ? UP_Z : UP_Y);
+      if (side.lengthSq() < 1e-8) side.copy(UNIT_X);
+      side.normalize().multiplyScalar(half);
+      // Overrun both ends by the half width so square corners close themselves
+      // without needing a mitre join.
+      a.addScaledVector(dir, -half);
+      b.addScaledVector(dir, half);
+      const base = pos.length / 3;
+      pos.push(a.x - side.x, a.y - side.y, a.z - side.z);
+      pos.push(a.x + side.x, a.y + side.y, a.z + side.z);
+      pos.push(b.x + side.x, b.y + side.y, b.z + side.z);
+      pos.push(b.x - side.x, b.y - side.y, b.z - side.z);
+      idx.push(base, base + 1, base + 2, base, base + 2, base + 3);
+    }
+  }
+
+  /**
+   * The transformer working: expanding ground rings 120 degrees apart — the
+   * three phases of the 208V board the tank is already drawn with — and a
+   * corona on each of its three bushings, striking on the same cycle. Plain
+   * alpha over the concrete rather than an additive bloom, because at midday
+   * an additive field is just fog.
+   */
+  private buildTransformerField(settings: TierSettings): void {
+    this.fieldMat = this.mat(new THREE.ShaderMaterial({
+      vertexShader: FIELD_VERT,
+      fragmentShader: FIELD_FRAG,
+      transparent: true,
+      depthWrite: false,
+      defines: { PHASES: settings.particleCount < 500 ? '2' : '3' },
+      uniforms: {
+        uTime: { value: 0 },
+        uGain: { value: 1 },
+        uFade: { value: 1 },
+        uBand: { value: 0.075 },
+        uColor: { value: new THREE.Color(C_FIELD) },
+      },
+    }));
+    this.fieldRing = new THREE.Mesh(
+      this.geo(new THREE.PlaneGeometry(26, 26).rotateX(-Math.PI / 2)),
+      this.fieldMat,
+    );
+    this.fieldRing.position.set(TRANSFORMER_P.x, 0.46, TRANSFORMER_P.z);
+    this.fieldRing.renderOrder = 3;
+    this.root.add(this.fieldRing);
+
+    const caps = new THREE.InstancedMesh(
+      this.geo(new THREE.SphereGeometry(0.26, 10, 8)),
+      this.mat(new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }), 1),
+      3,
+    );
+    caps.frustumCulled = false;
+    caps.renderOrder = 5;
+    caps.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    // Declared up front rather than lazily by setColorAt, so the shader is
+    // compiled once with the instancing-colour chunk already in it.
+    caps.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(9).fill(1), 3);
+    caps.instanceColor.setUsage(THREE.DynamicDrawUsage);
+    this.phaseCaps = caps;
+    this.root.add(caps);
+  }
+
+  /** Packets riding the run. The count follows the tier and the viewport. */
+  private buildPacketStream(settings: TierSettings): void {
+    if (this.packets) {
+      this.root.remove(this.packets);
+      this.disposeInstanced(this.packets);
+      this.packets = null;
+    }
+    const base = clamp(Math.round(settings.particleCount / 38), 10, 30);
+    // Packets are drawn longer at the portrait framing to stay legible, so the
+    // stream thins as it thickens or it would close into one solid line.
+    const count = Math.max(6, Math.round(base / (0.6 + 0.4 * this.espScale)));
+    const mesh = new THREE.InstancedMesh(
+      this.geo(new THREE.BoxGeometry(1.3, 0.3, 0.3)),
+      this.mat(new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }), 1),
+      count,
+    );
+    mesh.frustumCulled = false;
+    // ABOVE the tape. Neither writes depth, so without this the tape — which
+    // sorts later — paints straight over every packet riding it.
+    mesh.renderOrder = 4;
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count * 3).fill(1), 3);
+    mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+    this.packets = mesh;
+    this.root.add(mesh);
+  }
+
+  /**
+   * Building 1 drawing load. The two shells beside it get nothing at all —
+   * that contrast is the whole point of the model — so this is the only thing
+   * on the parcel with heat coming off it.
+   */
+  private buildPlume(settings: TierSettings): void {
+    if (this.plume) {
+      this.root.remove(this.plume);
+      this.disposeInstanced(this.plume);
+      this.plume = null;
+    }
+    const count = clamp(Math.round(settings.particleCount / 16), 14, 72);
+    const mesh = new THREE.InstancedMesh(
+      this.geo(new THREE.OctahedronGeometry(0.42, 0)),
+      this.mat(new THREE.MeshBasicMaterial({
+        color: new THREE.Color(C_PLUME), transparent: true, depthWrite: false,
+      }), 0.75),
+      count,
+    );
+    mesh.frustumCulled = false;
+    mesh.renderOrder = 5;
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
+    const seeds = new Float32Array(count * 4);
+    const rand = rng(0xc0ffee);
+    for (let i = 0; i < count; i++) {
+      seeds[i * 4] = BUILDING_X[0] + (rand() * 2 - 1) * 6.0;
+      seeds[i * 4 + 1] = BUILDING_Z + (rand() * 2 - 1) * 3.0;
+      seeds[i * 4 + 2] = rand();
+      seeds[i * 4 + 3] = 0.55 + rand() * 0.75;
+    }
+    this.plumeSeeds = seeds;
+    this.plume = mesh;
+    this.root.add(mesh);
+  }
+
+  /**
+   * Re-derive everything whose SIZE has to answer to the viewport. Called from
+   * frame(), so turning a phone from landscape to portrait re-cuts the tape
+   * rather than shrinking it out of existence.
+   */
+  private syncEnergyScale(): void {
+    if (!this.built) return;
+    if (Math.abs(this.espScale - this.builtEspScale) < 0.06) return;
+    this.builtEspScale = this.espScale;
+
+    if (this.conduit) {
+      const old = this.conduit.geometry;
+      this.conduit.geometry = this.runGeometry();
+      const i = this.geometries.indexOf(old);
+      if (i >= 0) this.geometries.splice(i, 1);
+      old.dispose();
+    }
+    if (this.fieldMat) this.fieldMat.uniforms.uBand.value = 0.075 * this.espScale;
+    if (this.settings) this.buildPacketStream(this.settings);
+  }
+
+  /**
+   * One pass over everything electrical. Phase is derived from `t` at a FIXED
+   * rate: scroll drives brightness and presence, never speed, because a rate
+   * that moved with scroll would teleport every packet mid-run. Scrolling back
+   * quietens the site; it never rewinds it.
+   */
+  private updateEnergy(t: number, scroll01: number): void {
+    const drive = 0.62 + 0.38 * scroll01;
+    const lit = 1 - this.arrive;
+
+    if (this.fieldMat) {
+      this.fieldMat.uniforms.uTime.value = t;
+      this.fieldMat.uniforms.uGain.value = drive;
+    }
+
+    // --- packets on the run ---
+    const packets = this.packets;
+    if (packets) {
+      const n = packets.count;
+      const cross = this.espScale * this.espBoost;
+      const long = 0.5 + 0.5 * this.espScale;
+      const phase = t * 0.058;
+      for (let i = 0; i < n; i++) {
+        const u = (i / n + phase) % 1;
+        const s = u * this.runTotal;
+        this.samplePath(s, this.pPos, this.pDir);
+        // Ride a little proud of the tape, on whichever plane it lies in.
+        this.pSide.copy(Math.abs(this.pDir.y) > 0.7 ? UP_Z : UP_Y);
+        this.pPos.addScaledVector(this.pSide, 0.10 + 0.16 * cross);
+        // Taper the two terminals so nothing pops at the combiner or inside
+        // the cooling plant.
+        const ends = Math.min(smooth01(u / 0.05), smooth01((1 - u) / 0.06));
+        this.pQuat.setFromUnitVectors(UNIT_X, this.pDir);
+        this.packDummy.position.copy(this.pPos);
+        this.packDummy.quaternion.copy(this.pQuat);
+        this.packDummy.scale.set(long * ends, cross * ends, cross * ends);
+        this.packDummy.updateMatrix();
+        packets.setMatrixAt(i, this.packDummy.matrix);
+
+        // Cool going in, hot coming out — and the change itself happens behind
+        // the tank, so it reads as conversion and not as a cross-fade.
+        const hot = smooth01((s - (this.runSplit - 2.6)) / 5.2);
+        this.pCol.lerpColors(this.colCool, this.colHot, hot);
+        this.pCol.multiplyScalar(drive * lit);
+        packets.setColorAt(i, this.pCol);
+      }
+      packets.instanceMatrix.needsUpdate = true;
+      if (packets.instanceColor) packets.instanceColor.needsUpdate = true;
+    }
+
+    // --- three-phase bushing coronas ---
+    const caps = this.phaseCaps;
+    if (caps) {
+      for (let k = 0; k < 3; k++) {
+        // A sawtooth rather than a sine: each phase strikes as its own ring is
+        // born at the tank and then decays, which is what makes the rings and
+        // the bushings read as one board rather than two effects.
+        const f = (t * FIELD_HZ + k / 3) % 1;
+        const pulse = Math.pow(1 - f, 2.2);
+        this.packDummy.position.set(
+          TRANSFORMER_P.x - 1.6 + k * 1.6,
+          TRANSFORMER_P.y + 6.30,
+          TRANSFORMER_P.z + 1.4,
+        );
+        this.packDummy.quaternion.identity();
+        this.packDummy.scale.setScalar((0.7 + 0.75 * pulse) * this.espScale * this.espBoost);
+        this.packDummy.updateMatrix();
+        caps.setMatrixAt(k, this.packDummy.matrix);
+        this.pCol.lerpColors(this.colPhaseLo, this.colPhaseHi, pulse);
+        this.pCol.multiplyScalar((0.58 + 0.42 * drive) * lit);
+        caps.setColorAt(k, this.pCol);
+      }
+      caps.instanceMatrix.needsUpdate = true;
+      if (caps.instanceColor) caps.instanceColor.needsUpdate = true;
+    }
+
+    // --- the heat Building 1 is making ---
+    const plume = this.plume;
+    if (plume) {
+      const seeds = this.plumeSeeds;
+      const size = (0.62 + 0.38 * this.espScale) * this.espBoost;
+      for (let i = 0; i < plume.count; i++) {
+        const ph = seeds[i * 4 + 2]!;
+        const u = (ph + t * 0.075) % 1;
+        this.packDummy.position.set(
+          seeds[i * 4]! + Math.sin(t * 0.35 + ph * 21.0) * 0.9,
+          BUILDING_H + 1.7 + u * 9.2,
+          seeds[i * 4 + 1]! + Math.cos(t * 0.27 + ph * 13.0) * 0.7,
+        );
+        this.packDummy.quaternion.identity();
+        // Scale, not opacity, carries the fade: one opaque material stays one
+        // draw call and, more to the point on a phone, one blend layer.
+        const rise = Math.pow(Math.sin(Math.PI * u), 0.6);
+        this.packDummy.scale.setScalar(seeds[i * 4 + 3]! * rise * size * drive);
+        this.packDummy.updateMatrix();
+        plume.setMatrixAt(i, this.packDummy.matrix);
+      }
+      plume.instanceMatrix.needsUpdate = true;
+    }
+  }
+
+  /** Position and direction `s` metres along the run. Allocates nothing. */
+  private samplePath(s: number, outPos: THREE.Vector3, outDir: THREE.Vector3): void {
+    const cum = this.runCum;
+    const pts = this.runPts;
+    let i = 1;
+    while (i < cum.length - 1 && cum[i]! < s) i++;
+    const a = pts[i - 1]!;
+    const b = pts[i]!;
+    const s0 = cum[i - 1]!;
+    const len = Math.max(cum[i]! - s0, 1e-4);
+    outPos.copy(a).lerp(b, clamp((s - s0) / len, 0, 1));
+    outDir.subVectors(b, a).divideScalar(len);
+  }
+
   private disposeInstanced(m: THREE.InstancedMesh): void {
     m.geometry.dispose();
     const gi = this.geometries.indexOf(m.geometry);
@@ -1326,6 +1847,16 @@ export class CampusScene implements StageScene {
       }
     } else {
       ctx.scene.fog = null;
+    }
+
+    if (this.fieldMat) {
+      // Two rings instead of three where fill rate is the constraint: the
+      // three-phase read survives on the bushings, the blend cost does not.
+      const phases = settings.particleCount < 500 ? '2' : '3';
+      if (this.fieldMat.defines.PHASES !== phases) {
+        this.fieldMat.defines.PHASES = phases;
+        this.fieldMat.needsUpdate = true;
+      }
     }
 
     ctx.renderer.shadowMap.enabled = settings.shadows;

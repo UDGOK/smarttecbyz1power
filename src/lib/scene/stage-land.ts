@@ -43,6 +43,7 @@ const STAND_R = 22;
 const MAX_FRONDS = 900;
 const FROND_SEGS = 4;
 const MAX_MOTES = 1200;
+const MAX_CHARGE = 340;
 
 const MIST_Y = 3.0;
 
@@ -95,6 +96,32 @@ const CAUSTIC = /* glsl */ `
     c /= float(CAUSTIC_STEPS);
     c = 1.17 - pow(c, 1.4);
     return clamp(pow(abs(c), 8.0) * 0.42, 0.0, 1.20);
+  }
+`;
+
+/**
+ * The latent field. A handful of nodes buried under the parcel — the strongest
+ * one directly beneath the stand, because that is where the site's own story
+ * starts — whose combined potential is read by two things at once: the ground
+ * draws its equipotential contours, and the charge crawling over it walks down
+ * its gradient. One function, so the lines and the charge can never disagree.
+ *
+ * It is deliberately tiny in amplitude. This is the opening frame; a few volts
+ * under the grass, not a storm.
+ */
+const BURIED = /* glsl */ `
+  uniform float uCharge;
+
+  float buried(vec2 p){
+    vec2 a = uFocus;
+    vec2 b = uFocus + vec2(-92.0, 52.0);
+    vec2 c = uFocus + vec2(104.0, -34.0);
+    float v = 1.30 * exp(-dot(p - a, p - a) / 5400.0);
+    v -= 0.86 * exp(-dot(p - b, p - b) / 9200.0);
+    v += 0.68 * exp(-dot(p - c, p - c) / 7400.0);
+    // The ground is not a lab bench: let the field wander with the land.
+    v += fbm3(p * 0.0062 + 21.0) * 0.95;
+    return v;
   }
 `;
 
@@ -254,6 +281,7 @@ const GROUND_FRAG = /* glsl */ `
   uniform vec3  uLight;  uniform vec3 uLightW;
   uniform vec3  uCool;   uniform vec3 uCoolW;
   uniform vec3  uHaze;   uniform vec3 uHazeW;
+  uniform vec3  uChargeA; uniform vec3 uChargeB;
 
   varying vec3  vWorld;
   varying vec3  vNrm;
@@ -263,6 +291,7 @@ const GROUND_FRAG = /* glsl */ `
 
   ${NOISE}
   ${CAUSTIC}
+  ${BURIED}
   ${FILM}
 
   void main(){
@@ -318,6 +347,24 @@ const GROUND_FRAG = /* glsl */ `
     col += lit * lightCol * 0.62;
     // Cheap bloom — the broad scale blooms where the network is already hot.
     col += c1 * smoothstep(0.62, 1.30, caus) * lightCol * 0.40;
+
+    // --- latent charge under the ground ----------------------------------
+    // Equipotential contours of the buried field, drifting outward at a
+    // fraction of the speed of anything else in the frame. The caustics own
+    // every warm highlight here, so a brighter warm line would simply vanish
+    // into them: the contour is drawn COOL, and each one is engraved with a
+    // faint trough on either side. A hue that is not already in the frame,
+    // plus a light/dark pair, reads at an amplitude a purely additive line
+    // could never survive at — which is what keeps this a few volts and not
+    // a storm. Dies into the haze, and held out of the near field so the lede
+    // and the hold ring always land on quiet ground.
+    float pot = buried(vWorld.xz);
+    float band = abs(fract(pot * 5.2 - uTime * 0.030) - 0.5) * 2.0;
+    float core = smoothstep(0.925, 1.0, band);
+    float trough = smoothstep(0.60, 0.925, band) * (1.0 - core);
+    float charge = uCharge * att * (1.0 - nearD * 0.90);
+    col *= 1.0 - trough * 0.055 * charge;
+    col += core * mix(uChargeA, uChargeB, uWorld) * 0.100 * charge;
 
     #if SHADOW
       // The stand throws a long shadow away from a sun this low.
@@ -485,6 +532,80 @@ const GROWTH_FRAG = /* glsl */ `
 `;
 
 /* ------------------------------------------------------------------ *
+ * Charge — the second half of the latent field. Sparks that ride the
+ * surface of the land, walking down the gradient of the same buried
+ * potential the ground is drawing contours of, so they always run
+ * across the lines rather than beside them. Quiet, sparse, held out
+ * of the near field. One draw call.
+ * ------------------------------------------------------------------ */
+
+const CHARGE_VERT = /* glsl */ `
+  attribute float aPhase;
+  attribute float aScale;
+
+  uniform float uPointScale;
+  uniform vec2  uResolution;
+
+  varying float vA;
+
+  ${NOISE}
+  ${LAND_H}
+  ${BURIED}
+
+  vec2 gradBuried(vec2 p){
+    const float e = 3.0;
+    float c0 = buried(p);
+    return vec2(buried(p + vec2(e, 0.0)) - c0, buried(p + vec2(0.0, e)) - c0);
+  }
+
+  void main(){
+    float t = fract(aPhase + uTime * 0.017);
+
+    // A charge follows the potential, so a couple of Euler steps down its
+    // gradient trace exactly the field the ground is already showing.
+    vec2 p = position.xz;
+    float len = t * 44.0 / float(CHARGE_STEPS);
+    for (int i = 0; i < CHARGE_STEPS; i++){
+      p -= normalize(gradBuried(p) + vec2(1e-5)) * len;
+    }
+
+    // Ride the height field, barely clear of it: read as light inside the
+    // ground rather than as something floating over it. The mist sheet above
+    // finishes the job of burying them.
+    vec3 wp = vec3(p.x, landH(p) * uAmp + 0.45, p.y);
+    vec4 mv = viewMatrix * vec4(wp, 1.0);
+    float d = -mv.z;
+
+    vA = smoothstep(0.0, 0.14, t) * smoothstep(1.0, 0.78, t)
+       * smoothstep(20.0, 52.0, d) * (1.0 - smoothstep(150.0, 265.0, d))
+       * uCharge;
+
+    // Attenuated the same way three's own PointsMaterial does it: half the
+    // DEVICE-pixel height over view depth. And hard-capped, because
+    // devicePixelRatio is commonly 3 on a phone and an unbounded attenuated
+    // point is exactly how an additive layer eats a mid-range GPU's fill rate.
+    gl_PointSize = min(aScale * uPointScale * 1.3 * (uResolution.y * 0.5 / max(d, 1.0)),
+                       18.0);
+    gl_Position = projectionMatrix * mv;
+  }
+`;
+
+const CHARGE_FRAG = /* glsl */ `
+  precision mediump float;
+  uniform float uWorld;
+  uniform vec3  uChargeA;
+  uniform vec3  uChargeB;
+  varying float vA;
+  void main(){
+    // Kill the fragment before it can cost a blend, not after.
+    if (vA <= 0.003) discard;
+    vec2 d = gl_PointCoord - 0.5;
+    float a = exp(-dot(d, d) * 9.0) * vA;
+    gl_FragColor = vec4(mix(uChargeA, uChargeB, uWorld), a);
+  }
+`;
+
+/* ------------------------------------------------------------------ *
  * Glow — the bloom halo. There is no post chain (the host owns the
  * renderer), so the bright areas bloom through an additive billboard
  * plus the in-shader highlight bleed on the ground.
@@ -553,6 +674,15 @@ function causticSteps(settings: TierSettings): number {
   return 2;
 }
 
+/** Euler steps per charge spark. One still traces the field; it just cuts corners. */
+function chargeSteps(settings: TierSettings): number {
+  return settings.terrainSegments >= 180 ? 2 : 1;
+}
+
+function chargeCount(settings: TierSettings): number {
+  return Math.max(48, Math.min(MAX_CHARGE, Math.round(settings.particleCount * 0.30)));
+}
+
 function frondCount(settings: TierSettings): number {
   return Math.max(220, Math.min(MAX_FRONDS, Math.round(settings.particleCount * 0.8)));
 }
@@ -568,6 +698,7 @@ export class LandScene implements StageScene {
   private growth!: THREE.Mesh;
   private glow!: THREE.Mesh;
   private motes!: THREE.Points;
+  private charge!: THREE.Points;
 
   private backdropMat!: THREE.ShaderMaterial;
   private groundMat!: THREE.ShaderMaterial;
@@ -576,6 +707,7 @@ export class LandScene implements StageScene {
   private glowMat!: THREE.ShaderMaterial;
   private moteMat!: THREE.PointsMaterial;
   private moteTex!: THREE.Texture;
+  private chargeMat!: THREE.ShaderMaterial;
 
   // Uniform objects shared across materials, so one write updates the world.
   private uTime: THREE.IUniform<number> = { value: 0 };
@@ -588,6 +720,9 @@ export class LandScene implements StageScene {
   private uHorizon: THREE.IUniform<number> = { value: 0.7 };
   private uSunScreen: THREE.IUniform<THREE.Vector2> = { value: new THREE.Vector2(-0.5, 0.8) };
   private uFog: THREE.IUniform<number> = { value: 1 };
+  /** How much latent charge the ground is showing. Derived from scroll. */
+  private uCharge: THREE.IUniform<number> = { value: 0.5 };
+  private uPointScale: THREE.IUniform<number> = { value: 1 };
 
   // Preallocated scratch — update() and setWorldMix() must never allocate.
   private tmp = new THREE.Vector3();
@@ -619,6 +754,9 @@ export class LandScene implements StageScene {
     const coolW = { value: new THREE.Color('#c04a30') };
     const haze = { value: new THREE.Color('#a9c2b0') };
     const hazeW = { value: new THREE.Color('#9c3a24') };
+    // The one hue in the frame that the dawn does not already own.
+    const chargeA = { value: new THREE.Color('#5fe0d0') };
+    const chargeB = { value: new THREE.Color('#ff7a54') };
 
     /* --- backdrop ---------------------------------------------------- */
     this.backdropMat = new THREE.ShaderMaterial({
@@ -662,6 +800,7 @@ export class LandScene implements StageScene {
         uFocus: this.uFocus,
         uSunDir: this.uSunDir,
         uFog: this.uFog,
+        uCharge: this.uCharge,
         uAmp: { value: AMP },
         uKnoll: { value: KNOLL },
         uKnollR: { value: KNOLL_R },
@@ -677,6 +816,8 @@ export class LandScene implements StageScene {
         uCoolW: coolW,
         uHaze: haze,
         uHazeW: hazeW,
+        uChargeA: chargeA,
+        uChargeB: chargeB,
       },
     });
     this.ground = new THREE.Mesh(this.groundGeometry(this.segments), this.groundMat);
@@ -757,6 +898,35 @@ export class LandScene implements StageScene {
     this.glow.renderOrder = 6;
     this.glow.frustumCulled = false;
     this.group.add(this.glow);
+
+    /* --- charge ------------------------------------------------------ */
+    // Drawn after the ground and before the mist, so the sheet above finishes
+    // burying it. Depth-tested against the land, so a rise still hides it.
+    this.chargeMat = new THREE.ShaderMaterial({
+      vertexShader: CHARGE_VERT,
+      fragmentShader: CHARGE_FRAG,
+      defines: { CHARGE_STEPS: String(chargeSteps(settings)) },
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        uTime: this.uTime,
+        uWorld: this.uWorld,
+        uFocus: this.uFocus,
+        uCharge: this.uCharge,
+        uPointScale: this.uPointScale,
+        uResolution: this.uRes,
+        uAmp: { value: AMP },
+        uKnoll: { value: KNOLL },
+        uKnollR: { value: KNOLL_R },
+        uChargeA: chargeA,
+        uChargeB: chargeB,
+      },
+    });
+    this.charge = new THREE.Points(this.chargeGeometry(settings), this.chargeMat);
+    this.charge.frustumCulled = false;
+    this.charge.renderOrder = 1;
+    this.group.add(this.charge);
 
     /* --- motes ------------------------------------------------------- */
     this.moteTex = makeMoteTexture();
@@ -844,6 +1014,33 @@ export class LandScene implements StageScene {
       Math.min(n, this.availableFronds);
   }
 
+  /**
+   * Seeds for the charge. Allocated once at MAX_CHARGE and drawn with a range,
+   * so changing tier never reallocates and the land — the first screen on a
+   * phone — pays for this exactly once.
+   */
+  private chargeGeometry(settings: TierSettings): THREE.BufferGeometry {
+    const pos = new Float32Array(MAX_CHARGE * 3);
+    const phase = new Float32Array(MAX_CHARGE);
+    const scale = new Float32Array(MAX_CHARGE);
+    const rnd = mulberry32(0x3a17e);
+    for (let i = 0; i < MAX_CHARGE; i++) {
+      const a = rnd() * Math.PI * 2;
+      const r = 12 + Math.pow(rnd(), 0.55) * 126;
+      pos[i * 3] = Math.cos(a) * r;
+      pos[i * 3 + 1] = 0;
+      pos[i * 3 + 2] = -55 + Math.sin(a) * r;
+      phase[i] = rnd();
+      scale[i] = 0.55 + rnd() * 0.75;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('aPhase', new THREE.BufferAttribute(phase, 1));
+    geo.setAttribute('aScale', new THREE.BufferAttribute(scale, 1));
+    geo.setDrawRange(0, chargeCount(settings));
+    return geo;
+  }
+
   private buildMotes(settings: TierSettings): THREE.Points {
     const pos = new Float32Array(MAX_MOTES * 3);
     const rnd = mulberry32(0x9c3f1);
@@ -881,6 +1078,10 @@ export class LandScene implements StageScene {
   update(elapsed: number, _delta: number, scroll: number, ctx: SceneContext): void {
     const t = ctx.reducedMotion ? 0 : elapsed;
     this.uTime.value = t;
+    // Latent, then a little less latent as the visitor comes down toward the
+    // land. Derived from scroll rather than accumulated, so scrolling back up
+    // quietens the ground again instead of leaving it charged.
+    this.uCharge.value = 0.5 + 0.5 * Math.min(Math.max(scroll, 0), 1);
     this.syncResolution(ctx);
 
     // Scroll flies the camera down toward the land and tilts it up. This is
@@ -933,6 +1134,13 @@ export class LandScene implements StageScene {
       old.dispose();
     }
 
+    const cSteps = String(chargeSteps(settings));
+    if (this.chargeMat.defines.CHARGE_STEPS !== cSteps) {
+      this.chargeMat.defines.CHARGE_STEPS = cSteps;
+      this.chargeMat.needsUpdate = true;
+    }
+    this.charge.geometry.setDrawRange(0, chargeCount(settings));
+
     this.setFrondCount(frondCount(settings));
     this.motes.geometry.setDrawRange(0, Math.min(settings.particleCount, MAX_MOTES));
   }
@@ -947,6 +1155,10 @@ export class LandScene implements StageScene {
     this.camZ = narrow ? 26 : 34;
     this.lookY = narrow ? -10 : -2;
     this.lookZ = narrow ? -34 : -40;
+
+    // Portrait holds the same ground from a wider lens, so a spark sized for
+    // the desktop framing loses about a third of its screen area. Give it back.
+    this.uPointScale.value = narrow ? 1.45 : 1.0;
 
     this.uFocus.value.set(narrow ? FOCUS_X_NARROW : FOCUS_X_WIDE, FOCUS_Z);
     this.growth.position.set(this.uFocus.value.x, 0, this.uFocus.value.y);
@@ -965,6 +1177,7 @@ export class LandScene implements StageScene {
     this.mist.geometry.dispose();
     this.glow.geometry.dispose();
     this.motes.geometry.dispose();
+    this.charge.geometry.dispose();
 
     this.backdropMat.dispose();
     this.groundMat.dispose();
@@ -973,6 +1186,7 @@ export class LandScene implements StageScene {
     this.glowMat.dispose();
     this.moteMat.dispose();
     this.moteTex.dispose();
+    this.chargeMat.dispose();
 
     this.group.removeFromParent();
     this.group.clear();
