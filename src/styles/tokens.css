@@ -138,8 +138,13 @@
      Google Sans Code, Google Sans Flex, Inter, Newsreader and Caveat are
      the faces the reference loads from Google Fonts; those are exact. */
   --f-mono:    'PP Supply Mono', 'PP Supply Sans', 'Google Sans Code', ui-monospace, 'SF Mono', monospace;
-  --f-sans:    'PP Supply Sans', 'Google Sans Flex', Inter, system-ui, -apple-system, sans-serif;
-  --f-display: 'STK Bureau Serif', 'Bodoni Moda', Didot, 'Times New Roman', serif;
+  --f-sans:    Ratch, 'Space Grotesk', 'Google Sans Flex', Inter, system-ui, -apple-system, sans-serif;
+  /* Ratch is a variable geometric grotesk, so the stand-in is one too.
+     Space Grotesk is the closest free face by genre, and both read far better
+     on screen than the didone this replaces. */
+  --f-display: Ratch, 'Space Grotesk', 'Archivo', system-ui, sans-serif;
+  /* The didone is kept for the rare editorial moment that wants it. */
+  --f-didone:  'STK Bureau Serif', 'Bodoni Moda', Didot, serif;
   --f-script:  'Pinyon Script', 'Bodoni Moda', cursive;
   /* The reference's editorial serif, used verbatim. */
   --f-editorial: Newsreader, Georgia, serif;
@@ -173,7 +178,7 @@
      is normal and its .scroll-indicator-label is an explicit 0. Ours at -0.035em
      was invented. Pulled most of the way back — a didone at 100px still wants a
      hair of tightening that a grotesque does not. */
-  --ls-display: -0.015em;
+  --ls-display: -0.028em;
   --t-script:  clamp(3.4rem, 1.2rem + 8.4vw, 9rem);
 
   /* Its UI weights: 400 for reading, 500 for every chip and menu item

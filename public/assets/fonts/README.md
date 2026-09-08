@@ -12,9 +12,18 @@ On Vercel, adding the files is a commit, which triggers a rebuild anyway.
 
 | Filename to drop in | Face | Where to buy |
 |---|---|---|
+| `Ratch-Variable.woff2` | **Ratch** — the primary face | youworkforthem.com/font/T29210/ratch |
+| `Ratch-Regular.woff2` / `-Medium` / `-Bold` | Ratch static cuts, if the licence has no variable file | as above |
 | `PPSupplyMono-Regular.otf` | PP Supply Mono | pangrampangram.com |
 | `PPSupplySans-Regular.otf` | PP Supply Sans | pangrampangram.com |
 | `STKBureau-SerifBook.otf` | STK Bureau Serif | the foundry that licenses Bureau Serif |
+
+**Ratch is the one that matters most.** It is now first in both the display
+and the body stack, so dropping it in changes the whole site's voice. It is a
+variable geometric grotesk in seven weights (Thin to Black) by Roman
+Melikhov. Convert whatever the licence ships to `.woff2` — a variable file
+alone is enough, and is preferred; the static entries are only there in case
+the licence has no variable cut.
 
 Buy a **web** licence, not just desktop — a desktop licence does not cover
 serving the file from a website. Web licences are usually sold by monthly
@@ -34,10 +43,12 @@ already match:
 
 ## What the stand-ins are
 
-Until the licensed files land, these carry the display voice. Both are free
-and chosen for contrast and register rather than name:
+Until the licensed files land, these carry the voice. All free, and chosen by
+genre rather than by name:
 
-- **Bodoni Moda** stands in for STK Bureau Serif — high-contrast didone
+- **Space Grotesk** stands in for Ratch — the closest free geometric grotesk,
+  and the reason the site currently reads as a grotesk rather than a didone
+- **Bodoni Moda** is kept on `--f-didone` for editorial moments only
 - **Pinyon Script** stands in for the reference's formal script face
 
 ## Checking it worked
@@ -45,7 +56,8 @@ and chosen for contrast and register rather than name:
 After dropping the files in, load any page and run in the console:
 
 ```js
-document.fonts.check("16px 'PP Supply Mono'")     // true once loaded
+document.fonts.check("16px Ratch")                // the important one
+document.fonts.check("16px 'PP Supply Mono'")
 document.fonts.check("16px 'STK Bureau Serif'")
 ```
 

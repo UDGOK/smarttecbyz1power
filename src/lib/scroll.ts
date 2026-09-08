@@ -35,7 +35,12 @@
 
 /** The reference's scroll + rig configuration, verbatim. */
 export const SCROLL_CONFIG = {
-  SCROLL_LERP: 0.075,
+  /**
+   * Raised from the reference's 0.075. Theirs damps a short stage; ours damps
+   * a longer one, and at 0.075 a fast scroll visibly lagged the input — the
+   * glide became a delay. 0.13 keeps the ease and drops the wait.
+   */
+  SCROLL_LERP: 0.13,
   CAMERA_LERP: 0.08,
   SCROLL_VELOCITY_SMOOTHING: 0.1,
   CAMERA_RIG: {
@@ -50,6 +55,19 @@ export const SCROLL_CONFIG = {
 export const MAX_DELTA = 500;
 /** …then multiplied by this into `targetScrollPos`. */
 export const DELTA_SCALE = 35;
+
+/**
+ * Fast input has to cover more ground than slow input, or a long stage feels
+ * like wading. A flick and a nudge both arrive as wheel deltas; without this
+ * they differ only in how many events fire, and the damping smears the
+ * difference away. The boost is applied to the delta, not to the damping, so
+ * precision at a crawl is untouched.
+ */
+export const BOOST_MAX = 3.4;
+/** Input rate, in raw delta units per second, at which the boost is at full. */
+export const BOOST_REF = 2600;
+/** How quickly the measured input rate decays once the flick stops. */
+const RATE_TC = 0.12;
 /** Closer than this and we snap, which kills the asymptotic tail. */
 const SNAP_EPSILON = 0.5;
 
@@ -133,6 +151,9 @@ export class ScrollManager {
   private _progress = 0;
   private _velocity = 0;
   private _positionVelocity = 0;
+  /** Smoothed input rate, delta units per second — drives the fast-scroll boost. */
+  private _inputRate = 0;
+  private _lastInputAt = 0;
 
   private readonly _smoothSpeed: number;
   private readonly _velocitySpeed: number;
@@ -358,7 +379,20 @@ export class ScrollManager {
 
   /** Accepts a raw pointer delta in the same units a wheel reports. */
   private applyDelta(rawDelta: number): void {
-    const d = clamp(rawDelta, -MAX_DELTA, MAX_DELTA) * DELTA_SCALE;
+    const now = performance.now();
+    const gap = this._lastInputAt > 0 ? Math.min(0.25, (now - this._lastInputAt) / 1000) : 0.016;
+    this._lastInputAt = now;
+
+    // Rate is measured in delta units per second, so it means the same thing
+    // to a 120Hz trackpad emitting small deltas and a wheel emitting large
+    // ones — the thing that differs between a flick and a nudge is the rate,
+    // not the event count.
+    const instantRate = Math.abs(rawDelta) / Math.max(gap, 0.004);
+    const k = 1 - Math.exp(-gap / RATE_TC);
+    this._inputRate += (instantRate - this._inputRate) * k;
+
+    const boost = 1 + Math.min(BOOST_MAX - 1, this._inputRate / BOOST_REF);
+    const d = clamp(rawDelta, -MAX_DELTA, MAX_DELTA) * DELTA_SCALE * boost;
     this.targetScrollPos = clamp(this.targetScrollPos + d, this.min, this.max);
     // With reduced motion there is no glide: the two positions move as one.
     if (this._reducedMotion) this.scrollPos = this.targetScrollPos;

@@ -12,9 +12,16 @@ import '../styles/global.css';
  * time. Declaring them unconditionally would 404 on every page view.
  */
 const LICENSED_FACES = [
-  { family: 'PP Supply Mono', file: 'PPSupplyMono-Regular.otf' },
-  { family: 'PP Supply Sans', file: 'PPSupplySans-Regular.otf' },
-  { family: 'STK Bureau Serif', file: 'STKBureau-SerifBook.otf' },
+  // Ratch is the intended primary face: a variable geometric grotesk. Both a
+  // variable file and static cuts are accepted, so whichever the licence ships
+  // will be picked up.
+  { family: 'Ratch', file: 'Ratch-Variable.woff2', weight: '100 900' },
+  { family: 'Ratch', file: 'Ratch-Regular.woff2', weight: '400' },
+  { family: 'Ratch', file: 'Ratch-Medium.woff2', weight: '500' },
+  { family: 'Ratch', file: 'Ratch-Bold.woff2', weight: '700' },
+  { family: 'PP Supply Mono', file: 'PPSupplyMono-Regular.otf', weight: '400' },
+  { family: 'PP Supply Sans', file: 'PPSupplySans-Regular.otf', weight: '400' },
+  { family: 'STK Bureau Serif', file: 'STKBureau-SerifBook.otf', weight: '400' },
 ] as const;
 
 const fontDir = path.join(process.cwd(), 'public', 'assets', 'fonts');
@@ -41,7 +48,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
     {licensed.length > 0 && (
       <style set:html={licensed
-        .map((f) => `@font-face{font-family:'${f.family}';src:url('/assets/fonts/${f.file}') format('opentype');font-weight:400;font-style:normal;font-display:swap}`)
+        .map((f) => {
+          const fmt = f.file.endsWith('.woff2') ? 'woff2' : 'opentype';
+          return `@font-face{font-family:'${f.family}';src:url('/assets/fonts/${f.file}') format('${fmt}');font-weight:${f.weight};font-style:normal;font-display:swap}`;
+        })
         .join('')} />
     )}
 
@@ -57,7 +67,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
          See public/assets/fonts/README.md. -->
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;0,6..96,700;0,6..96,800;1,6..96,600&family=Caveat:wght@700&family=Google+Sans+Code:wght@400;700&family=Google+Sans+Flex:wght@400;500;600&family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&family=Pinyon+Script&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,600&family=Space+Grotesk:wght@300;400;500;600;700&family=Caveat:wght@700&family=Google+Sans+Code:wght@400;700&family=Google+Sans+Flex:wght@400;500;600&family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&family=Pinyon+Script&display=swap"
     />
   </head>
   <body data-experience={experience ? '' : undefined}>
