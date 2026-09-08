@@ -119,61 +119,126 @@ const COMMON = /* glsl */ `
 /* ------------------------------------------------------------------ *
  * 1. SHATTER — the frame cracks and comes at you.
  *
- * The crack pattern is a voronoi diagram evaluated in log-polar space around
- * the impact point, which is what makes it read as broken glass rather than as
- * cracked mud: cells become radial spokes crossed by concentric rings, exactly
- * the way a pane fails around a strike. Cell borders are the true straight
- * bisectors (Quilez's two-pass border distance), so the shards have flat edges.
+ * The fracture is a voronoi over a POLAR RING GRID centred on the impact: a
+ * stack of concentric rings, each subdivided into its own number of angular
+ * cells. That is the one construction that survives the strike point. A plain
+ * log-polar grid (rings at a constant *ratio* of radius) collapses toward the
+ * centre — cell size goes to zero, the middle of the frame turns into sub-pixel
+ * scribble, and the ring offsets read as a spiral vortex rather than a strike.
+ * Here the ring heights come from `u^0.75`, so they are TALLEST at the impact
+ * and tighten toward the rim, and the angular count grows ring by ring
+ * (4, 9, 14, 19 …) so cells stay roughly square all the way out: big plates
+ * around the strike, finer fragments at the edge of the frame, about 120 shards
+ * in the whole frame rather than several hundred.
  *
- * Three things are driven off `p`, all monotonic and all pure:
- *   - the crack front races outward from the impact (per-cell delay by radius)
- *   - each shard erodes from its own edges once its crack has arrived, opening
- *     a gap onto the destination colour behind
- *   - a second evaluation of the same field in an expanding, falling frame is
- *     the debris flying past the lens
+ * Candidate cells are compared in SCREEN units — angular offsets multiplied by
+ * arc length, radial offsets by ring height — so the border distance that comes
+ * back is a real distance on screen. That is what lets crack weight be
+ * specified in pixels and vary with radius without guesswork.
+ *
+ * Four things are driven off `p`, all monotonic and all pure:
+ *   - the crack front races outward from the impact (per-ring delay), each
+ *     crack arriving thin and faint and thickening as its shard lets go
+ *   - the pulverised core at the strike itself
+ *   - each shard erodes from its own edges, opening a gap onto the destination
+ *   - a separate CARTESIAN voronoi, magnified and falling, is the debris. A
+ *     cartesian field is scale invariant, so blowing it up reads as shards
+ *     coming at the lens; blowing up the polar field would just resubdivide it.
  * ------------------------------------------------------------------ */
 
 const SHATTER_FRAG = /* glsl */ `
   ${COMMON}
 
-  const float SPOKES = 15.0;
-  const float RINGS = 4.2;
+  const float RMAX = 0.95;    // reference radius: roughly the far corner
+  const float RINGS = 6.0;    // rings out to RMAX (the grid continues past it)
+  const float RPOW = 0.75;    // <1 puts the tall rings at the impact
+  const float NBASE = 4.0;    // angular cells in the innermost ring
+  const float NSTEP = 5.0;    // and how many more each ring out
 
-  vec2 logPolar(vec2 q) {
-    return vec2(
-      atan(q.y, q.x) * (SPOKES / TAU),
-      log(max(length(q), 0.02)) * RINGS
-    );
+  float ringCount(float j) { return NBASE + NSTEP * max(j, 0.0); }
+
+  /* Offset from the sample point to the centre of ring cell (kk, jj), in
+     screen units. Every candidate uses the sample's own metric, so the
+     partition is a proper voronoi in the sample's local frame. */
+  vec2 cellVec(float kk, float jj, float n, float a, float v, float arcS, float radS) {
+    float kw = mod(kk, n);
+    vec2 h = hash22(vec2(kw, jj) + uSeed);
+    float da = (kw + 0.28 + 0.44 * h.x) / n - a;
+    da -= floor(da + 0.5);                       // shortest way round the ring
+    float dv = jj + 0.28 + 0.44 * h.y - v;
+    return vec2(da * arcS, dv * radS);
   }
 
-  /* Wrapping the angular index keeps the seam at ±PI invisible. */
-  vec2 cellJitter(vec2 c) {
-    c.x = mod(c.x, SPOKES);
-    return 0.5 + 0.46 * (hash22(c + uSeed) * 2.0 - 1.0);
-  }
-
-  /* x: distance to the nearest straight cell border
+  /* x: distance to the nearest straight cell border, in screen units
      y: per-shard random
-     z: log-radius of the cell centre
-     w: distance to the cell centre                                   */
-  vec4 voro(vec2 x) {
+     z: the shard's ring as a fraction of RINGS — linear in ring index, which
+        is what the departure schedule wants; ring RADIUS is wildly non-linear
+        (ring 3 of 6 sits at 0.49 of the radius) and keying the delay to it
+        empties the middle of the frame far too early
+     w: distance to the cell centre, in screen units                  */
+  vec4 fracture(vec2 q) {
+    float rs = max(length(q), 0.033);
+    float u = rs / RMAX;
+    float a = atan(q.y, q.x) / TAU;
+    float v = pow(u, RPOW) * RINGS;
+    float arcS = TAU * rs;                                  // screen units per turn
+    float radS = pow(u, 1.0 - RPOW) * RMAX / (RPOW * RINGS); // screen units per ring
+    float j0 = floor(v);
+
+    vec2 mr = vec2(0.0);
+    float md = 1e9, mk = 0.0, mj = 0.0, mn = NBASE;
+    for (int dj = -1; dj <= 1; dj++) {
+      float jj = j0 + float(dj);
+      if (jj >= 0.0) {
+        float n = ringCount(jj);
+        float k0 = floor(a * n);
+        for (int dk = -1; dk <= 1; dk++) {
+          float kk = k0 + float(dk);
+          vec2 o = cellVec(kk, jj, n, a, v, arcS, radS);
+          float d = dot(o, o);
+          if (d < md) { md = d; mr = o; mk = kk; mj = jj; mn = n; }
+        }
+      }
+    }
+
+    float border = 1e9;
+    for (int dj = -1; dj <= 1; dj++) {
+      float jj = j0 + float(dj);
+      if (jj >= 0.0) {
+        float n = ringCount(jj);
+        float k0 = floor(a * n);
+        for (int dk = -1; dk <= 1; dk++) {
+          vec2 o = cellVec(k0 + float(dk), jj, n, a, v, arcS, radS);
+          vec2 diff = o - mr;
+          float l = dot(diff, diff);
+          if (l > 1e-8) border = min(border, dot(0.5 * (mr + o), diff * inversesqrt(l)));
+        }
+      }
+    }
+
+    float rnd = hash11(mod(mk, mn) * 7.31 + mj * 23.17 + uSeed * 3.7);
+    return vec4(border, rnd, (mj + 0.5) / RINGS, sqrt(md));
+  }
+
+  /* Plain jittered-grid voronoi, straight borders, for the debris plane. */
+  vec3 chunks(vec2 x) {
     vec2 n = floor(x), f = fract(x);
-    vec2 mg = vec2(0.0), mo = vec2(0.0), mr = vec2(0.0);
+    vec2 mg = vec2(0.0), mr = vec2(0.0);
     float md = 8.0;
     for (int j = -1; j <= 1; j++) {
       for (int i = -1; i <= 1; i++) {
         vec2 g = vec2(float(i), float(j));
-        vec2 o = cellJitter(n + g);
+        vec2 o = 0.5 + 0.42 * (hash22(n + g + uSeed) * 2.0 - 1.0);
         vec2 rv = g + o - f;
         float d = dot(rv, rv);
-        if (d < md) { md = d; mg = g; mo = o; mr = rv; }
+        if (d < md) { md = d; mg = g; mr = rv; }
       }
     }
     float border = 8.0;
     for (int j = -1; j <= 1; j++) {
       for (int i = -1; i <= 1; i++) {
         vec2 g = mg + vec2(float(i), float(j));
-        vec2 o = cellJitter(n + g);
+        vec2 o = 0.5 + 0.42 * (hash22(n + g + uSeed) * 2.0 - 1.0);
         vec2 rv = g + o - f;
         vec2 diff = rv - mr;
         float l = dot(diff, diff);
@@ -181,13 +246,13 @@ const SHATTER_FRAG = /* glsl */ `
       }
     }
     vec2 cell = n + mg;
-    float rnd = hash11(mod(cell.x, SPOKES) * 17.13 + cell.y * 41.71 + uSeed * 5.7);
-    return vec4(border, rnd, cell.y + mo.y, sqrt(md));
+    return vec3(border, hash11(cell.x * 17.13 + cell.y * 41.71 + uSeed * 5.7), sqrt(md));
   }
 
   void main() {
     float p = clamp(uProgress, 0.0, 1.0);
     vec2 q = vec2((vUv.x - uOrigin.x) * uAspect, vUv.y - uOrigin.y);
+    float r = length(q);
 
     vec4 acc = vec4(0.0);
 
@@ -203,62 +268,72 @@ const SHATTER_FRAG = /* glsl */ `
     vec3 glass = uFrom;
 
     if (pane > 0.001) {
-      /* The whole pane drifts a little toward the lens as it lets go. */
-      vec2 pq = q / (1.0 + 0.17 * smoothstep(0.20, 1.0, p));
-      float pr = length(pq);
-      vec4 v = voro(logPolar(pq));
+      vec4 v = fracture(q);
 
-      /* Screen-consistent hairlines: one unit of log-polar space covers
-         ~RINGS/r of the screen, so scale the line width by the inverse. The
-         ceiling matters — without it the cells nearest the impact, which are
-         microscopic on screen, fill with crack. */
-      float lw = clamp(0.0022 * RINGS / max(pr, 0.05), 0.003, 0.055);
+      /* The crack front leaves the impact and runs outward; each shard then
+         lets go a beat later. Ring radius drives both, so a shard never
+         disagrees with itself about when its turn is. */
+      /* Spread the departures right across the range. Erode them all inside
+         the first two thirds and the pane has effectively become the veil by
+         p=0.7 — measured at 92% opaque — which throws the outgoing world away
+         while the visitor is still only halfway through the hold. */
+      float delay = min(v.z * 0.72, 0.58) + v.y * 0.14;
+      float grow = smoothstep(delay, delay + 0.12, p);
+      float fall = smoothstep(delay + 0.10, delay + 0.28, p);
 
-      float cellR = exp(v.z / RINGS);
-      float delay = clamp(cellR * 0.55, 0.0, 0.42) + v.y * 0.10;
-      float crackP = smoothstep(delay, delay + 0.09, p);
-      float fall = smoothstep(delay + 0.08, delay + 0.52, p);
+      /* Crack weight in screen units: heavy where the pane is crushed, a
+         hairline out at the rim, and tapering back to nothing at the moment
+         of arrival so the front reads as a crack running rather than as a
+         line switching on. */
+      float lw = mix(0.0019, 0.0008, smoothstep(0.06, 0.70, r))
+               * (0.45 + 0.40 * grow + 0.35 * fall);
 
-      float erode = fall * 0.62;
-      shard = smoothstep(erode, erode + lw * 2.0, v.x) * pane;
-      crackA = (1.0 - smoothstep(lw * 0.6, lw * 2.0, v.x)) * crackP * pane;
+      float erode = fall * 0.115;
+      shard = smoothstep(erode, erode + 0.004, v.x) * pane;
+      crackA = (1.0 - smoothstep(lw * 0.5, lw * 1.6, v.x))
+             * grow * pane
+             * smoothstep(0.012, 0.050, r);       // no moire in the crushed hub
 
       /* Facet: a soft dome across each shard plus a per-shard bias, so no two
          pieces catch the light the same way. Kept faint — the world has to
          stay legible through the glass until the shards actually leave. */
-      float facet = 0.35 * v.y + 0.65 * (1.0 - clamp(v.w, 0.0, 1.0));
+      float facet = 0.35 * v.y + 0.65 * (1.0 - clamp(v.w / 0.10, 0.0, 1.0));
       glass = mix(lift(uFrom, 0.10), vec3(1.0), 0.05 + 0.30 * facet);
-      tint = shard * smoothstep(0.03, 0.28, p) * (0.05 + 0.30 * fall);
+      tint = shard * smoothstep(0.03, 0.28, p) * (0.04 + 0.19 * fall);
     }
 
-    float gap = (1.0 - shard) * smoothstep(0.16, 0.60, p) * 0.94;
+    float gap = (1.0 - shard) * smoothstep(0.16, 0.72, p) * 0.90;
     layer(acc, uTo, max(veil, gap));
     layer(acc, glass, tint);
-    layer(acc, mix(vec3(1.0), lift(uTo, 0.9), 0.35), crackA * 0.52);
+    layer(acc, mix(vec3(1.0), lift(uTo, 0.9), 0.40), crackA * 0.38);
 
-    /* The strike itself: one bloom out of the impact point, early and brief. */
+    /* The strike: a pulverised core where the wedges converge, and one bloom
+       out of it. Both are what stops the hub reading as aliasing. */
+    float core = smoothstep(0.052, 0.010, r) * smoothstep(0.02, 0.12, p) * pane;
+    layer(acc, mix(vec3(1.0), lift(uTo, 0.9), 0.18), core * 0.60);
+
     float ft = (p - 0.10) / 0.05;
-    float flash = exp(-ft * ft) * smoothstep(0.22, 0.0, length(q));
+    float flash = exp(-ft * ft) * smoothstep(0.22, 0.0, r);
     layer(acc, mix(vec3(1.0), lift(uTo, 0.8), 0.25), flash * 0.50);
 
-    /* --- debris: the same field, magnified and falling --------------- */
+    /* --- debris: a cartesian field, magnified and falling ------------ */
     float dw = smoothstep(0.22, 0.44, p) * (1.0 - smoothstep(0.60, 0.90, p));
     if (dw > 0.002) {
-      /* The debris has to arrive already at a different scale from the pane,
-         or the two voronoi fields sit on top of each other and read as one
-         static web instead of as glass leaving the frame. */
+      /* Big and sparse. A dense debris field just lays a second mosaic over
+         the pane and the two cancel each other out; a third of the cells,
+         each already plate-sized, reads as glass tumbling past the lens. */
+      const float DENS = 9.0;
       float dp = ease(clamp((p - 0.18) / 0.82, 0.0, 1.0));
-      float zoom = mix(0.55, 0.10, dp);
-      vec2 dq = (q + vec2(uParallax.x, uParallax.y - 0.40 * dp * dp)) / zoom;
-      vec4 dv = voro(logPolar(dq) + vec2(3.7, 1.9));
-      float dr = length(dq);
-      float dlw = clamp(0.0026 * RINGS / max(dr, 0.05), 0.003, 0.05);
-      float keep = step(0.40, dv.y);
-      float body = smoothstep(dlw * 1.2, dlw * 5.0, dv.x) * keep;
-      float rim = (1.0 - smoothstep(dlw * 0.7, dlw * 2.4, dv.x)) * keep;
+      float spread = mix(0.70, 3.00, dp);          // screen size of one chunk
+      vec2 dq = q + vec2(uParallax.x, uParallax.y - 0.40 * dp * dp);
+      vec3 dv = chunks(dq * (DENS / spread) + vec2(11.3, 4.7));
+      float dlw = 0.0016 * DENS / spread;          // constant weight on screen
+      float keep = step(0.64, dv.y);
+      float body = smoothstep(dlw * 1.0, dlw * 5.0, dv.x) * keep;
+      float rim = (1.0 - smoothstep(dlw * 0.6, dlw * 2.2, dv.x)) * keep;
       vec3 dcol = mix(lift(uFrom, 0.13), vec3(1.0), 0.06 + 0.40 * dv.y);
-      layer(acc, dcol, body * dw * 0.26);
-      layer(acc, mix(vec3(1.0), lift(uTo, 0.9), 0.22), rim * dw * 0.50);
+      layer(acc, dcol, body * dw * 0.15);
+      layer(acc, mix(vec3(1.0), lift(uTo, 0.9), 0.22), rim * dw * 0.34);
     }
 
     writeOut(acc);
@@ -279,7 +354,11 @@ const TUNNEL_FRAG = /* glsl */ `
 
   void main() {
     float p = clamp(uProgress, 0.0, 1.0);
-    vec2 q = vec2((vUv.x - uOrigin.x) * uAspect, vUv.y - uOrigin.y) - uParallax * 0.35;
+    /* The vanishing point leans toward the strike point but nothing like as
+       far — a corridor whose far end is a third of the way off frame stops
+       reading as a corridor. */
+    vec2 c = mix(vec2(0.5), uOrigin, 0.35);
+    vec2 q = vec2((vUv.x - c.x) * uAspect, vUv.y - c.y) - uParallax * 0.35;
     float rmax = 0.5 * sqrt(1.0 + uAspect * uAspect);
     float r = length(q) / rmax;
     float ang = atan(q.y, q.x);
@@ -504,7 +583,15 @@ export class Transition {
     // direction differ every time, but stay fixed while the ring is scrubbed.
     const seed = Math.random();
     this.uniforms.uSeed.value = seed;
-    this.uniforms.uOrigin.value.set(0.42 + seed * 0.16, 0.48 + hash(seed) * 0.16);
+    // Push the impact well off centre, on a random bearing, so no two
+    // crossings put the strike in the same place. Kept inside the safe area
+    // so the rosette never lands under the chrome in a corner.
+    const bearing = hash(seed) * Math.PI * 2;
+    const spread = 0.20 + hash(seed + 0.5) * 0.11;
+    this.uniforms.uOrigin.value.set(
+      0.5 + Math.cos(bearing) * spread * 1.15,
+      0.5 + Math.sin(bearing) * spread,
+    );
     this.uniforms.uParallax.value.set(0, 0);
     this.uniforms.uProgress.value = 0;
 
