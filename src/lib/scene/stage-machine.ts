@@ -152,20 +152,24 @@ const RACK_FRAG = /* glsl */ `
     col += front * bar * uCyan * 0.85 * load;
 
     // Power draw. A band of current climbing the cabinet as a job lands on it,
-    // clocked off the same per-rack `load` the door LEDs already run from, so
+    // clocked off the same per-rack 'load' the door LEDs already run from, so
     // the busiest cabinets surge most often and hardest. The phase is seeded
     // per rack, which means under reduced motion (uTime pinned at 0) the hall
     // holds a still frame with the surges frozen at forty different heights
     // rather than all forty racks flashing on one line.
     float sPhase = fract(uTime * (0.11 + 0.13 * load) + hash11(vSeed * 5.09));
     float sHead  = sPhase * 1.30 - 0.15;
-    float surge  = smoothstep(0.14, 0.0, abs(y01 - sHead));
+    float surge  = smoothstep(0.075, 0.0, abs(y01 - sHead));
     // Squared for a hard crest, gated at both ends of the sweep so it reads as
     // a discrete event with a gap after it rather than a travelling sine.
     surge *= surge * smoothstep(0.0, 0.10, sPhase) * smoothstep(1.0, 0.86, sPhase);
-    // Capped at ~0.5 of the cyan accent: the crest kisses the 0.62 bloom
-    // threshold this stage is graded at without ever clipping the door white.
-    col += front * surge * load * uCyan * (0.16 + 0.34 * uTraffic);
+    // Ripple at the 42U pitch across the band, so it reads as current finding
+    // the chassis rather than a lamp being panned up the cabinet.
+    surge *= 0.70 + 0.30 * sin(y01 * 264.0 + uTime * 5.0 + vSeed);
+    // Peak add is ~0.25 of the cyan accent on a door sitting near 0.12. Well
+    // under the 0.62 threshold this stage is graded at: the surge is felt as
+    // power moving, and it is the LEDs riding it that actually bloom.
+    col += front * surge * load * uCyan * (0.07 + 0.18 * uTraffic);
 
     // Plinth shadow: the racks should feel heavy where they meet the floor.
     col *= 0.35 + 0.65 * smoothstep(0.0, 0.09, y01);
@@ -262,14 +266,14 @@ const LED_FRAG = /* glsl */ `
     }
 
     // Sympathetic surge. When the cabinet's current pulse sweeps past this
-    // LED's height the row lifts with it — same `load`, same clock and same
+    // LED's height the row lifts with it — same 'load', same clock and same
     // seed as RACK_FRAG, so the door and its lights read as one event instead
-    // of two effects running side by side. This only ever adds to `level`;
+    // of two effects running side by side. This only ever adds to 'level';
     // every light keeps the rate, kind and phase it was built with.
     float rLoad  = 0.42 + 0.58 * hash11(vRack * 7.31);
     float sPhase = fract(uTime * (0.11 + 0.13 * rLoad) + hash11(vRack * 5.09));
     float sHead  = sPhase * 1.30 - 0.15;
-    float surge  = smoothstep(0.16, 0.0, abs(vY01 - sHead));
+    float surge  = smoothstep(0.095, 0.0, abs(vY01 - sHead));
     surge *= surge * smoothstep(0.0, 0.10, sPhase) * smoothstep(1.0, 0.86, sPhase);
     level = min(1.0, level + surge * rLoad * (0.18 + 0.42 * uTraffic));
 
@@ -785,7 +789,7 @@ const FABRIC_VERT = /* glsl */ `
 
     // A dormant instance is thrown outside the frustum whole. This is the
     // cheapest cull there is: no fragment is ever raised for it, which is what
-    // keeps the fill-rate cost of this layer proportional to `uTraffic` on a
+    // keeps the fill-rate cost of this layer proportional to 'uTraffic' on a
     // phone rather than to the instance count.
     if (vGain <= 0.002 || uWorld > 0.94) {
       gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
@@ -830,16 +834,16 @@ const FABRIC_FRAG = /* glsl */ `
       for (int i = 0; i < 2; i++) {
         float fi = float(i);
         float ph = fract(uTime * (0.15 + 0.11 * fi) + vSeed * (3.0 + fi * 7.0));
-        pulse += smoothstep(0.11, 0.0, abs(vS - ph));
+        pulse += smoothstep(0.07, 0.0, abs(vS - ph));
       }
       pulse = min(pulse, 1.0);
       col = mix(uCyan, uIce, min(1.0, pulse * 0.55 + vBurst * 0.8));
-      a   = pow(across, 1.5)
-          * (0.040 + 0.045 * uTraffic
-             + 0.150 * pulse * (0.35 + 0.65 * uTraffic)
-             + 0.420 * vBurst);
+      a   = pow(across, 2.2)
+          * (0.018 + 0.026 * uTraffic
+             + 0.130 * pulse * (0.35 + 0.65 * uTraffic)
+             + 0.400 * vBurst);
       // Only a saturation burst is allowed over the 0.62 bloom threshold.
-      a = min(a, 0.62);
+      a = min(a, 0.60);
     } else {
       // A quantum with a short wake. Hard head, sixth-power falloff: it has to
       // read as one thing arriving, never as a smear of light.
@@ -902,6 +906,35 @@ interface Plan {
   shimmer: boolean;
   fog: number;
   contact: number;
+  /** Luminous quanta on the fabric. Shares `particleCount` with the motes. */
+  packets: number;
+  /** Height tiers of fibre run down each rack face. */
+  faceRuns: number;
+  /** How many segments each face run is broken into. */
+  faceSegs: number;
+  /** Segments of top-of-rack spine per side. */
+  spineSegs: number;
+  /** Cross-aisle links — the GPU-to-GPU hops over the cold aisle. */
+  cross: number;
+  /** Rack-top to spine risers. */
+  risers: number;
+}
+
+/**
+ * One run of fabric. Endpoints are stored as (side, offset) rather than as an
+ * absolute x, so portrait — which pulls the two rows in from 1.80m to 1.26m —
+ * re-solves them without rebuilding anything, and as a landscape/portrait pair
+ * of heights, because on a phone the copy owns the middle of the frame and the
+ * traffic has to be composed into the bands above and below it.
+ */
+interface PathDef {
+  aSide: number; aOff: number; aY: number; aYp: number; aZ: number;
+  bSide: number; bOff: number; bY: number; bYp: number; bZ: number;
+  bow: number; bowP: number;
+  /** Traffic level at which this run wakes: 0 = always lit, 1 = only at full. */
+  rank: number;
+  /** Relative share of the packet budget. */
+  weight: number;
 }
 
 /** Fixed rack dimensions, in metres, because that is what a rack is. */
@@ -922,6 +955,7 @@ export class MachineScene implements StageScene {
   private plan: Plan = {
     racksPerRow: 19, ledRows: 14, hazeSlabs: 10, motes: 660,
     shimmer: true, fog: 1, contact: 1,
+    packets: 440, faceRuns: 3, faceSegs: 2, spineSegs: 2, cross: 8, risers: 4,
   };
 
   /** Everything this stage allocated, so `dispose()` can be exhaustive. */
@@ -935,6 +969,16 @@ export class MachineScene implements StageScene {
   private tubes: THREE.Mesh[] = [];
   private shimmers: THREE.Mesh[] = [];
   private motes: THREE.Points | null = null;
+  /** Fibre runs and the packets on them, in one instanced draw. */
+  private fabric: THREE.InstancedMesh | null = null;
+  private fabricMat: THREE.ShaderMaterial | null = null;
+  private paths: PathDef[] = [];
+  private fabFrom = new Float32Array(0);
+  private fabTo = new Float32Array(0);
+  private fabBow = new Float32Array(0);
+  private fabPathOf = new Int32Array(0);
+  /** Rack seeds, kept so the LEDs can share their cabinet's load and clock. */
+  private rackSeeds = new Float32Array(0);
   private wall: THREE.Mesh | null = null;
   private floorMesh: THREE.Mesh | null = null;
   private ceilMesh: THREE.Mesh | null = null;
@@ -944,6 +988,8 @@ export class MachineScene implements StageScene {
   private worldMix = 0;
   private scroll = 0;
   private time = 0;
+  /** 0..1, read straight off `scroll` every frame. Never accumulated. */
+  private traffic = 0;
 
   // Framing. Portrait tightens the aisle and widens the lens rather than
   // shrinking the desktop composition down to a letterbox.
@@ -982,6 +1028,19 @@ export class MachineScene implements StageScene {
       shimmer: s.fog,
       fog: s.fog ? 1 : 0.45,
       contact: s.shadows ? 1 : 0.45,
+
+      // Packets share `particleCount` with the motes above rather than being
+      // added on top of it: 440 + 660 at HIGH, 210 + 420 at MEDIUM, 64 + 192
+      // at LOW, so the stage never spends more particles than the tier allows.
+      packets: Math.round(s.particleCount * (s.shadows ? 0.40 : s.fog ? 0.30 : 0.20)),
+      // LOW keeps a fibre run high and low on both faces, both spine trunks
+      // and three cross-aisle links — nine runs. It is a thinner fabric, not a
+      // static one: a phone still sees packets crossing the aisle.
+      faceRuns:  s.shadows ? 3 : s.fog ? 2 : 2,
+      faceSegs:  s.shadows ? 2 : s.fog ? 2 : 1,
+      spineSegs: s.shadows ? 2 : s.fog ? 2 : 1,
+      cross:     s.shadows ? 8 : s.fog ? 5 : 4,
+      risers:    s.shadows ? 4 : s.fog ? 3 : 0,
     };
   }
 
@@ -1004,6 +1063,7 @@ export class MachineScene implements StageScene {
     this.buildShimmer();
     this.buildHaze();
     this.buildMotes();
+    this.buildFabric();
     this.layout();
   }
 
@@ -1082,6 +1142,9 @@ export class MachineScene implements StageScene {
       side[i] = row;
       depth[i] = this.plan.racksPerRow > 1 ? idx / (this.plan.racksPerRow - 1) : 0;
     }
+    // Handed to the LEDs so a light and its cabinet resolve the same load and
+    // the same surge clock. Built before buildLeds(), which reads it.
+    this.rackSeeds = seed;
     geo.setAttribute('iSeed', new THREE.InstancedBufferAttribute(seed, 1));
     geo.setAttribute('iSide', new THREE.InstancedBufferAttribute(side, 1));
     geo.setAttribute('iDepth', new THREE.InstancedBufferAttribute(depth, 1));
@@ -1093,6 +1156,7 @@ export class MachineScene implements StageScene {
         uTime: { value: 0 },
         uWorld: { value: 0 },
         uFog: { value: this.plan.fog },
+        uTraffic: { value: 0 },
         uRackH: { value: RACK_H },
         uGraphite: { value: new THREE.Color(PAL.machine) },
         uDeep: { value: new THREE.Color(PAL.deep) },
@@ -1114,6 +1178,11 @@ export class MachineScene implements StageScene {
     const seed = new Float32Array(n);
     const rate = new Float32Array(n);
     const kind = new Float32Array(n);
+    // Which cabinet each light belongs to, and how far up it sits — the two
+    // things the sympathetic power surge needs. Written in the same order
+    // layout() walks, which is rack-major then row then column.
+    const rack = new Float32Array(n);
+    const y01 = new Float32Array(n);
     for (let i = 0; i < n; i++) {
       seed[i] = Math.random();
       // Varied rates are the whole point: a wall of lights on one clock reads
@@ -1121,10 +1190,16 @@ export class MachineScene implements StageScene {
       rate[i] = 0.35 + Math.random() * Math.random() * 5.5;
       const r = Math.random();
       kind[i] = r > 0.985 ? 0.97 : r > 0.58 ? 0.75 : Math.random() * 0.5;
+      const rk = Math.floor(i / perRack);
+      rack[i] = this.rackSeeds[rk] ?? 0;
+      const row = Math.floor((i % perRack) / 2);
+      y01[i] = (0.30 + (row / Math.max(1, this.plan.ledRows - 1)) * 1.42) / RACK_H;
     }
     geo.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seed, 1));
     geo.setAttribute('aRate', new THREE.InstancedBufferAttribute(rate, 1));
     geo.setAttribute('aKind', new THREE.InstancedBufferAttribute(kind, 1));
+    geo.setAttribute('aRack', new THREE.InstancedBufferAttribute(rack, 1));
+    geo.setAttribute('aY01', new THREE.InstancedBufferAttribute(y01, 1));
 
     const m = this.mat(new THREE.ShaderMaterial({
       vertexShader: LED_VERT,
@@ -1136,6 +1211,7 @@ export class MachineScene implements StageScene {
         uTime: { value: 0 },
         uWorld: { value: 0 },
         uFog: { value: this.plan.fog },
+        uTraffic: { value: 0 },
         uCyan: { value: new THREE.Color(PAL.cyan) },
         uIce: { value: new THREE.Color(PAL.ice) },
         uGold: { value: new THREE.Color(PAL.gold) },
@@ -1307,6 +1383,270 @@ export class MachineScene implements StageScene {
     this.root.add(this.motes);
   }
 
+
+  /**
+   * The network fabric. Every run in the hall — the horizontal trays down each
+   * rack face, the top-of-rack spine, the risers up to it and the cross-aisle
+   * links — plus every packet travelling on them, in a single instanced draw.
+   *
+   * Positions are never touched per frame. The CPU writes each instance's two
+   * endpoints once (and again only when portrait re-composes the aisle), and
+   * the vertex shader solves the curve, the streak window and the billboard.
+   */
+  private buildFabric(): void {
+    this.paths = this.makePaths();
+    const fibres = this.paths.length;
+    const packets = this.plan.packets;
+    const n = fibres + packets;
+    if (n === 0) return;
+
+    // 12 segments follow a bowed cross-aisle link cleanly; LOW halves it,
+    // because on a phone the arcs are shorter on screen anyway.
+    const geo = this.track(new THREE.PlaneGeometry(1, 1, this.plan.fog ? 12 : 6, 1));
+
+    const from = new Float32Array(n * 3);
+    const to = new Float32Array(n * 3);
+    const bow = new Float32Array(n);
+    const kind = new Float32Array(n);
+    const phase = new Float32Array(n);
+    const rank = new Float32Array(n);
+    const seed = new Float32Array(n);
+    const pathOf = new Int32Array(n);
+
+    for (let i = 0; i < fibres; i++) {
+      pathOf[i] = i;
+      kind[i] = 0;
+      phase[i] = Math.random();
+      // A run lights before its own traffic does, so the fabric is visible as
+      // structure first and then fills with packets as the visitor descends.
+      rank[i] = (this.paths[i]?.rank ?? 0) * 0.45;
+      seed[i] = Math.random();
+    }
+
+    // Packets are dealt round-robin over a weight-expanded pool: a cross-aisle
+    // link carries more of them than a riser, without any path starving.
+    const pool: number[] = [];
+    for (let i = 0; i < fibres; i++) {
+      const reps = Math.max(1, Math.round((this.paths[i]?.weight ?? 1) * 3));
+      for (let r = 0; r < reps; r++) pool.push(i);
+    }
+    for (let k = 0; k < packets; k++) {
+      const i = fibres + k;
+      const pi = pool.length > 0 ? pool[k % pool.length]! : 0;
+      pathOf[i] = pi;
+      kind[i] = 1;
+      phase[i] = Math.random();
+      // Rank blends the path's own rank with a per-packet roll, so a busy path
+      // gains density smoothly instead of switching on whole.
+      rank[i] = Math.min(0.96, (this.paths[pi]?.rank ?? 0) * 0.7 + Math.random() * 0.86);
+      seed[i] = Math.random();
+    }
+
+    this.fabFrom = from;
+    this.fabTo = to;
+    this.fabBow = bow;
+    this.fabPathOf = pathOf;
+
+    geo.setAttribute('aFrom', new THREE.InstancedBufferAttribute(from, 3));
+    geo.setAttribute('aTo', new THREE.InstancedBufferAttribute(to, 3));
+    geo.setAttribute('aBow', new THREE.InstancedBufferAttribute(bow, 1));
+    geo.setAttribute('aKind', new THREE.InstancedBufferAttribute(kind, 1));
+    geo.setAttribute('aPhase', new THREE.InstancedBufferAttribute(phase, 1));
+    geo.setAttribute('aRank', new THREE.InstancedBufferAttribute(rank, 1));
+    geo.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seed, 1));
+
+    const m = this.mat(new THREE.ShaderMaterial({
+      vertexShader: FABRIC_VERT,
+      fragmentShader: FABRIC_FRAG,
+      transparent: true,
+      depthWrite: false,
+      // Depth-tested, so a packet behind a cabinet is genuinely behind it.
+      blending: THREE.AdditiveBlending,
+      uniforms: {
+        uTime: { value: 0 },
+        uWorld: { value: 0 },
+        uFog: { value: this.plan.fog },
+        uTraffic: { value: 0 },
+        uPx: { value: 0.004 },
+        uNear: { value: 2.20 },
+        uFar: { value: 0.045 },
+        uFibreW: { value: 0.012 },
+        uPacketW: { value: 0.030 },
+        uStreakLen: { value: 0.22 },
+        uSpeed: { value: 2.6 },
+        uCyan: { value: new THREE.Color(PAL.cyan) },
+        uIce: { value: new THREE.Color(PAL.ice) },
+        uGold: { value: new THREE.Color(PAL.gold) },
+      },
+    }));
+    this.fabricMat = m;
+
+    const mesh = new THREE.InstancedMesh(geo, m, n);
+    mesh.frustumCulled = false;
+    // Above the LEDs, below the haze — the fabric is in the room, not on it.
+    mesh.renderOrder = 2;
+    // Every instance is placed from its attributes, so the matrices are all
+    // identity and are written exactly once.
+    const id = new THREE.Matrix4();
+    for (let i = 0; i < n; i++) mesh.setMatrixAt(i, id);
+    mesh.instanceMatrix.needsUpdate = true;
+    this.fabric = mesh;
+    this.root.add(mesh);
+  }
+
+  /**
+   * Where the fabric runs. Heights come in landscape/portrait pairs: on a
+   * phone the headline and lede sit across the middle of the frame, so the
+   * middle tier is lifted clear and the cross-aisle links are split into a low
+   * band and a high band. Nothing is authored in absolute x — endpoints are
+   * (side, offset from the door plane), so portrait's narrower aisle re-solves
+   * them for free.
+   */
+  private makePaths(): PathDef[] {
+    const out: PathDef[] = [];
+    const len = this.corridorLen;
+    const zA = -0.45;
+    const zB = -(len - 0.2);
+    const lerpZ = (t: number) => zA + (zB - zA) * t;
+    const rnd = () => Math.random();
+
+    // Landscape reads top-to-bottom in one frame, so three evenly spread
+    // tiers. Portrait pushes the same three into the near bands the copy
+    // leaves free: low, high, low.
+    const hL = [0.52, 1.08, 1.62];
+    // Measured against the portrait framing (fov 76, eye at 1.46m, aimed 2.4
+    // degrees down): at the distances a face run is actually read from, 0.40
+    // lands under the lede and 1.95 lands over the kicker.
+    const hP = [0.40, 1.95, 0.72];
+
+    // 1. Fibre trays down each rack face, 5cm proud of the doors so they sit
+    //    in front of the LED columns rather than inside them.
+    for (const side of [-1, 1]) {
+      for (let h = 0; h < this.plan.faceRuns; h++) {
+        const y = hL[h % 3]!;
+        const yp = hP[h % 3]!;
+        for (let s = 0; s < this.plan.faceSegs; s++) {
+          const z0 = lerpZ(s / this.plan.faceSegs);
+          const z1 = lerpZ((s + 1) / this.plan.faceSegs);
+          // Alternate the direction so the hall reads as two-way traffic.
+          const fwd = (h + s + (side > 0 ? 1 : 0)) % 2 === 0;
+          out.push({
+            aSide: side, aOff: -0.05, aY: y, aYp: yp, aZ: fwd ? z0 : z1,
+            bSide: side, bOff: -0.05, bY: y, bYp: yp, bZ: fwd ? z1 : z0,
+            bow: 0, bowP: 0,
+            rank: 0.02 + h * 0.02,
+            weight: 1.0,
+          });
+        }
+      }
+    }
+
+    // 2. Top-of-rack spine, outboard of the cabinets and under the coolant
+    //    run. High in both orientations, so it owns the top band on a phone.
+    for (const side of [-1, 1]) {
+      for (let s = 0; s < this.plan.spineSegs; s++) {
+        const z0 = lerpZ(s / this.plan.spineSegs);
+        const z1 = lerpZ((s + 1) / this.plan.spineSegs);
+        const fwd = (s + (side > 0 ? 1 : 0)) % 2 === 0;
+        out.push({
+          aSide: side, aOff: 0.46, aY: 2.72, aYp: 2.72, aZ: fwd ? z0 : z1,
+          bSide: side, bOff: 0.46, bY: 2.72, bYp: 2.72, bZ: fwd ? z1 : z0,
+          bow: 0, bowP: 0,
+          rank: 0.03,
+          weight: 1.2,
+        });
+      }
+    }
+
+    // 3. Cross-aisle links — GPUs on one row talking to GPUs on the other.
+    //    These are the headline: a packet visibly crossing the cold aisle.
+    for (let i = 0; i < this.plan.cross; i++) {
+      const t = (i + 0.5) / Math.max(1, this.plan.cross);
+      const z = lerpZ(t);
+      const dir = i % 2 === 0 ? 1 : -1;
+      const high = i % 2 === 1;
+      out.push({
+        // Landscape spreads the links through the full height of the aisle.
+        // Portrait alternates them between a band under the copy and a band
+        // over it, because on a phone the type owns the middle of the frame
+        // and a link strung across it would only read as noise behind the
+        // headline.
+        aSide: -dir, aOff: -0.04, aY: 0.50 + rnd() * 1.35, aYp: high ? 2.02 + rnd() * 0.42 : 0.26 + rnd() * 0.34, aZ: z,
+        bSide: dir, bOff: -0.04, bY: 0.50 + rnd() * 1.35, bYp: high ? 2.04 + rnd() * 0.40 : 0.28 + rnd() * 0.32, bZ: z + (rnd() - 0.5) * 0.9,
+        bow: 0.16 + rnd() * 0.30,
+        bowP: high ? 0.14 + rnd() * 0.26 : 0.06 + rnd() * 0.14,
+        // The cross-aisle fabric wires itself up as the visitor descends.
+        rank: 0.18 + t * 0.34,
+        weight: 1.6,
+      });
+    }
+
+    // 4. Risers from a rack top up to the spine. Aggregation, and the only
+    //    vertical movement in the hall.
+    for (let i = 0; i < this.plan.risers; i++) {
+      const side = i % 2 === 0 ? -1 : 1;
+      const t = (i + 0.5) / Math.max(1, this.plan.risers);
+      const z = lerpZ(0.12 + t * 0.76);
+      out.push({
+        aSide: side, aOff: 0.20, aY: RACK_H + 0.05, aYp: RACK_H + 0.05, aZ: z,
+        bSide: side, bOff: 0.46, bY: 2.72, bYp: 2.72, bZ: z,
+        bow: 0.04, bowP: 0.04,
+        rank: 0.24 + t * 0.28,
+        weight: 0.6,
+      });
+    }
+
+    return out;
+  }
+
+  /**
+   * Re-solve every endpoint for the current aisle width and orientation.
+   * Runs on build and on reframe only — never per frame — and writes into
+   * buffers allocated once in buildFabric().
+   */
+  private layoutFabric(): void {
+    const mesh = this.fabric;
+    if (!mesh) return;
+    const half = this.aisleHalf;
+    const narrow = this.narrow;
+    const of = this.fabPathOf;
+    const x = (side: number, off: number) => (side === 0 ? off : side * (half + off));
+
+    for (let i = 0; i < of.length; i++) {
+      const p = this.paths[of[i]!];
+      if (!p) continue;
+      const j = i * 3;
+      this.fabFrom[j] = x(p.aSide, p.aOff);
+      this.fabFrom[j + 1] = narrow ? p.aYp : p.aY;
+      this.fabFrom[j + 2] = p.aZ;
+      this.fabTo[j] = x(p.bSide, p.bOff);
+      this.fabTo[j + 1] = narrow ? p.bYp : p.bY;
+      this.fabTo[j + 2] = p.bZ;
+      this.fabBow[i] = narrow ? p.bowP : p.bow;
+    }
+
+    const g = mesh.geometry;
+    (g.getAttribute('aFrom') as THREE.BufferAttribute).needsUpdate = true;
+    (g.getAttribute('aTo') as THREE.BufferAttribute).needsUpdate = true;
+    (g.getAttribute('aBow') as THREE.BufferAttribute).needsUpdate = true;
+
+    const u = this.fabricMat?.uniforms;
+    if (!u) return;
+    // Portrait brings the traffic in toward the lens — that is where it lands
+    // in the bands above and below the type — and pulls it out of the far
+    // distance, which on a phone sits squarely behind the headline.
+    if (u.uNear) u.uNear.value = narrow ? 1.15 : 2.20;
+    if (u.uFar) u.uFar.value = narrow ? 0.075 : 0.045;
+    // LOW draws shorter packets: the same reading for less fill. Portrait
+    // draws them a little larger, because at 390 CSS px a 3cm quantum six
+    // metres away is two pixels of screen and would read as a mote, not as a
+    // packet — the one place where the phone gets *more* than the desktop.
+    const lo = !this.plan.fog;
+    if (u.uStreakLen) u.uStreakLen.value = (lo ? 0.17 : 0.22) * (narrow ? 1.18 : 1.0);
+    if (u.uPacketW) u.uPacketW.value = (lo ? 0.024 : 0.030) * (narrow ? 1.26 : 1.0);
+    if (u.uFibreW) u.uFibreW.value = lo ? 0.010 : 0.012;
+  }
+
   /**
    * Place every instance. Split out from `build` because portrait re-composes
    * by tightening the aisle, and that only means rewriting ~40 matrices — far
@@ -1395,6 +1735,8 @@ export class MachineScene implements StageScene {
       this.shimmers[i]!.position.x = sgn * (half + 0.06);
     }
 
+    this.layoutFabric();
+
     if (this.hallMat) this.hallMat.uniforms.uAisle!.value = half;
     if (this.wallMat) this.wallMat.uniforms.uAisle!.value = half;
   }
@@ -1411,10 +1753,35 @@ export class MachineScene implements StageScene {
     // as a finished, deliberate image, just a still one.
     this.time = ctx.reducedMotion ? 0 : elapsed;
 
+    // Traffic is a pure function of scroll: sparse at the mouth of the aisle,
+    // saturated at the far end, and quiet again the moment the visitor scrolls
+    // back. Nothing here integrates, so there is no state to unwind.
+    const p = this.scroll;
+    // Deliberately not a smoothstep: the hall has to be visibly working from
+    // the moment the visitor enters it, then keep filling all the way down.
+    this.traffic = 0.24 + 0.76 * Math.pow(p, 0.8);
+
     for (const m of this.mats) {
       const u = m.uniforms.uTime;
       if (u) u.value = this.time;
+      const q = m.uniforms.uTraffic;
+      if (q) q.value = this.traffic;
     }
+
+    // View-space size of one drawing-buffer pixel per unit depth, which is
+    // what the fabric ribbons floor their width at. This is deliberately read
+    // from the renderer's own pixel ratio, not window.devicePixelRatio: a
+    // phone reporting DPR 3 is still rendered at the tier cap (1 on LOW), and
+    // the buffer the shader is rasterising into is what decides whether a
+    // hairline aliases.
+    if (this.fabricMat) {
+      const px = this.fabricMat.uniforms.uPx;
+      if (px) {
+        const hPx = Math.max(1, ctx.height * ctx.renderer.getPixelRatio());
+        px.value = (3.4 * Math.tan(ctx.camera.fov * 0.5 * THREE.MathUtils.DEG2RAD)) / hPx;
+      }
+    }
+
     if (this.motes) {
       const mm = this.motes.material as THREE.ShaderMaterial;
       const p = mm.uniforms.uPixel;
@@ -1494,7 +1861,7 @@ export class MachineScene implements StageScene {
   private clearContent(): void {
     // InstancedMesh.dispose() releases the instance matrix buffers, which the
     // geometry/material sweep below does not cover.
-    for (const m of [this.racks, this.leds, this.drops, this.hazeSlabs]) m?.dispose();
+    for (const m of [this.racks, this.leds, this.drops, this.hazeSlabs, this.fabric]) m?.dispose();
     this.root.clear();
     for (const item of this.trash) item.dispose();
     this.trash = [];
@@ -1503,6 +1870,14 @@ export class MachineScene implements StageScene {
     this.leds = null;
     this.drops = null;
     this.hazeSlabs = null;
+    this.fabric = null;
+    this.fabricMat = null;
+    this.paths = [];
+    this.fabFrom = new Float32Array(0);
+    this.fabTo = new Float32Array(0);
+    this.fabBow = new Float32Array(0);
+    this.fabPathOf = new Int32Array(0);
+    this.rackSeeds = new Float32Array(0);
     this.tubes = [];
     this.shimmers = [];
     this.motes = null;
