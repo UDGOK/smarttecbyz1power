@@ -141,9 +141,12 @@ const grain =
     pointer-events: none;
   }
   main > * { pointer-events: auto; }
-  /* The campus is the one stage whose scene needs the pointer more than its
-     copy does. */
-  [data-stage='campus'] { pointer-events: none; }
+  /* These two must stay transparent, and they have to out-specify the rule
+     above: Astro scopes `main > *` as `main[cid] > *[cid]`, which outweighs a
+     plain scoped class or attribute selector. Matching its shape, plus an id,
+     is what actually wins. */
+  main > #campus-ui { pointer-events: none; }
+  main > [data-stage='campus'] { pointer-events: none; }
 
   .stage-scroll { height: var(--scroll-vh, 250vh); }
 
@@ -228,7 +231,9 @@ const grain =
 
   /* ---- Campus explorer ---- */
   .campus-ui { position: fixed; inset: 0; z-index: var(--z-chrome); pointer-events: none; }
-  .campus-hotspots { position: absolute; inset: 0; }
+  /* The hotspot layer covers the whole model, so it must be transparent to
+     the pointer — only the dots themselves take events (global.css). */
+  .campus-hotspots { position: absolute; inset: 0; pointer-events: none; }
 
   .campus-controls {
     position: absolute;
