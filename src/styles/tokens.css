@@ -73,8 +73,12 @@
   --t-ui:    12px;   /* buttons */
   --t-read:  15px;
   --t-lede:  clamp(1.05rem, 0.9rem + 0.6vw, 1.4rem);
-  --t-display: clamp(2.8rem, 1.0rem + 6.6vw, 7.5rem);
-  --t-script:  clamp(3.2rem, 1.2rem + 7.6vw, 8.5rem);
+  --t-display: clamp(2.9rem, 0.8rem + 7.4vw, 8.2rem);
+  /* Display weight. The reference sets its didone heavy and enormous; at that
+     scale a Book weight reads as timid. */
+  --fw-display: 700;
+  --ls-display: -0.035em;
+  --t-script:  clamp(3.4rem, 1.2rem + 8.4vw, 9rem);
 
   --ls-wide: 0.12em;  /* the reference's signature UI tracking */
   --ls-mid:  0.08em;

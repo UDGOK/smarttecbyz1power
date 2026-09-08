@@ -160,7 +160,10 @@ const grain =
     align-items: center;
     text-align: center;
     padding: calc(var(--chrome-inset) * 6) var(--s-5) 150px;
-    max-width: 78ch;
+    /* Wide enough that each authored line of the headline stays on one line
+       at the new display size — otherwise the type sets itself and the
+       intended line breaks are lost. */
+    max-width: min(94vw, 1400px);
     margin: 0 auto;
     will-change: transform, opacity;
   }
@@ -188,17 +191,17 @@ const grain =
     margin: 0 0 var(--s-6);
     font-family: var(--f-display);
     font-optical-sizing: auto;
-    font-weight: 400;
+    font-weight: var(--fw-display);
     font-size: var(--t-display);
-    line-height: 0.92;
-    letter-spacing: -0.025em;
+    line-height: 0.88;
+    letter-spacing: var(--ls-display);
     color: var(--chrome-fg-loud);
     text-wrap: balance;
   }
 
   .stage-panel__lede {
     margin: 0 auto;
-    max-width: 52ch;
+    max-width: 54ch;
     font-size: var(--t-lede);
     line-height: 1.5;
     color: var(--chrome-fg);
