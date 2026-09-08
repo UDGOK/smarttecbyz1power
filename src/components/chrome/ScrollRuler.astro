@@ -1,21 +1,60 @@
 ---
 import { stages } from '../../data/site';
+
+/**
+ * Scroll ruler — 300x60, pinned top-centre.
+ *
+ * boot.ts owns `.scroll-ruler-track`'s transform (62px per stage), so the
+ * geometry below is built to match: eight ticks + seven 7px gaps + 5px of
+ * padding is exactly 62px, which puts a major tick under the indicator at
+ * every stage boundary. Three pad segments either side keep the rail full
+ * at both ends of the journey.
+ *
+ * Hover (or keyboard focus) trades the tick rail for jump-to-stage buttons.
+ * Styles live in src/styles/chrome.css.
+ */
+
+const TICKS_PER_SEGMENT = 8;
+const PAD_SEGMENTS = 3;
+const ticks = Array.from({ length: TICKS_PER_SEGMENT });
+const pads = Array.from({ length: PAD_SEGMENTS });
 ---
-<div class="scroll-ruler" role="group" aria-label="Stage navigation">
-  <div class="scroll-ruler-track" aria-hidden="true">
-    {stages.map((s) => (
-      <div class="ruler-segment" data-stage={s.id}>
-        {Array.from({ length: 12 }).map((_, i) => (
-          <span class={`ruler-tick ${i === 0 ? 'major' : 'minor'}`} />
-        ))}
-      </div>
-    ))}
+<div class="scroll-ruler" role="group" aria-label="Scroll position and stage navigation">
+  <div class="scroll-ruler-rail" aria-hidden="true">
+    <div class="scroll-ruler-track">
+      {pads.map(() => (
+        <div class="ruler-segment ruler-segment--pad">
+          {ticks.map((_, i) => <span class={`ruler-tick ${i === 0 ? 'major' : 'minor'}`} />)}
+        </div>
+      ))}
+      {stages.map((s) => (
+        <div class="ruler-segment" data-stage={s.id}>
+          {ticks.map((_, i) => <span class={`ruler-tick ${i === 0 ? 'major' : 'minor'}`} />)}
+        </div>
+      ))}
+      {pads.map(() => (
+        <div class="ruler-segment ruler-segment--pad">
+          {ticks.map((_, i) => <span class={`ruler-tick ${i === 0 ? 'major' : 'minor'}`} />)}
+        </div>
+      ))}
+    </div>
   </div>
+
   <div class="scroll-ruler-indicator" aria-hidden="true"></div>
-  <output class="scroll-ruler-readout mono-label" id="ruler-readout" aria-live="polite">-100 BP</output>
-  <nav class="scroll-ruler-nav">
-    {stages.map((s) => (
-      <button type="button" class="scroll-ruler-nav-btn" data-goto={s.id} aria-label={`Go to stage ${s.ruler}`}>
+
+  <output class="scroll-ruler-readout mono-label" id="ruler-readout" aria-live="polite">{stages[0].ruler}</output>
+
+  <nav class="scroll-ruler-nav" aria-label="Jump to stage">
+    {stages.map((s, i) => (
+      <button
+        type="button"
+        class="scroll-ruler-nav-btn"
+        data-goto={s.id}
+        data-cursor="action"
+        aria-current="false"
+        aria-label={`Jump to stage ${i + 1} of ${stages.length} — ${s.kicker}`}
+        style={`--i: ${i}`}
+      >
         <span class="scroll-ruler-nav-line" aria-hidden="true"></span>
         <span class="scroll-ruler-nav-label">{s.ruler}</span>
       </button>
@@ -23,103 +62,48 @@ import { stages } from '../../data/site';
   </nav>
 </div>
 
-<style>
-  .scroll-ruler {
-    position: fixed;
-    top: var(--chrome-inset);
-    left: 50%;
-    transform: translateX(-50%);
-    width: var(--ruler-w);
-    height: var(--ruler-h);
-    z-index: var(--z-chrome);
-    pointer-events: auto;
-    -webkit-mask-image: linear-gradient(90deg, #0000 0%, #000 8%, #000 92%, #0000 100%);
-    mask-image: linear-gradient(90deg, #0000 0%, #000 8%, #000 92%, #0000 100%);
-  }
-  .scroll-ruler-track {
-    position: absolute;
-    inset: 0 auto auto 0;
-    display: flex;
-    height: 18px;
-    will-change: transform;
-  }
-  .ruler-segment { display: flex; gap: 10px; padding-right: 10px; }
-  .ruler-tick { width: 1px; background: var(--chrome-line); opacity: 0.55; }
-  .ruler-tick.minor { height: 6px; }
-  .ruler-tick.major { height: 14px; opacity: 0.9; }
+<script>
+  /**
+   * Velocity readout for the indicator.
+   *
+   * boot.ts already writes the track's translateX once per scroll frame, so
+   * the cheapest honest source of scroll speed is the delta on that inline
+   * transform — no second scroll listener, no layout read. The value lands on
+   * --v, which chrome.css uses to stretch the indicator and bloom its smear.
+   */
+  const ruler = document.querySelector<HTMLElement>('.scroll-ruler');
+  const track = document.querySelector<HTMLElement>('.scroll-ruler-track');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  .scroll-ruler-indicator {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 2px;
-    height: 18px;
-    background: var(--chrome-fg-loud);
-    transition: background var(--d-base);
-  }
-  .scroll-ruler-readout {
-    position: absolute;
-    top: 26px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: var(--chrome-fg);
-    white-space: nowrap;
-  }
+  if (ruler && track && !reduced) {
+    const readX = (): number => {
+      const m = /-?[\d.]+/.exec(track.style.transform);
+      return m ? parseFloat(m[0]) : 0;
+    };
 
-  /* The tick track and the jump buttons occupy the same space and swap on hover. */
-  .scroll-ruler-nav {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 26px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s;
-  }
-  .scroll-ruler:hover .scroll-ruler-nav,
-  .scroll-ruler:focus-within .scroll-ruler-nav { opacity: 1; pointer-events: auto; }
-  .scroll-ruler:hover .scroll-ruler-track,
-  .scroll-ruler:focus-within .scroll-ruler-track { opacity: 0; }
-  .scroll-ruler-track { transition: opacity 0.25s; }
+    let last = readX();
+    let v = 0;
+    let written = '';
 
-  .scroll-ruler-nav-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 0 2px;
-    margin: 0;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-family: var(--f-mono);
-    font-size: var(--t-micro);
-    letter-spacing: var(--ls-wide);
-    text-transform: uppercase;
-    color: var(--chrome-fg);
-    transition: color var(--d-fast);
-  }
-  .scroll-ruler-nav-btn:hover { color: var(--chrome-fg-loud); }
-  .scroll-ruler-nav-line {
-    width: 28px;
-    height: 1px;
-    background: var(--chrome-line);
-    transition: width var(--d-fast), background var(--d-fast), height var(--d-fast);
-  }
-  .scroll-ruler-nav-btn:hover .scroll-ruler-nav-line,
-  .scroll-ruler-nav-btn[aria-current='true'] .scroll-ruler-nav-line {
-    width: 40px;
-    height: 2px;
-    background: var(--chrome-fg-loud);
-  }
+    const tick = (): void => {
+      const now = readX();
+      const delta = Math.abs(now - last);
+      last = now;
 
-  @media (max-width: 640px) {
-    /* Leave the badge and brandmark their corners rather than overlapping them. */
-    .scroll-ruler { width: 150px; }
-    .scroll-ruler-nav { gap: 10px; }
-    .scroll-ruler-nav-line { width: 16px; }
+      // ~6px of track in one frame is a hard flick.
+      const target = Math.min(1, delta / 6);
+      // Rise fast, fall slow: the smear should trail the movement, not lead it.
+      v += (target - v) * (target > v ? 0.55 : 0.11);
+      if (v < 0.004) v = 0;
+
+      const out = v.toFixed(3);
+      if (out !== written) {
+        written = out;
+        ruler.style.setProperty('--v', out);
+      }
+      requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
   }
-</style>
+</script>

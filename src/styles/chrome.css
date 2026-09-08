@@ -2,4 +2,907 @@
    Chrome layer styles — ruler, badge, brandmark, capture bar,
    custom cursor. Owned alongside the components in
    src/components/chrome/ and src/lib/cursor.ts.
+
+   Two rules hold throughout this file:
+
+   1. Only transform and opacity are animated. Where the reference
+      grows a rule from 28px to 40px, we scale a 40px rule instead —
+      same picture, no layout pass over a live WebGL frame.
+   2. Colour comes from the --chrome-* tokens, which [data-chrome='dark']
+      flips in one place (tokens.css) for the light stages. Nothing
+      below hard-codes a palette value; the few derived surfaces are
+      mixed from tokens so a palette change carries through.
+
+   These are global rather than Astro-scoped because several of the
+   nodes below (the cursor, the odometer reels) are created at runtime
+   and would never carry a scope hash.
    ============================================================ */
+
+:root {
+  /* Derived chrome surfaces, mixed from palette tokens. */
+  --chrome-shadow:      0 10px 34px var(--k-30);
+  --chrome-shadow-lift: 0 18px 54px var(--k-40);
+
+  --paper:        var(--c-white);
+  --paper-sunk:   color-mix(in srgb, var(--c-carbon) 7%,  var(--c-white));
+  --paper-sunk-2: color-mix(in srgb, var(--c-carbon) 13%, var(--c-white));
+  --paper-line:   color-mix(in srgb, var(--c-carbon) 13%, transparent);
+  --paper-quiet:  color-mix(in srgb, var(--c-carbon) 42%, var(--c-white));
+  --ink-hover:    color-mix(in srgb, var(--c-white) 12%,  var(--c-carbon));
+  --signal-wash:  color-mix(in srgb, var(--c-signal) 12%, transparent);
+  /* The capture pill is white in both polarities, so its focus ring needs a
+     colour that clears 3:1 against white — signal green does not. */
+  --focus-edge:   var(--c-moss);
+
+  --e-spring: cubic-bezier(0.18, 1.25, 0.4, 1);
+
+  /* One ruler segment is exactly one stage of scroll: boot.ts translates
+     the track by 62px per stage, so a major tick lands under the
+     indicator at every stage boundary. */
+  --seg-w: 62px;
+  --seg-lead: 3;   /* pad segments rendered either side of the five stages */
+}
+
+/* ============================================================
+   1. Custom cursor
+   ------------------------------------------------------------
+   Three layers that share one position: a lagging velocity-stretched
+   ring, an instant dot, and a blurred trail whose opacity is the
+   speed readout. State lives in one attribute on the root so a state
+   change is a single DOM write per move.
+   ============================================================ */
+
+.cur {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s var(--e-out);
+  /* Velocity, written by cursor.ts. --cv is 0..1 speed. */
+  --cv: 0;
+}
+.cur.is-live { opacity: 1; }
+.cur.is-away { opacity: 0; }
+
+.cur__trail,
+.cur__ring,
+.cur__dot,
+.cur__caret {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+}
+
+/* --- trail: the smear that only exists while you are moving --- */
+.cur__trail {
+  width: 0;
+  height: 0;
+}
+.cur__trail::before {
+  content: '';
+  position: absolute;
+  left: -19px;
+  top: -19px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--chrome-fg-loud);
+  filter: blur(5px);
+  opacity: calc(var(--cv) * 0.45);
+}
+
+/* --- ring --- */
+.cur__ring { width: 0; height: 0; }
+
+.cur__ring-state {
+  position: absolute;
+  left: -22px;
+  top: -22px;
+  width: 44px;
+  height: 44px;
+  transform: scale(0.68);
+  transition: transform 0.3s var(--e-spring);
+}
+.cur__ring-stretch {
+  position: absolute;
+  inset: 0;
+  /* rotate + squash along the direction of travel, written per frame */
+}
+.cur__ring-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.cur__ring-circle,
+.cur__ring-arc {
+  fill: none;
+  stroke: var(--chrome-fg-loud);
+  stroke-width: 1;
+}
+.cur__ring-circle {
+  opacity: 0.55;
+  transition: opacity 0.25s var(--e-out);
+}
+.cur__ring-arc {
+  stroke-dasharray: 2.5 8;
+  stroke-linecap: round;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 0.25s var(--e-out);
+}
+.cur__ring-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--signal-wash);
+  opacity: 0;
+  transition: opacity 0.25s var(--e-out);
+}
+
+/* --- dot and caret --- */
+.cur__dot {
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: var(--chrome-fg-loud);
+  transition: transform 0.28s var(--e-spring), opacity 0.2s var(--e-out);
+}
+.cur__caret { width: 0; height: 0; }
+.cur__caret-bar {
+  position: absolute;
+  left: -1px;
+  top: -12px;
+  width: 2px;
+  height: 24px;
+  border-radius: 1px;
+  background: var(--chrome-fg-loud);
+  opacity: 0;
+  transform: scaleY(0.4);
+  transition: transform 0.24s var(--e-spring), opacity 0.16s linear;
+}
+
+/* --- glyph layer: unrotated, unstretched, one visible at a time --- */
+.cur__glyphs {
+  position: absolute;
+  left: -13px;
+  top: -13px;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  color: var(--chrome-fg-loud);
+}
+.cur__glyph {
+  grid-area: 1 / 1;
+  display: flex;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: transform 0.26s var(--e-spring), opacity 0.2s var(--e-out);
+}
+
+/* ---- states ---- */
+
+/* default: quiet ring + dot, already set above */
+
+/* action — links, buttons, controls */
+.cur[data-state='action'] .cur__ring-state { transform: scale(0.52); }
+.cur[data-state='action'] .cur__ring-circle { opacity: 1; stroke: var(--c-signal); }
+[data-chrome='dark'] .cur[data-state='action'] .cur__ring-circle { stroke: var(--c-moss); }
+.cur[data-state='action'] .cur__ring-fill { opacity: 1; }
+.cur[data-state='action'] .cur__dot { transform: scale(1.7); }
+
+/* text — inputs and editable regions */
+.cur[data-state='text'] .cur__ring-state { transform: scale(0.2); }
+.cur[data-state='text'] .cur__ring-circle { opacity: 0; }
+.cur[data-state='text'] .cur__dot { opacity: 0; transform: scale(0.2); }
+.cur[data-state='text'] .cur__caret-bar {
+  opacity: 1;
+  transform: scaleY(1);
+  animation: cur-blink 1.15s steps(1) infinite;
+}
+.cur[data-state='text'] .cur__trail::before { opacity: 0; }
+
+/* draw — the entry gate, where the gesture is the brand */
+.cur[data-state='draw'] .cur__ring-state { transform: scale(1.5); }
+.cur[data-state='draw'] .cur__ring-circle { opacity: 0.22; }
+.cur[data-state='draw'] .cur__ring-arc {
+  opacity: 0.9;
+  animation: cur-spin 7s linear infinite;
+}
+.cur[data-state='draw'] .cur__dot { transform: scale(1.5); }
+.cur[data-state='draw'] .cur__glyph[data-glyph='draw'] { opacity: 1; transform: scale(1); }
+
+/* grab / grabbing — the campus model */
+.cur[data-state='grab'] .cur__ring-state { transform: scale(0.86); }
+.cur[data-state='grab'] .cur__ring-circle { opacity: 0.85; }
+.cur[data-state='grab'] .cur__dot { opacity: 0; }
+.cur[data-state='grab'] .cur__glyph[data-glyph='grab'] { opacity: 1; transform: scale(1); }
+
+.cur[data-state='grabbing'] .cur__ring-state { transform: scale(0.62); }
+.cur[data-state='grabbing'] .cur__ring-circle { opacity: 1; }
+.cur[data-state='grabbing'] .cur__dot { opacity: 0; }
+.cur[data-state='grabbing'] .cur__glyph[data-glyph='grabbing'] { opacity: 1; transform: scale(1); }
+
+/* pressed — applies over whatever state is current */
+.cur.is-down .cur__ring-state { transform: scale(0.42); }
+.cur.is-down[data-state='draw'] .cur__ring-state { transform: scale(1.28); }
+.cur.is-down[data-state='action'] .cur__ring-state { transform: scale(0.4); }
+.cur.is-down .cur__dot { transform: scale(2.1); }
+.cur.is-down[data-state='text'] .cur__dot { transform: scale(0.2); }
+
+@keyframes cur-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes cur-blink {
+  0%, 55%  { opacity: 1; }
+  56%,100% { opacity: 0.25; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cur__trail { display: none; }
+  .cur[data-state='draw'] .cur__ring-arc { animation: none; }
+  .cur[data-state='text'] .cur__caret-bar { animation: none; }
+}
+
+/* ============================================================
+   2. Scroll ruler
+   ============================================================ */
+
+.scroll-ruler {
+  position: fixed;
+  top: var(--chrome-inset);
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--ruler-w);
+  height: var(--ruler-h);
+  z-index: var(--z-chrome);
+  pointer-events: auto;
+  --v: 0;              /* scroll velocity, 0..1, written by the component */
+  --open: 0;           /* 1 while the jump nav is showing */
+}
+
+/* The rail is the only masked box, so the jump labels are never
+   clipped by the end fade. The mask does two jobs at once: the
+   reference's end fade, and a falloff that makes ticks near the
+   indicator read stronger than distant ones. */
+.scroll-ruler-rail {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 18px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg,
+    #0000 0%, #00000059 8%, #000 46%, #000 54%, #00000059 92%, #0000 100%);
+  mask-image: linear-gradient(90deg,
+    #0000 0%, #00000059 8%, #000 46%, #000 54%, #00000059 92%, #0000 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  transform-origin: 50% 0;
+  transition: transform 0.42s var(--e-out), opacity 0.3s var(--e-out);
+}
+
+.scroll-ruler-track {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  /* Offset so the first stage's major tick starts under the indicator;
+     boot.ts owns this element's transform, so the offset is a margin. */
+  margin-left: calc(var(--seg-w) * var(--seg-lead) * -1);
+  display: flex;
+  height: 18px;
+  will-change: transform;
+}
+
+.ruler-segment {
+  display: flex;
+  gap: 7px;
+  padding-right: 5px;   /* 8 ticks + 7 gaps + 5 == --seg-w */
+}
+.ruler-tick {
+  width: 1px;
+  background: var(--chrome-line);
+  transform-origin: 50% 0;
+}
+.ruler-tick.minor { height: 6px; opacity: 0.5; }
+.ruler-tick.major { height: 14px; opacity: 0.95; }
+.ruler-segment--pad .ruler-tick { opacity: 0.28; }
+.ruler-segment--pad .ruler-tick.major { opacity: 0.42; }
+
+/* The indicator sits outside the rail so it is never masked. It reads
+   scroll speed: the bar stretches downward and a smear blooms behind it. */
+.scroll-ruler-indicator {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 2px;
+  height: 18px;
+  transform: translateX(-50%);
+  /* Stands down while the jump nav is open — aria-current marks the stage. */
+  opacity: calc(1 - var(--open));
+  transition: opacity 0.24s var(--e-out);
+}
+.scroll-ruler-indicator::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--chrome-fg-loud);
+  transform-origin: 50% 0;
+  transform: scaleY(calc(1 + var(--v) * 0.6)) scaleX(calc(1 + var(--v) * 0.5));
+}
+.scroll-ruler-indicator::after {
+  content: '';
+  position: absolute;
+  left: -14px;
+  right: -14px;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #0000, var(--chrome-fg-loud), #0000);
+  transform: scaleY(0.42);
+  transform-origin: 50% 0;
+  opacity: calc(var(--v) * 0.55);
+}
+
+.scroll-ruler-readout {
+  position: absolute;
+  top: 26px;
+  left: 50%;
+  margin: 0;
+  transform: translateX(-50%) translateY(calc(var(--open) * 3px));
+  color: var(--chrome-fg);
+  white-space: nowrap;
+  opacity: calc(1 - var(--open) * 0.55);
+  transition: transform 0.34s var(--e-out), opacity 0.28s var(--e-out);
+}
+
+/* The tick rail and the jump nav share the same 18px band and trade
+   places on hover: the rail settles back and dims, the labels rise in
+   on a short stagger. */
+.scroll-ruler-nav {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.scroll-ruler:hover,
+.scroll-ruler:focus-within { --open: 1; }
+
+.scroll-ruler:hover .scroll-ruler-rail,
+.scroll-ruler:focus-within .scroll-ruler-rail {
+  opacity: 0;
+  transform: scale(0.9) translateY(-3px);
+}
+.scroll-ruler:hover .scroll-ruler-nav,
+.scroll-ruler:focus-within .scroll-ruler-nav { pointer-events: auto; }
+
+.scroll-ruler-nav-btn {
+  display: flex;
+  flex-direction: column-reverse;   /* rule under the label, as per reference */
+  align-items: center;
+  gap: 7px;
+  padding: 0 2px;
+  margin: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: var(--f-mono);
+  font-size: var(--t-micro);
+  letter-spacing: var(--ls-wide);
+  text-transform: uppercase;
+  color: var(--chrome-fg);
+  opacity: 0;
+  transform: translateY(7px);
+  transition:
+    opacity 0.24s var(--e-out),
+    transform 0.36s var(--e-out),
+    color var(--d-fast);
+}
+.scroll-ruler:hover .scroll-ruler-nav-btn,
+.scroll-ruler:focus-within .scroll-ruler-nav-btn {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: calc(var(--i, 0) * 34ms);
+}
+.scroll-ruler-nav-btn:hover,
+.scroll-ruler-nav-btn:focus-visible,
+.scroll-ruler-nav-btn[aria-current='true'] { color: var(--chrome-fg-loud); }
+.scroll-ruler-nav-btn:focus-visible { border-radius: var(--r-sm); }
+
+/* 40px rule scaled to 28px at rest: the reference's growth, without a
+   layout pass. scaleY(2) on a 1px line is the 2px thickening. */
+.scroll-ruler-nav-line {
+  width: 40px;
+  height: 1px;
+  background: var(--chrome-line);
+  transform: scaleX(0.7);
+  transform-origin: 50% 50%;
+  transition: transform 0.34s var(--e-spring), background var(--d-fast);
+}
+.scroll-ruler-nav-btn:hover .scroll-ruler-nav-line,
+.scroll-ruler-nav-btn:focus-visible .scroll-ruler-nav-line,
+.scroll-ruler-nav-btn[aria-current='true'] .scroll-ruler-nav-line {
+  transform: scaleX(1) scaleY(2);
+  background: var(--chrome-fg-loud);
+}
+.scroll-ruler-nav-label { display: block; }
+
+@media (max-width: 760px) {
+  /* Leave the badge and brandmark their corners rather than overlapping them.
+     Five stage labels will not fit beside them, and the readout already says
+     where you are — so on narrow screens the jump nav keeps only its rules.
+     Each button still carries its full name for assistive tech. */
+  .scroll-ruler { width: 156px; }
+  .scroll-ruler-nav { gap: 10px; }
+  .scroll-ruler-nav-line { width: 20px; }
+  .scroll-ruler-nav-btn { gap: 0; padding: 8px 3px; }
+  .scroll-ruler-nav-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-ruler-nav-btn { transition-delay: 0s !important; }
+}
+
+/* ============================================================
+   3. Power badge
+   ------------------------------------------------------------
+   #power-value stays the element boot.ts writes to; it is the data
+   source. When the component's script is running it hides that node
+   and mirrors it into an odometer, so with no JS the plain number is
+   still on screen.
+   ============================================================ */
+
+.power-badge {
+  position: fixed;
+  top: var(--chrome-inset);
+  right: var(--chrome-inset);
+  z-index: var(--z-chrome);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 15px;
+  border-radius: var(--r-pill);
+  background: var(--chrome-veil);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-family: var(--f-mono);
+  font-size: var(--t-label);
+  line-height: 1.15;
+  letter-spacing: var(--ls-mid);
+  color: var(--chrome-fg-loud);
+  overflow: hidden;   /* contains the top-up sweep */
+}
+
+/* A light rule so the pill still has an edge on the white campus stage. */
+.power-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--chrome-line);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+/* Top-up sweep. global.css owns the pill's scale pop on .is-topup; this
+   is the light that crosses it. */
+.power-badge::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(100deg, #0000 35%, var(--chrome-fg-loud) 50%, #0000 65%);
+  opacity: 0;
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+.power-badge.is-topup::after { animation: badge-sweep 0.75s var(--e-out); }
+@keyframes badge-sweep {
+  0%   { opacity: 0;    transform: translateX(-110%); }
+  30%  { opacity: 0.14; }
+  100% { opacity: 0;    transform: translateX(110%); }
+}
+
+.power-badge__bolt {
+  display: flex;
+  align-self: center;
+  color: var(--c-gold);
+  transform-origin: 50% 50%;
+}
+.power-badge.is-topup .power-badge__bolt { animation: badge-bolt 0.7s var(--e-spring); }
+@keyframes badge-bolt {
+  0%   { transform: scale(1)    rotate(0deg); opacity: 1; }
+  25%  { transform: scale(1.45) rotate(-9deg); opacity: 1; }
+  55%  { transform: scale(0.94) rotate(4deg); opacity: 0.75; }
+  100% { transform: scale(1)    rotate(0deg); opacity: 1; }
+}
+
+.power-badge__value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+/* Odometer. Each column is a 0-9-0 reel translated by a continuous
+   place value, so the ones digit spins and the tens only roll as the
+   ones carries — the way a real counter behaves. */
+.power-badge__odo {
+  display: none;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  --odo-step: 1.15em;
+}
+.power-badge[data-odo='on'] .power-badge__odo { display: flex; }
+.power-badge[data-odo='on'] .power-badge__value {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.odo-col {
+  height: var(--odo-step);
+  overflow: hidden;
+  transform-origin: 50% 50%;
+}
+.odo-col.is-new { animation: odo-enter 0.45s var(--e-spring); }
+@keyframes odo-enter {
+  from { opacity: 0; transform: translateY(0.35em) scale(0.7); }
+  to   { opacity: 1; transform: none; }
+}
+.odo-reel {
+  display: block;
+  will-change: transform;
+  transform: translate3d(0, calc(var(--o, 0) * var(--odo-step) * -1), 0);
+}
+.odo-reel > span {
+  display: block;
+  height: var(--odo-step);
+  line-height: var(--odo-step);
+  text-align: center;
+}
+.power-badge.is-topup .power-badge__odo { animation: badge-kick 0.6s var(--e-spring); }
+@keyframes badge-kick {
+  0%   { transform: translateY(0); }
+  30%  { transform: translateY(-2px); }
+  100% { transform: translateY(0); }
+}
+
+.power-badge__unit { color: var(--chrome-fg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .power-badge::after,
+  .power-badge .power-badge__bolt,
+  .power-badge .power-badge__odo,
+  .odo-col.is-new { animation: none !important; }
+}
+
+@media (max-width: 640px) {
+  .power-badge { padding: 7px 12px; gap: 5px; }
+}
+
+/* ============================================================
+   4. Brandmark
+   ------------------------------------------------------------
+   Alive, not noisy: one very slow dashed orbit and a signal pip that
+   breathes. Hover tightens the orbit and sends a single ping out.
+   ============================================================ */
+
+.brandmark {
+  position: fixed;
+  top: var(--chrome-inset);
+  left: var(--chrome-inset);
+  z-index: var(--z-chrome);
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: var(--chrome-fg-loud);
+  transition: transform 0.5s var(--e-spring), color var(--d-base);
+}
+.brandmark:hover,
+.brandmark:focus-visible { transform: scale(1.06); }
+.brandmark:active { transform: scale(0.94); }
+.brandmark:focus-visible { border-radius: 50%; }
+
+.brandmark__svg {
+  grid-area: 1 / 1;
+  display: block;
+  overflow: visible;
+}
+
+.brandmark__rim {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  opacity: 0.4;
+  transition: opacity var(--d-base);
+}
+.brandmark__orbit {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-dasharray: 3 9;
+  stroke-linecap: round;
+  opacity: 0.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: brand-orbit 34s linear infinite;
+}
+.brandmark:hover .brandmark__orbit { animation-duration: 7s; opacity: 0.85; }
+.brandmark:hover .brandmark__rim { opacity: 0.7; }
+
+.brandmark__glyph {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.5s var(--e-spring);
+}
+.brandmark:hover .brandmark__glyph { transform: rotate(-8deg) scale(1.05); }
+
+/* Signal pip: the site is live. */
+.brandmark__pip {
+  fill: var(--c-signal);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: brand-pip 3.4s var(--e-inout) infinite;
+}
+
+/* A single ping on hover, drawn as a ring that expands and fades. */
+.brandmark__ping {
+  grid-area: 1 / 1;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0;
+  transform: scale(0.7);
+  pointer-events: none;
+}
+.brandmark:hover .brandmark__ping,
+.brandmark:focus-visible .brandmark__ping { animation: brand-ping 1.1s var(--e-out); }
+
+@keyframes brand-orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes brand-pip {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%      { transform: scale(1.55); opacity: 0.45; }
+}
+@keyframes brand-ping {
+  0%   { opacity: 0.5; transform: scale(0.72); }
+  100% { opacity: 0;   transform: scale(1.5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brandmark__orbit,
+  .brandmark__pip,
+  .brandmark__ping { animation: none !important; }
+  .brandmark:hover .brandmark__orbit { opacity: 0.85; }
+}
+
+/* ============================================================
+   5. Capture bar
+   ------------------------------------------------------------
+   The only always-light element on the site. It sits at 0.9 with a
+   wide soft shadow so it reads as glass over a moving scene, and comes
+   to full strength the moment you touch it. On the white campus stage
+   ([data-chrome='dark']) it gains a hairline, or it would dissolve.
+   ============================================================ */
+
+.cta-bar {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  z-index: var(--z-chrome);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(540px, calc(100vw - 32px));
+  padding: 7px 7px 7px 10px;
+  border-radius: var(--r-pill);
+  background: var(--paper);
+  box-shadow: var(--chrome-shadow), 0 0 0 0 #0000;
+  opacity: 0.94;
+  transform: translateX(-50%) translateY(0) scale(1);
+  transition:
+    opacity 0.3s var(--e-out),
+    transform 0.4s var(--e-spring),
+    box-shadow 0.3s var(--e-out);
+}
+.cta-bar:hover { opacity: 1; }
+.cta-bar:hover,
+.cta-bar:focus-within {
+  transform: translateX(-50%) translateY(-2px) scale(1.005);
+  box-shadow: var(--chrome-shadow-lift), 0 0 0 0 #0000;
+}
+.cta-bar:focus-within {
+  opacity: 1;
+  box-shadow: var(--chrome-shadow-lift), 0 0 0 2px var(--focus-edge);
+}
+
+/* On the light stage the pill would vanish into the scene. */
+[data-chrome='dark'] .cta-bar {
+  box-shadow: var(--chrome-shadow), inset 0 0 0 1px var(--paper-line);
+}
+[data-chrome='dark'] .cta-bar:hover,
+[data-chrome='dark'] .cta-bar:focus-within {
+  box-shadow: var(--chrome-shadow-lift), inset 0 0 0 1px var(--paper-line);
+}
+[data-chrome='dark'] .cta-bar:focus-within {
+  box-shadow: var(--chrome-shadow-lift), 0 0 0 2px var(--focus-edge),
+              inset 0 0 0 1px var(--paper-line);
+}
+
+.cta-bar__back {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: var(--paper-sunk);
+  color: var(--c-carbon);
+  cursor: pointer;
+  transition: background var(--d-fast), transform 0.3s var(--e-spring);
+}
+.cta-bar__back:hover { background: var(--paper-sunk-2); }
+.cta-bar__back:hover svg { transform: translateX(-2px); }
+.cta-bar__back:active { transform: scale(0.9); }
+.cta-bar__back:focus-visible { border-radius: 50%; }
+.cta-bar__back svg { transition: transform 0.3s var(--e-spring); }
+
+.cta-bar__field {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+.cta-bar__input {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  font-family: var(--f-sans);
+  font-size: var(--t-read);
+  color: var(--c-carbon);
+}
+.cta-bar__input::placeholder {
+  color: var(--paper-quiet);
+  transition: opacity var(--d-fast);
+}
+.cta-bar__input:focus::placeholder { opacity: 0.5; }
+/* The bar itself carries the focus ring; a second rectangle inside it
+   would only add noise. */
+.cta-bar__input:focus-visible { outline: none; }
+
+/* A hairline that draws in under the field while it is focused. */
+.cta-bar__rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: var(--c-carbon);
+  opacity: 0.25;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.42s var(--e-out);
+  pointer-events: none;
+}
+.cta-bar__input:focus ~ .cta-bar__rule { transform: scaleX(1); }
+.cta-bar.is-error .cta-bar__rule {
+  background: var(--c-wait);
+  opacity: 0.7;
+  transform: scaleX(1);
+}
+
+.cta-bar__submit {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 11px 20px;
+  border: none;
+  border-radius: var(--r-pill);
+  background: var(--c-carbon);
+  color: var(--c-white);
+  font-family: var(--f-sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background var(--d-fast), transform 0.3s var(--e-spring);
+}
+.cta-bar__submit:hover { background: var(--ink-hover); transform: translateY(-1px); }
+.cta-bar__submit:active { transform: translateY(0) scale(0.97); }
+.cta-bar__submit:focus-visible { border-radius: var(--r-pill); }
+
+.cta-bar__submit-label {
+  display: block;
+  transition: transform 0.3s var(--e-out), opacity 0.2s var(--e-out);
+}
+.cta-bar__spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 15px;
+  height: 15px;
+  margin: -7.5px 0 0 -7.5px;
+  border-radius: 50%;
+  border: 1.5px solid var(--w-30);
+  border-top-color: var(--c-white);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.2s var(--e-out), transform 0.3s var(--e-spring);
+}
+.cta-bar.is-submitting .cta-bar__submit { cursor: progress; }
+.cta-bar.is-submitting .cta-bar__submit-label { transform: translateY(-140%); opacity: 0; }
+.cta-bar.is-submitting .cta-bar__spinner {
+  opacity: 1;
+  transform: scale(1);
+  animation: cta-spin 0.7s linear infinite;
+}
+@keyframes cta-spin {
+  from { transform: scale(1) rotate(0deg); }
+  to   { transform: scale(1) rotate(360deg); }
+}
+
+.cta-bar.is-sent .cta-bar__submit { background: var(--c-moss); }
+
+.cta-bar__msg.mono-label,
+.cta-bar__msg {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  margin: 0;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  background: var(--chrome-veil);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--chrome-fg-loud);
+  white-space: nowrap;
+  transform: translateX(-50%) translateY(6px);
+  opacity: 0;
+  transition: transform 0.4s var(--e-spring), opacity 0.28s var(--e-out);
+}
+.cta-bar__msg:not(:empty) { transform: translateX(-50%) translateY(0); opacity: 1; }
+.cta-bar__msg:empty { pointer-events: none; }
+
+@media (max-width: 520px) {
+  .cta-bar { gap: 6px; padding: 6px 6px 6px 8px; }
+  .cta-bar__submit { padding: 11px 14px; font-size: 13px; }
+  .cta-bar__msg { max-width: calc(100vw - 48px); white-space: normal; text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-bar.is-submitting .cta-bar__spinner { animation: none; }
+}

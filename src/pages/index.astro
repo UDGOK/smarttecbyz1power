@@ -131,7 +131,19 @@ const grain =
     background: var(--veil-color, #000);
   }
 
-  main { position: relative; z-index: var(--z-content); }
+  /* main sits above the canvas, so by default it swallows every pointer event
+     before the WebGL layer sees one — which silently killed drag-to-orbit and
+     pinch-zoom on the campus. Let events fall through by default and hand them
+     back only to the things that actually want them. */
+  main {
+    position: relative;
+    z-index: var(--z-content);
+    pointer-events: none;
+  }
+  main > * { pointer-events: auto; }
+  /* The campus is the one stage whose scene needs the pointer more than its
+     copy does. */
+  [data-stage='campus'] { pointer-events: none; }
 
   .stage-scroll { height: var(--scroll-vh, 250vh); }
 
