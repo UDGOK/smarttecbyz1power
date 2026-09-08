@@ -108,19 +108,25 @@
   --i-90: #141414e6;
 
   /* --- Chrome tint: flipped per stage by [data-chrome] --- */
-  /* Measured off the reference's .hud-xp / .hud-menu-dropdown / .scroll-indicator
-     — its whole floating chrome layer is one recipe:
-       text quiet  #ffffffb3   text loud #ffffffe6
-       surface     #0006       border    #ffffff1a  (1px, hairline)
-     The border is the one that had drifted furthest: ours was 55% white, a
-     hard outline where the reference draws a whisper. 55% white is real, but
-     in the reference it is a drawn rule (.scroll-ruler-nav-line), not a
-     container edge — so it lives on as --chrome-rule. */
-  --chrome-fg:      var(--w-70);
-  --chrome-fg-loud: var(--w-90);
-  --chrome-line:    var(--w-10);
-  --chrome-rule:    var(--w-55);
-  --chrome-veil:    var(--k-40);
+  /* Measured off the reference's .hud-* chips and its scroll ruler, which
+     are one recipe in two polarities:
+       text quiet   #ffffffb3   ← .scroll-ruler-nav-btn, .hud-status
+       text loud    #ffffffe6   ← the chip text on every glass pill
+       drawn rule   #ffffff8c   ← .scroll-ruler-nav-line
+       container    #ffffff1a   ← 1px border on every chip and dropdown
+       surface      #0006       ← the glass itself, under blur(14px)
+     --chrome-fg and --chrome-line already sat on the right rungs. Two did not:
+     --chrome-fg-loud was 95%, which in the reference is a fill (.mtl-fill),
+     not text; and --chrome-veil was #14141aa6, a mis-transcription of the
+     reference's INK colour #141414a6 — which is text on light stages, never a
+     surface. Its surface is plain 40% black.
+     A rule and a container edge differ by 5.5x in the reference, so the border
+     gets its own token rather than borrowing the rule's. */
+  --chrome-fg:       var(--w-70);
+  --chrome-fg-loud:  var(--w-90);
+  --chrome-line:     var(--w-55);
+  --chrome-hairline: var(--w-10);
+  --chrome-veil:     var(--k-40);
 
   /* --- Type --- */
   /* Each stack names the reference's own face first, then the closest
@@ -230,15 +236,17 @@
 }
 
 /* Light stages invert the entire chrome layer in one place. */
-/* This is the reference's own .nav-black recipe, rung for rung:
-     text quiet #141414a6   text loud #141414e6
-     surface    #ffffff73   border    #0000000f
-   Note it inverts to ink, not to black, and its inverted border is 6% —
-   the same hairline discipline as the dark polarity, not the 40% we had. */
+/* This is the reference's own .nav-black block, rung for rung:
+     text quiet #141414a6   text loud  #141414e6
+     drawn rule #0006       container  #0000000f
+     surface    #ffffff73
+   Note it inverts to ink, not to black — #141414 at 65% and 90%, where we
+   were using flat #0000008c and opaque --c-carbon. The drawn rule at 40%
+   black was already exact, and stays. */
 [data-chrome='dark'] {
-  --chrome-fg:      var(--i-65);
-  --chrome-fg-loud: var(--i-90);
-  --chrome-line:    var(--k-06);
-  --chrome-rule:    var(--k-30);
-  --chrome-veil:    var(--w-45);
+  --chrome-fg:       var(--i-65);
+  --chrome-fg-loud:  var(--i-90);
+  --chrome-line:     var(--k-40);
+  --chrome-hairline: var(--k-06);
+  --chrome-veil:     var(--w-45);
 }

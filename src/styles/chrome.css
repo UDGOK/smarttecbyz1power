@@ -517,7 +517,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  border: 1px solid var(--chrome-line);
+  border: 1px solid var(--chrome-hairline);
   opacity: 0.22;
   pointer-events: none;
 }
@@ -989,8 +989,10 @@
 .menu__eyebrow--second { margin-top: var(--s-8); }
 
 .menu__list { list-style: none; margin: 0; padding: 0; }
-.menu__item { border-top: 1px solid var(--chrome-line); }
-.menu__item:last-child { border-bottom: 1px solid var(--chrome-line); }
+/* Container borders, not drawn rules — the reference separates the two by a
+   factor of about five and ours had them at rule weight. */
+.menu__item { border-top: 1px solid var(--chrome-hairline); }
+.menu__item:last-child { border-bottom: 1px solid var(--chrome-hairline); }
 
 /* The overlay used to arrive as a single opacity fade — the whole index simply
    appeared. The reference's larger moves are staged, so the rows ride in on the
@@ -1052,7 +1054,7 @@
   align-items: center;
   gap: 8px;
   padding: 9px 14px;
-  border: 1px solid var(--chrome-line);
+  border: 1px solid var(--chrome-hairline);
   border-radius: var(--r-pill);
   background: none;
   color: var(--chrome-fg);
