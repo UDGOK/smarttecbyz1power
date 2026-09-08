@@ -123,7 +123,7 @@
      A rule and a container edge differ by 5.5x in the reference, so the border
      gets its own token rather than borrowing the rule's. */
   --chrome-fg:       var(--w-70);
-  --chrome-fg-loud:  var(--w-90);
+  --chrome-fg-loud:  var(--w-95);
   --chrome-line:     var(--w-55);
   --chrome-hairline: var(--w-10);
   --chrome-veil:     var(--k-40);
@@ -163,7 +163,7 @@
      reference's number instead of 8.2rem: at 1440 we were rendering 119px
      against its 100px, and at 1920 we hit 131px while it held 100px. The
      ramp is drawn so the cap engages at exactly 1440. */
-  --t-display: clamp(2.6rem, 1.32rem + 5.48vw, 6.25rem);
+  --t-display: clamp(2.8rem, 1.1rem + 6.6vw, 7.4rem);
   /* Display weight. Confirmed, not assumed: every display-scale line in the
      reference — .loader-text, .next-stage-label, its pre-canvas counter — is
      700. It is 700 in a grotesque and ours is 700 in a didone, which reads

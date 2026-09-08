@@ -33,6 +33,17 @@ const CROSS_START = 0.8;
 /** Ignore scroll for this long after a swap, or momentum re-triggers it. */
 const SWAP_LOCKOUT_MS = 620;
 
+/**
+ * How much longer a stage's track is than its nominal height.
+ *
+ * Calibrated by measurement, not taste: at 1.0 a single wheel notch advanced
+ * 5.5% of a stage, so a trackpad swipe — which emits a long momentum tail of
+ * events — crossed two whole worlds before the visitor could read either. At
+ * 2.6 a notch is worth about 2%, so a stage takes deliberate effort and a
+ * momentum flick lands inside it rather than through it.
+ */
+const STAGE_TRACK_SCALE = 2.6;
+
 /** kW committed by the time each stage has been reached. */
 const STAGE_KW = [0, 0.08, 0.35, 1, 1];
 
@@ -96,7 +107,7 @@ export function boot(): void {
    * roughly 100px therefore advances about 100px worth of the track.
    */
   const trackLength = (index: number): number =>
-    ((stages[index]?.scrollVh ?? 250) / 100) * window.innerHeight * DELTA_SCALE;
+    ((stages[index]?.scrollVh ?? 250) / 100) * window.innerHeight * DELTA_SCALE * STAGE_TRACK_SCALE;
 
   // --- Scene host, code-split and idle-loaded ---------------------------
   async function initScene(): Promise<void> {
