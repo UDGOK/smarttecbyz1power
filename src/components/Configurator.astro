@@ -78,6 +78,11 @@ const pad = (n: number): string => String(n).padStart(2, '0');
                   <span class="cfg__card-idx mono-label">{pad(j + 1)}</span>
                   <span class="cfg__card-label">{o.label}</span>
                   <span class="cfg__card-detail">{o.detail}</span>
+                  <span class="cfg__card-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12h13M12 5l7 7-7 7" />
+                    </svg>
+                  </span>
                 </button>
               ))}
             </div>
@@ -85,41 +90,53 @@ const pad = (n: number): string => String(n).padStart(2, '0');
         ))}
 
         <section class="cfg__result" data-result hidden aria-labelledby={`${id}-result-title`}>
-          <p class="cfg__q-kicker mono-label">
-            <span class="cfg__line"><span class="cfg__line-inner">Recommendation · estimated</span></span>
-          </p>
-          <h3 class="cfg__result-title" id={`${id}-result-title`} tabindex="-1" data-result-focus>
-            <span class="cfg__line"><span class="cfg__line-inner" data-field="fit-headline">It fits Phase 1A.</span></span>
-          </h3>
-          <p class="cfg__result-detail">
-            <span class="cfg__line"><span class="cfg__line-inner" data-field="fit-detail"></span></span>
-          </p>
+          <div class="cfg__slab" data-slab>
+            <div class="cfg__slab-top">
+              <p class="cfg__q-kicker mono-label">
+                <span class="cfg__line"><span class="cfg__line-inner">Recommendation · estimated</span></span>
+              </p>
+              <p class="cfg__seal mono-label" data-seal>
+                <span class="cfg__verdict-dot" aria-hidden="true"></span><span data-field="fit">—</span>
+              </p>
+            </div>
 
-          <dl class="cfg__result-grid">
-            <div class="cfg__result-cell" data-reveal>
-              <dt class="mono-label">GPU allocation</dt>
-              <dd><strong class="cfg__figure" data-field="gpus">—</strong> <span class="cfg__unit" data-field="gpu-note">of {compute.rentable} rentable</span></dd>
-            </div>
-            <div class="cfg__result-cell" data-reveal>
-              <dt class="mono-label">Estimated draw</dt>
-              <dd><strong class="cfg__figure" data-field="kw">—</strong> <span class="cfg__unit">kW · <span data-field="phase-share"></span></span></dd>
-            </div>
-            <div class="cfg__result-cell" data-reveal>
-              <dt class="mono-label">Transformer</dt>
-              <dd><strong class="cfg__figure" data-field="share">—</strong> <span class="cfg__unit">% of {power.transformer}</span></dd>
-            </div>
-            <div class="cfg__result-cell" data-reveal>
-              <dt class="mono-label">Energy at {power.rate}</dt>
-              <dd><strong class="cfg__figure" data-field="energy">—</strong> <span class="cfg__unit" data-field="energy-period"></span></dd>
-            </div>
-          </dl>
+            <h3 class="cfg__result-title" id={`${id}-result-title`} tabindex="-1" data-result-focus>
+              <span class="cfg__line"><span class="cfg__line-inner" data-field="fit-headline">It fits Phase 1A.</span></span>
+            </h3>
+            <p class="cfg__result-detail">
+              <span class="cfg__line"><span class="cfg__line-inner" data-field="fit-detail"></span></span>
+            </p>
 
-          <p class="cfg__lift mono-label" data-field="lift"></p>
-          <ul class="cfg__notes" data-notes></ul>
+            <dl class="cfg__result-grid">
+              <div class="cfg__result-cell">
+                <span class="cfg__rule" data-rule aria-hidden="true"></span>
+                <dt class="mono-label">GPU allocation</dt>
+                <dd><strong class="cfg__figure" data-field="gpus" data-tally>—</strong> <span class="cfg__unit" data-field="gpu-note">of {compute.rentable} rentable</span></dd>
+              </div>
+              <div class="cfg__result-cell">
+                <span class="cfg__rule" data-rule aria-hidden="true"></span>
+                <dt class="mono-label">Estimated draw</dt>
+                <dd><strong class="cfg__figure" data-field="kw" data-tally>—</strong> <span class="cfg__unit">kW · <span data-field="phase-share"></span></span></dd>
+              </div>
+              <div class="cfg__result-cell">
+                <span class="cfg__rule" data-rule aria-hidden="true"></span>
+                <dt class="mono-label">Transformer</dt>
+                <dd><strong class="cfg__figure" data-field="share" data-tally>—</strong> <span class="cfg__unit">% of {power.transformer}</span></dd>
+              </div>
+              <div class="cfg__result-cell">
+                <span class="cfg__rule" data-rule aria-hidden="true"></span>
+                <dt class="mono-label">Energy at {power.rate}</dt>
+                <dd><strong class="cfg__figure" data-field="energy" data-tally>—</strong> <span class="cfg__unit" data-field="energy-period"></span></dd>
+              </div>
+            </dl>
 
-          <div class="cfg__cta" data-reveal>
-            <a class="cfg__reserve" href={ctaHref} data-cursor="action">Reserve capacity</a>
-            <button type="button" class="cfg__ghost-btn" data-restart data-cursor="action">Start over</button>
+            <p class="cfg__lift mono-label" data-field="lift"></p>
+            <ul class="cfg__notes" data-notes></ul>
+
+            <div class="cfg__cta" data-reveal>
+              <a class="cfg__reserve" href={ctaHref} data-cursor="action">Reserve capacity</a>
+              <button type="button" class="cfg__ghost-btn cfg__ghost-btn--slab" data-restart data-cursor="action">Start over</button>
+            </div>
           </div>
         </section>
       </div>
@@ -132,34 +149,49 @@ const pad = (n: number): string => String(n).padStart(2, '0');
           Back
         </button>
         <p class="cfg__hint mono-label" aria-hidden="true">← → move · Enter chooses · Esc goes back</p>
+        <div class="cfg__pips" aria-hidden="true">
+          {questions.map((q) => <span class="cfg__pip" data-pip={q.id}></span>)}
+        </div>
         <p class="cfg__progress mono-label"><span data-field="progress">0 / {questions.length}</span></p>
       </div>
     </div>
 
-    <aside class="cfg__readout" aria-label="Running estimate">
-      <p class="cfg__readout-kicker mono-label">Running estimate</p>
+    <aside class="cfg__readout" aria-label="Running estimate" data-readout>
+      <span class="cfg__flash" data-flash aria-hidden="true"></span>
+
+      <div class="cfg__readout-top">
+        <p class="cfg__readout-kicker mono-label">Running estimate</p>
+        <span class="cfg__delta mono-label" data-delta aria-hidden="true"></span>
+      </div>
 
       <div class="cfg__stat">
-        <span class="cfg__figure cfg__figure--lg" data-field="gpus">—</span>
+        <span class="cfg__figure cfg__figure--lg" data-field="gpus" data-pop>—</span>
         <span class="cfg__unit">GPUs · <span data-field="gpu-note">pick a workload to start</span></span>
       </div>
 
-      <div class="cfg__meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Share of the rentable Phase 1A GPUs">
-        <span class="cfg__meter-fill" data-bar></span>
+      <div class="cfg__gauge">
+        <div class="cfg__meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Share of the rentable Phase 1A GPUs">
+          <span class="cfg__meter-ticks" aria-hidden="true"></span>
+          <span class="cfg__meter-fill" data-bar></span>
+          <span class="cfg__meter-mark" aria-hidden="true"></span>
+        </div>
+        <p class="cfg__scale mono-label" aria-hidden="true">
+          <span>0</span><span>{compute.rentable} rentable</span>
+        </p>
       </div>
 
       <dl class="cfg__stats">
         <div>
           <dt class="mono-label">Draw</dt>
-          <dd><span class="cfg__figure" data-field="kw">—</span> <span class="cfg__unit">kW</span></dd>
+          <dd><span class="cfg__figure" data-field="kw" data-pop>—</span> <span class="cfg__unit">kW</span></dd>
         </div>
         <div>
           <dt class="mono-label">{power.transformer}</dt>
-          <dd><span class="cfg__figure" data-field="share">—</span> <span class="cfg__unit">%</span></dd>
+          <dd><span class="cfg__figure" data-field="share" data-pop>—</span> <span class="cfg__unit">%</span></dd>
         </div>
         <div>
           <dt class="mono-label">Energy</dt>
-          <dd><span class="cfg__figure" data-field="energy">—</span> <span class="cfg__unit" data-field="energy-period">per month</span></dd>
+          <dd><span class="cfg__figure" data-field="energy" data-pop>—</span> <span class="cfg__unit" data-field="energy-period">per month</span></dd>
         </div>
       </dl>
 
@@ -208,29 +240,67 @@ const pad = (n: number): string => String(n).padStart(2, '0');
 
 <style>
   /* Local ladder, derived from the token alpha ramps so the whole block flips
-     with the chrome the same way the rest of the UI does. */
+     with the chrome the same way the rest of the UI does. The hairlines and
+     shadows are mixed off `--chrome-fg-loud`, so they invert on their own. */
   .cfg {
     --cfg-line: var(--w-25);
-    --cfg-line-soft: var(--w-10);
+    --cfg-hair: color-mix(in srgb, var(--chrome-fg-loud) 20%, transparent);
+    --cfg-hair-soft: color-mix(in srgb, var(--chrome-fg-loud) 11%, transparent);
     --cfg-surface: var(--w-04);
-    --cfg-surface-hi: var(--w-08);
+
+    /* Cards float above the ground; on a dark ground they are a lit pane, on a
+       light one they are paper. */
+    --cfg-card: var(--w-04);
+    --cfg-lift-1: 0 1px 1px color-mix(in srgb, var(--c-carbon) 24%, transparent);
+    --cfg-lift-2:
+      0 2px 4px color-mix(in srgb, var(--c-carbon) 20%, transparent),
+      0 16px 34px color-mix(in srgb, var(--c-carbon) 26%, transparent);
+
+    /* Chosen card: fully inverted, so the answer reads from across the room. */
+    --cfg-sel-bg: var(--c-white);
+    --cfg-sel-fg: var(--c-carbon);
+    --cfg-sel-idx: var(--c-moss);
+
+    /* The result slab. */
+    --cfg-slab-bg: var(--w-08);
+    --cfg-slab-fg: var(--w-70);
+    --cfg-slab-loud: var(--w-95);
+    --cfg-slab-line: var(--w-25);
+
     --cfg-accent: var(--c-signal);
+    --cfg-dot: var(--c-signal);
+    /* Overwritten from the rule data, so the gauge's threshold mark is not a
+       retyped number. */
+    --cfg-tight: 75%;
 
     position: relative;
     z-index: var(--z-content);
-    max-width: 1120px;
+    max-width: 1180px;
     margin: 0 auto;
     padding: var(--s-9) var(--s-5);
     color: var(--chrome-fg);
   }
   :global([data-chrome='dark']) .cfg {
     --cfg-line: var(--k-30);
-    --cfg-line-soft: var(--k-06);
     --cfg-surface: var(--k-06);
-    --cfg-surface-hi: var(--k-06);
+    --cfg-card: var(--c-white);
+    --cfg-lift-1: 0 1px 2px color-mix(in srgb, var(--c-carbon) 7%, transparent), 0 6px 14px color-mix(in srgb, var(--c-carbon) 5%, transparent);
+    --cfg-lift-2:
+      0 2px 6px color-mix(in srgb, var(--c-carbon) 8%, transparent),
+      0 18px 40px color-mix(in srgb, var(--c-carbon) 14%, transparent);
+    --cfg-sel-bg: var(--c-carbon);
+    --cfg-sel-fg: var(--w-95);
+    --cfg-sel-idx: var(--c-signal);
+    --cfg-slab-bg: var(--c-carbon);
+    --cfg-accent: var(--c-moss);
   }
-  .cfg[data-fit='phase-1a-tight'] { --cfg-accent: var(--c-gold); }
-  .cfg[data-fit='expansion']      { --cfg-accent: var(--c-power); }
+
+  /* Fit ladder: the dot always carries the colour, the type never does, so the
+     verdict stays legible on either ground. */
+  .cfg[data-fit='phase-1a-tight'] { --cfg-accent: var(--c-gold); --cfg-dot: var(--c-gold); }
+  .cfg[data-fit='expansion']      { --cfg-accent: var(--c-power); --cfg-dot: var(--c-power); }
+  :global([data-chrome='dark']) .cfg[data-fit='phase-1a-tight'] { --cfg-accent: var(--c-power-deep); }
+  :global([data-chrome='dark']) .cfg[data-fit='expansion']      { --cfg-accent: var(--c-wait); --cfg-dot: var(--c-wait); }
 
   /* ---- Head ---- */
   .cfg__head { max-width: 62ch; margin: 0 0 var(--s-8); }
@@ -240,22 +310,22 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     font-family: var(--f-display);
     font-optical-sizing: auto;
     font-weight: 400;
-    font-size: clamp(2.2rem, 1.2rem + 3.4vw, 4.2rem);
-    line-height: 0.94;
-    letter-spacing: -0.025em;
+    font-size: clamp(2.6rem, 1.2rem + 4.6vw, 5.6rem);
+    line-height: 0.92;
+    letter-spacing: -0.03em;
     color: var(--chrome-fg-loud);
   }
   .cfg__lede { margin: 0; max-width: 52ch; font-size: var(--t-lede); line-height: 1.5; text-wrap: pretty; }
 
   /* The masked line rise, kept local: the global `.line` pair is driven by the
      stage boot script and would be reset out from under us. */
-  .cfg__line { display: block; overflow: hidden; }
+  .cfg__line { display: block; overflow: hidden; padding-bottom: 0.06em; }
   .cfg__line-inner { display: block; will-change: transform; }
 
   /* ---- Layout ---- */
   .cfg__grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(0, 1fr) 320px;
     gap: var(--s-7);
     align-items: start;
   }
@@ -278,85 +348,118 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     display: flex;
     align-items: baseline;
     gap: var(--s-2);
-    padding: 7px 13px;
-    border: 1px solid var(--cfg-line-soft);
+    padding: 7px 14px;
+    border: 1px solid var(--cfg-hair);
     border-radius: var(--r-pill);
-    background: var(--cfg-surface);
+    background: var(--cfg-card);
+    box-shadow: var(--cfg-lift-1);
     color: var(--chrome-fg-loud);
     font-family: var(--f-sans);
     font-size: var(--t-ui);
     cursor: pointer;
-    transition: border-color var(--d-fast), background var(--d-fast), transform var(--d-fast) var(--e-out);
+    transition:
+      border-color var(--d-fast),
+      box-shadow var(--d-fast),
+      transform var(--d-fast) var(--e-out);
   }
   .cfg__chip:hover, .cfg__chip:focus-visible {
-    border-color: var(--cfg-accent);
-    background: var(--cfg-surface-hi);
-    transform: translateY(-1px);
+    border-color: var(--chrome-fg-loud);
+    box-shadow: var(--cfg-lift-2);
+    transform: translateY(-2px);
   }
   .cfg__chip-key { color: var(--chrome-fg); }
   .cfg__chip-value { white-space: nowrap; }
 
   /* ---- Questions ---- */
-  .cfg__stack { min-height: 340px; }
+  .cfg__stack { min-height: 420px; }
   .cfg__q { display: block; }
   .cfg__q[hidden], .cfg__result[hidden] { display: none; }
   .cfg__q + .cfg__q { margin-top: var(--s-8); }
   .cfg__q-kicker { margin: 0 0 var(--s-3); }
   .cfg__q-prompt {
-    margin: 0 0 var(--s-3);
+    margin: 0 0 var(--s-4);
     font-family: var(--f-display);
+    font-optical-sizing: auto;
     font-weight: 400;
-    font-size: clamp(1.7rem, 1.1rem + 2vw, 2.8rem);
-    line-height: 1.02;
-    letter-spacing: -0.02em;
+    font-size: clamp(2.3rem, 1.3rem + 3.4vw, 4.2rem);
+    line-height: 0.96;
+    letter-spacing: -0.03em;
     color: var(--chrome-fg-loud);
+    text-wrap: balance;
   }
-  .cfg__q-help { margin: 0 0 var(--s-5); max-width: 48ch; font-size: var(--t-read); }
+  .cfg__q-help { margin: 0 0 var(--s-6); max-width: 48ch; font-size: var(--t-read); line-height: 1.5; }
 
+  /* Two up, always: four options in a 2×2 block read as a set of choices, where
+     an auto-fit track leaves a stranded fourth card on most widths. */
   .cfg__cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--s-3);
   }
 
-  /* Single-compound selectors: the fly-to-strip ghost is a clone of this card
-     appended to <body>, and descendant selectors would not reach it there. */
+  /* Single-compound selectors on `.cfg__card` itself: the fly-to-strip ghost is
+     a clone appended to <body>, where descendant selectors would not reach it.
+     Its children keep their own classes, so those still match. */
   .cfg__card {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: var(--s-2);
     min-width: 0;
-    padding: var(--s-4);
-    border: 1px solid var(--cfg-line-soft);
+    padding: var(--s-4) var(--s-4) var(--s-5);
+    border: 1px solid var(--cfg-hair);
     border-radius: var(--r-card);
-    background: var(--cfg-surface);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: var(--cfg-card);
+    box-shadow: var(--cfg-lift-1);
     color: var(--chrome-fg-loud);
     font-family: var(--f-sans);
     text-align: left;
     cursor: pointer;
     transition:
       border-color var(--d-fast),
-      background var(--d-fast),
-      transform var(--d-fast) var(--e-out);
+      box-shadow var(--d-base) var(--e-out),
+      transform var(--d-base) var(--e-out);
   }
-  /* Hover and keyboard focus get the identical treatment. */
+  /* Hover and keyboard focus get the identical lift; focus adds the ring. */
   .cfg__card:hover,
   .cfg__card:focus-visible {
-    border-color: var(--cfg-accent);
-    background: var(--cfg-surface-hi);
-    transform: translateY(-3px);
+    border-color: var(--chrome-fg-loud);
+    box-shadow: var(--cfg-lift-2);
+    transform: translateY(-5px);
   }
+  .cfg__card:focus-visible {
+    outline: 2px solid var(--chrome-fg-loud);
+    outline-offset: 4px;
+  }
+  .cfg__card:active { transform: translateY(-1px) scale(0.995); }
   .cfg__card[aria-checked='true'] {
-    border-color: var(--cfg-accent);
-    box-shadow: inset 0 0 0 1px var(--cfg-accent);
+    border-color: var(--cfg-sel-bg);
+    background: var(--cfg-sel-bg);
+    color: var(--cfg-sel-fg);
+    box-shadow: var(--cfg-lift-2);
   }
-  .cfg__card-idx { color: var(--chrome-fg); }
-  .cfg__card[aria-checked='true'] .cfg__card-idx { color: var(--cfg-accent); }
-  .cfg__card-label { font-size: 1.15rem; line-height: 1.15; letter-spacing: -0.01em; }
-  .cfg__card-detail { font-size: var(--t-ui); line-height: 1.45; color: var(--chrome-fg); }
+
+  .cfg__card-idx { color: var(--chrome-fg); transition: color var(--d-fast); }
+  .cfg__card-label { font-size: 1.35rem; line-height: 1.1; letter-spacing: -0.02em; }
+  .cfg__card-detail { font-size: var(--t-ui); line-height: 1.5; color: var(--chrome-fg); }
+  .cfg__card:hover .cfg__card-idx { color: var(--chrome-fg-loud); }
+  .cfg__card[aria-checked='true'] .cfg__card-idx { color: var(--cfg-sel-idx); }
+  .cfg__card[aria-checked='true'] .cfg__card-detail { color: var(--cfg-sel-fg); opacity: 0.72; }
+
+  /* The consequence cue: an arrow that only exists once you are on the card. */
+  .cfg__card-mark {
+    position: absolute;
+    right: var(--s-4);
+    bottom: var(--s-4);
+    display: flex;
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity var(--d-fast), transform var(--d-base) var(--e-out);
+  }
+  .cfg__card:hover .cfg__card-mark,
+  .cfg__card:focus-visible .cfg__card-mark { opacity: 1; transform: translateX(0); }
+  .cfg__card[aria-checked='true'] .cfg__card-mark { opacity: 1; transform: translateX(0); color: var(--cfg-sel-idx); }
 
   /* ---- Foot ---- */
   .cfg__foot { display: none; }
@@ -365,18 +468,29 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     flex-wrap: wrap;
     align-items: center;
     gap: var(--s-4);
-    margin-top: var(--s-6);
+    margin-top: var(--s-7);
     padding-top: var(--s-4);
-    border-top: 1px solid var(--cfg-line-soft);
+    border-top: 1px solid var(--cfg-hair-soft);
   }
   .cfg__hint { margin: 0; opacity: 0.75; }
-  .cfg__progress { margin: 0 0 0 auto; color: var(--chrome-fg-loud); font-variant-numeric: tabular-nums; }
+  .cfg__pips { display: flex; gap: 5px; margin-left: auto; }
+  .cfg__pip {
+    width: 16px;
+    height: 2px;
+    border-radius: var(--r-pill);
+    background: var(--cfg-hair);
+    transform-origin: left center;
+    transition: background var(--d-base), transform var(--d-base) var(--e-out);
+  }
+  .cfg__pip[data-on] { background: var(--chrome-fg-loud); }
+  .cfg__pip[data-now] { background: var(--cfg-dot); transform: scaleX(1.5); }
+  .cfg__progress { margin: 0; color: var(--chrome-fg-loud); font-variant-numeric: tabular-nums; }
 
   .cfg__ghost-btn {
     display: inline-flex;
     align-items: center;
     gap: var(--s-2);
-    padding: 8px 15px;
+    padding: 9px 16px;
     border: 1px solid var(--cfg-line);
     border-radius: var(--r-pill);
     background: none;
@@ -386,109 +500,242 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     letter-spacing: var(--ls-wide);
     text-transform: uppercase;
     cursor: pointer;
-    transition: border-color var(--d-fast), background var(--d-fast);
+    transition: border-color var(--d-fast), background var(--d-fast), transform var(--d-fast) var(--e-out);
   }
-  .cfg__ghost-btn:hover { border-color: var(--cfg-accent); background: var(--cfg-surface); }
+  .cfg__ghost-btn:hover { border-color: var(--chrome-fg-loud); background: var(--cfg-surface); transform: translateY(-1px); }
 
-  /* ---- Readout ---- */
+  /* ---- Readout: the instrument panel ---- */
   .cfg__readout {
     position: sticky;
     top: calc(var(--chrome-inset) * 5);
+    overflow: hidden;
     padding: var(--s-5);
-    border: 1px solid var(--cfg-line-soft);
+    border: 1px solid var(--cfg-hair);
     border-radius: var(--r-card);
-    background: var(--cfg-surface);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: var(--cfg-card);
+    box-shadow: var(--cfg-lift-1);
   }
-  .cfg__readout-kicker { margin: 0 0 var(--s-4); }
-  .cfg__stat { display: flex; flex-direction: column; gap: var(--s-1); }
+  /* Fires on a material change; opacity only, so it costs nothing. */
+  .cfg__flash {
+    position: absolute;
+    inset: 0;
+    background: var(--cfg-accent);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .cfg__readout-top {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    margin: 0 0 var(--s-5);
+    min-height: 20px;
+  }
+  .cfg__readout-kicker { margin: 0; }
+  .cfg__delta {
+    padding: 3px 9px;
+    border-radius: var(--r-pill);
+    background: var(--cfg-dot);
+    color: var(--c-carbon);
+    font-variant-numeric: tabular-nums;
+    opacity: 0;
+    white-space: nowrap;
+  }
+  .cfg__delta[data-dir='down'] { background: var(--cfg-hair); color: var(--chrome-fg-loud); }
+
+  .cfg__stat { position: relative; display: flex; flex-direction: column; gap: 6px; }
   .cfg__figure {
+    display: inline-block;
     font-family: var(--f-mono);
     font-variant-numeric: tabular-nums;
     font-weight: 700;
     color: var(--chrome-fg-loud);
   }
-  .cfg__figure--lg { font-size: clamp(2.4rem, 1.6rem + 2.4vw, 3.4rem); line-height: 1; letter-spacing: -0.03em; }
-  .cfg__unit { font-family: var(--f-mono); font-size: var(--t-label); letter-spacing: var(--ls-mid); color: var(--chrome-fg); }
+  .cfg__figure--lg {
+    font-size: clamp(3rem, 2rem + 3vw, 4.4rem);
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    transform-origin: left center;
+  }
+  .cfg__unit {
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--chrome-fg);
+  }
 
+  .cfg__gauge { position: relative; margin: var(--s-5) 0; }
   .cfg__meter {
-    height: 3px;
-    margin: var(--s-4) 0 var(--s-5);
+    position: relative;
+    height: 8px;
     border-radius: var(--r-pill);
-    background: var(--cfg-line-soft);
+    background: var(--cfg-hair-soft);
     overflow: hidden;
   }
+  .cfg__meter-ticks {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--cfg-hair) 0 1px,
+      transparent 1px 10%
+    );
+    opacity: 0.7;
+  }
   .cfg__meter-fill {
-    display: block;
-    width: 0;
-    height: 100%;
+    position: absolute;
+    inset: 0;
     border-radius: var(--r-pill);
     background: var(--cfg-accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  /* The "fills Phase 1A" threshold, positioned from the rule data. */
+  .cfg__meter-mark {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    left: var(--cfg-tight);
+    width: 1px;
+    background: var(--chrome-fg-loud);
+    opacity: 0.55;
+  }
+  .cfg__scale {
+    display: flex;
+    justify-content: space-between;
+    margin: 7px 0 0;
   }
 
-  .cfg__stats { display: grid; gap: var(--s-3); margin: 0; }
-  .cfg__stats > div { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3); }
+  .cfg__stats { display: grid; gap: 0; margin: 0; }
+  .cfg__stats > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-3);
+    padding: 11px 0;
+    border-top: 1px solid var(--cfg-hair-soft);
+  }
   .cfg__stats dt { margin: 0; }
   .cfg__stats dd { margin: 0; text-align: right; }
+  .cfg__stats .cfg__figure { font-size: 1.05rem; letter-spacing: -0.02em; }
 
   .cfg__verdict {
+    position: relative;
     display: flex;
     align-items: center;
     gap: var(--s-2);
-    margin: var(--s-5) 0 0;
+    margin: var(--s-4) 0 0;
     padding-top: var(--s-4);
-    border-top: 1px solid var(--cfg-line-soft);
+    border-top: 1px solid var(--cfg-hair);
     font-family: var(--f-mono);
     font-size: var(--t-label);
-    letter-spacing: var(--ls-mid);
+    letter-spacing: var(--ls-wide);
     text-transform: uppercase;
     color: var(--chrome-fg-loud);
   }
-  .cfg__verdict-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cfg-accent); flex: 0 0 auto; }
+  .cfg__verdict-dot {
+    position: relative;
+    width: 8px; height: 8px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--cfg-dot);
+    transition: background var(--d-base);
+  }
+  .cfg__verdict-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid var(--cfg-dot);
+    opacity: 0;
+  }
+  .cfg[data-state='complete'] .cfg__verdict-dot::after { animation: cfg-ping 2.6s var(--e-out) infinite; }
+  @keyframes cfg-ping {
+    0%   { opacity: 0.9; transform: scale(0.6); }
+    70%  { opacity: 0;   transform: scale(1.9); }
+    100% { opacity: 0;   transform: scale(1.9); }
+  }
 
-  /* ---- Result ---- */
+  /* ---- Result: the payoff slab ---- */
+  .cfg__slab {
+    position: relative;
+    padding: var(--s-7) var(--s-6) var(--s-6);
+    border: 1px solid var(--cfg-hair);
+    border-radius: var(--r-card);
+    background: var(--cfg-slab-bg);
+    box-shadow: var(--cfg-lift-2);
+    color: var(--cfg-slab-fg);
+    transform-origin: 50% 20%;
+  }
+  .cfg__slab-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    margin: 0 0 var(--s-5);
+  }
+  .cfg__slab .cfg__q-kicker { margin: 0; color: var(--cfg-slab-fg); }
+  .cfg__seal {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin: 0;
+    padding: 5px 12px;
+    border: 1px solid var(--cfg-slab-line);
+    border-radius: var(--r-pill);
+    color: var(--cfg-slab-loud);
+  }
   .cfg__result-title {
     margin: 0 0 var(--s-4);
     font-family: var(--f-display);
+    font-optical-sizing: auto;
     font-weight: 400;
-    font-size: clamp(1.9rem, 1.2rem + 2.2vw, 3rem);
-    line-height: 1;
-    letter-spacing: -0.02em;
-    color: var(--chrome-fg-loud);
+    font-size: clamp(2.5rem, 1.4rem + 3.6vw, 4.4rem);
+    line-height: 0.94;
+    letter-spacing: -0.03em;
+    color: var(--cfg-slab-loud);
+    text-wrap: balance;
   }
-  .cfg__result-title:focus-visible { outline-offset: 6px; }
-  .cfg__result-detail { margin: 0 0 var(--s-6); max-width: 56ch; font-size: var(--t-read); text-wrap: pretty; }
+  .cfg__result-title:focus-visible { outline: 2px solid var(--cfg-slab-loud); outline-offset: 10px; }
+  .cfg__result-detail { margin: 0 0 var(--s-7); max-width: 58ch; font-size: var(--t-read); line-height: 1.55; text-wrap: pretty; }
 
   .cfg__result-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: var(--s-4);
-    margin: 0 0 var(--s-5);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--s-6) var(--s-5);
+    margin: 0 0 var(--s-6);
   }
-  .cfg__result-cell {
-    min-width: 0;
-    padding-top: var(--s-3);
-    border-top: 1px solid var(--cfg-line);
+  .cfg__result-cell { position: relative; min-width: 0; padding-top: var(--s-3); }
+  /* A drawn rule rather than a border, so the arrival can scale it in. */
+  .cfg__rule {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: var(--cfg-slab-line);
+    transform-origin: left center;
   }
-  .cfg__result-cell dt { margin: 0 0 var(--s-2); }
+  .cfg__result-cell dt { margin: 0 0 var(--s-2); color: var(--cfg-slab-fg); }
   .cfg__result-cell dd { margin: 0; display: flex; align-items: baseline; gap: var(--s-2); flex-wrap: wrap; }
-  .cfg__result-cell .cfg__figure { font-size: 1.8rem; letter-spacing: -0.02em; }
+  .cfg__result-cell .cfg__figure { font-size: clamp(1.8rem, 1.4rem + 1vw, 2.4rem); letter-spacing: -0.03em; color: var(--cfg-slab-loud); }
+  .cfg__result-cell .cfg__unit { color: var(--cfg-slab-fg); }
 
-  .cfg__lift { margin: 0 0 var(--s-4); color: var(--cfg-accent); }
+  .cfg__lift { margin: 0 0 var(--s-4); color: var(--cfg-slab-loud); }
   .cfg__lift:empty { display: none; }
   .cfg__notes { margin: 0 0 var(--s-6); padding: 0; list-style: none; display: grid; gap: var(--s-2); }
   .cfg__notes:empty { display: none; }
-  .cfg__note { padding-left: var(--s-4); font-size: var(--t-ui); line-height: 1.5; position: relative; }
-  .cfg__note::before { content: '—'; position: absolute; left: 0; color: var(--chrome-fg); }
+  .cfg__note { padding-left: var(--s-4); font-size: var(--t-ui); line-height: 1.55; position: relative; color: var(--cfg-slab-fg); }
+  .cfg__note::before { content: '—'; position: absolute; left: 0; opacity: 0.6; }
 
   .cfg__cta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); }
   .cfg__reserve {
     display: inline-flex;
     align-items: center;
-    padding: 12px 24px;
+    padding: 13px 26px;
     border-radius: var(--r-pill);
-    background: var(--cfg-accent);
+    background: var(--cfg-slab-loud);
     color: var(--c-carbon);
     font-family: var(--f-mono);
     font-size: var(--t-ui);
@@ -497,13 +744,15 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     text-decoration: none;
     transition: transform var(--d-fast) var(--e-out), filter var(--d-fast);
   }
-  .cfg__reserve:hover { transform: translateY(-2px); filter: brightness(1.08); }
+  .cfg__reserve:hover { transform: translateY(-2px); filter: brightness(0.92); }
+  .cfg__ghost-btn--slab { border-color: var(--cfg-slab-line); color: var(--cfg-slab-loud); }
+  .cfg__ghost-btn--slab:hover { border-color: var(--cfg-slab-loud); background: var(--w-08); }
 
   /* ---- Assumptions + fallback ---- */
   .cfg__assumptions {
     margin-top: var(--s-8);
     padding-top: var(--s-4);
-    border-top: 1px solid var(--cfg-line-soft);
+    border-top: 1px solid var(--cfg-hair-soft);
   }
   .cfg__assumptions summary { cursor: pointer; color: var(--chrome-fg-loud); }
   .cfg__assumptions dl { display: grid; gap: var(--s-3); margin: var(--s-5) 0 0; }
@@ -511,7 +760,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
   .cfg__assumptions dt {
     display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2);
     font-family: var(--f-mono); font-size: var(--t-label);
-    letter-spacing: var(--ls-mid); text-transform: uppercase; color: var(--chrome-fg);
+    letter-spacing: var(--ls-wide); text-transform: uppercase; color: var(--chrome-fg);
   }
   .cfg__assumptions dd { margin: 0; font-size: var(--t-ui); line-height: 1.5; }
   .cfg__assumptions dd strong { color: var(--chrome-fg-loud); }
@@ -519,14 +768,14 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     padding: 2px 7px;
     border: 1px solid var(--cfg-accent);
     border-radius: var(--r-pill);
-    color: var(--cfg-accent);
+    color: var(--chrome-fg-loud);
   }
   .cfg__smallprint { margin: var(--s-5) 0 0; font-size: var(--t-ui); line-height: 1.6; color: var(--chrome-fg); }
   .cfg__static { margin-top: var(--s-5); }
   .cfg[data-enhanced] .cfg__static { display: none; }
 
   /* ---- Responsive: one column, readout first, nothing wider than the page ---- */
-  @media (max-width: 900px) {
+  @media (max-width: 980px) {
     .cfg__grid { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
     .cfg__readout { position: static; order: -1; }
     .cfg__stack { min-height: 0; }
@@ -535,13 +784,38 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     .cfg { padding: var(--s-8) var(--s-4); }
     .cfg__cards { grid-template-columns: minmax(0, 1fr); }
     .cfg__result-grid { grid-template-columns: minmax(0, 1fr); }
+    .cfg__slab { padding: var(--s-6) var(--s-4) var(--s-5); }
     .cfg__assumptions dl > div { grid-template-columns: minmax(0, 1fr); gap: var(--s-1); }
     .cfg__hint { display: none; }
+    .cfg__pips { margin-left: 0; }
+    .cfg__progress { margin-left: auto; }
+    /* The readout leads on a phone, so it has to stay small enough to leave the
+       question it is answering on the same screen. */
+    .cfg__head { margin-bottom: var(--s-6); }
+    .cfg__readout { padding: var(--s-4); }
+    .cfg__readout-top { margin-bottom: var(--s-4); }
+    .cfg__figure--lg { font-size: 2.6rem; }
+    .cfg__gauge { margin: var(--s-4) 0; }
+    .cfg__stats > div { padding: 9px 0; }
+    .cfg__verdict { margin-top: var(--s-3); padding-top: var(--s-3); }
   }
 
-  /* Reduced motion: the script already swaps instantly and jumps the counter.
-     This kills the hover lift so nothing moves under the pointer either. */
+  /* Reduced motion: the script already swaps instantly, jumps every counter and
+     skips the flight. This kills the resting motion too — nothing lifts, nothing
+     slides, nothing pulses — and the block stays entirely usable. */
   @media (prefers-reduced-motion: reduce) {
-    .cfg__card:hover, .cfg__card:focus-visible, .cfg__chip:hover, .cfg__reserve:hover { transform: none; }
+    .cfg__card,
+    .cfg__card-mark,
+    .cfg__chip,
+    .cfg__pip,
+    .cfg__meter-fill { transition: none; }
+    .cfg__card:hover, .cfg__card:focus-visible,
+    .cfg__card:active,
+    .cfg__chip:hover, .cfg__chip:focus-visible,
+    .cfg__ghost-btn:hover,
+    .cfg__reserve:hover { transform: none; }
+    .cfg__card-mark { transform: none; }
+    .cfg__pip[data-now] { transform: none; }
+    .cfg[data-state='complete'] .cfg__verdict-dot::after { animation: none; }
   }
 </style>

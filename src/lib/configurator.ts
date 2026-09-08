@@ -1,12 +1,18 @@
 /**
  * Deployment configurator.
  *
- * One question on screen at a time. Answering it flies the chosen card into
- * the summary strip and rises the next question in behind it, while a running
- * readout counts up to the new estimate. The whole thing is progressive
- * enhancement over server-rendered markup: every question, every card and the
- * static fallback are already in the HTML, so with the script blocked the page
- * still reads as a spec sheet.
+ * One question on screen at a time. Answering it clears the outgoing question
+ * with intent — the discarded cards fall, the prompt is pulled up out of its own
+ * mask — while the chosen card flies into the summary strip and the next
+ * question rises in behind it. A running readout counts to the new estimate,
+ * reacts when an answer changes the answer materially, and the fifth answer
+ * lands the recommendation as a slab rather than another panel.
+ *
+ * The whole thing is progressive enhancement over server-rendered markup: every
+ * question, every card and the static fallback are already in the HTML, so with
+ * the script blocked the page still reads as a spec sheet. Under
+ * `prefers-reduced-motion` every animation below is skipped — panels swap
+ * instantly, counters jump, nothing flies — and the flow is unchanged.
  *
  * All sizing rules live in `src/data/configurator.ts`. Nothing numeric is
  * decided in here beyond arithmetic and rounding.
@@ -146,7 +152,34 @@ const fmt = {
 
 type FieldName = 'gpus' | 'kw' | 'share' | 'energy';
 
+/** Every animated figure, with the one formatter that owns it. */
+const FORMAT: Record<FieldName, (n: number) => string> = {
+  gpus: fmt.gpus,
+  kw: fmt.kw,
+  share: fmt.share,
+  energy: fmt.money,
+};
+
+const FIELDS = Object.keys(FORMAT) as FieldName[];
+
+function asField(value: string | undefined): FieldName | null {
+  return value !== undefined && Object.prototype.hasOwnProperty.call(FORMAT, value)
+    ? (value as FieldName)
+    : null;
+}
+
 const CARD = '[data-option]';
+
+/**
+ * The local colour ladder is declared on the configurator root. The fly-to-chip
+ * ghost is appended to <body>, outside that scope, so it is copied across —
+ * otherwise the card loses its surface halfway through the flight.
+ */
+const LADDER = [
+  '--cfg-line', '--cfg-hair', '--cfg-hair-soft', '--cfg-surface',
+  '--cfg-card', '--cfg-lift-1', '--cfg-lift-2',
+  '--cfg-sel-bg', '--cfg-sel-fg', '--cfg-sel-idx', '--cfg-accent', '--cfg-dot',
+];
 
 /**
  * Binds one server-rendered `[data-configurator]` block.
@@ -164,15 +197,21 @@ export class Configurator {
 
   private readonly panels: HTMLElement[] = [];
   private readonly groups: HTMLElement[] = [];
+  private readonly pips: HTMLElement[] = [];
   private readonly resultEl: HTMLElement | null;
   private readonly announceEl: HTMLElement | null;
   private readonly motionQuery: MediaQueryList | null;
 
   private answers: Answers = {};
   private index = 0;
+  private last: SizingResult | null = null;
   private readonly shown = new Map<FieldName, number>();
   private readonly proxies = new Map<FieldName, { v: number }>();
   private ghost: HTMLElement | null = null;
+  /** The outgoing-question timeline, held so a mid-flight jump can undo it. */
+  private exit: { tl: gsap.core.Timeline; els: HTMLElement[] } | null = null;
+  /** Per-element count-ups on the result slab. */
+  private tallies: gsap.core.Tween[] = [];
 
   private readonly onClick = (event: MouseEvent): void => this.handleClick(event);
   private readonly onKeyDown = (event: KeyboardEvent): void => this.handleKey(event);
@@ -191,10 +230,15 @@ export class Configurator {
       if (!panel || !group) continue;
       this.panels.push(panel);
       this.groups.push(group);
+      const pip = root.querySelector<HTMLElement>(`[data-pip="${question.id}"]`);
+      if (pip) this.pips.push(pip);
     }
     if (this.panels.length !== questions.length) return;
 
     root.dataset.enhanced = 'true';
+    // The gauge's "fills Phase 1A" mark is placed from the rule data, not from
+    // a percentage retyped into the stylesheet.
+    root.style.setProperty('--cfg-tight', `${rules.tightGpuShare * 100}%`);
     root.addEventListener('click', this.onClick);
     root.addEventListener('keydown', this.onKeyDown);
 
@@ -204,6 +248,7 @@ export class Configurator {
     if (this.resultEl) this.resultEl.hidden = true;
     this.groups.forEach((group) => this.roveTo(group, this.cards(group)[0] ?? null, false));
     this.render(false);
+    this.syncPips();
   }
 
   private get reduced(): boolean {
@@ -333,6 +378,12 @@ export class Configurator {
 
   // --- Movement -------------------------------------------------------
 
+  /**
+   * Clear the outgoing question, then rise the next one in. The discarded cards
+   * fall in reading order, the prompt is pulled up out of its own mask, and the
+   * chosen card leaves on its own path into the summary chip — so the swap reads
+   * as one move rather than two panels trading places.
+   */
   private advance(from: number, to: number, card: HTMLElement, chip: HTMLElement | null): void {
     const outgoing = this.panels[from];
     if (!outgoing) return;
@@ -344,26 +395,30 @@ export class Configurator {
 
     const cardRect = card.getBoundingClientRect();
     const chipRect = chip?.getBoundingClientRect() ?? null;
-
-    // Dim the cards that were not chosen before the winner leaves.
     const siblings = this.cards(outgoing).filter((c) => c !== card);
-    gsap.to(siblings, { opacity: 0, y: 8, duration: 0.22, ease: 'power2.in' });
+    const lines = Array.from(outgoing.querySelectorAll<HTMLElement>('.cfg__line-inner'));
 
-    if (chipRect && chipRect.width > 0) {
-      this.flyToChip(card, cardRect, chip as HTMLElement, chipRect);
-    }
+    const flying = !!(chip && chipRect && chipRect.width > 0);
+    if (flying && chip && chipRect) this.flyToChip(card, cardRect, chip, chipRect);
 
-    gsap.to(outgoing, {
-      opacity: 0,
-      y: -14,
-      duration: 0.3,
-      ease: 'power2.in',
-      onComplete: () => {
-        gsap.set(siblings, { clearProps: 'opacity,transform' });
-        gsap.set(outgoing, { clearProps: 'opacity,transform' });
-        this.goTo(to, true);
-      },
-    });
+    const tl = gsap.timeline({ onComplete: () => this.goTo(to, true) });
+    this.exit = { tl, els: [...siblings, ...lines, card, outgoing] };
+
+    tl.to(siblings, { opacity: 0, y: 12, duration: 0.26, ease: 'power2.in', stagger: 0.035 }, 0);
+    tl.to(lines, { yPercent: -115, duration: 0.36, ease: 'power2.in', stagger: 0.04 }, 0.06);
+    // The chosen card is handed to the ghost, so it is cut rather than faded.
+    if (flying) tl.set(card, { opacity: 0 }, 0.03);
+    else tl.to(card, { opacity: 0, y: 12, duration: 0.26, ease: 'power2.in' }, 0.06);
+    tl.to(outgoing, { opacity: 0, duration: 0.2, ease: 'power1.in' }, 0.28);
+  }
+
+  /** Undo whatever the outgoing timeline left inline, wherever it got to. */
+  private clearExit(): void {
+    if (!this.exit) return;
+    const { tl, els } = this.exit;
+    this.exit = null;
+    tl.kill();
+    gsap.set(els, { clearProps: 'opacity,transform' });
   }
 
   /** Detached clone of the chosen card, flown into its summary chip. */
@@ -374,6 +429,11 @@ export class Configurator {
     ghost.removeAttribute('id');
     ghost.setAttribute('aria-hidden', 'true');
     ghost.tabIndex = -1;
+
+    // Carry the block's colour ladder out to <body> with the clone.
+    const ladder = window.getComputedStyle(this.root);
+    for (const name of LADDER) ghost.style.setProperty(name, ladder.getPropertyValue(name));
+
     Object.assign(ghost.style, {
       position: 'fixed',
       left: `${from.left}px`,
@@ -394,12 +454,17 @@ export class Configurator {
       y: to.top - from.top,
       scaleX: to.width / Math.max(1, from.width),
       scaleY: to.height / Math.max(1, from.height),
-      opacity: 0.15,
-      duration: 0.52,
+      opacity: 0.12,
+      duration: 0.54,
       ease: 'power3.inOut',
       onComplete: () => this.clearGhost(),
     });
-    gsap.to(chip, { opacity: 1, duration: 0.28, delay: 0.34, ease: 'power2.out' });
+    // The chip catches it: the answer lands rather than appears.
+    gsap.fromTo(
+      chip,
+      { opacity: 0, scale: 0.84 },
+      { opacity: 1, scale: 1, duration: 0.42, delay: 0.34, ease: 'back.out(2.2)', clearProps: 'transform' },
+    );
   }
 
   private clearGhost(): void {
@@ -411,16 +476,22 @@ export class Configurator {
 
   /** `index === questions.length` shows the result panel. */
   private goTo(index: number, focus: boolean): void {
+    this.clearExit();
+    this.killTallies();
     this.index = Math.max(0, Math.min(index, questions.length));
     const atResult = this.index === questions.length;
 
     this.panels.forEach((panel, i) => { panel.hidden = i !== this.index; });
     if (this.resultEl) this.resultEl.hidden = !atResult;
+    this.syncPips();
 
     const incoming = atResult ? this.resultEl : this.panels[this.index] ?? null;
     if (!incoming) return;
 
-    if (!this.reduced) this.reveal(incoming);
+    if (!this.reduced) {
+      if (atResult) this.revealResult(incoming);
+      else this.reveal(incoming);
+    }
 
     if (!focus) return;
     if (atResult) {
@@ -437,22 +508,147 @@ export class Configurator {
   /** Masked per-line rise, the same treatment the stage panels use. */
   private reveal(panel: HTMLElement): void {
     const lines = Array.from(panel.querySelectorAll<HTMLElement>('.cfg__line-inner'));
-    const cards = Array.from(panel.querySelectorAll<HTMLElement>('[data-option], [data-reveal]'));
+    const cards = Array.from(panel.querySelectorAll<HTMLElement>(CARD));
 
     gsap.killTweensOf([...lines, ...cards]);
     if (lines.length) {
       gsap.fromTo(
         lines,
-        { yPercent: 115, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 0.62, ease: 'power3.out', stagger: 0.05, clearProps: 'transform,opacity' },
+        { yPercent: 118, opacity: 0 },
+        { yPercent: 0, opacity: 1, duration: 0.66, ease: 'power3.out', stagger: 0.055, clearProps: 'transform,opacity' },
       );
     }
     if (cards.length) {
       gsap.fromTo(
         cards,
-        { y: 18, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out', stagger: 0.045, delay: 0.1, clearProps: 'transform,opacity' },
+        { y: 22, opacity: 0, scale: 0.985 },
+        {
+          y: 0, opacity: 1, scale: 1,
+          duration: 0.55, ease: 'power3.out', stagger: 0.05, delay: 0.14,
+          clearProps: 'transform,opacity',
+        },
       );
+    }
+  }
+
+  /**
+   * The payoff. The slab lands, the verdict seal snaps in, the headline rises,
+   * the rules draw left to right and every figure counts up from zero behind
+   * them — the reserve call arrives last, once the numbers have settled.
+   */
+  private revealResult(panel: HTMLElement): void {
+    const slab = panel.querySelector<HTMLElement>('[data-slab]');
+    const seal = panel.querySelector<HTMLElement>('[data-seal]');
+    const cta = panel.querySelector<HTMLElement>('[data-reveal]');
+    const lines = Array.from(panel.querySelectorAll<HTMLElement>('.cfg__line-inner'));
+    const drawn = Array.from(panel.querySelectorAll<HTMLElement>('[data-rule]'));
+    const cells = Array.from(panel.querySelectorAll<HTMLElement>('.cfg__result-cell'));
+    const notes = Array.from(panel.querySelectorAll<HTMLElement>('.cfg__note'));
+
+    const all: HTMLElement[] = [slab, seal, cta, ...lines, ...drawn, ...cells, ...notes]
+      .filter((el): el is HTMLElement => el !== null);
+    gsap.killTweensOf(all);
+
+    const tl = gsap.timeline();
+    if (slab) {
+      tl.fromTo(
+        slab,
+        { opacity: 0, y: 30, scale: 0.985 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.72, ease: 'power3.out', clearProps: 'transform,opacity' },
+        0,
+      );
+    }
+    if (lines.length) {
+      tl.fromTo(
+        lines,
+        { yPercent: 118, opacity: 0 },
+        { yPercent: 0, opacity: 1, duration: 0.72, ease: 'power3.out', stagger: 0.06, clearProps: 'transform,opacity' },
+        0.14,
+      );
+    }
+    if (seal) {
+      tl.fromTo(
+        seal,
+        { opacity: 0, scale: 0.86 },
+        { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(2)', clearProps: 'transform,opacity' },
+        0.3,
+      );
+    }
+    if (drawn.length) {
+      tl.fromTo(
+        drawn,
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.62, ease: 'power3.inOut', stagger: 0.06, clearProps: 'transform' },
+        0.3,
+      );
+    }
+    if (cells.length) {
+      tl.fromTo(
+        cells,
+        { opacity: 0, y: 14 },
+        { opacity: 1, y: 0, duration: 0.52, ease: 'power3.out', stagger: 0.06, clearProps: 'transform,opacity' },
+        0.34,
+      );
+    }
+    if (notes.length) {
+      tl.fromTo(
+        notes,
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.44, ease: 'power2.out', stagger: 0.05, clearProps: 'transform,opacity' },
+        0.62,
+      );
+    }
+    if (cta) {
+      tl.fromTo(
+        cta,
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.52, ease: 'back.out(1.5)', clearProps: 'transform,opacity' },
+        0.78,
+      );
+    }
+
+    this.tally();
+  }
+
+  /** Count every figure on the slab up from zero, in the order they read. */
+  private tally(): void {
+    if (!this.resultEl || this.reduced) return;
+    const els = Array.from(this.resultEl.querySelectorAll<HTMLElement>('[data-tally]'));
+    if (!els.length) return;
+
+    // Hand the figures over: the shared count-up must not write over the tally.
+    for (const name of FIELDS) {
+      const proxy = this.proxies.get(name);
+      if (proxy) gsap.killTweensOf(proxy);
+      this.write(name, this.shown.get(name) ?? 0);
+    }
+
+    els.forEach((el, i) => {
+      const name = asField(el.dataset.field);
+      if (!name) return;
+      const format = FORMAT[name];
+      const target = this.shown.get(name) ?? 0;
+      const proxy = { v: 0 };
+      el.textContent = format(0);
+      this.tallies.push(gsap.to(proxy, {
+        v: target,
+        duration: 0.95,
+        delay: 0.36 + i * 0.09,
+        ease: 'power2.out',
+        onUpdate: () => { el.textContent = format(proxy.v); },
+        onComplete: () => { el.textContent = format(target); },
+      }));
+    });
+  }
+
+  private killTallies(): void {
+    if (!this.tallies.length) return;
+    for (const tween of this.tallies) tween.kill();
+    this.tallies = [];
+    if (!this.resultEl) return;
+    for (const el of this.resultEl.querySelectorAll<HTMLElement>('[data-tally]')) {
+      const name = asField(el.dataset.field);
+      if (name) el.textContent = FORMAT[name](this.shown.get(name) ?? 0);
     }
   }
 
@@ -465,13 +661,17 @@ export class Configurator {
   private restart(): void {
     this.clearGhost();
     this.answers = {};
+    this.last = null;
     this.groups.forEach((group) => {
       for (const card of this.cards(group)) card.setAttribute('aria-checked', 'false');
       this.roveTo(group, this.cards(group)[0] ?? null, false);
     });
     for (const question of questions) {
       const slot = this.root.querySelector<HTMLElement>(`[data-chip-slot="${question.id}"]`);
-      if (slot) slot.hidden = true;
+      if (slot) {
+        gsap.set(slot, { clearProps: 'opacity,transform' });
+        slot.hidden = true;
+      }
     }
     this.render(true);
     this.goTo(0, true);
@@ -485,13 +685,26 @@ export class Configurator {
     }
   }
 
-  private number(name: FieldName, value: number, format: (n: number) => string): void {
+  /** Write one figure everywhere it appears, formatted by its own rule. */
+  private write(name: FieldName, value: number): void {
+    const format = FORMAT[name];
+    for (const el of this.root.querySelectorAll<HTMLElement>(`[data-field="${name}"]`)) {
+      el.textContent = format(value);
+    }
+  }
+
+  /**
+   * Count to the new figure and settle on it. The run is longer for a bigger
+   * move, so a jump from 4 to 60 GPUs takes visibly more work than 4 to 8.
+   */
+  private number(name: FieldName, value: number): void {
     const els = Array.from(this.root.querySelectorAll<HTMLElement>(`[data-field="${name}"]`));
     if (!els.length) return;
 
     const from = this.shown.get(name) ?? 0;
     this.shown.set(name, value);
 
+    const format = FORMAT[name];
     const write = (n: number): void => { for (const el of els) el.textContent = format(n); };
 
     if (this.reduced || from === value) {
@@ -504,22 +717,79 @@ export class Configurator {
     const p = proxy;
     gsap.killTweensOf(p);
     p.v = from;
+
+    const span = Math.abs(value - from) / Math.max(1, Math.abs(value), Math.abs(from));
+    const pops = els.filter((el) => el.dataset.pop !== undefined);
+
     gsap.to(p, {
       v: value,
-      duration: 0.7,
+      duration: 0.55 + Math.min(0.45, span * 0.45),
       ease: 'power2.out',
       onUpdate: () => write(p.v),
-      onComplete: () => write(value),
+      onComplete: () => { write(value); this.pop(pops); },
+    });
+  }
+
+  /** The settle: a figure that has just changed nudges once and stops. */
+  private pop(els: HTMLElement[]): void {
+    if (this.reduced || !els.length) return;
+    gsap.fromTo(
+      els,
+      { scale: 1 },
+      {
+        scale: 1.05, duration: 0.13, ease: 'power2.out',
+        transformOrigin: 'left center', yoyo: true, repeat: 1,
+        clearProps: 'transform',
+      },
+    );
+  }
+
+  /** A wash across the readout when the verdict itself changes. */
+  private flash(): void {
+    const el = this.root.querySelector<HTMLElement>('[data-flash]');
+    if (!el || this.reduced) return;
+    gsap.killTweensOf(el);
+    gsap.fromTo(el, { opacity: 0 }, { opacity: 0.18, duration: 0.18, ease: 'power2.out', yoyo: true, repeat: 1 });
+  }
+
+  /** The gamified bit: how many GPUs that answer just moved the estimate by. */
+  private showDelta(diff: number): void {
+    const el = this.root.querySelector<HTMLElement>('[data-delta]');
+    if (!el || this.reduced || diff === 0) return;
+    const size = Math.abs(diff);
+    el.textContent = `${diff > 0 ? '+' : '−'}${fmt.gpus(size)} GPU${size === 1 ? '' : 's'}`;
+    el.dataset.dir = diff > 0 ? 'up' : 'down';
+    gsap.killTweensOf(el);
+    gsap.timeline()
+      .fromTo(
+        el,
+        { opacity: 0, y: -10, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: 'back.out(2.4)' },
+      )
+      .to(el, { opacity: 0, y: -6, duration: 0.3, ease: 'power2.in', delay: 1.6 });
+  }
+
+  /** Answered / current markers on the foot's progress pips. */
+  private syncPips(): void {
+    this.pips.forEach((pip, i) => {
+      const question = questions[i];
+      const answered = !!(question && this.answers[question.id]);
+      if (answered) pip.dataset.on = '';
+      else delete pip.dataset.on;
+      if (i === this.index) pip.dataset.now = '';
+      else delete pip.dataset.now;
     });
   }
 
   private render(announce: boolean): void {
     const r = computeSizing(this.answers);
+    const previous = this.last;
+    this.last = r;
 
-    this.number('gpus', r.gpus, fmt.gpus);
-    this.number('kw', r.totalKw, fmt.kw);
-    this.number('share', r.transformerShare, fmt.share);
-    this.number('energy', r.energy.usd, fmt.money);
+    this.number('gpus', r.gpus);
+    this.number('kw', r.totalKw);
+    this.number('share', r.transformerShare);
+    this.number('energy', r.energy.usd);
 
     this.text('energy-period', `per ${r.energy.period}`);
     this.text('phase-share', `${fmt.share(r.phase1aShare)}% of the Phase 1A load`);
@@ -542,13 +812,14 @@ export class Configurator {
 
     this.root.dataset.fit = r.fit;
     this.root.dataset.state = r.complete ? 'complete' : 'sizing';
+    this.syncPips();
 
     const bar = this.root.querySelector<HTMLElement>('[data-bar]');
     if (bar) {
-      const pct = Math.min(100, (r.gpus / envelope.rentableGpus) * 100);
-      if (this.reduced) gsap.set(bar, { width: `${pct}%` });
-      else gsap.to(bar, { width: `${pct}%`, duration: 0.6, ease: 'power3.out' });
-      bar.parentElement?.setAttribute('aria-valuenow', String(Math.round(pct)));
+      const share = Math.min(1, r.gpus / envelope.rentableGpus);
+      if (this.reduced) gsap.set(bar, { scaleX: share });
+      else gsap.to(bar, { scaleX: share, duration: 0.7, ease: 'power3.out' });
+      bar.parentElement?.setAttribute('aria-valuenow', String(Math.round(share * 100)));
     }
 
     const notes = this.root.querySelector<HTMLElement>('[data-notes]');
@@ -559,6 +830,13 @@ export class Configurator {
         li.textContent = note;
         return li;
       }));
+    }
+
+    // React only to a change the visitor can act on: a different GPU count, or
+    // a verdict that has crossed into the next band.
+    if (announce && previous) {
+      if (previous.gpus !== r.gpus) this.showDelta(r.gpus - previous.gpus);
+      if (previous.fit !== r.fit && r.gpus > 0) this.flash();
     }
 
     if (announce && this.announceEl) {
@@ -572,6 +850,8 @@ export class Configurator {
 
   destroy(): void {
     this.clearGhost();
+    this.clearExit();
+    this.killTallies();
     this.root.removeEventListener('click', this.onClick);
     this.root.removeEventListener('keydown', this.onKeyDown);
     delete this.root.dataset.enhanced;
