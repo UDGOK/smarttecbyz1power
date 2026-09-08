@@ -83,7 +83,7 @@ function supportsWebGL(): boolean {
   }
 }
 
-export function boot(): void {
+function run(): void {
   const canvas = document.querySelector<HTMLCanvasElement>('#experience-canvas');
   const root = document.querySelector<HTMLElement>('[data-stage-root]');
   const holdSlot = document.querySelector<HTMLElement>('#hold-slot');
@@ -121,7 +121,10 @@ export function boot(): void {
   // is most of why its motion reads smooth. Same model here.
   const scroller = new ScrollManager({ reducedMotion: reduced });
   const rig = new CameraRig({ reducedMotion: reduced });
-  document.body.dataset.virtualScroll = '';
+  // Deliberately NOT armed here. `data-virtual-scroll` sets overflow: hidden,
+  // so arming it before the scroller is actually running means any later
+  // failure leaves a page that cannot be scrolled at all. It goes on at the
+  // same moment the scroller is enabled, and comes off if anything breaks.
 
   /**
    * A stage's scroll track, in the manager's own units.
@@ -705,6 +708,59 @@ export function boot(): void {
     reveal(0);
     audio.play('stage-land-ambient', { fadeIn: 1.2, volume: 0.35 });
     scroller.enable();
+    document.body.dataset.virtualScroll = '';
     onProgress(0);
+    window.dispatchEvent(new Event('experience:ready'));
   });
+}
+
+
+/**
+ * Boot behind a safety net.
+ *
+ * `run()` hides the static reading path and takes the document's scrolling
+ * away within its first few statements, and only reveals the stage copy some
+ * way further down. A throw in between — a shader that will not compile on a
+ * particular phone, a missing platform API — therefore leaves exactly the
+ * worst possible state: no headings and no way to scroll.
+ *
+ * So: if anything throws, or if the experience has not signed on within a few
+ * seconds, hand the page back to the browser. A plain scrollable document with
+ * its content visible is a far better failure than a locked blank one.
+ */
+export function boot(): void {
+  const recover = (why: string, err?: unknown): void => {
+    document.documentElement.classList.remove('js-ready');
+    delete document.body.dataset.virtualScroll;
+    document.querySelector<HTMLElement>('#after')?.removeAttribute('hidden');
+    const loader = document.querySelector<HTMLElement>('#loader');
+    if (loader) { loader.hidden = true; loader.classList.add('is-done'); }
+    for (const panel of document.querySelectorAll<HTMLElement>('[data-stage-panel]')) {
+      panel.hidden = false;
+      panel.removeAttribute('aria-hidden');
+      const sticky = panel.querySelector<HTMLElement>('[data-stage-sticky]');
+      if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
+      for (const line of panel.querySelectorAll<HTMLElement>('.line__inner')) {
+        line.style.opacity = '1';
+        line.style.transform = 'none';
+      }
+    }
+    // eslint-disable-next-line no-console
+    console.warn(`[boot] fell back to the plain document: ${why}`, err ?? '');
+  };
+
+  // If the gate never clears, the visitor is staring at a title card forever.
+  const watchdog = window.setTimeout(() => {
+    const loader = document.querySelector<HTMLElement>('#loader');
+    if (loader && !loader.hidden) recover('the entry card never cleared');
+  }, 7000);
+
+  window.addEventListener('experience:ready', () => window.clearTimeout(watchdog), { once: true });
+
+  try {
+    run();
+  } catch (err) {
+    window.clearTimeout(watchdog);
+    recover('boot threw', err);
+  }
 }
