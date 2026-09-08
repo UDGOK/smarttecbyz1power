@@ -34,12 +34,20 @@ export function initLoader(onComplete: () => void): void {
   let dwell = 0;
   const openedAt = performance.now();
 
-  const finish = (): void => {
+  /**
+   * `byUser` matters: the card also clears itself on a timer, and unlocking
+   * audio there constructs an AudioContext with no gesture behind it. Chrome
+   * then leaves it suspended, the bus believes it is live, and every sound
+   * queues against a frozen clock. Only a real interaction may unlock.
+   */
+  const finish = (byUser: boolean): void => {
     if (done) return;
     done = true;
     window.clearTimeout(dwell);
-    audio.unlock();
-    audio.play('whoosh');
+    if (byUser) {
+      audio.unlock();
+      audio.play('whoosh');
+    }
     el.classList.add('is-done');
     window.setTimeout(() => {
       el.hidden = true;
@@ -52,7 +60,7 @@ export function initLoader(onComplete: () => void): void {
   // card is a greeting, not a gate.
   const onAny = (): void => {
     if (performance.now() - openedAt < GRACE_MS) return;
-    finish();
+    finish(true);
   };
 
   function teardown(): void {
@@ -69,7 +77,7 @@ export function initLoader(onComplete: () => void): void {
     onAny();
   };
 
-  skip?.addEventListener('click', () => finish());
+  skip?.addEventListener('click', () => finish(true));
   window.addEventListener('wheel', onAny, { passive: true });
   window.addEventListener('pointerdown', onAny, { passive: true });
   window.addEventListener('touchstart', onAny, { passive: true });
@@ -80,7 +88,7 @@ export function initLoader(onComplete: () => void): void {
     requestAnimationFrame(() => {
       el.classList.add('is-in');
       window.setTimeout(() => el.classList.add('is-ready'), reduced ? 0 : 700);
-      dwell = window.setTimeout(finish, reduced ? 600 : DWELL_MS);
+        dwell = window.setTimeout(() => finish(false), reduced ? 600 : DWELL_MS);
     });
   });
 }

@@ -425,13 +425,29 @@ function hitOut(h: Hit, pan: number, wet: number): GainNode {
   p.pan.value = pan;
   g.connect(p);
   p.connect(h.dry);
+  const extra: AudioNode[] = [p];
   if (wet > 0) {
     const w = h.ctx.createGain();
     w.gain.value = wet;
     p.connect(w);
     w.connect(h.send);
+    extra.push(w);
   }
+  // The panner and send gain outlive the source that feeds them, and nothing
+  // was disconnecting them — one sparse event every few seconds adds up to a
+  // thousand permanently connected nodes over an hour of listening. They ride
+  // along on the gain so `killHit` can take the whole chain down together.
+  (g as HitGain).__extra = extra;
   return g;
+}
+
+interface HitGain extends GainNode { __extra?: AudioNode[] }
+
+/** Disconnect an event's output and everything hitOut hung off it. */
+function killHit(g: GainNode): void {
+  g.disconnect();
+  for (const n of (g as HitGain).__extra ?? []) n.disconnect();
+  (g as HitGain).__extra = undefined;
 }
 
 /** Envelope every event the same way: never a value set, always a ramp. */
@@ -459,7 +475,7 @@ function tick(h: Hit, at: number, o: {
   f.connect(g);
   src.start(at, rand(0, 3));
   src.stop(at + o.decay + 0.08);
-  src.onended = () => { src.disconnect(); f.disconnect(); g.disconnect(); };
+  src.onended = () => { src.disconnect(); f.disconnect(); killHit(g); };
 }
 
 /** A pitch-dropping sine: transformer thunk, distant door, contactor weight. */
@@ -475,7 +491,7 @@ function thunk(h: Hit, at: number, o: {
   osc.connect(g);
   osc.start(at);
   osc.stop(at + o.decay + 0.1);
-  osc.onended = () => { osc.disconnect(); g.disconnect(); };
+  osc.onended = () => { osc.disconnect(); killHit(g); };
 }
 
 /** A sine bell with a couple of partials: a ping, a bloom, a credit. */
@@ -499,7 +515,7 @@ function bell(h: Hit, at: number, o: {
     pg.connect(lp);
     osc.start(at);
     osc.stop(at + o.decay + 0.12);
-    osc.onended = () => { osc.disconnect(); pg.disconnect(); };
+    osc.onended = () => { osc.disconnect(); pg.disconnect(); killHit(g); };
   });
 }
 
@@ -524,7 +540,7 @@ function sweep(h: Hit, at: number, o: {
   f.connect(g);
   src.start(at, rand(0, 3));
   src.stop(at + o.dur + 0.35);
-  src.onended = () => { src.disconnect(); f.disconnect(); g.disconnect(); };
+  src.onended = () => { src.disconnect(); f.disconnect(); killHit(g); };
 }
 
 // ---------------------------------------------------------------------------
@@ -901,7 +917,14 @@ class AudioBus {
 
   /** Browsers require a gesture before audio may start. */
   unlock(): void {
-    if (this.ctx) { void this.ctx.resume(); this.muted = false; return; }
+    if (this.ctx) {
+      // Only claim to be live once the context actually is. Setting muted
+      // false against a suspended context makes the bus queue every source
+      // against a frozen currentTime, and they all fire at once on resume.
+      void this.ctx.resume().then(() => { this.muted = this.ctx?.state !== 'running'; });
+      this.muted = this.ctx.state !== 'running';
+      return;
+    }
     const Ctor = window.AudioContext
       ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return;
@@ -911,7 +934,10 @@ class AudioBus {
     const chain = createMasterChain(ctx);
     chain.output.connect(ctx.destination);
     this.master = chain.input;
-    this.muted = false;
+    this.muted = ctx.state !== 'running';
+    if (ctx.state !== 'running') {
+      void ctx.resume().then(() => { this.muted = ctx.state !== 'running'; });
+    }
 
     // The noise buffers cost around ten milliseconds to generate. Doing it on
     // idle keeps that off the gesture that unlocked us, and `ready()` forces

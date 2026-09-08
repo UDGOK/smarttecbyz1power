@@ -86,6 +86,10 @@ export function boot(): void {
 
   document.documentElement.classList.add('js-ready');
 
+  // The reading path below the experience ships visible so a no-JS visitor
+  // still gets it. Now that JS is running, hide it until the campus.
+  document.querySelector<HTMLElement>('#after')?.setAttribute('hidden', '');
+
   const canvasEl: HTMLCanvasElement = canvas;
   const rootEl: HTMLElement = root;
   const slot: HTMLElement = holdSlot;
@@ -610,6 +614,18 @@ export function boot(): void {
     if (msg) msg.textContent = 'Thanks — we will be in touch about Phase 1A.';
     form.reset();
   });
+
+  // Any first real interaction unlocks audio. It was previously wired only to
+  // a few controls, so a visitor who only ever scrolled heard nothing at all.
+  const unlockOnce = (): void => {
+    audio.unlock();
+    window.removeEventListener('pointerdown', unlockOnce);
+    window.removeEventListener('keydown', unlockOnce);
+    window.removeEventListener('touchstart', unlockOnce);
+  };
+  window.addEventListener('pointerdown', unlockOnce, { passive: true });
+  window.addEventListener('keydown', unlockOnce);
+  window.addEventListener('touchstart', unlockOnce, { passive: true });
 
   // --- Go ----------------------------------------------------------------
   initCursor();

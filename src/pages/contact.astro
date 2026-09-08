@@ -30,7 +30,7 @@ const headroomFactor = power.headroom.split(' ')[0];
       <span class="todo">[PLACEHOLDER: form endpoint — this form posts to /api/reserve, which is not implemented yet. Wire it to the CRM or mail relay before launch.]</span>
     </p>
 
-    <form class="form" method="post" action="/api/reserve">
+    <form class="form" id="reserve-enquiry" method="post" action="/api/reserve">
       <fieldset class="form__set">
         <legend class="form__legend"><span class="form__legend-n">01</span>You</legend>
 
@@ -136,6 +136,7 @@ const headroomFactor = power.headroom.split(' ')[0];
       </fieldset>
 
       <div class="form__actions">
+        <p class="form__status" data-form-status role="status" tabindex="-1" hidden></p>
         <button class="btn form__submit" type="submit">
           Send enquiry
           <span class="form__submit-arrow" aria-hidden="true">→</span>
@@ -199,6 +200,36 @@ const headroomFactor = power.headroom.split(' ')[0];
     </div>
   </section>
 </Content>
+
+<style>
+  .form__status {
+    margin: 0 0 var(--s-4);
+    padding: var(--s-3) var(--s-4);
+    border-left: 2px solid var(--c-signal);
+    color: var(--w-90);
+    font-size: var(--t-read);
+    max-width: 60ch;
+  }
+</style>
+
+<script>
+  /* The endpoint is not built yet. Until it is, intercept rather than let a
+     valid submission navigate to a 404 and take every typed field with it. */
+  const form = document.querySelector<HTMLFormElement>('#reserve-enquiry, form[action="/api/reserve"]');
+  const status = document.querySelector<HTMLElement>('[data-form-status]');
+  form?.addEventListener('submit', (e) => {
+    if (!form.checkValidity()) return;
+    e.preventDefault();
+    if (status) {
+      status.textContent =
+        'Thank you — your details are captured here but not yet delivered: the enquiry endpoint is not connected. '
+        + 'Please email us in the meantime, and nothing you typed has been lost.';
+      status.hidden = false;
+      status.focus();
+    }
+  });
+</script>
+
 
 <style>
   /* These are <p> elements inside .doc, so they carry .doc's own paragraph

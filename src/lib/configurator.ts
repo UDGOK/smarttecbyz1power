@@ -812,15 +812,19 @@ export class Configurator {
 
     this.text('energy-period', `per ${r.energy.period}`);
     this.text('phase-share', `${fmt.share(r.phase1aShare)}% of the Phase 1A load`);
-    this.text('fit', r.gpus === 0 ? 'Not sized yet' : r.fitCopy.label);
+    this.text('fit', r.answered === 0 ? 'Not sized yet' : r.fitCopy.label);
+    // "1 GPUS" read wrong next to a delta chip that already said "+1 GPU".
+    this.text('gpu-word', r.gpus === 1 ? 'GPU' : 'GPUs');
     this.text('fit-headline', r.fitCopy.headline);
     this.text('fit-detail', r.fitCopy.detail);
     this.text('progress', `${r.answered} / ${r.total}`);
     this.text(
       'gpu-note',
-      r.gpus === 0
+      r.answered === 0
         ? 'Pick a workload to start'
-        : r.provisional
+        : r.gpus === 0
+          ? 'Scale it to size the deployment'
+          : r.provisional
           ? `provisional · of ${envelope.rentableGpus} rentable`
           : `of ${envelope.rentableGpus} rentable`,
     );
@@ -859,9 +863,9 @@ export class Configurator {
     }
 
     if (announce && this.announceEl) {
-      this.announceEl.textContent = r.gpus === 0
+      this.announceEl.textContent = r.answered === 0
         ? 'No answers yet.'
-        : `${r.answered} of ${r.total} answered. ${fmt.gpus(r.gpus)} GPUs of ${envelope.rentableGpus} rentable, `
+        : `${r.answered} of ${r.total} answered. ${fmt.gpus(r.gpus)} ${r.gpus === 1 ? 'GPU' : 'GPUs'} of ${envelope.rentableGpus} rentable, `
           + `${fmt.kw(r.totalKw)} kilowatts estimated, ${fmt.share(r.transformerShare)} percent of the `
           + `${envelope.transformerLabel} transformer. ${r.fitCopy.label}.`;
     }

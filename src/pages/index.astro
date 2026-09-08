@@ -80,8 +80,9 @@ const grain =
     <CtaBar />
   </main>
 
-  <!-- Released once the campus is reached: the configurator and the reading path. -->
-  <section class="after" id="after" hidden>
+  <!-- Visible by default so it survives with JavaScript off; boot hides it and
+       releases it again once the campus is reached. -->
+  <section class="after" id="after">
     <Configurator />
   </section>
 
