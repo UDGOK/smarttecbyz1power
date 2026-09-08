@@ -61,6 +61,8 @@ const XFMR_D = 3.2;
 
 /** Time the clock is pinned to when the user asked for no motion. */
 const STILL_T = 8.0;
+/** Stream phase held under reduced motion — a well-distributed frame. */
+const STILL_PHASE = 4.7;
 
 const C_GOLD = '#f2b705';       // --c-power
 const C_GOLD_DEEP = '#7a5a02';  // --c-power-deep
@@ -180,7 +182,7 @@ const SKY_FRAG = /* glsl */ `
     // disc: a core, a corona, a glow, and a wash that reaches half the sky.
     // The lower limb is eaten by the same haze, so it sets *into* the horizon.
     float sd  = max(dot(d, uSun), 0.0);
-    float ext = smoothstep(0.004, 0.036, el);
+    float ext = smoothstep(-0.012, 0.052, el);
     float disc = smoothstep(0.99948, 0.99986, sd);
     float scatter = pow(sd, 2400.0) * 1.30
                   + pow(sd,  320.0) * 0.80
@@ -502,15 +504,23 @@ const METAL_FRAG = /* glsl */ `
 
 const STRIP_VERT = /* glsl */ `
   attribute float aSeed;
+  attribute float aFlare;   // 1 the instant a quantum lands, decaying after
+  attribute float aBump;    // the transient it adds to that cabinet's level
   varying vec2  vUv;
   varying float vSeed;
+  varying float vFlare;
+  varying float vBump;
   void main(){
     vUv = uv;
     #ifdef USE_INSTANCING
-      vSeed = aSeed;
+      vSeed  = aSeed;
+      vFlare = aFlare;
+      vBump  = aBump;
       gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0);
     #else
-      vSeed = 0.0;
+      vSeed  = 0.0;
+      vFlare = 0.0;
+      vBump  = 0.0;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     #endif
   }
@@ -527,23 +537,33 @@ const STRIP_FRAG = /* glsl */ `
   uniform vec3  uBlue;
   varying vec2  vUv;
   varying float vSeed;
+  varying float vFlare;
+  varying float vBump;
   ${COOL}
 
   void main(){
     // Ten cells per cabinet, filling from the bottom. Each cabinet lags its
-    // neighbour slightly so the bank fills as a bank, not as one bar.
-    float charge = clamp(uCharge * 1.18 - vSeed * 0.16, 0.0, 1.0);
+    // neighbour slightly so the bank fills as a bank, not as one bar, and the
+    // transient bump is what an arriving quantum actually buys.
+    float charge = clamp(uCharge * 1.16 - vSeed * 0.14 + vBump, 0.0, 1.0);
     float f = fract(vUv.y * 10.0);
     float gap = smoothstep(0.10, 0.20, f) * smoothstep(0.90, 0.80, f);
     float seg = floor(vUv.y * 10.0) * 0.1;
     float on = step(seg + 0.05, charge);
 
     float pulse = 0.70 + 0.30 * sin(uTime * 2.3 - vUv.y * 7.0 + vSeed * 6.283);
-    vec3 col = uGold * (on * pulse * 1.6 + 0.05);
+    vec3 col = uGold * (on * pulse * 1.55 + 0.05);
 
     // The live fill line, brighter and beating faster than the cells below it.
     float line = smoothstep(0.045, 0.0, abs(vUv.y - charge));
-    col += line * uEmber * (1.1 + 0.7 * sin(uTime * 3.1 + vSeed * 4.0));
+    col += line * uEmber * (1.0 + 0.6 * sin(uTime * 3.1 + vSeed * 4.0));
+
+    // Arrival. The whole strip lifts, and a ripple runs up the cell stack as
+    // the flare decays — so a quantum landing is a thing you can point at.
+    float rp = (1.0 - vFlare) * charge;
+    float ripple = smoothstep(0.075, 0.0, abs(vUv.y - rp)) * vFlare;
+    col *= 1.0 + vFlare * 0.85;
+    col += ripple * uEmber * 1.25;
 
     float edge = smoothstep(0.5, 0.30, abs(vUv.x - 0.5));
     col *= gap * edge;
@@ -626,39 +646,74 @@ const DUCT_FRAG = /* glsl */ `
 `;
 
 /* ------------------------------------------------------------------ *
- * Current — particles on quadratic beziers, panels -> cabinets -> tank.
- * Position is solved entirely in the vertex shader, so the CPU never
- * touches the buffer after build.
+ * The current — discrete quanta on quadratic beziers, panels -> cabinets
+ * -> tank. One InstancedMesh, one draw call, and the whole path is solved
+ * in the vertex shader: the CPU only reads the phase back to know when a
+ * particle lands.
+ *
+ * They are drawn as view-aligned streaks rather than point sprites. A point
+ * sprite is a square with a soft falloff, which under a real bloom pass
+ * turns into a blob; a short tapered streak with a small hard head reads as
+ * a moving quantum and gives the bloom something specific to catch.
  * ------------------------------------------------------------------ */
 
-const FLOW_VERT = /* glsl */ `
-  uniform float uTime;
-  uniform float uSize;
-  uniform float uPixelRatio;
+const STREAK_VERT = /* glsl */ `
+  uniform float uPhase;     // the animation clock, advanced by scroll speed
+  uniform float uEmit;      // 0..1 of the budget currently in flight
+  uniform float uPxScale;   // world units per pixel, per unit of depth
+  attribute vec3  aP0;
   attribute vec3  aP1;
   attribute vec3  aP2;
   attribute float aOff;
   attribute float aSpeed;
   attribute float aLeg;
+  attribute float aRank;
+  attribute float aWidth;
+  varying vec2  vUv;
   varying float vFade;
   varying float vLeg;
+  varying float vAlive;
+  varying float vHot;
+
+  vec3 bez(vec3 a, vec3 b, vec3 c, float t){
+    return mix(mix(a, b, t), mix(b, c, t), t);
+  }
 
   void main(){
-    // The built-in position attribute is P0 — the emitter — so the bezier
-    // costs three attributes, not four, and the CPU never touches the
-    // buffer after build.
-    float t = fract(aOff + uTime * aSpeed);
-    vec3 p = mix(mix(position, aP1, t), mix(aP1, aP2, t), t);
-    vec4 mv = modelViewMatrix * vec4(p, 1.0);
-    gl_Position = projectionMatrix * mv;
-    // Fade in and out at both ends so nothing pops at a junction.
-    vFade = sin(3.14159265 * t);
+    vUv  = uv;
     vLeg = aLeg;
-    gl_PointSize = uSize * uPixelRatio * (0.55 + 0.75 * vFade) / max(0.001, -mv.z);
+    // Emission rate is a threshold on a per-particle rank, not a rebuild:
+    // scrolling opens the gate wider and the stream thickens for free.
+    float alive = step(aRank, uEmit);
+    vAlive = alive;
+
+    float t  = fract(aOff + uPhase * aSpeed);
+    // Trail length follows the particle's own speed, so a fast quantum draws
+    // a longer streak than a slow one and the stream stops looking uniform.
+    float dt = clamp(0.010 + aSpeed * 0.075, 0.010, 0.070);
+    vec3 head = bez(aP0, aP1, aP2, t);
+    vec3 tail = bez(aP0, aP1, aP2, max(t - dt, 0.0));
+
+    vFade = sin(3.14159265 * t);
+    vHot  = smoothstep(0.80, 1.0, t);   // brightens on the run into the bank
+
+    vec4 hv = modelViewMatrix * vec4(head, 1.0);
+    vec4 tv = modelViewMatrix * vec4(tail, 1.0);
+    vec2 d  = hv.xy - tv.xy;
+    float l = length(d);
+    vec2 ax = l > 0.0001 ? d / l : vec2(1.0, 0.0);
+    vec2 pe = vec2(-ax.y, ax.x);
+
+    vec3 base = mix(tv.xyz, hv.xyz, uv.x);
+    float w = aWidth * (0.25 + 0.75 * uv.x) * (0.45 + 0.55 * vFade) * alive;
+    // Never let a far quantum drop below a couple of pixels, or the stream
+    // dissolves into aliasing noise at the back of the field.
+    w = max(w, uPxScale * max(-base.z, 0.001) * 3.0 * alive);
+    gl_Position = projectionMatrix * vec4(base + vec3(pe * (uv.y - 0.5) * w, 0.0), 1.0);
   }
 `;
 
-const FLOW_FRAG = /* glsl */ `
+const STREAK_FRAG = /* glsl */ `
   precision highp float;
   uniform float uMix;
   uniform float uCharge;
@@ -666,19 +721,30 @@ const FLOW_FRAG = /* glsl */ `
   uniform vec3  uEmber;
   uniform vec3  uMachine;
   uniform vec3  uBlue;
+  varying vec2  vUv;
   varying float vFade;
   varying float vLeg;
+  varying float vAlive;
+  varying float vHot;
   ${COOL}
 
   void main(){
-    float d = length(gl_PointCoord - 0.5);
-    float a = smoothstep(0.5, 0.0, d);
-    a *= a;
+    if (vAlive < 0.5) discard;
+    float across = abs(vUv.y - 0.5) * 2.0;
+    float body   = max(1.0 - across * across, 0.0);
+    float along  = pow(vUv.x, 2.6);                                  // tail
+    float core   = smoothstep(0.90, 1.0, vUv.x) * max(1.0 - across * 1.7, 0.0);
+
     // The second leg — cabinets to transformer — runs hotter than the first.
-    vec3 col = mix(uGold, uEmber, 0.25 + vLeg * 0.6);
-    col *= (0.55 + 0.75 * uCharge) * vFade;
+    vec3 col = mix(uGold, uEmber, 0.25 + 0.55 * vLeg) * (0.85 + 0.55 * vHot);
+    col += vec3(1.0, 0.94, 0.80) * core * 0.55;
     col = coolDown(col, uMachine, uBlue, uMix);
-    gl_FragColor = vec4(col, a * vFade * (0.35 + 0.65 * uCharge));
+
+    // Kept under 1 on purpose: the grade blooms at 0.52, and a streak that
+    // clips to white loses the gold the whole world is built on.
+    float a = min(body * (along * 0.85 + core * 0.95) * vFade * (0.50 + 0.50 * uCharge), 0.95);
+    if (a <= 0.002) discard;
+    gl_FragColor = vec4(col, a);
   }
 `;
 
@@ -726,8 +792,14 @@ export class PowerStage implements StageScene {
   private uFog = { value: 1 };
   private uCharge = { value: 0.2 };
   private uRes = { value: new THREE.Vector2(1, 1) };
-  private uPixelRatio = { value: 1 };
   private uFar = { value: 190 };
+  /** The stream's own clock. Advanced by delta scaled by scroll, never by
+   *  scroll directly — scrubbing must not teleport a quantum mid-flight. */
+  private uPhase = { value: 0 };
+  /** Fraction of the particle budget currently in flight. */
+  private uEmit = { value: 0.15 };
+  /** World units per pixel, per unit of depth. Keeps far quanta visible. */
+  private uPxScale = { value: 0.002 };
 
   /** Rebuildable pieces — replaced wholesale when the tier changes. */
   private ground: THREE.Mesh | null = null;
@@ -736,12 +808,24 @@ export class PowerStage implements StageScene {
   private postMat: THREE.ShaderMaterial | null = null;
   private shadowMat: THREE.ShaderMaterial | null = null;
   private shadowStripeMat: THREE.ShaderMaterial | null = null;
-  private flow: THREE.Points | null = null;
+  private flow: THREE.InstancedMesh | null = null;
+  private strips: THREE.InstancedMesh | null = null;
   private shadows: THREE.Group | null = null;
   private trackers = 0;
 
-  private charge = 0.2;
   private scroll = 0;
+  /** Per-cabinet arrival flash and level bump. Both decay to zero every
+   *  frame, so nothing here is state that only moves forward. */
+  private cabFlare = new Float32Array(0);
+  private cabBump = new Float32Array(0);
+  private flareAttr: THREE.InstancedBufferAttribute | null = null;
+  private bumpAttr: THREE.InstancedBufferAttribute | null = null;
+  /** Leg-A particles, read back each frame to detect arrivals. */
+  private arrOff = new Float32Array(0);
+  private arrSpeed = new Float32Array(0);
+  private arrRank = new Float32Array(0);
+  private arrCab = new Uint8Array(0);
+  private prevPhase = 0;
   private baseCam = new THREE.Vector3(0, 5.2, 22);
   private baseLook = new THREE.Vector3(0, 3.4, -30);
   private dollyZ = 16;
@@ -754,7 +838,6 @@ export class PowerStage implements StageScene {
     this.ctx = ctx;
     this.settings = settings;
     this.uFog.value = settings.fog ? 1 : 0;
-    this.uPixelRatio.value = ctx.renderer.getPixelRatio();
 
     this.buildSky();
     this.buildGround(settings);
@@ -991,7 +1074,20 @@ export class PowerStage implements StageScene {
     }
     strips.instanceMatrix.needsUpdate = true;
     stripGeo.setAttribute('aSeed', new THREE.InstancedBufferAttribute(stripSeeds, 1));
+
+    // The arrival channel. These two buffers ARE the decaying per-cabinet
+    // state — written in update(), read straight by the shader, no copy.
+    this.cabFlare = new Float32Array(cabinets);
+    this.cabBump = new Float32Array(cabinets);
+    this.flareAttr = new THREE.InstancedBufferAttribute(this.cabFlare, 1);
+    this.bumpAttr = new THREE.InstancedBufferAttribute(this.cabBump, 1);
+    this.flareAttr.setUsage(THREE.DynamicDrawUsage);
+    this.bumpAttr.setUsage(THREE.DynamicDrawUsage);
+    stripGeo.setAttribute('aFlare', this.flareAttr);
+    stripGeo.setAttribute('aBump', this.bumpAttr);
+
     strips.renderOrder = 4;
+    this.strips = strips;
     this.root.add(strips);
 
     /* Pad under the bank ------------------------------------------ */
@@ -1115,8 +1211,12 @@ export class PowerStage implements StageScene {
   /* --- energy flow ------------------------------------------------ */
 
   private buildFlow(settings: TierSettings): void {
-    const count = Math.max(60, settings.particleCount);
-    const legB = Math.round(count * 0.38);
+    // Thin hard on the low tier: the stream is the subject, but it is also the
+    // only thing here with per-particle vertex work, so it is what gives first.
+    const thin = settings.terrainSegments < 180 ? 0.45 : 1;
+    const count = Math.max(48, Math.round(settings.particleCount * thin));
+    const legB = Math.round(count * 0.13);
+    const legA = count - legB;
 
     const p0 = new Float32Array(count * 3);
     const p1 = new Float32Array(count * 3);
@@ -1124,6 +1224,14 @@ export class PowerStage implements StageScene {
     const off = new Float32Array(count);
     const spd = new Float32Array(count);
     const leg = new Float32Array(count);
+    const rank = new Float32Array(count);
+    const wid = new Float32Array(count);
+
+    // Read back on the CPU each frame to know when a quantum lands.
+    this.arrOff = new Float32Array(legA);
+    this.arrSpeed = new Float32Array(legA);
+    this.arrRank = new Float32Array(legA);
+    this.arrCab = new Uint8Array(legA);
 
     const rows = this.rowsFor(settings);
     const fieldBack = FIELD_Z_NEAR - (rows - 1) * ROW_SPACING;
@@ -1134,61 +1242,84 @@ export class PowerStage implements StageScene {
     const a = new THREE.Vector3();
     const c = new THREE.Vector3();
     for (let i = 0; i < count; i++) {
-      const isB = i >= count - legB;
-      const cab = cabs[Math.floor(Math.random() * cabs.length)]!;
+      const isB = i >= legA;
+      const ci = Math.floor(Math.random() * cabs.length);
+      const cab = cabs[ci]!;
 
       if (isB) {
         // Cabinets -> transformer: short, fast, low over the bus duct.
         a.set(cab.x, 1.7, cab.z + CAB_D / 2);
         c.set(XFMR.x - XFMR_W / 2 + 0.4, 2.4, XFMR.z + 0.4);
       } else {
-        // Panels -> cabinets: long, lazy, arcing in from the field. Emitters
-        // are rejection-sampled so nothing sets off from the empty clearing.
+        // Panels -> cabinets: the long haul, arcing in from the field.
+        // Emitters are biased toward the axis rather than spread flat across
+        // the section — a uniform spread puts most of the stream off the sides
+        // of the frame, where it charges nothing anybody can see. Rejection
+        // sampling keeps them out of the empty clearing.
         let ex = 0, ez = 0;
         for (let k = 0; k < 8; k++) {
-          ex = (Math.random() - 0.5) * 140;
-          ez = FIELD_Z_NEAR - Math.random() * Math.abs(FIELD_Z_NEAR - fieldBack);
+          const r = Math.random() * 2 - 1;
+          ex = Math.sign(r) * Math.pow(Math.abs(r), 1.8) * 58;
+          ez = (FIELD_Z_NEAR - 8) - Math.random() * Math.abs(FIELD_Z_NEAR - fieldBack) * 0.5;
           if (!this.inClearing(ex, ez)) break;
         }
-        a.set(ex, 1.7, ez);
-        c.set(cab.x, 2.2, cab.z + CAB_D / 2);
+        a.set(ex, 1.55 + Math.random() * 0.6, ez);
+        c.set(cab.x + (Math.random() - 0.5) * 0.9, 1.6 + Math.random() * 1.4, cab.z + CAB_D / 2);
       }
 
       p0[i * 3] = a.x; p0[i * 3 + 1] = a.y; p0[i * 3 + 2] = a.z;
       p2[i * 3] = c.x; p2[i * 3 + 1] = c.y; p2[i * 3 + 2] = c.z;
-      // Control point lifts the arc and pushes it sideways a little, so the
-      // stream reads as a braid rather than a wire.
-      p1[i * 3] = (a.x + c.x) * 0.5 + (Math.random() - 0.5) * 6.0;
-      p1[i * 3 + 1] = (a.y + c.y) * 0.5 + (isB ? 2.2 : 5.5) + Math.random() * 2.0;
-      p1[i * 3 + 2] = (a.z + c.z) * 0.5 + (Math.random() - 0.5) * 4.0;
+      // Control point lifts the arc and pushes it sideways, so the stream
+      // reads as a braid of separate paths rather than one wire.
+      p1[i * 3] = (a.x + c.x) * 0.5 + (Math.random() - 0.5) * (isB ? 2.5 : 9.0);
+      // The long leg arcs well clear of the array. At panel height the quanta
+      // are lost in the field's own lit edges — the flight has to happen
+      // against the dark sky before it dives onto the bank.
+      p1[i * 3 + 1] = (a.y + c.y) * 0.5 + (isB ? 1.6 : 13.0) + Math.random() * (isB ? 1.6 : 18.0);
+      p1[i * 3 + 2] = (a.z + c.z) * 0.5 + (Math.random() - 0.5) * (isB ? 2.5 : 8.0);
 
       off[i] = Math.random();
-      spd[i] = isB ? 0.26 + Math.random() * 0.16 : 0.07 + Math.random() * 0.06;
+      // A wide speed spread is what stops the stream reading as a conveyor.
+      spd[i] = isB
+        ? 0.38 + Math.random() * 0.42
+        : 0.050 + Math.pow(Math.random(), 1.6) * 0.115;
       leg[i] = isB ? 1 : 0;
+      rank[i] = Math.random();
+      wid[i] = (isB ? 0.15 : 0.20) + Math.random() * 0.16;
+
+      if (!isB) {
+        this.arrOff[i] = off[i]!;
+        this.arrSpeed[i] = spd[i]!;
+        this.arrRank[i] = rank[i]!;
+        this.arrCab[i] = ci;
+      }
     }
 
-    const geo = this.keep(new THREE.BufferGeometry());
-    geo.setAttribute('position', new THREE.BufferAttribute(p0, 3)); // P0 of the bezier
-    geo.setAttribute('aP1', new THREE.BufferAttribute(p1, 3));
-    geo.setAttribute('aP2', new THREE.BufferAttribute(p2, 3));
-    geo.setAttribute('aOff', new THREE.BufferAttribute(off, 1));
-    geo.setAttribute('aSpeed', new THREE.BufferAttribute(spd, 1));
-    geo.setAttribute('aLeg', new THREE.BufferAttribute(leg, 1));
+    // A unit quad, stretched along the screen-space velocity in the shader.
+    const geo = this.keep(new THREE.PlaneGeometry(1, 1, 1, 1));
+    geo.setAttribute('aP0', new THREE.InstancedBufferAttribute(p0, 3));
+    geo.setAttribute('aP1', new THREE.InstancedBufferAttribute(p1, 3));
+    geo.setAttribute('aP2', new THREE.InstancedBufferAttribute(p2, 3));
+    geo.setAttribute('aOff', new THREE.InstancedBufferAttribute(off, 1));
+    geo.setAttribute('aSpeed', new THREE.InstancedBufferAttribute(spd, 1));
+    geo.setAttribute('aLeg', new THREE.InstancedBufferAttribute(leg, 1));
+    geo.setAttribute('aRank', new THREE.InstancedBufferAttribute(rank, 1));
+    geo.setAttribute('aWidth', new THREE.InstancedBufferAttribute(wid, 1));
 
     const mat = this.flow
       ? (this.flow.material as THREE.ShaderMaterial)
       : this.keep(new THREE.ShaderMaterial({
-        vertexShader: FLOW_VERT,
-        fragmentShader: FLOW_FRAG,
+        vertexShader: STREAK_VERT,
+        fragmentShader: STREAK_FRAG,
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
         uniforms: {
-          uTime: this.uTime,
+          uPhase: this.uPhase,
+          uEmit: this.uEmit,
+          uPxScale: this.uPxScale,
           uMix: this.uMix,
           uCharge: this.uCharge,
-          uPixelRatio: this.uPixelRatio,
-          uSize: { value: 90 },
           uGold: { value: new THREE.Color(C_GOLD) },
           uEmber: { value: new THREE.Color(C_EMBER) },
           uMachine: { value: new THREE.Color(C_MACHINE) },
@@ -1196,7 +1327,8 @@ export class PowerStage implements StageScene {
         },
       }));
 
-    this.flow = new THREE.Points(geo, mat);
+    // One InstancedMesh, one draw call, whatever the budget.
+    this.flow = new THREE.InstancedMesh(geo, mat, count);
     this.flow.frustumCulled = false;
     this.flow.renderOrder = 6;
     this.root.add(this.flow);
@@ -1259,29 +1391,46 @@ export class PowerStage implements StageScene {
   /* ---------------------------------------------------------------- */
 
   update(elapsed: number, delta: number, scroll: number, ctx: SceneContext): void {
-    this.scroll = scroll;
+    const p = THREE.MathUtils.clamp(scroll, 0, 1);
+    this.scroll = p;
     const still = ctx.reducedMotion;
-    // Reduced motion pins the clock at a moment where the bank is part-charged
-    // and the current is mid-flight, so the still frame still reads as a
-    // working plant rather than a switched-off one.
+    const dt = Math.min(Math.max(delta, 0), 0.1);
+
+    // Reduced motion pins the clock at a moment where the current is
+    // mid-flight, so the still frame reads as a working plant rather than a
+    // switched-off one.
     this.uTime.value = still ? STILL_T : elapsed;
 
-    // The transformer takes charge as the stage is scrolled, with a slow swell
-    // on top. Smoothed on delta so a scroll jump does not snap the strips.
-    const target = still
-      ? 0.72
-      : THREE.MathUtils.clamp(0.24 + scroll * 0.62 + Math.sin(elapsed * 0.45) * 0.09, 0, 1);
-    const k = still ? 1 : 1 - Math.exp(-Math.min(delta, 0.1) * 3.2);
-    this.charge += (target - this.charge) * k;
-    this.uCharge.value = this.charge;
+    // --- charge -----------------------------------------------------
+    // Derived from scroll and nothing else. No accumulator, no easing toward
+    // a target: scroll back up the track and the bank discharges through the
+    // exact same values it charged through.
+    const e = p * p * (3 - 2 * p);
+    this.uCharge.value = 0.06 + 0.94 * e;
 
+    // Emission opens as the visitor scrolls. Reduced motion keeps the gate
+    // half open so a static frame still shows a populated stream.
+    this.uEmit.value = (still ? 0.45 : 0.10) + (still ? 0.55 : 0.90) * p;
+
+    // The stream's clock. Advancing it by delta (not by scroll) is what keeps
+    // a quantum on its path when the ring or the scrollbar is scrubbed; scroll
+    // only sets how fast that clock runs.
+    if (still) {
+      this.uPhase.value = STILL_PHASE;
+    } else {
+      this.uPhase.value += dt * (0.30 + 1.55 * p);
+    }
+
+    // --- arrivals ---------------------------------------------------
+    this.registerArrivals(dt, still);
+
+    // --- camera -----------------------------------------------------
     // Scroll cranes over the plant rather than pushing into it: rising and
     // easing forward while the aim drops and pulls back onto the bank keeps
     // every part of the arrangement inside the frame the whole way down the
     // track. A straight dolly walks the transformer off the right edge.
     // The move is user-driven, so it survives reduced motion; only the idle
     // breathing on top of it is switched off.
-    const p = scroll;
     const driftX = still ? 0 : Math.sin(elapsed * 0.13) * 0.5;
     const driftY = still ? 0 : Math.sin(elapsed * 0.21) * 0.09;
     ctx.camera.position.set(
@@ -1297,6 +1446,53 @@ export class PowerStage implements StageScene {
     );
   }
 
+  /**
+   * Which cabinets just took a hit.
+   *
+   * Every leg-A particle's position is a closed form of the shared phase, so
+   * the landing moment can be read back on the CPU without a readback: a
+   * quantum in the last few percent of its path is arriving at the cabinet it
+   * was assigned at build time. The flash and the level bump both decay every
+   * frame, which is what keeps them transient rather than accumulated.
+   */
+  private registerArrivals(dt: number, still: boolean): void {
+    const n = this.cabFlare.length;
+    if (n === 0) return;
+
+    const decay = Math.exp(-dt * 5.0);
+    for (let k = 0; k < n; k++) {
+      this.cabFlare[k]! *= decay;
+      this.cabBump[k]! *= decay;
+    }
+
+    if (!still && this.uPhase.value !== this.prevPhase) {
+      const phase = this.uPhase.value;
+      const prev = this.prevPhase;
+      const emit = this.uEmit.value;
+      const count = this.arrOff.length;
+      for (let i = 0; i < count; i++) {
+        if (this.arrRank[i]! > emit) continue;
+        const sp = this.arrSpeed[i]!;
+        const o = this.arrOff[i]!;
+        // A lap boundary crossed between the last frame and this one IS the
+        // arrival. Comparing floors gives exactly one impulse per landing —
+        // no per-particle state, and no re-firing while it sits in the last
+        // few percent of its path.
+        if (Math.floor(o + phase * sp) === Math.floor(o + prev * sp)) continue;
+        const k = this.arrCab[i]!;
+        // Small additive impulses: one quantum is a ping, a flood of them is
+        // a boil. A max() here would peg every cabinet at full and the whole
+        // effect would read as a constant glow.
+        this.cabFlare[k] = Math.min(1, this.cabFlare[k]! + 0.11);
+        this.cabBump[k] = Math.min(0.10, this.cabBump[k]! + 0.008);
+      }
+    }
+    this.prevPhase = this.uPhase.value;
+
+    if (this.flareAttr) this.flareAttr.needsUpdate = true;
+    if (this.bumpAttr) this.bumpAttr.needsUpdate = true;
+  }
+
   /** One uniform object, shared by every material in the stage. */
   setWorldMix(t: number): void {
     this.uMix.value = THREE.MathUtils.clamp(t, 0, 1);
@@ -1306,7 +1502,6 @@ export class PowerStage implements StageScene {
     this.settings = settings;
     this.ctx = ctx;
     this.uFog.value = settings.fog ? 1 : 0;
-    this.uPixelRatio.value = ctx.renderer.getPixelRatio();
 
     if (this.ground) {
       const old = this.ground.geometry;
@@ -1337,6 +1532,7 @@ export class PowerStage implements StageScene {
     if (this.flow) {
       const geo = this.flow.geometry;
       this.root.remove(this.flow);
+      this.flow.dispose();
       this.untrack(geo);
       geo.dispose();
       this.buildFlow(settings);
@@ -1365,7 +1561,6 @@ export class PowerStage implements StageScene {
     const cam = ctx.camera;
 
     this.uRes.value.set(Math.max(1, ctx.width), Math.max(1, ctx.height));
-    this.uPixelRatio.value = ctx.renderer.getPixelRatio();
 
     const aspect = Math.max(0.25, ctx.width / Math.max(1, ctx.height));
     // Portrait is a shape, not a width: a tall desktop window crops the plant
@@ -1408,6 +1603,11 @@ export class PowerStage implements StageScene {
     cam.lookAt(this.baseLook);
     cam.updateProjectionMatrix();
 
+    // World units per pixel at unit depth, so the streak shader can hold a
+    // minimum screen width without the far stream aliasing into noise.
+    this.uPxScale.value =
+      (2 * Math.tan(THREE.MathUtils.degToRad(cam.fov) * 0.5)) / Math.max(1, ctx.height);
+
     // Re-apply the scroll dolly at the new framing so a resize mid-stage does
     // not jump the camera back to the top of the track.
     if (this.scroll > 0) {
@@ -1429,6 +1629,15 @@ export class PowerStage implements StageScene {
     this.shadowMat = null;
     this.shadowStripeMat = null;
     this.flow = null;
+    this.strips = null;
+    this.flareAttr = null;
+    this.bumpAttr = null;
+    this.cabFlare = new Float32Array(0);
+    this.cabBump = new Float32Array(0);
+    this.arrOff = new Float32Array(0);
+    this.arrSpeed = new Float32Array(0);
+    this.arrRank = new Float32Array(0);
+    this.arrCab = new Uint8Array(0);
     this.shadows = null;
     this.cabinetPos = [];
     this.cabinetSeeds = new Float32Array(0);
@@ -1459,6 +1668,14 @@ export class PowerStage implements StageScene {
 
   /** Read-only accessors, handy for the host's debug overlay. */
   get trackerCount(): number { return this.trackers; }
+  /** 0..1 bank charge. A pure function of the last scroll value it was given. */
+  get chargeLevel(): number { return this.uCharge.value; }
+  /** Fraction of the quantum budget currently in flight. */
+  get emitFraction(): number { return this.uEmit.value; }
+  /** The stream's clock, in laps. Frozen under reduced motion. */
+  get streamPhase(): number { return this.uPhase.value; }
+  /** Quanta in the stream at the current tier. */
+  get streamCount(): number { return this.flow ? this.flow.count : 0; }
   get tierSettings(): TierSettings { return this.settings; }
   get cabinetCount(): number { return this.cabinetSeeds.length; }
   get context(): SceneContext | null { return this.ctx; }
