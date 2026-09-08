@@ -307,6 +307,9 @@ export function boot(): void {
     applyChrome(index);
     setPower(STAGE_KW[index] ?? 0);
     window.scrollTo({ top: 0, behavior: 'auto' });
+    // Clear any parallax left inline by the previous stage's scroll.
+    const jumped = panels[index].querySelector<HTMLElement>('[data-stage-sticky]');
+    if (jumped) { jumped.style.opacity = '1'; jumped.style.transform = 'none'; }
     reveal(index);
     mountHold(index);
     if (to.scene === 'campus') enterCampus(); else exitCampus();

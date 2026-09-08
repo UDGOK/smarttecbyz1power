@@ -247,17 +247,20 @@ const grain =
   [data-stage="campus"] .stage-panel {
     align-items: flex-start;
     text-align: left;
-    max-width: 46ch;
+    max-width: 44ch;
     margin: 0;
     padding-left: max(var(--s-6), 4vw);
-    justify-content: flex-end;
-    padding-bottom: 190px;
+    /* Top-left: the legend owns the bottom-left corner on this stage. */
+    justify-content: flex-start;
+    padding-top: 96px;
+    padding-bottom: 0;
+    min-height: auto;
   }
   [data-stage="campus"] .stage-panel__title { font-size: clamp(2.4rem, 1rem + 4vw, 4.4rem); }
   [data-stage="campus"] .stage-panel__lede { max-width: 38ch; }
 
   @media (max-width: 640px) {
-    [data-stage="campus"] .stage-panel { padding-bottom: 230px; }
+    [data-stage="campus"] .stage-panel { padding-top: 80px; max-width: 30ch; }
   }
 
   .after { position: relative; z-index: var(--z-content); background: var(--c-campus); }

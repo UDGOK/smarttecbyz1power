@@ -8,19 +8,21 @@ original — nothing is lifted from the reference.
 
 ---
 
-## Status — vertical slice
+## Status
 
-Stages 1 and 2 of the cinematic route are built end-to-end, including the
-hold-to-advance interaction that the whole experience hangs on. Stages 3–5 and
-the content pages are scaffolded in the content model but not yet implemented.
+All five stage worlds, the campus explorer, the configurator and the six
+content pages are built. What remains is real assets and real endpoints.
 
-| Built | Not yet built |
+| Built | Outstanding |
 |---|---|
-| Design tokens, chrome layer, stage machine | Stages 3 (Power), 4 (Machine), 5 (Campus) |
-| Hold-to-advance with world/audio/chrome scrub | Isometric campus explorer |
-| Procedural WebGL terrain + adaptive quality tiers | Deployment configurator |
-| Static reading path, reduced-motion path, WebGL fallback | Content pages (site, colocation, power, pricing, about, contact) |
-| Lead capture UI | Form endpoint, analytics, CMS |
+| Design tokens, chrome layer, stage machine, scene host | Real audio files (every track is a WebAudio synth) |
+| Entry gate, custom cursor, film grain, flash ripple | Photography — the site ships no invented imagery |
+| Hold-to-advance scrubbing world, audio, chrome and veil | Form endpoint, analytics, hosting |
+| Five procedural WebGL worlds, each its own chunk | 73 marked `[PLACEHOLDER]` facts across the content pages |
+| Explorable campus with clamped orbit, pinch zoom, hotspots | Licensed display fonts, if pixel-exact type is wanted |
+| Deployment configurator, keyboard-operable, no-JS fallback | |
+| Six content pages, every figure imported from the record | |
+| Static reading path, reduced-motion path, WebGL fallback | |
 
 ## Run
 
@@ -71,11 +73,15 @@ Ruler unit is **BP — Before Power-On**, counting down to Q4 2026.
 
 | Stage | Ruler | World | Beat | Scroll | Mobile | Reduced motion |
 |---|---|---|---|---|---|---|
-| 1 · The Land | `-100 BP` | Muted field greens | 30 acres, already ours | 250vh | Lens widened to 58°, horizon lifted into lower third | Static terrain, click to advance |
+| 1 · The Land | `-100 BP` | Muted field greens | 30 acres, already ours | 250vh | Lens to 58°, horizon lifted into lower third | Static terrain, click to advance |
 | 2 · The Wait | `-75 BP` | Blood red | Everyone else is in a 4–7 year queue | 250vh | as above | as above |
-| 3 · The Power | `-50 BP` | Gold / electric | Behind the meter, no queue | 300vh | *planned* | *planned* |
-| 4 · The Machine | `-25 BP` | Graphite | 64 Blackwells, liquid cooled | 300vh | *planned* | *planned* |
-| 5 · The Campus | `0 BP` | Daylight | Explorable campus + configurator | 200vh | *planned* | *planned* |
+| 3 · The Power | `-50 BP` | Low sun, gold | Behind the meter, so no queue to join | 300vh | Lens widened, horizon lifted | Sun and flow frozen, scene still complete |
+| 4 · The Machine | `-25 BP` | Graphite, cyan heat | 64 Blackwells, liquid cooled | 300vh | Lens 52°→76°, aisle tightened, ~40 instances re-laid | LEDs hold a seeded static pattern, not a dark wall |
+| 5 · The Campus | `0 BP` | Daylight | Explore the parcel, then size a deployment | 200vh | Isometric angle raised toward plan, fit distance recomputed | No idle drift; all interaction still works |
+
+Stages 1 and 2 share one scene and scrub between palettes on a single uniform.
+Crossings that change scene run behind a colour veil the hold scrubs, so a
+scene swap still reads as one continuous move rather than a cut.
 
 **The hold.** `onProgress(0..1)` drives the shader's world mix, the cross-fade
 between two ambient tracks, the chrome tint and the power badge in one callback.
