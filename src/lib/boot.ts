@@ -517,12 +517,16 @@ function run(): void {
     // The tail of every stage is the crossing into the next one.
     const t = p <= CROSS_START ? 0 : (p - CROSS_START) / (1 - CROSS_START);
     cross(t);
-    // The copy holds through the first half of the crossing and only clears in
-    // the last stretch. It used to be gone by t = 0.45 — the final 11% of a
-    // track — which on a phone is where a single flick keeps landing you: the
-    // world changed on schedule but the headline had already left, so stage
-    // after stage read as untitled. It stays lit for 90% of the stage now.
-    if (sticky) sticky.style.opacity = String(1 - Math.max(0, (t - 0.5) / 0.5));
+    // Dissolving the copy is how the virtual scroller gets a stage off the
+    // screen, because there the panel never moves. On the spine the panel does
+    // move — it unpins and rides away — so the fade only makes it leave
+    // invisibly, and since onProgress writes to the incoming stage from the
+    // handover on, that faded value stayed on the outgoing panel for the whole
+    // screen-height of its exit. The slide is the transition; the words stay
+    // legible until they are gone.
+    if (sticky && !nativeScroll) {
+      sticky.style.opacity = String(1 - Math.max(0, (t - 0.5) / 0.5));
+    }
 
     if (!nativeScroll && t >= 0.995 && performance.now() > lockedUntil) void advance();
   }
