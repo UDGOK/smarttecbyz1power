@@ -175,13 +175,15 @@ const grain =
   .stage-panel__title,
   h2.stage-panel__title,
   .stage-panel__lede {
-    text-shadow: 0 1px 18px #05100bb3, 0 0 46px #05100b80;
+    /* One tight shadow only. A second wide one merged across the glyphs
+       and read as a rectangular plate behind the line. */
+    text-shadow: 0 2px 22px #04100ad9;
   }
   :global([data-chrome='dark']) .stage-panel__kicker,
   :global([data-chrome='dark']) .stage-panel__title,
   :global([data-chrome='dark']) h2.stage-panel__title,
   :global([data-chrome='dark']) .stage-panel__lede {
-    text-shadow: 0 1px 18px #ffffffb3, 0 0 46px #ffffff80;
+    text-shadow: 0 2px 22px #ffffffd9;
   }
 
   .stage-panel__kicker { margin: 0 0 var(--s-5); }

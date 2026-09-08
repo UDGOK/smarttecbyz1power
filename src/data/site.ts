@@ -62,6 +62,8 @@ export const compute = {
 export const stages = [
   {
     id: 'land',
+    // Dawn over water: generous bloom on the caustics, gentle fringing.
+    post: { bloomStrength: 0.72, bloomThreshold: 0.8, bloomRadius: 0.6, aberration: 0.0035, vignette: 0.42 },
     index: 0,
     scene: 'land' as const,
     ground: '#0e2419',
@@ -75,6 +77,8 @@ export const stages = [
   },
   {
     id: 'wait',
+    // Pressure: hotter bloom, harder fringing, heavier corners.
+    post: { bloomStrength: 1.15, bloomThreshold: 0.58, bloomRadius: 0.5, aberration: 0.008, vignette: 0.5 },
     index: 1,
     scene: 'land' as const,
     ground: '#4d0806',
@@ -88,6 +92,8 @@ export const stages = [
   },
   {
     id: 'power',
+    // A low sun and lit charge strips are the whole subject — let them burn.
+    post: { bloomStrength: 1.35, bloomThreshold: 0.52, bloomRadius: 0.7, aberration: 0.005, vignette: 0.42 },
     index: 2,
     scene: 'power' as const,
     ground: '#1a1204',
@@ -101,6 +107,8 @@ export const stages = [
   },
   {
     id: 'machine',
+    // Emissive LEDs in a dark hall: tight, cold bloom, minimal haze.
+    post: { bloomStrength: 1.05, bloomThreshold: 0.62, bloomRadius: 0.38, aberration: 0.0045, vignette: 0.44 },
     index: 3,
     scene: 'machine' as const,
     ground: '#070a0f',
@@ -114,6 +122,8 @@ export const stages = [
   },
   {
     id: 'campus',
+    // Daylight. Restraint — bloom here would only look like fog.
+    post: { bloomStrength: 0.45, bloomThreshold: 0.86, bloomRadius: 0.45, aberration: 0.0015, vignette: 0.22 },
     index: 4,
     scene: 'campus' as const,
     ground: '#dfe5e1',

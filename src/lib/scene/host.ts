@@ -9,6 +9,7 @@
 
 import * as THREE from 'three';
 import { quality, type Tier } from '../quality';
+import { PostChain, type PostSettings } from './post';
 import type { SceneContext, StageScene, TierSettings } from './types';
 
 export class SceneHost {
@@ -21,6 +22,7 @@ export class SceneHost {
   private disposeTier: () => void;
   private stage: StageScene | null = null;
   private scroll = 0;
+  private post: PostChain;
 
   running = false;
 
@@ -33,8 +35,17 @@ export class SceneHost {
     this.renderer.setClearColor(0x0e2419, 1);
     this.camera = new THREE.PerspectiveCamera(38, 1, 0.1, 400);
 
-    this.disposeTier = quality.onChange((_t: Tier, settings) => {
+    this.post = new PostChain(
+      this.renderer,
+      canvas.clientWidth || window.innerWidth,
+      canvas.clientHeight || window.innerHeight,
+      quality.current,
+    );
+
+    this.disposeTier = quality.onChange((tier: Tier, settings) => {
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, settings.pixelRatio));
+      // Order matters: setQuality re-measures from the pixel ratio we just set.
+      this.post.setQuality(tier);
       this.stage?.onTier(settings, this.ctx());
     });
 
@@ -76,6 +87,12 @@ export class SceneHost {
     this.renderer.setClearColor(color, 1);
   }
 
+  /** Each world grades itself — a daylight campus wants far less bloom than a
+      hall full of emissive racks. */
+  setPost(settings: Partial<PostSettings>): void {
+    this.post.set(settings);
+  }
+
   resize = (): void => {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
@@ -83,6 +100,7 @@ export class SceneHost {
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
+    this.post.setSize(w, h);
     this.stage?.frame(this.ctx());
   };
 
@@ -97,7 +115,7 @@ export class SceneHost {
       const delta = this.clock.getDelta();
       const elapsed = this.reducedMotion ? 0 : this.clock.getElapsedTime();
       this.stage?.update(elapsed, delta, this.scroll, this.ctx());
-      this.renderer.render(this.scene, this.camera);
+      this.post.render(this.scene, this.camera, elapsed);
       this.raf = requestAnimationFrame(loop);
     };
     this.raf = requestAnimationFrame(loop);
@@ -113,6 +131,7 @@ export class SceneHost {
     this.disposeTier();
     this.stage?.dispose();
     this.scene.clear();
+    this.post.dispose();
     this.renderer.dispose();
   }
 }

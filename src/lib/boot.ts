@@ -93,6 +93,8 @@ export function boot(): void {
   function applyChrome(index: number): void {
     const stage = stages[index];
     if (!stage) return;
+    // Each world carries its own grade.
+    host?.setPost(stage.post);
     document.documentElement.dataset.chrome = stage.chrome === 'dark' ? 'dark' : 'light';
     if (readout) readout.textContent = stage.ruler;
     rootEl.querySelectorAll<HTMLElement>('.scroll-ruler-nav-btn').forEach((b, i) => {
