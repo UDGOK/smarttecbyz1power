@@ -1003,7 +1003,14 @@
 .menu__stage-name { opacity: 0.65; }
 
 @media (max-width: 640px) {
-  .menu-toggle { right: calc(var(--chrome-inset) + 92px); padding: 9px 12px; }
+  /* On narrow screens the top-right corner belongs to the badge and the
+     centre to the ruler; the toggle overlapped the ruler's right edge, which
+     on touch is where its jump targets live. Park it beside the brandmark. */
+  .menu-toggle {
+    right: auto;
+    left: calc(var(--chrome-inset) + 46px);
+    padding: 9px 12px;
+  }
   .menu-toggle__label { display: none; }
   .menu__note { display: none; }
   .menu__link { grid-template-columns: 2.4rem 1fr; }
