@@ -52,7 +52,7 @@ export interface TrackOptions {
 }
 
 const REGISTRY: Record<string, TrackOptions> = {
-  // 30 acres of prairie at first light: wind, ground, almost nothing.
+  // 40 acres of prairie at first light: wind, ground, almost nothing.
   'stage-land-ambient':    { type: 'ambient', loop: true, volume: 0.5, bed: 'land' },
   // The interconnection queue: pressure, a hard room, time not passing.
   'stage-wait-ambient':    { type: 'ambient', loop: true, volume: 0.5, bed: 'wait' },
@@ -174,7 +174,7 @@ interface SpaceSpec {
 }
 
 const SPACES: Record<SpaceId, SpaceSpec> = {
-  // 30 acres of open ground: no walls, just distance and air.
+  // 40 acres of open ground: no walls, just distance and air.
   open: { seconds: 3.0, decay: 1.9, damp: 2.9, predelay: 0.030, taps: 0 },
   // The queue: painted block, a hard ceiling, nothing soft in it.
   room: { seconds: 1.8, decay: 3.1, damp: 0.85, predelay: 0.009, taps: 10 },

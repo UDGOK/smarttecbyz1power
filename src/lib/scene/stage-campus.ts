@@ -2,7 +2,7 @@
  * Stage 5 — THE CAMPUS.
  *
  * The payoff. Four worlds of dark ground open into daylight: an explorable
- * isometric model of Site 01 at 8460 US-70, Mead, Oklahoma — thirty acres of
+ * isometric model of Site 01 at 8460 US-70, Mead, Oklahoma — forty acres of
  * Bryan County with three buildings, a 3 MVA transformer, ~500 kW of solar,
  * Z1Power LFP storage, and the open land that Phase 2 and 3 grow into.
  *
@@ -12,7 +12,7 @@
  * of boxes with edge lines, which is what gives it the flat, drawn, isometric
  * register rather than a photoreal one.
  *
- * Scale is stylised, not survey-accurate. Thirty acres is ~1,140 ft square and
+ * Scale is stylised, not survey-accurate. Forty acres is ~1,320 ft square and
  * a 3,000 sqft building is ~55 ft on a side — at true ratio the buildings would
  * be four pixels wide. The parcel keeps its proportion; the built work is drawn
  * at the size the story needs it.
@@ -39,7 +39,7 @@ import type { SceneContext, StageScene, TierSettings } from './types';
    ============================================================ */
 
 const PARCEL_C = new THREE.Vector2(0, 0);
-const PARCEL_H = new THREE.Vector2(65, 52);   // half-extents of the 30 acres
+const PARCEL_H = new THREE.Vector2(65, 52);   // half-extents of the 40 acres
 const PAD_C = new THREE.Vector2(-4, -4);      // graded caliche apron
 const PAD_H = new THREE.Vector2(48, 24);
 const ROAD_Z = 62;                            // US-70 centreline
@@ -326,7 +326,7 @@ const GROUND_FRAG = /* glsl */ `
     vec3 col = mix(uGrassLo, uGrassHi, smoothstep(0.18, 0.86, g));
     col *= 0.72 + vShade * 0.46;
 
-    // --- The 30 acres: graded apron, then the surveyed boundary ---
+    // --- The 40 acres: graded apron, then the surveyed boundary ---
     float pad = 1.0 - smoothstep(-1.0, 5.5, sdBox(vW - uPadC, uPadH));
     col = mix(col, uPad * (0.80 + vShade * 0.30), pad * 0.92);
 

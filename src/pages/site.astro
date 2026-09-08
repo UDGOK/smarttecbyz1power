@@ -9,7 +9,7 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
   title={`${site.designation} — ${site.name} | ${company.full}`}
   description={`${site.acres} acres in ${site.county}, Oklahoma, owned outright, with three ${site.buildings[0].sqft.toLocaleString()} sq ft buildings and an existing ${power.transformer} service already on the parcel. Power-on ${site.powerOn}.`}
   kicker={`${site.designation} · ${site.county}, Oklahoma`}
-  heading="Thirty acres that already have power on them."
+  heading="Forty acres that already have power on them."
   lede={`${site.address}. ${site.acres} acres, ${site.ownership.toLowerCase()}, three buildings standing, and a ${power.transformer} service energised on the parcel. Nothing here is optioned, leased or subject to a land assembly.`}
   meta={[
     { label: 'Parcel', value: `${site.acres} acres`, note: `${site.ownership}, ${site.county}`, count: true },

@@ -1,7 +1,7 @@
 /**
  * Stage 1 — THE LAND.
  *
- * Thirty acres of Bryan County read from above at first light, rendered with
+ * Forty acres of Bryan County read from above at first light, rendered with
  * the reference experience's technique rather than as a landscape: a broad,
  * almost-flat field whose form is carried by a caustic network of dawn light
  * rippling across it, a drifting film of ground mist over that, an atmosphere

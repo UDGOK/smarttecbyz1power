@@ -1,7 +1,7 @@
 /**
  * Stage 1 — THE LAND.
  *
- * A procedurally displaced terrain read from above: 30 acres of Bryan County
+ * A procedurally displaced terrain read from above: 40 acres of Bryan County
  * at first light. No glTF, no texture atlases — the whole world is fbm noise
  * in a shader, which keeps the payload at zero bytes and lets the colour world
  * be scrubbed by the hold interaction on a single uniform.

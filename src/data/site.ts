@@ -19,7 +19,7 @@ export const site = {
   designation: 'Site 01',
   address: '8460 US-70, Mead, OK 73449',
   county: 'Bryan County',
-  acres: 30,
+  acres: 40,
   ownership: 'Owned outright',
   buildings: [
     { id: 1, sqft: 3000, role: 'Phase 1A compute hall' },
@@ -71,7 +71,7 @@ export const stages = [
     ground: '#0e2419',
     ruler: '-100 BP',
     kicker: 'Site 01 · Mead, Oklahoma',
-    title: 'Thirty acres,\nalready ours.',
+    title: 'Forty acres,\nalready ours.',
     lede: `${site.acres} acres on the US-70 corridor in ${site.county}, owned outright, with three buildings and a ${power.transformer} transformer already standing on it.`,
     chrome: 'light' as const,
     scrollVh: 250,
