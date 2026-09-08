@@ -1098,3 +1098,57 @@
   .scroll-ruler-nav { opacity: 1; pointer-events: auto; }
   .scroll-ruler-track { opacity: 0; }
 }
+
+/* ---- Touch targets ------------------------------------------------------
+   Measured on a phone viewport: the ruler's stage buttons are 21px tall, the
+   brandmark and the capture bar's back control 38px, the menu toggle 33px,
+   and a campus hotspot 13px. All are well under the 44px minimum, and the
+   ruler buttons are worst because on touch they are permanently visible.
+
+   These expand the *hit* area only. Nothing moves, nothing resizes, and the
+   pseudo-element is inert to the eye — so the chrome keeps its proportions
+   while a thumb gets something it can actually land on. */
+/* Both conditions, deliberately: a phone reports a coarse pointer, but a
+   narrow viewport is the layout we actually ship to phones and is the one a
+   desktop browser can be made to reproduce — so the fix is verifiable. */
+@media (pointer: coarse), (max-width: 640px) {
+  .scroll-ruler-nav-btn,
+  .brandmark,
+  .menu-toggle,
+  .cta-bar__back,
+  .cta-bar__submit,
+  .campus-btn,
+  .campus-legend__btn,
+  .menu__stage,
+  .campus-hotspot {
+    position: relative;
+  }
+
+  .scroll-ruler-nav-btn::after,
+  .brandmark::after,
+  .menu-toggle::after,
+  .cta-bar__back::after,
+  .cta-bar__submit::after,
+  .campus-btn::after,
+  .campus-legend__btn::after,
+  .menu__stage::after,
+  .campus-hotspot::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+    /* Above the element's own decoration, below anything it draws on top. */
+    z-index: 1;
+  }
+
+  /* The hotspot already uses ::before for its dot, so its expanded target must
+     not inherit the dot's own transform on hover. */
+  .campus-hotspot::after { pointer-events: auto; }
+
+  /* The field itself was 21px tall inside a taller pill — the pill looked
+     tappable, the input was not. */
+  .cta-bar__input { padding-block: 13px; }
+}
