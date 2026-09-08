@@ -182,6 +182,9 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
     padding: 0;
     list-style: none;
   }
+  /* Nothing may shrink below its text, or the labels wrap inside the strip
+     instead of overflowing it, and the scroller never engages. */
+  .nav__list > li { flex: 0 0 auto; }
 
   .nav__link {
     position: relative;
@@ -215,6 +218,18 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
   .nav__link[aria-current='page']::after { transform: scaleX(1); }
 
   /* Contact is the conversion surface, so it is drawn as one. */
+  /* Contact is the conversion CTA and was scrolling off the end of the strip
+     on a phone — clipped at 390px, entirely gone at 360px, with no way to
+     reach it. It stays pinned to the right edge while the rest scrolls under
+     it. */
+  .nav__list > li:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    padding-left: var(--s-2);
+    background: linear-gradient(to right, transparent, var(--c-land) 22%);
+  }
+
   .nav__link--cta {
     margin-left: var(--s-3);
     padding: var(--s-2) var(--s-4);
@@ -260,5 +275,13 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
   @media (prefers-reduced-motion: reduce) {
     .nav__link::after { transition: none; }
     .nav__inner { transition: none; }
+  }
+
+  /* Touch targets. Placed last deliberately: an equal-specificity rule
+     earlier in this file sets the resting padding, and source order decides.
+     Line box is 16.5px, so 14px each side is what actually clears 44px. */
+  @media (pointer: coarse), (max-width: 760px) {
+    .nav__link { padding-block: 14px; }
+    .nav__brand { padding-block: 9px; }
   }
 </style>

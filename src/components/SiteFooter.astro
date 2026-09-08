@@ -260,4 +260,9 @@ const groups = [
   @media (prefers-reduced-motion: reduce) {
     .foot__link:hover { transform: none; }
   }
+
+  /* Touch targets, placed last so source order carries them. */
+  @media (pointer: coarse), (max-width: 760px) {
+    .foot__link { padding-block: 15px; }
+  }
 </style>

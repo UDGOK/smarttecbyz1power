@@ -468,11 +468,34 @@ export function boot(): void {
     }
   };
 
+  // Touch equivalent of campusWheel: a sustained downward pull at the top of
+  // the document. Desktop had a documented gesture that a phone silently
+  // lacked.
+  let campusTouchY = 0;
+  const campusTouchStart = (e: TouchEvent): void => {
+    campusTouchY = e.touches[0]?.clientY ?? 0;
+    campusPull = 0;
+  };
+  const campusTouchMove = (e: TouchEvent): void => {
+    if (swapping || stages[current]?.scene !== 'campus') return;
+    const y = e.touches[0]?.clientY ?? 0;
+    const delta = y - campusTouchY;
+    campusTouchY = y;
+    if (window.scrollY > 2 || delta <= 0) { campusPull = 0; return; }
+    campusPull += delta;
+    if (campusPull > 190 && performance.now() > lockedUntil) {
+      campusPull = 0;
+      void retreat();
+    }
+  };
+
   function enterCampus(): void {
     const scene = campus();
     if (!scene || !campusUI) return;
     campusPull = 0;
     window.addEventListener('wheel', campusWheel, { passive: true });
+    window.addEventListener('touchstart', campusTouchStart, { passive: true });
+    window.addEventListener('touchmove', campusTouchMove, { passive: true });
     // The journey is over: give the page back to the browser so the
     // configurator and the reading path below can actually be reached.
     scroller.disable();
@@ -519,11 +542,23 @@ export function boot(): void {
           label.className = 'campus-hotspot__label mono-label';
           label.textContent = p.label;
           node.appendChild(label);
-          node.addEventListener('click', () => { audio.play('click'); sc.focusHotspot(p.id); });
+          const dot = node;
+          dot.addEventListener('click', () => {
+            audio.play('click');
+            sc.focusHotspot(p.id);
+            // On touch there is no hover and the legend is hidden, so the tap
+            // itself has to reveal the label — otherwise the visitor is flown
+            // somewhere with no idea what they are looking at.
+            hotspotLayer?.querySelectorAll('.campus-hotspot.is-active')
+              .forEach((n) => { if (n !== dot) n.classList.remove('is-active'); });
+            dot.classList.toggle('is-active');
+          });
           hotspotLayer.appendChild(node);
         }
         node.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
         node.style.opacity = p.visible ? '1' : '0';
+        // A label opening rightwards from a dot near the right edge runs off.
+        node.classList.toggle('campus-hotspot--flip', p.x > window.innerWidth * 0.55);
       }
       hotspotRaf = requestAnimationFrame(trackHotspots);
     };
@@ -533,6 +568,8 @@ export function boot(): void {
 
   function exitCampus(): void {
     window.removeEventListener('wheel', campusWheel);
+    window.removeEventListener('touchstart', campusTouchStart);
+    window.removeEventListener('touchmove', campusTouchMove);
     campusPull = 0;
     scroller.enable();
     document.body.dataset.virtualScroll = '';

@@ -1156,6 +1156,21 @@
   .cta-bar__input { padding-block: 13px; }
 }
 
+@media (max-width: 640px) {
+  /* The label has to fit beside a dot that can be anywhere on the model. */
+  .campus-hotspot__label {
+    max-width: 62vw;
+    white-space: normal;
+    line-height: 1.3;
+  }
+  /* Flip to the left of the dot when it would otherwise leave the screen. */
+  .campus-hotspot--flip .campus-hotspot__label {
+    left: auto;
+    right: 18px;
+    text-align: right;
+  }
+}
+
 /* Hotspots are 13px dots on every pointer, not just coarse ones. */
 .campus-hotspot { position: relative; }
 .campus-hotspot::after {

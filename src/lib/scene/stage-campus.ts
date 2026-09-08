@@ -909,7 +909,15 @@ export class CampusScene implements StageScene {
     const dom = ctx.renderer.domElement as HTMLElement;
     this.dom = dom;
     this.prevTouchAction = dom.style.touchAction;
-    dom.style.touchAction = 'none';   // or pointermove never fires on touch
+    // On a phone the canvas is fixed across the whole viewport, so claiming
+    // every touch meant a finger anywhere was consumed by the orbit rig and
+    // the configurator below could not be reached by swiping at all. `pan-y`
+    // hands vertical pans back to the browser while the scene keeps
+    // horizontal drags and every multi-touch gesture — one finger scrolls the
+    // page, two fingers orbit and pinch.
+    const coarse = typeof window !== 'undefined'
+      && window.matchMedia?.('(pointer: coarse)').matches;
+    dom.style.touchAction = coarse ? 'pan-y' : 'none';
     dom.addEventListener('pointerdown', this.onPointerDown);
     dom.addEventListener('pointermove', this.onPointerMove);
     dom.addEventListener('pointerup', this.onPointerUp);

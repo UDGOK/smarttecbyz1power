@@ -68,6 +68,13 @@ export const BOOST_MAX = 3.4;
 export const BOOST_REF = 2600;
 /** How quickly the measured input rate decays once the flick stops. */
 const RATE_TC = 0.12;
+
+/** Below this the release was a stop, not a throw. Raw delta units per event. */
+const TOUCH_FLING_MIN = 2.2;
+/** How much of the release velocity is carried on. */
+const TOUCH_FLING_GAIN = 9;
+/** Smoothing on the measured swipe velocity. */
+const TOUCH_V_TC = 0.055;
 /** Closer than this and we snap, which kills the asymptotic tail. */
 const SNAP_EPSILON = 0.5;
 
@@ -154,6 +161,8 @@ export class ScrollManager {
   /** Smoothed input rate, delta units per second — drives the fast-scroll boost. */
   private _inputRate = 0;
   private _lastInputAt = 0;
+  /** Smoothed per-event touch delta, used to throw on release. */
+  private _touchVelocity = 0;
 
   private readonly _smoothSpeed: number;
   private readonly _velocitySpeed: number;
@@ -431,11 +440,23 @@ export class ScrollManager {
     // Tracking continues while held so the release does not jump.
     this.lastTouchY = y;
     if (!this.acceptsInput) return;
+    // Smoothed so one stuttering sample cannot become the whole throw.
+    this._touchVelocity += (delta - this._touchVelocity)
+      * (1 - Math.exp(-0.016 / TOUCH_V_TC));
     this.applyDelta(delta);
   };
 
   private onTouchEnd = (): void => {
     this.touching = false;
+    // Carry the gesture on after the finger leaves. Without this a swipe
+    // stops dead at release, so a thumb has to make roughly four times as
+    // many gestures as a trackpad to cross the same ground.
+    if (!this.acceptsInput || this._reducedMotion) return;
+    const v = this._touchVelocity;
+    if (Math.abs(v) < TOUCH_FLING_MIN) return;
+    const fling = clamp(v, -MAX_DELTA, MAX_DELTA) * DELTA_SCALE * TOUCH_FLING_GAIN;
+    this.targetScrollPos = clamp(this.targetScrollPos + fling, this.min, this.max);
+    this._touchVelocity = 0;
   };
 
   /**
