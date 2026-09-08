@@ -314,6 +314,12 @@ body[data-experience] main > [data-stage='campus'] { pointer-events: none; }
 body[data-virtual-scroll] { overflow: hidden; height: 100svh; }
 body[data-virtual-scroll] .stage-scroll { height: 100svh; }
 
+/* On touch the document scrolls, so the stage keeps its full track and the
+   panel sticks inside it — exactly how a long-form page behaves. */
+@media (pointer: coarse) {
+  body[data-experience] { overflow-x: clip; overflow-y: visible; }
+}
+
 /* ---- Silver shimmer ----
    The reference's own treatment: the text is a clipped gradient rather than a
    fill, swept across on a nine-second loop.
@@ -391,6 +397,12 @@ body[data-experience] main > [data-stage='campus'] { pointer-events: none; }
    control back so the configurator and reading path below are reachable. */
 body[data-virtual-scroll] { overflow: hidden; height: 100svh; }
 body[data-virtual-scroll] .stage-scroll { height: 100svh; }
+
+/* On touch the document scrolls, so the stage keeps its full track and the
+   panel sticks inside it — exactly how a long-form page behaves. */
+@media (pointer: coarse) {
+  body[data-experience] { overflow-x: clip; overflow-y: visible; }
+}
 
 /* ---- Silver shimmer ----
    The reference's own treatment, transcribed from its stylesheet: the text is

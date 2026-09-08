@@ -127,6 +127,17 @@ function run(): void {
 
   // The reference does not use native scroll: it damps its own position, which
   // is most of why its motion reads smooth. Same model here.
+  /**
+   * Touch devices keep native scrolling.
+   *
+   * The damped virtual scroll is a real improvement over a mouse wheel, which
+   * arrives in coarse notches. It is a liability on a phone: iOS already has
+   * better momentum than we can synthesise, and taking `overflow` away in
+   * order to replace it means any failure in the replacement leaves a page
+   * that cannot be moved at all. Which is what happened.
+   */
+  const nativeScroll = window.matchMedia('(pointer: coarse)').matches;
+
   const scroller = new ScrollManager({ reducedMotion: reduced });
   const rig = new CameraRig({ reducedMotion: reduced });
   // Deliberately NOT armed here. `data-virtual-scroll` sets overflow: hidden,
@@ -219,13 +230,36 @@ function run(): void {
   };
   requestAnimationFrame(tick);
 
+  /** Progress through the current stage, read from the document's own scroll. */
+  let nativeTicking = false;
+  function onNativeScroll(): void {
+    if (nativeTicking) return;
+    nativeTicking = true;
+    requestAnimationFrame(() => {
+      nativeTicking = false;
+      const panel = panels[current];
+      if (!panel || panel.hidden || swapping) return;
+      const rect = panel.getBoundingClientRect();
+      const travel = Math.max(1, rect.height - window.innerHeight);
+      const p = Math.min(1, Math.max(0, -rect.top / travel));
+      onProgress(p);
+      if (p >= 0.995 && performance.now() > lockedUntil) void advance();
+    });
+  }
+
   /** Hands the page to the experience, or to the browser if there is none. */
   function maybeArm(): void {
     if (!gateCleared || sceneState === 'pending') return;
     if (armed) return;
     armed = true;
 
-    if (sceneState === 'ready') {
+    if (sceneState === 'ready' && nativeScroll) {
+      // The document scrolls; we only read it. Nothing is taken away, so
+      // nothing can freeze.
+      window.addEventListener('scroll', onNativeScroll, { passive: true });
+      window.addEventListener('resize', onNativeScroll, { passive: true });
+      onNativeScroll();
+    } else if (sceneState === 'ready') {
       scroller.enable();
       document.body.dataset.virtualScroll = '';
       onProgress(0);
@@ -403,7 +437,8 @@ function run(): void {
     setPower(STAGE_KW[next] ?? 1);
     topupBadge();
 
-    armStage(next);
+    if (nativeScroll) window.scrollTo({ top: 0, behavior: 'auto' });
+    else armStage(next);
     const sticky = panels[next].querySelector<HTMLElement>('[data-stage-sticky]');
     if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
 
@@ -461,8 +496,14 @@ function run(): void {
     applyChrome(prev);
     setPower(STAGE_KW[prev] ?? 0);
 
-    armStage(prev);
-    scroller.setScrollImmediate(trackLength(prev) * RETREAT_LANDING);
+    if (nativeScroll) {
+      const panel = panels[prev];
+      const travel = Math.max(1, panel.getBoundingClientRect().height - window.innerHeight);
+      window.scrollTo({ top: travel * RETREAT_LANDING, behavior: 'auto' });
+    } else {
+      armStage(prev);
+      scroller.setScrollImmediate(trackLength(prev) * RETREAT_LANDING);
+    }
 
     const sticky = panels[prev].querySelector<HTMLElement>('[data-stage-sticky]');
     if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
@@ -509,7 +550,8 @@ function run(): void {
     showPanel(index);
     applyChrome(index);
     setPower(STAGE_KW[index] ?? 0);
-    armStage(index);
+    if (nativeScroll) window.scrollTo({ top: 0, behavior: 'auto' });
+    else armStage(index);
     // Clear any parallax left inline by the previous stage's scroll.
     const jumped = panels[index].querySelector<HTMLElement>('[data-stage-sticky]');
     if (jumped) { jumped.style.opacity = '1'; jumped.style.transform = 'none'; }
@@ -767,8 +809,10 @@ function run(): void {
   // still its own chunk; we simply stop waiting for idle to ask for it.
   void initScene();
   scroller.onScrub(onProgress);
-  armStage(0);
-  window.addEventListener('resize', () => armStage(current));
+  if (!nativeScroll) {
+    armStage(0);
+    window.addEventListener('resize', () => armStage(current));
+  }
 
   initLoader(() => {
     reveal(0);
