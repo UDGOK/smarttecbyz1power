@@ -1,19 +1,31 @@
 ---
 /**
- * Footer for the content routes. Repeats the primary navigation as a real link
- * list (the sticky strip scrolls on small screens, so this is the reliable
- * copy), plus the site address and the two facts a buyer scanning the page
- * bottom is actually looking for: where it is and when it turns on.
+ * Footer for the content routes.
+ *
+ * It closes the page the way the cinematic route closes its last stage: one
+ * display statement, then the site's own figures set as a mono ledger, then the
+ * navigation repeated as a real link list (the sticky strip scrolls on small
+ * screens, so this is the reliable copy). Every figure is read from
+ * src/data/site.ts — nothing here is typed twice.
  */
-import { company, site, power } from '../data/site';
+import { company, site, power, network, compute } from '../data/site';
 
 const year = new Date().getFullYear();
+
+const ledger = [
+  { label: 'Site', value: `${site.designation} · ${site.name}` },
+  { label: 'Land', value: `${site.acres} acres · ${site.ownership.toLowerCase()}` },
+  { label: 'Service', value: `${power.transformer} · ${power.voltage}` },
+  { label: 'Energy', value: power.rate },
+  { label: 'Network', value: `${network.speed.split(' ').slice(0, 2).join(' ')} · ${network.provider}` },
+  { label: 'Phase 1A', value: `${compute.gpus} GPUs · ${compute.load}` },
+] as const;
 
 const groups = [
   {
     heading: 'The site',
     links: [
-      { href: '/site', label: 'Site 01 — Mead, Oklahoma' },
+      { href: '/site', label: `${site.designation} — ${site.name}` },
       { href: '/power', label: 'Power' },
     ],
   },
@@ -35,26 +47,24 @@ const groups = [
 ---
 
 <footer class="foot">
-  <div class="foot__inner">
+  <div class="foot__top">
     <div class="foot__lead">
-      <p class="foot__mark">
-        <a href="/">{company.full}</a>
-      </p>
-      <p class="foot__line">{company.tagline}</p>
-      <address class="foot__address">
-        {site.designation} · {site.address}<br />
-        {site.county}, {site.acres} acres, {site.ownership.toLowerCase()}
-      </address>
-      <p class="foot__status mono-label">
+      <p class="foot__kicker">
         <span class="foot__dot" aria-hidden="true"></span>
-        Interconnection queue: {power.interconnectionQueue} · Power-on {site.powerOn}
+        Power-on {site.powerOn} · Interconnection queue: {power.interconnectionQueue}
       </p>
+      <p class="foot__statement">{company.tagline}</p>
+      <p class="foot__mark"><a href="/">{company.full}</a></p>
+      <address class="foot__address">
+        {site.designation}, {site.address}<br />
+        {site.county}, Oklahoma
+      </address>
     </div>
 
     <nav class="foot__nav" aria-label="Footer">
       {groups.map((g) => (
         <div class="foot__group">
-          <h2 class="foot__heading mono-label">{g.heading}</h2>
+          <h2 class="foot__heading">{g.heading}</h2>
           <ul class="foot__list">
             {g.links.map((l) => (
               <li><a class="foot__link" href={l.href}>{l.label}</a></li>
@@ -64,6 +74,15 @@ const groups = [
       ))}
     </nav>
   </div>
+
+  <dl class="foot__ledger">
+    {ledger.map((row) => (
+      <div class="foot__ledger-row">
+        <dt>{row.label}</dt>
+        <dd>{row.value}</dd>
+      </div>
+    ))}
+  </dl>
 
   <div class="foot__rule">
     <p class="foot__fine">© {year} {company.full}. {company.domain}</p>
@@ -76,47 +95,30 @@ const groups = [
 
 <style>
   .foot {
+    margin-top: clamp(var(--s-8), 10vh, 140px);
+    padding: clamp(var(--s-8), 9vh, 120px) var(--s-4) var(--s-6);
+    background: color-mix(in srgb, var(--c-land-deep) 55%, var(--c-carbon));
     border-top: 1px solid var(--w-10);
-    margin-top: var(--s-9);
-    padding: var(--s-8) var(--s-4) var(--s-6);
-    background: var(--c-land-deep);
-    background: color-mix(in srgb, var(--c-land-deep) 62%, var(--c-carbon));
   }
 
-  .foot__inner {
+  .foot__top {
     display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.6fr);
-    gap: var(--s-8) var(--s-6);
-    width: min(1120px, 100%);
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: var(--s-8) var(--s-7);
+    width: min(1240px, 100%);
     margin: 0 auto;
   }
 
-  .foot__mark {
-    margin: 0 0 var(--s-3);
-    font-family: var(--f-display);
-    font-size: 1.5rem;
-    font-weight: 400;
-    line-height: 1.1;
-  }
-  .foot__mark a { color: var(--w-95); text-decoration: none; }
-  .foot__mark a:hover { color: var(--c-signal); }
-
-  .foot__line { margin: 0 0 var(--s-4); color: var(--w-55); max-width: 32ch; }
-
-  .foot__address {
-    margin: 0 0 var(--s-4);
-    font-style: normal;
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--w-70);
-  }
-
-  .foot__status {
+  .foot__kicker {
     display: flex;
     align-items: center;
     gap: var(--s-2);
-    margin: 0;
-    color: var(--w-70);
+    margin: 0 0 var(--s-6);
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-45);
     line-height: 1.6;
   }
   .foot__dot {
@@ -128,32 +130,110 @@ const groups = [
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-signal) 18%, transparent);
   }
 
+  /* The last display line on the page. */
+  .foot__statement {
+    margin: 0 0 var(--s-7);
+    max-width: 15ch;
+    font-family: var(--f-display);
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-size: clamp(1.9rem, 1.1rem + 2.9vw, 4rem);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    color: var(--w-95);
+    text-wrap: balance;
+  }
+
+  .foot__mark {
+    margin: 0 0 var(--s-3);
+    font-family: var(--f-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+  }
+  .foot__mark a {
+    color: var(--w-70);
+    text-decoration: none;
+    transition: color var(--d-fast);
+  }
+  .foot__mark a:hover { color: var(--c-signal); }
+
+  .foot__address {
+    margin: 0;
+    font-style: normal;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--w-55);
+  }
+
   .foot__nav {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
     gap: var(--s-6) var(--s-5);
+    align-content: start;
+  }
+  /* Three groups, three columns — auto-fit leaves a hole at this width. */
+  @media (min-width: 560px) {
+    .foot__nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
 
   .foot__heading {
     margin: 0 0 var(--s-4);
-    color: var(--w-45);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--w-10);
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
     font-weight: 400;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-45);
   }
 
   .foot__list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--s-3); }
 
   .foot__link {
+    display: inline-block;
     color: var(--w-85);
     font-size: 14px;
+    line-height: 1.5;
     text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: color var(--d-fast), border-color var(--d-fast);
+    transition: color var(--d-fast), transform var(--d-fast) var(--e-out);
   }
-  .foot__link:hover { color: var(--c-signal); border-bottom-color: currentColor; }
+  .foot__link:hover { color: var(--c-signal); transform: translateX(3px); }
+
+  /* The site record, restated as a strip of marks. */
+  .foot__ledger {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+    gap: 0;
+    width: min(1240px, 100%);
+    margin: clamp(var(--s-8), 8vh, 100px) auto 0;
+  }
+  .foot__ledger-row {
+    min-width: 0;
+    padding: var(--s-4) var(--s-4) var(--s-5) 0;
+    border-top: 1px solid var(--w-10);
+  }
+  .foot__ledger dt {
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-30);
+  }
+  .foot__ledger dd {
+    margin: var(--s-2) 0 0;
+    font-family: var(--f-mono);
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: var(--ls-tight);
+    color: var(--w-70);
+    overflow-wrap: anywhere;
+  }
 
   .foot__rule {
-    width: min(1120px, 100%);
-    margin: var(--s-8) auto 0;
+    width: min(1240px, 100%);
+    margin: var(--s-7) auto 0;
     padding-top: var(--s-4);
     border-top: 1px solid var(--w-10);
     display: flex;
@@ -163,13 +243,17 @@ const groups = [
   }
   .foot__fine {
     margin: 0;
-    max-width: 62ch;
+    max-width: 58ch;
     font-size: 12px;
     line-height: 1.6;
     color: var(--w-45);
   }
 
   @media (max-width: 780px) {
-    .foot__inner { grid-template-columns: minmax(0, 1fr); gap: var(--s-7); }
+    .foot__top { grid-template-columns: minmax(0, 1fr); gap: var(--s-7); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .foot__link:hover { transform: none; }
   }
 </style>

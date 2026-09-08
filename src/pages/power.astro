@@ -8,6 +8,12 @@ const drawKw = Number(power.phase1aDraw.replace(/[^\d.]/g, ''));
 const rateUsd = Number(power.rate.replace(/[^\d.]/g, ''));
 const annualKwh = drawKw * 8760;
 const annualCost = Math.round(annualKwh * rateUsd);
+
+/* The two halves of the published queue position, so the headline figure and
+   its qualifier can be set at different sizes without retyping either. */
+const [queueAnswer = power.interconnectionQueue, queueBasis = ''] =
+  power.interconnectionQueue.split('—').map((s) => s.trim());
+const headroomFactor = power.headroom.split(' ')[0];
 ---
 
 <Content
@@ -16,9 +22,15 @@ const annualCost = Math.round(annualKwh * rateUsd);
   kicker="The power story"
   heading="Everyone else is in a queue. We never joined it."
   lede={`The average interconnection queue runs ${power.industryQueue}. GPUs stopped being the constraint some time ago; energised capacity is the constraint. ${site.designation} has a ${power.transformer} service standing on owned land, with ${power.headroom.toLowerCase()}.`}
+  meta={[
+    { label: 'Installed service', value: power.transformer, note: `${power.voltage}, energised on site`, tone: 'gold' },
+    { label: 'Energy', value: power.rate, note: 'Published site rate' },
+    { label: 'Headroom', value: headroomFactor, note: power.headroom, tone: 'signal' },
+    { label: 'Interconnection queue', value: queueAnswer, note: power.interconnectionQueue },
+  ]}
 >
   <section aria-labelledby="queue" data-reveal>
-    <p class="eyebrow" aria-hidden="true">01 — The problem</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">The problem</span></p>
     <h2 id="queue">The queue is the whole industry's problem</h2>
 
     <div class="split">
@@ -30,6 +42,8 @@ const annualCost = Math.round(annualKwh * rateUsd);
           you take in that queue is the position you keep. The industry average runs
           {' '}<strong>{power.industryQueue}</strong>.
         </p>
+      </div>
+      <div>
         <p>
           Nothing about that timeline is fixed by having capital, having GPUs, or having
           a signed tenant. You can hold a purchase order for accelerators that ship in
@@ -37,24 +51,31 @@ const annualCost = Math.round(annualKwh * rateUsd);
           is currently paying a premium to close.
         </p>
       </div>
+    </div>
 
-      <div class="callout is-warning">
-        <p style="margin:0;">
-          <strong>Interconnection queue, industry average</strong>
-        </p>
-        <p style="margin:0; font-family: var(--f-display); font-size: clamp(2.4rem, 1.6rem + 3vw, 3.6rem); line-height:1;">
-          {power.industryQueue}
-        </p>
-        <p style="margin:0;">
+    <div class="versus" data-reveal>
+      <div class="versus__side">
+        <p class="versus__label">Industry interconnection queue</p>
+        <p class="versus__value">{power.industryQueue}</p>
+        <p class="versus__note">
           Time from filing a request to energised service. This is the number every other
           site on your shortlist is quietly working around.
+        </p>
+      </div>
+      <div class="versus__side is-answer">
+        <p class="versus__label">{site.designation} queue position</p>
+        <p class="versus__value">{queueAnswer}</p>
+        <p class="versus__note">
+          {power.interconnectionQueue}. The {power.transformer} service is already
+          energised on land we own{queueBasis ? `, and generation stays ${queueBasis}` : ''},
+          so the application that would create a queue position was never required.
         </p>
       </div>
     </div>
   </section>
 
   <section aria-labelledby="btm" data-reveal>
-    <p class="eyebrow" aria-hidden="true">02 — Behind the meter</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Behind the meter</span></p>
     <h2 id="btm">Why {site.designation} is not in it</h2>
 
     <p>
@@ -100,7 +121,7 @@ const annualCost = Math.round(annualKwh * rateUsd);
   </section>
 
   <section aria-labelledby="service" data-reveal>
-    <p class="eyebrow" aria-hidden="true">03 — The service</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">The service</span></p>
     <h2 id="service">What is standing on the parcel</h2>
 
     <dl class="spec">
@@ -114,12 +135,14 @@ const annualCost = Math.round(annualKwh * rateUsd);
       <div><dt>Utility of record</dt><dd><span class="todo">[PLACEHOLDER: serving utility / cooperative name and account status]</span></dd></div>
     </dl>
 
-    <p style="margin-top: var(--s-6);">
-      The headroom figure is the one to hold onto. Phase 1A consumes roughly a twentieth
-      of what is already installed. A tenant growing from a few racks to a few hundred
-      kilowatts does not trigger a utility upgrade, a new study, or a new date — it
-      consumes capacity that is already sitting there.
-    </p>
+    <blockquote class="pull">
+      <p>{headroomFactor} headroom, already installed.</p>
+      <p>
+        Phase 1A consumes roughly a twentieth of what is standing. A tenant growing from
+        a few racks to a few hundred kilowatts does not trigger a utility upgrade, a new
+        study, or a new date — it consumes capacity that is already sitting there.
+      </p>
+    </blockquote>
 
     <figure class="photo" style="margin-top: var(--s-6);">
       <div class="photo__frame">
@@ -141,7 +164,7 @@ const annualCost = Math.round(annualKwh * rateUsd);
   </section>
 
   <section aria-labelledby="solar" data-reveal>
-    <p class="eyebrow" aria-hidden="true">04 — Generation and storage</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Generation and storage</span></p>
     <h2 id="solar">Solar and storage, on our side of the meter</h2>
 
     <div class="split">
@@ -189,7 +212,7 @@ const annualCost = Math.round(annualKwh * rateUsd);
   </section>
 
   <section aria-labelledby="economics" data-reveal>
-    <p class="eyebrow" aria-hidden="true">05 — Economics</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Economics</span></p>
     <h2 id="economics">What the power actually costs</h2>
 
     <p>
@@ -250,8 +273,8 @@ const annualCost = Math.round(annualKwh * rateUsd);
     </p>
   </section>
 
-  <section aria-labelledby="unclaimed" data-reveal>
-    <p class="eyebrow" aria-hidden="true">06 — Not yet claimed</p>
+  <section class="is-end" aria-labelledby="unclaimed" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">06</span><span class="eyebrow__t">Not yet claimed</span></p>
     <h2 id="unclaimed">What we are not claiming about resilience</h2>
 
     <p>

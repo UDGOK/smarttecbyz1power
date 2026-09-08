@@ -16,9 +16,15 @@ const perSystemKw = loadKw / systems;
   kicker="Phase 1A hardware"
   heading="Sixty-four Blackwells, liquid cooled."
   lede={`${compute.systems} in Building 1. ${compute.gpus} GPUs, ${compute.rentable} of them rentable, drawing ${compute.load} — ${power.phase1aUtilisation} of the service already standing on the parcel.`}
+  meta={[
+    { label: 'Systems', value: String(systems), note: compute.systems, count: true },
+    { label: 'GPUs', value: String(compute.gpus), note: `${gpusPerSystem} per system`, count: true },
+    { label: 'Rentable', value: String(compute.rentable), note: 'Offered to tenants at Phase 1A', tone: 'signal', count: true },
+    { label: 'IT load', value: compute.load, note: `${power.phase1aUtilisation} of the ${power.transformer} service`, tone: 'gold' },
+  ]}
 >
   <section aria-labelledby="fleet" data-reveal>
-    <p class="eyebrow" aria-hidden="true">01 — The fleet</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">The fleet</span></p>
     <h2 id="fleet">What Phase 1A is</h2>
 
     <div class="split">
@@ -43,27 +49,27 @@ const perSystemKw = loadKw / systems;
 
       <dl class="figures">
         <div>
-          <dt>Systems</dt>
-          <dd>{systems}<span class="sub">{compute.systems}</span></dd>
+          <dt>Rentable GPUs</dt>
+          <dd class="is-signal"><span data-count>{compute.rentable}</span><span class="sub">of {compute.gpus} across {systems} systems</span></dd>
         </div>
         <div>
-          <dt>GPUs</dt>
-          <dd>{compute.gpus}<span class="sub">{gpusPerSystem} per system</span></dd>
-        </div>
-        <div>
-          <dt>Rentable</dt>
-          <dd class="is-signal">{compute.rentable}<span class="sub">Offered to tenants at Phase 1A</span></dd>
-        </div>
-        <div>
-          <dt>IT load</dt>
-          <dd class="is-gold">{compute.load}<span class="sub">{power.phase1aUtilisation} of the {power.transformer} service</span></dd>
+          <dt>Held back</dt>
+          <dd><span data-count>{heldBack}</span><span class="sub">Disposition not yet published</span></dd>
         </div>
       </dl>
     </div>
+
+    <blockquote class="pull">
+      <p>One building out of {site.buildings.length}. {power.phase1aUtilisation} of one transformer.</p>
+      <p>
+        A larger announced number would be a forecast. This one is a purchase and a
+        fit-out, and every figure on the page is checkable against the site record.
+      </p>
+    </blockquote>
   </section>
 
   <section aria-labelledby="arithmetic" data-reveal>
-    <p class="eyebrow" aria-hidden="true">02 — Per system</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Per system</span></p>
     <h2 id="arithmetic">The power arithmetic, per system</h2>
 
     <p>
@@ -102,7 +108,7 @@ const perSystemKw = loadKw / systems;
   </section>
 
   <section aria-labelledby="cooling" data-reveal>
-    <p class="eyebrow" aria-hidden="true">03 — Cooling</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Cooling</span></p>
     <h2 id="cooling">Direct-to-chip, not a retrofit</h2>
 
     <div class="split">
@@ -133,7 +139,7 @@ const perSystemKw = loadKw / systems;
   </section>
 
   <section aria-labelledby="stack" data-reveal>
-    <p class="eyebrow" aria-hidden="true">04 — The rest of the stack</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">The rest of the stack</span></p>
     <h2 id="stack">What we have not specified yet</h2>
 
     <p>
@@ -183,8 +189,8 @@ const perSystemKw = loadKw / systems;
     </div>
   </section>
 
-  <section aria-labelledby="buying" data-reveal>
-    <p class="eyebrow" aria-hidden="true">05 — Buying it</p>
+  <section class="is-end" aria-labelledby="buying" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Buying it</span></p>
     <h2 id="buying">How capacity is sold</h2>
 
     <dl class="spec">

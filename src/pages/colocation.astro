@@ -8,6 +8,9 @@ const netGbps = Number((network.speed.match(/[\d.]+/) ?? ['0'])[0]);
 const headroomFactor = power.headroom.split(' ')[0];
 const netAnnual = netMonthly * 12;
 const netPerGbps = netMonthly / netGbps;
+/* "100 Gbps" out of "100 Gbps symmetrical DIA", so the headline figure and its
+   qualifier can be set at different sizes without retyping either. */
+const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
 ---
 
 <Content
@@ -16,9 +19,15 @@ const netPerGbps = netMonthly / netGbps;
   kicker="Colocation and GPU capacity"
   heading="Rack space where the power already exists."
   lede={`Take space and power in Building 1, or take GPU capacity on our hardware. Either way the constraint you are buying past is the same one: ${power.industryQueue} of interconnection queue that this site never entered.`}
+  meta={[
+    { label: 'Energy', value: power.rate, note: 'Site rate, behind the meter' },
+    { label: 'Headroom', value: headroomFactor, note: power.headroom, tone: 'signal' },
+    { label: 'Network', value: netHeadline, note: `${network.provider}, ${network.term.toLowerCase()}` },
+    { label: 'Power-on target', value: site.powerOn, note: 'Phase 1A compute hall', tone: 'gold' },
+  ]}
 >
   <section aria-labelledby="two-ways" data-reveal>
-    <p class="eyebrow" aria-hidden="true">01 — Two ways to buy</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">Two ways to buy</span></p>
     <h2 id="two-ways">Space and power, or capacity on our machines</h2>
 
     <div class="cards">
@@ -54,7 +63,7 @@ const netPerGbps = netMonthly / netGbps;
   </section>
 
   <section aria-labelledby="power-terms" data-reveal>
-    <p class="eyebrow" aria-hidden="true">02 — Power</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Power</span></p>
     <h2 id="power-terms">Power is the product; everything else is logistics</h2>
 
     <div class="split">
@@ -84,22 +93,14 @@ const netPerGbps = netMonthly / netGbps;
         </div>
         <div>
           <dt>Committed at Phase 1A</dt>
-          <dd>{power.phase1aDraw}<span class="sub">{power.phase1aUtilisation}</span></dd>
-        </div>
-        <div>
-          <dt>Headroom</dt>
-          <dd class="is-signal">{headroomFactor}<span class="sub">{power.headroom}</span></dd>
-        </div>
-        <div>
-          <dt>Energy</dt>
-          <dd>{power.rate}<span class="sub">Site rate. Tenant billing model still to be published.</span></dd>
+          <dd>{power.phase1aDraw}<span class="sub">{power.phase1aUtilisation}. The rest is unsold capacity that already exists.</span></dd>
         </div>
       </dl>
     </div>
   </section>
 
   <section aria-labelledby="density" data-reveal>
-    <p class="eyebrow" aria-hidden="true">03 — Density and cooling</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Density and cooling</span></p>
     <h2 id="density">Direct-to-chip liquid cooling, because the racks are dense</h2>
 
     <p>
@@ -126,7 +127,7 @@ const netPerGbps = netMonthly / netGbps;
   </section>
 
   <section aria-labelledby="network" data-reveal>
-    <p class="eyebrow" aria-hidden="true">04 — Network</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Network</span></p>
     <h2 id="network">{network.speed} into a field in Oklahoma</h2>
 
     <div class="split">
@@ -162,7 +163,7 @@ const netPerGbps = netMonthly / netGbps;
   </section>
 
   <section aria-labelledby="terms" data-reveal>
-    <p class="eyebrow" aria-hidden="true">05 — Commercial terms</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Commercial terms</span></p>
     <h2 id="terms">Terms, including the ones we have not set</h2>
 
     <p>
@@ -213,7 +214,7 @@ const netPerGbps = netMonthly / netGbps;
   </section>
 
   <section aria-labelledby="hall" data-reveal>
-    <p class="eyebrow" aria-hidden="true">06 — The hall</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">06</span><span class="eyebrow__t">The hall</span></p>
     <h2 id="hall">Building 1, before fit-out</h2>
 
     <figure class="photo">
@@ -235,8 +236,8 @@ const netPerGbps = netMonthly / netGbps;
     </figure>
   </section>
 
-  <section aria-labelledby="reserve" data-reveal>
-    <p class="eyebrow" aria-hidden="true">07 — Next</p>
+  <section class="is-end" aria-labelledby="reserve" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">07</span><span class="eyebrow__t">Next</span></p>
     <h2 id="reserve">Reserve before Phase 1A fills</h2>
     <p>
       Phase 1A is one building and {compute.rentable} rentable GPUs. Tell us the load in

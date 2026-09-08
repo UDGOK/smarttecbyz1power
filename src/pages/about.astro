@@ -9,9 +9,15 @@ import { company, site, power, network, compute } from '../data/site';
   kicker={`About ${company.name}`}
   heading={`${company.name} is the data center arm of ${company.parent}.`}
   lede={`${company.tagline} One company owns the land, the electrical service and the battery cabinets, which is why the schedule on this site is ours to keep rather than somebody else's to grant.`}
+  meta={[
+    { label: 'Site', value: site.designation, note: `${site.name}, ${site.county}` },
+    { label: 'Land', value: `${site.acres} acres`, note: site.ownership, count: true },
+    { label: 'Service', value: power.transformer, note: `${power.voltage}, energised on site`, tone: 'gold' },
+    { label: 'First capacity', value: site.powerOn, note: compute.systems, tone: 'signal' },
+  ]}
 >
   <section aria-labelledby="what" data-reveal>
-    <p class="eyebrow" aria-hidden="true">01 — What we do</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">What we do</span></p>
     <h2 id="what">We build AI data centers starting from the power, not the rendering</h2>
 
     <div class="split">
@@ -46,7 +52,7 @@ import { company, site, power, network, compute } from '../data/site';
   </section>
 
   <section aria-labelledby="parentage" data-reveal>
-    <p class="eyebrow" aria-hidden="true">02 — {company.parent}</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">{company.parent}</span></p>
     <h2 id="parentage">Why the parentage changes the economics</h2>
 
     <p>
@@ -91,7 +97,7 @@ import { company, site, power, network, compute } from '../data/site';
   </section>
 
   <section aria-labelledby="how" data-reveal>
-    <p class="eyebrow" aria-hidden="true">03 — How we publish</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">How we publish</span></p>
     <h2 id="how">Two rules about what appears on this site</h2>
 
     <div class="cards">
@@ -116,17 +122,17 @@ import { company, site, power, network, compute } from '../data/site';
       </div>
     </div>
 
-    <div class="callout" style="margin-top: var(--s-6);">
+    <blockquote class="pull">
+      <p>We would rather show you our gaps now than defend them at contract.</p>
       <p>
         If a competing proposal quotes you a PUE, a tier and a price for a site that has
-        not been energised, ask which of those three is measured. We would rather show
-        you our gaps now than defend them at contract.
+        not been energised, ask which of those three is measured.
       </p>
-    </div>
+    </blockquote>
   </section>
 
   <section aria-labelledby="people" data-reveal>
-    <p class="eyebrow" aria-hidden="true">04 — People</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">People</span></p>
     <h2 id="people">Who you would be dealing with</h2>
 
     <p>
@@ -154,8 +160,8 @@ import { company, site, power, network, compute } from '../data/site';
     </figure>
   </section>
 
-  <section aria-labelledby="talk" data-reveal>
-    <p class="eyebrow" aria-hidden="true">05 — Next</p>
+  <section class="is-end" aria-labelledby="talk" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Next</span></p>
     <h2 id="talk">Come and look at it</h2>
     <p>
       The site is at {site.address}. If you are evaluating capacity for

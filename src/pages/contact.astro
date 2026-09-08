@@ -1,6 +1,12 @@
 ---
 import Content from '../layouts/Content.astro';
 import { company, site, power, compute } from '../data/site';
+
+/* Split so the headline figure and its qualifier can be set at different sizes
+   without either being retyped away from the site record. */
+const [queueAnswer = power.interconnectionQueue] =
+  power.interconnectionQueue.split('—').map((s) => s.trim());
+const headroomFactor = power.headroom.split(' ')[0];
 ---
 
 <Content
@@ -9,9 +15,15 @@ import { company, site, power, compute } from '../data/site';
   kicker="Contact"
   heading="Reserve capacity before Phase 1A fills."
   lede={`Phase 1A is one building and ${compute.rentable} rentable GPUs. Tell us the load in kilowatts and the date you need it live, and you will get an answer about real capacity rather than a place on a waiting list.`}
+  meta={[
+    { label: 'Rentable at Phase 1A', value: String(compute.rentable), note: `of ${compute.gpus} GPUs, ${compute.systems}`, tone: 'signal', count: true },
+    { label: 'Power-on target', value: site.powerOn, note: 'Phase 1A compute hall' },
+    { label: 'Headroom', value: headroomFactor, note: power.headroom, tone: 'gold' },
+    { label: 'Interconnection queue', value: queueAnswer, note: power.interconnectionQueue },
+  ]}
 >
   <section aria-labelledby="form-heading" data-reveal>
-    <p class="eyebrow" aria-hidden="true">01 — Tell us what you need</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">Tell us what you need</span></p>
     <h2 id="form-heading">Capacity enquiry</h2>
 
     <p class="form-note">
@@ -20,7 +32,7 @@ import { company, site, power, compute } from '../data/site';
 
     <form class="form" method="post" action="/api/reserve">
       <fieldset class="form__set">
-        <legend class="form__legend">You</legend>
+        <legend class="form__legend"><span class="form__legend-n">01</span>You</legend>
 
         <div class="form__grid">
           <p class="field">
@@ -56,7 +68,7 @@ import { company, site, power, compute } from '../data/site';
       </fieldset>
 
       <fieldset class="form__set">
-        <legend class="form__legend">The deployment</legend>
+        <legend class="form__legend"><span class="form__legend-n">02</span>The deployment</legend>
 
         <div class="form__grid">
           <p class="field">
@@ -124,14 +136,20 @@ import { company, site, power, compute } from '../data/site';
       </fieldset>
 
       <div class="form__actions">
-        <button class="btn" type="submit">Send enquiry</button>
-        <span class="form__req-note">Fields marked * are required.</span>
+        <button class="btn form__submit" type="submit">
+          Send enquiry
+          <span class="form__submit-arrow" aria-hidden="true">→</span>
+        </button>
+        <span class="form__req-note">
+          Fields marked <span class="field__req" aria-hidden="true">*</span> are required.
+          A person reads this, not a sequence.
+        </span>
       </div>
     </form>
   </section>
 
-  <section aria-labelledby="direct" data-reveal>
-    <p class="eyebrow" aria-hidden="true">02 — Direct</p>
+  <section class="is-end" aria-labelledby="direct" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Direct</span></p>
     <h2 id="direct">Other ways to reach us</h2>
 
     <div class="split">
@@ -183,62 +201,113 @@ import { company, site, power, compute } from '../data/site';
 </Content>
 
 <style>
-  .form-note { margin-bottom: var(--s-5); }
+  /* These are <p> elements inside .doc, so they carry .doc's own paragraph
+     rules. Matching that specificity here keeps the form layout independent
+     of how the scoped-style strategy is configured. */
+  .doc .form-note { margin-bottom: var(--s-7); }
 
-  .form { display: grid; gap: var(--s-6); max-width: 780px; }
+  .form { display: grid; gap: clamp(var(--s-7), 6vw, var(--s-8)); max-width: 820px; }
 
+  /* No boxes. Each group is a ruled band with its own index, so the form reads
+     as part of the same document rather than as a widget dropped into it. */
   .form__set {
     margin: 0;
-    padding: var(--s-5);
-    border: 1px solid var(--w-10);
-    border-radius: var(--r-card);
-    background: var(--w-04);
+    padding: var(--s-6) 0 0;
+    border: 0;
+    border-top: 1px solid var(--w-25);
   }
 
   .form__legend {
-    padding: 0 var(--s-2);
-    margin-left: calc(var(--s-2) * -1);
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-4);
+    padding: 0;
+    margin-bottom: var(--s-6);
     font-family: var(--f-mono);
-    font-size: var(--t-label);
+    font-size: var(--t-micro);
     letter-spacing: var(--ls-wide);
     text-transform: uppercase;
     color: var(--w-70);
   }
+  .form__legend-n {
+    font-variant-numeric: tabular-nums;
+    color: var(--c-signal);
+  }
 
   .form__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
-    gap: var(--s-5) var(--s-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+    gap: var(--s-7) var(--s-6);
   }
 
-  .field { display: grid; gap: var(--s-2); margin: 0; min-width: 0; }
-  .field--wide { margin-top: var(--s-5); }
+  .doc .field { display: grid; gap: var(--s-3); margin: 0; max-width: none; min-width: 0; align-content: start; }
+  .doc .field--wide { margin-top: var(--s-8); }
 
   .field__label {
     font-family: var(--f-mono);
-    font-size: var(--t-label);
-    letter-spacing: var(--ls-mid);
+    font-size: var(--t-micro);
+    letter-spacing: var(--ls-wide);
     text-transform: uppercase;
-    color: var(--w-70);
+    color: var(--w-45);
+    transition: color var(--d-fast);
   }
+  .field:focus-within .field__label { color: var(--w-95); }
   .field__req { color: var(--c-gold); }
 
+  /* An underlined field, not a chip: it sits on the page's own rule system. */
   .field__input {
     width: 100%;
     min-width: 0;
-    padding: 11px 13px;
-    border: 1px solid var(--w-25);
-    border-radius: var(--r-sm);
-    background: var(--w-08);
+    padding: var(--s-2) 0 var(--s-3);
+    border: 0;
+    border-bottom: 1px solid var(--w-25);
+    border-radius: 0;
+    background: none;
     color: var(--w-95);
     font-family: var(--f-sans);
-    font-size: var(--t-read);
+    font-size: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
     line-height: 1.4;
     transition: border-color var(--d-fast), background var(--d-fast);
   }
-  .field__input:hover { border-color: var(--w-45); }
-  .field__input:focus { border-color: var(--c-signal); background: var(--w-10); }
-  .field__input--area { resize: vertical; min-height: 7em; font-family: var(--f-sans); }
+  .field__input:hover { border-bottom-color: var(--w-45); }
+  .field__input:focus {
+    outline: none;
+    border-bottom-color: var(--c-signal);
+    background: linear-gradient(180deg, transparent 60%, color-mix(in srgb, var(--c-signal) 8%, transparent));
+  }
+  /* Keyboard users still get the ring the rest of the site uses. */
+  .field__input:focus-visible {
+    outline: 2px solid var(--c-signal);
+    outline-offset: 3px;
+    border-radius: var(--r-sm);
+  }
+  .field__input::placeholder { color: var(--w-30); }
+  .field__input--area {
+    resize: vertical;
+    min-height: 6.5em;
+    padding: var(--s-3) 0;
+    font-family: var(--f-sans);
+  }
+
+  /* Selects lose their native chevron on a borderless field, so draw one. */
+  select.field__input {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: var(--s-6);
+    background-image: linear-gradient(45deg, transparent 50%, var(--w-55) 50%),
+                      linear-gradient(135deg, var(--w-55) 50%, transparent 50%);
+    background-position: right 10px center, right 4px center;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+  }
+  select.field__input:focus {
+    background-image: linear-gradient(45deg, transparent 50%, var(--c-signal) 50%),
+                      linear-gradient(135deg, var(--c-signal) 50%, transparent 50%),
+                      linear-gradient(180deg, transparent 60%, color-mix(in srgb, var(--c-signal) 8%, transparent));
+    background-position: right 10px center, right 4px center, 0 0;
+    background-size: 6px 6px, 6px 6px, 100% 100%;
+  }
 
   /* The native select popup is drawn by the OS, so its options need a colour
      that survives being rendered on a light system menu. */
@@ -246,24 +315,40 @@ import { company, site, power, compute } from '../data/site';
 
   .field__hint {
     font-size: 13px;
-    line-height: 1.55;
-    color: var(--w-55);
+    line-height: 1.6;
+    color: var(--w-45);
+    text-wrap: pretty;
   }
 
   .form__actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--s-3) var(--s-5);
+    gap: var(--s-4) var(--s-6);
+    padding-top: var(--s-6);
+    border-top: 1px solid var(--w-25);
   }
+  .form__submit { padding: 15px 28px; }
+  .form__submit-arrow {
+    display: inline-block;
+    transition: transform var(--d-fast) var(--e-out);
+  }
+  .form__submit:hover .form__submit-arrow { transform: translateX(4px); }
   .form__req-note {
+    max-width: 42ch;
     font-family: var(--f-mono);
-    font-size: var(--t-label);
+    font-size: var(--t-micro);
+    line-height: 1.7;
     letter-spacing: var(--ls-mid);
+    text-transform: uppercase;
     color: var(--w-45);
   }
 
   .addr { font-style: normal; line-height: 1.7; }
 
-  .fineprint { font-size: 13px; color: var(--w-45); }
+  .doc .fineprint { font-size: 13px; color: var(--w-45); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .form__submit:hover .form__submit-arrow { transform: none; }
+  }
 </style>

@@ -11,50 +11,46 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
   kicker={`${site.designation} · ${site.county}, Oklahoma`}
   heading="Thirty acres that already have power on them."
   lede={`${site.address}. ${site.acres} acres, ${site.ownership.toLowerCase()}, three buildings standing, and a ${power.transformer} service energised on the parcel. Nothing here is optioned, leased or subject to a land assembly.`}
+  meta={[
+    { label: 'Parcel', value: `${site.acres} acres`, note: `${site.ownership}, ${site.county}`, count: true },
+    { label: 'Buildings', value: `${totalSqft.toLocaleString()} sq ft`, note: `${site.buildings.length} × ${site.buildings[0].sqft.toLocaleString()} sq ft, standing`, count: true },
+    { label: 'Electrical service', value: power.transformer, note: `${power.voltage}, energised on site`, tone: 'gold' },
+    { label: 'Power-on target', value: site.powerOn, note: 'Phase 1A compute hall', tone: 'signal' },
+  ]}
 >
   <section aria-labelledby="today" data-reveal>
-    <p class="eyebrow" aria-hidden="true">01 — On the ground</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">On the ground</span></p>
     <h2 id="today">What exists today, not what is planned</h2>
 
     <div class="split">
       <div>
         <p>
-          Most AI data center sites are sold on a rendering and a land option. This
-          one is sold on a deed. {company.name} owns the {site.acres} acres at
-          {' '}{site.address} outright, the three buildings are already up, the
-          {' '}{power.transformer} transformer is already set, and the fibre is a signed
-          quote rather than a feasibility study.
+          Most AI data center sites are sold on a rendering and a land option.
+          {' '}{company.name} owns the {site.acres} acres at {site.address} outright,
+          the three buildings are already up, the {power.transformer} transformer is
+          already set, and the fibre is a signed quote rather than a feasibility study.
         </p>
+      </div>
+      <div>
         <p>
           That changes what a tenant is underwriting. You are not underwriting whether
           the power will arrive, or whether the seller closes on the land. You are
           underwriting a fit-out schedule inside a building that exists.
         </p>
       </div>
-
-      <dl class="figures">
-        <div>
-          <dt>Parcel</dt>
-          <dd>{site.acres} acres<span class="sub">{site.ownership}, {site.county}</span></dd>
-        </div>
-        <div>
-          <dt>Buildings</dt>
-          <dd>{totalSqft.toLocaleString()} sq ft<span class="sub">{site.buildings.length} × {site.buildings[0].sqft.toLocaleString()} sq ft, standing</span></dd>
-        </div>
-        <div>
-          <dt>Electrical service</dt>
-          <dd class="is-gold">{power.transformer}<span class="sub">{power.voltage}, on site</span></dd>
-        </div>
-        <div>
-          <dt>Power-on target</dt>
-          <dd class="is-signal">{site.powerOn}<span class="sub">Phase 1A compute hall</span></dd>
-        </div>
-      </dl>
     </div>
+
+    <blockquote class="pull">
+      <p>This one is sold on a deed.</p>
+      <p>
+        {site.acres} acres at {site.address}. {site.ownership} in {site.county} —
+        not optioned, not leased, not subject to a land assembly.
+      </p>
+    </blockquote>
   </section>
 
   <section aria-labelledby="land" data-reveal>
-    <p class="eyebrow" aria-hidden="true">02 — The land</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">The land</span></p>
     <h2 id="land">The parcel</h2>
 
     <div class="split">
@@ -90,7 +86,7 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
   </section>
 
   <section aria-labelledby="buildings" data-reveal>
-    <p class="eyebrow" aria-hidden="true">03 — The buildings</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">The buildings</span></p>
     <h2 id="buildings">Three shells, phased</h2>
 
     <p>
@@ -160,7 +156,7 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
   </section>
 
   <section aria-labelledby="why" data-reveal>
-    <p class="eyebrow" aria-hidden="true">04 — Location</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Location</span></p>
     <h2 id="why">Why Mead</h2>
 
     <p>
@@ -203,7 +199,7 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
   </section>
 
   <section aria-labelledby="diligence" data-reveal>
-    <p class="eyebrow" aria-hidden="true">05 — Diligence</p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Diligence</span></p>
     <h2 id="diligence">What we have not published yet</h2>
 
     <p>
@@ -225,8 +221,8 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
     </ul>
   </section>
 
-  <section aria-labelledby="next" data-reveal>
-    <p class="eyebrow" aria-hidden="true">06 — Next</p>
+  <section class="is-end" aria-labelledby="next" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">06</span><span class="eyebrow__t">Next</span></p>
     <h2 id="next">The power is the reason this site is worth reading about</h2>
     <p>
       Thirty owned acres is a good starting position. It is the electrical position that
