@@ -51,7 +51,7 @@ const PAL = {
 
 const FORM_H = 3.6;        // a waiting form, roughly two and a half people tall
 const PITCH = 3.4;         // pair to pair down the file
-const QUEUE_Z0 = -3.0;     // the first pair, already past the lens
+const QUEUE_Z0 = 5.0;      // the first pair, already alongside the lens
 const CURTAIN_R = 200;     // the red wall the world ends against
 const CURTAIN_H = 520;
 const FLOOR_W = 560;
@@ -160,20 +160,20 @@ const CURTAIN_FRAG = /* glsl */ `
 
     // This must be exactly the colour the ground fades to, or the horizon
     // shows as a seam across the whole width of the frame.
-    vec3 horizon = mix(uDeep * 0.72, uPowerDeep * 0.9, uWorld * 0.85);
+    vec3 horizon = mix(uDeep * 0.95, uPowerDeep * 0.9, uWorld * 0.85);
 
     // Blood red, climbing out of the horizon into the light.
-    vec3 col = mix(horizon, uWait, smoothstep(0.0, 0.40, hh));
-    col = mix(col, uWait * 1.22, smoothstep(0.30, 1.0, hh));
+    vec3 col = mix(horizon, uWait, smoothstep(-0.06, 0.52, hh));
+    col = mix(col, uWait * 1.06, smoothstep(0.30, 1.0, hh));
 
     // The light columns. Clustered on the vanishing point rather than spread
     // evenly, so the brightest part of the wall is the part of the queue you
-    // can never reach. The cluster is 0.2 of the way around the cylinder,
-    // which is about the width of one landscape frame.
+    // can never reach. The cluster is a third of the way around the
+    // cylinder, which is a frame and a half wide.
     float cols = 0.0;
-    for (int i = 0; i < 9; i++) {
+    for (int i = 0; i < 11; i++) {
       float fi = float(i);
-      float x  = uSunU + (hash11(fi * 3.31) - 0.5) * 0.20;
+      float x  = uSunU + (hash11(fi * 3.31) - 0.5) * 0.34;
       float w  = 0.006 + hash11(fi * 7.71) * 0.020;
       // A sway so slow it barely registers as motion at all. That is the point.
       float sway = sin(uTime * (0.031 + hash11(fi * 2.37) * 0.043) + fi * 2.1) * 0.0042;
@@ -186,11 +186,14 @@ const CURTAIN_FRAG = /* glsl */ `
     float breath = 0.86 + 0.14 * fbm(vec2(vUv.x * 7.0, hh * 2.2 - uTime * 0.021));
     cols *= breath;
 
-    col += cols * uEmber * 0.55;
+    // Held well off clipping. The host grades this stage through a bloom pass,
+    // and a wall already at full red would bloom into a flat sheet with no
+    // columns left in it at all.
+    col += cols * uEmber * 0.26;
     // A general plume of light behind the file, so the vanishing point is the
     // brightest thing in the frame and the rest of the wall falls away from it.
     float plume = exp(-pow((abs(fract(vUv.x - uSunU + 0.5) - 0.5)) * 13.0, 2.0));
-    col += uEmber * plume * smoothstep(0.0, 0.8, hh) * 0.16;
+    col += uEmber * plume * smoothstep(0.0, 0.8, hh) * 0.06;
 
     // One slow band descending the wall — a clock in a room where nothing else
     // keeps time. Roughly a minute a pass; you notice it only if you wait.
@@ -303,18 +306,20 @@ const FLOOR_FRAG = /* glsl */ `
     float contact = exp(-pow((ax - uRank) * 1.55, 2.0));
     col *= 1.0 - contact * 0.55 * uContact;
 
-    // Atmospheric perspective toward the curtain, so the horizon has no seam.
-    vec3 far = mix(uDeep * 0.72, uPowerDeep * 0.9, uWorld * 0.85);
-    col = mix(col, far, 1.0 - exp(-vView * (uFog > 0.5 ? 0.0125 : 0.0060)));
-
     /* --- the turn toward the gold world ---------------------------------- */
     float w = smoothstep(0.03, 1.0, uWorld);
     // Dirt under a low sun, plus the long streak the sun lays down the axis of
     // the file — the road out, arriving where the queue used to be.
-    vec3 gold = mix(uPit * 1.5, uPowerDeep * 0.85, 0.30 + 0.45 * grit);
+    vec3 gold = mix(uPowerDeep * 0.28, uPowerDeep * 1.05, 0.28 + 0.50 * grit);
     float streak = exp(-pow((vPosW.x - uQx) * 0.055, 2.0)) * smoothstep(-40.0, -170.0, vPosW.z);
     gold += uPower * streak * 0.34;
     col = mix(col, gold, w);
+
+    // Atmospheric perspective, applied after the turn so both worlds recede
+    // into exactly the horizon the curtain paints. Do it before the mix and
+    // the gold ground meets the gold sky at a hard line across the frame.
+    vec3 far = mix(uDeep * 0.95, uPowerDeep * 0.9, uWorld * 0.85);
+    col = mix(col, far, 1.0 - exp(-vView * (uFog > 0.5 ? 0.0200 : 0.0140)));
 
     float g = fract(sin(dot(gl_FragCoord.xy + uTime, vec2(12.9898, 78.233))) * 43758.5453);
     col += (g - 0.5) * 0.030;
@@ -322,7 +327,7 @@ const FLOOR_FRAG = /* glsl */ `
     // The near ground falls away into shadow: the lede, the ruler and the hold
     // button all land down here and all of them are white.
     vec2 q = gl_FragCoord.xy / max(uRes, vec2(1.0)) - 0.5;
-    col *= 1.0 - smoothstep(0.02, 0.44, -q.y) * 0.72;
+    col *= 1.0 - smoothstep(0.06, 0.46, -q.y) * 0.58;
     q.x *= 1.05;
     col *= 1.0 - dot(q, q) * 0.95;
 
@@ -372,7 +377,6 @@ const FORM_FRAG = /* glsl */ `
   uniform float uHeight;    // the form's own height, for the local y ramp
   uniform float uGain;      // how hard this material takes the light
   uniform float uHold;      // 0 = dissolves with the file, 1 = goes last
-  uniform float uEmberOdds; // fraction of forms carrying a status light
   uniform vec3  uDeep;
   uniform vec3  uPit;
   uniform vec3  uEmber;
@@ -386,7 +390,6 @@ const FORM_FRAG = /* glsl */ `
   varying float vDepth;
   varying float vView;
 
-  ${NOISE}
   ${SHAFTS}
 
   void main(){
@@ -401,33 +404,33 @@ const FORM_FRAG = /* glsl */ `
     // light comes down, so the shoulders take it and the legs stay in the dark.
     float lit = shaftPool(vPosW.xz, 1.15, 2.10) * uGain;
     float down = 0.30 + 0.70 * max(n.y, 0.0);
-    col += uEmber * lit * down * (0.10 + 0.90 * smoothstep(0.15, 0.95, y01)) * 0.85;
+    col += uEmber * lit * down * (0.10 + 0.90 * smoothstep(0.15, 0.95, y01)) * 1.45;
 
     // Rim. This is what makes a black shape in red fog read as a *body* and
     // not as a hole cut in the frame. Kept low: against a wall this bright the
     // silhouette does the work, and a hot outline would make them ornaments.
     float rim = pow(1.0 - abs(dot(n, v)), 3.6);
-    col += uEmber * rim * (0.07 + 0.34 * lit) * (0.35 + 0.65 * y01);
-
-    // One in a handful carries a status light at chest height, front-facing.
-    // It never changes and it is never green — green is what "live" looks like,
-    // and nothing in this queue is live.
-    float has = step(hash11(vSeed * 5.13), uEmberOdds);
-    float lamp = smoothstep(0.016, 0.0, abs(y01 - 0.66)) * smoothstep(0.78, 0.99, n.z);
-    col += uEmber * lamp * has * 0.40;
-
-    // Atmospheric perspective. The far end of the file dissolves into the wall.
-    vec3 far = mix(uDeep * 0.72, uPowerDeep * 0.9, uWorld * 0.85);
-    col = mix(col, far, 1.0 - exp(-vView * (uFog > 0.5 ? 0.0125 : 0.0060)));
+    col += uEmber * rim * (0.07 + 0.26 * lit) * (0.35 + 0.65 * y01);
 
     /* --- the turn toward the gold world ---------------------------------- */
     // The file empties from the far end forward, so the vanishing point clears
     // first and the low sun arrives through the gap it leaves.
-    float d = hash11(vSeed * 3.77 + floor(y01 * 11.0) * 4.13);
-    float bite = uWorld * (0.34 + 1.00 * vDepth) * 1.55 * (1.0 - uHold * 0.62);
+    vec3  cell = floor(vPosW * 16.0);
+    float d = fract(sin(mod(dot(cell, vec3(12.9898, 78.233, 37.719)) + vSeed, 6283.0))
+                    * 43758.5453);
+    // uHold buys the hero a long stay of execution and then takes it anyway:
+    // at mix 1 every form in this world is gone, or the handoff to the gold
+    // world would arrive with a red silhouette still standing in it.
+    float w2 = pow(uWorld, 1.0 + uHold * 3.5);
+    float bite = w2 * (0.75 + 0.90 * vDepth + uHold * 0.55) * 1.60;
     if (d < bite) discard;
 
     col = mix(col, uPowerDeep * 0.7 + uPower * 0.10, smoothstep(0.0, 0.9, uWorld) * 0.55);
+
+    // Atmospheric perspective last, for the same reason as the ground: the
+    // far end of the file has to dissolve into the wall in either world.
+    vec3 far = mix(uDeep * 0.95, uPowerDeep * 0.9, uWorld * 0.85);
+    col = mix(col, far, 1.0 - exp(-vView * (uFog > 0.5 ? 0.0200 : 0.0140)));
 
     float g = fract(sin(dot(gl_FragCoord.xy + uTime, vec2(12.9898, 78.233))) * 43758.5453);
     col += (g - 0.5) * 0.028;
@@ -499,7 +502,7 @@ const CONE_FRAG = /* glsl */ `
     float dust = fbm(vec2(vUv.x * 6.0 + vSeed * 17.0, hy * 3.4 - uTime * 0.045));
     a *= 0.62 + 0.62 * (dust + 0.5);
 
-    a *= uGain * 0.50;
+    a *= uGain * 0.30;
     // Anything this close is fog on the lens rather than light in the room.
     a *= smoothstep(1.5, 9.0, vView);
     a *= exp(-vView * (uFog > 0.5 ? 0.0055 : 0.0022));
@@ -651,13 +654,15 @@ function rng(seed: number): () => number {
 function formProfile(): THREE.Vector2[] {
   return [
     new THREE.Vector2(0.00, 0.00),
-    new THREE.Vector2(0.54, 0.00),
-    new THREE.Vector2(0.52, 0.22),
-    new THREE.Vector2(0.40, 0.72),
-    new THREE.Vector2(0.365, 2.32),
-    new THREE.Vector2(0.445, 2.74),
-    new THREE.Vector2(0.40, 3.06),
-    new THREE.Vector2(0.255, 3.42),
+    new THREE.Vector2(0.60, 0.00),   // plinth
+    new THREE.Vector2(0.58, 0.20),
+    new THREE.Vector2(0.43, 0.82),
+    new THREE.Vector2(0.40, 2.06),   // body
+    new THREE.Vector2(0.63, 2.44),   // a hard shoulder, wider than the body —
+    new THREE.Vector2(0.59, 2.88),   // this is what stops it reading as a pill
+    new THREE.Vector2(0.25, 2.97),   // and steps in sharply to the head
+    new THREE.Vector2(0.235, 3.34),
+    new THREE.Vector2(0.145, 3.52),
     new THREE.Vector2(0.00, 3.60),
   ];
 }
@@ -691,14 +696,14 @@ interface Shot {
 }
 
 const SHOT_WIDE: Shot = {
-  qx: 7.0, rank: 2.9,
+  qx: 6.2, rank: 2.9,
   // Tipped up about five degrees, which drops the horizon to the lower third
   // and hands the top two thirds of the frame to the wall of light. That is
   // the shape of the beat: the queue is a line along the bottom of a very
   // large red room, and the room is the point.
   camX: 0, camY: 2.35, camZ: 15,
-  lookX: -7.5, lookY: 7.6,
-  heroX: 11.2, heroZ: -23, heroScale: 3.7,
+  lookX: -6.2, lookY: 6.8,
+  heroX: 2.6, heroZ: -46, heroScale: 6.0,
   spread: 1.0, fov: 46, travel: 9.5,
 };
 
@@ -713,7 +718,7 @@ const SHOT_TALL: Shot = {
   qx: 4.2, rank: 2.2,
   camX: 0, camY: 2.60, camZ: 13,
   lookX: -2.4, lookY: 11.5,
-  heroX: 6.4, heroZ: -19, heroScale: 4.1,
+  heroX: 2.2, heroZ: -37, heroScale: 6.4,
   spread: 0.55, fov: 70, travel: 7.5,
 };
 
@@ -951,7 +956,7 @@ export class WaitScene implements StageScene {
     geo.setAttribute('iSeed', new THREE.InstancedBufferAttribute(seed, 1));
     geo.setAttribute('iDepth', new THREE.InstancedBufferAttribute(depth, 1));
 
-    const makeMat = (gain: number, hold: number, odds: number) =>
+    const makeMat = (gain: number, hold: number) =>
       this.mat(new THREE.ShaderMaterial({
         vertexShader: FORM_VERT,
         fragmentShader: FORM_FRAG,
@@ -961,7 +966,6 @@ export class WaitScene implements StageScene {
           uHeight: { value: FORM_H },
           uGain: { value: gain },
           uHold: { value: hold },
-          uEmberOdds: { value: odds },
           uDeep: { value: new THREE.Color(PAL.deep) },
           uPit: { value: new THREE.Color(PAL.pit) },
           uEmber: { value: new THREE.Color(PAL.ember) },
@@ -970,7 +974,7 @@ export class WaitScene implements StageScene {
         },
       }));
 
-    this.forms = new THREE.InstancedMesh(geo, makeMat(1.0, 0.0, 0.22), n);
+    this.forms = new THREE.InstancedMesh(geo, makeMat(1.0, 0.0), n);
     this.forms.frustumCulled = false;
     this.root.add(this.forms);
 
@@ -983,7 +987,7 @@ export class WaitScene implements StageScene {
     const hd = new Float32Array([0]);
     heroGeo.setAttribute('iSeed', new THREE.InstancedBufferAttribute(hs, 1));
     heroGeo.setAttribute('iDepth', new THREE.InstancedBufferAttribute(hd, 1));
-    this.hero = new THREE.InstancedMesh(heroGeo, makeMat(1.55, 1.0, 0), 1);
+    this.hero = new THREE.InstancedMesh(heroGeo, makeMat(1.55, 1.0), 1);
     this.hero.frustumCulled = false;
     this.root.add(this.hero);
   }
@@ -1105,7 +1109,7 @@ export class WaitScene implements StageScene {
     for (let i = 0; i < MAX_SHAFTS; i++) {
       const s = this.shaftSeeds[i]!;
       const on = i < this.plan.shafts;
-      this.shaftX[i] = shot.qx + (s.u * 0.5 - 0.62) * 26 * shot.spread;
+      this.shaftX[i] = shot.qx + (s.u * 0.62 - 0.42) * 26 * shot.spread;
       this.shaftZ[i] = QUEUE_Z0 - s.d * (len * 0.82);
       this.shaftW[i] = (5.0 + s.w * 9.0) * (0.7 + 0.3 * shot.spread);
       this.shaftI[i] = on ? s.i : 0;
@@ -1136,7 +1140,7 @@ export class WaitScene implements StageScene {
         // horror of it is how nearly identical every position is.
         const jx = (r() - 0.5) * 0.55;
         const jz = (r() - 0.5) * 0.45;
-        const h = 0.9 + r() * 0.22;
+        const h = 1.12 + r() * 0.26;
         d.position.set(shot.qx + (left ? -shot.rank : shot.rank) + jx, 0, z + jz);
         d.rotation.set(0, (r() - 0.5) * 0.5, 0);
         d.scale.set(h, h, h);
@@ -1154,9 +1158,6 @@ export class WaitScene implements StageScene {
       d.updateMatrix();
       this.hero.setMatrixAt(0, d.matrix);
       this.hero.instanceMatrix.needsUpdate = true;
-      const hm = this.hero.material as THREE.ShaderMaterial;
-      const uh = hm.uniforms.uHeight;
-      if (uh) uh.value = FORM_H * shot.heroScale;
     }
 
     if (this.mist) {

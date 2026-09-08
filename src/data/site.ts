@@ -84,7 +84,7 @@ export const stages = [
     // Pressure: hotter bloom, harder fringing, heavier corners.
     post: { bloomStrength: 1.15, bloomThreshold: 0.58, bloomRadius: 0.5, aberration: 0.008, vignette: 0.5 },
     index: 1,
-    scene: 'land' as const,
+    scene: 'wait' as const,
     ground: '#4d0806',
     ruler: '-75 BP',
     kicker: 'The industry problem',
@@ -150,7 +150,7 @@ export const stages = [
 export type Stage = (typeof stages)[number];
 export type SceneId = Stage['scene'];
 
-/** Stage 2 is the land scene already crossed over to the queue palette. */
+/** Every stage now owns its world, so each is entered at rest. */
 export const ENTRY_MIX: Record<string, number> = {
-  land: 0, wait: 1, power: 0, machine: 0, campus: 0,
+  land: 0, wait: 0, power: 0, machine: 0, campus: 0,
 };
