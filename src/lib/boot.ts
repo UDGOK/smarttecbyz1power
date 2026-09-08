@@ -112,6 +112,14 @@ function run(): void {
   const panels = Array.from(rootEl.querySelectorAll<HTMLElement>('[data-stage-panel]'));
 
   let host: SceneHost | null = null;
+  /**
+   * The experience is armed only when the gate has cleared AND the scene is
+   * up. They finish in either order — the gate runs on a timer, the scene
+   * waits on a 127KB chunk — so whichever lands second does the arming.
+   */
+  let armed = false;
+  let gateCleared = false;
+  let sceneState: 'pending' | 'ready' | 'failed' = 'pending';
   let current = 0;
   let swapping = false;
   let lockedUntil = 0;
@@ -149,6 +157,8 @@ function run(): void {
     if (!supportsWebGL()) {
       canvasEl.hidden = true;
       document.body.dataset.noWebgl = '';
+      sceneState = 'failed';
+      maybeArm();
       return;
     }
     try {
@@ -159,13 +169,14 @@ function run(): void {
       window.addEventListener('resize', host.resize);
       (window as unknown as { __experience?: SceneHost }).__experience = host;
 
-      // One clock for everything: the host's own delta drives the damped
-      // scroll and the parallax rig, so they can never drift out of step
-      // with the frame they are moving.
-      host.onFrame((dt) => {
-        scroller.update(dt);
-        rig.update(dt);
+      sceneState = 'ready';
+      maybeArm();
 
+      // The scroll and the rig are stepped on their own clock (see `tick`),
+      // not here — they must keep running even when this loop does not exist.
+      // What does belong here is the stage threshold check, which only means
+      // anything while there is a world to advance.
+      host.onFrame(() => {
         if (!swapping && performance.now() > lockedUntil) {
           const p = scroller.progress;
           const t = p <= CROSS_START ? 0 : (p - CROSS_START) / (1 - CROSS_START);
@@ -183,8 +194,63 @@ function run(): void {
     } catch {
       canvasEl.hidden = true;
       document.body.dataset.noWebgl = '';
+      sceneState = 'failed';
+      maybeArm();
     }
   }
+
+  /**
+   * The damped scroll and the parallax rig are driven here, on their own
+   * clock, and NOT from the renderer's loop.
+   *
+   * They used to ride on `host.onFrame`, which meant that if WebGL failed to
+   * start — an old phone, a lost context, a scene that threw — the loop never
+   * ran, nothing advanced the scroll position, and because the page had
+   * already been switched to virtual scrolling there was no native scrolling
+   * either. The result was a page that could not be moved at all.
+   */
+  let lastTick = performance.now();
+  const tick = (now: number): void => {
+    const dt = Math.min(0.064, (now - lastTick) / 1000);
+    lastTick = now;
+    scroller.update(dt);
+    rig.update(dt);
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+
+  /** Hands the page to the experience, or to the browser if there is none. */
+  function maybeArm(): void {
+    if (!gateCleared || sceneState === 'pending') return;
+    if (armed) return;
+    armed = true;
+
+    if (sceneState === 'ready') {
+      scroller.enable();
+      document.body.dataset.virtualScroll = '';
+      onProgress(0);
+    } else {
+      // No scene to drive, so never take native scrolling away: that pairing
+      // is what produces a page nothing can move.
+      for (const panel of panels) {
+        panel.hidden = false;
+        panel.removeAttribute('aria-hidden');
+        const sticky = panel.querySelector<HTMLElement>('[data-stage-sticky]');
+        if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
+        for (const line of panel.querySelectorAll<HTMLElement>('.line__inner')) {
+          line.style.opacity = '1';
+          line.style.transform = 'none';
+        }
+      }
+      document.querySelector<HTMLElement>('#after')?.removeAttribute('hidden');
+    }
+    window.dispatchEvent(new Event('experience:ready'));
+  }
+
+  // If the scene chunk never resolves at all, stop waiting on it.
+  window.setTimeout(() => {
+    if (sceneState === 'pending') { sceneState = 'failed'; maybeArm(); }
+  }, 9000);
 
   // --- Chrome ------------------------------------------------------------
   function applyChrome(index: number): void {
@@ -707,9 +773,8 @@ function run(): void {
   initLoader(() => {
     reveal(0);
     audio.play('stage-land-ambient', { fadeIn: 1.2, volume: 0.35 });
-    scroller.enable();
-    document.body.dataset.virtualScroll = '';
-    onProgress(0);
+    gateCleared = true;
+    maybeArm();
     window.dispatchEvent(new Event('experience:ready'));
   });
 }
