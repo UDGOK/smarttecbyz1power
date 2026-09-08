@@ -330,7 +330,15 @@ body[data-virtual-scroll] .stage-scroll { height: 100svh; }
    invisible rather than merely unstyled. The solid colour stays underneath so
    there is always something to see. */
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  .silver {
+  /* The gradient goes on whichever element actually holds the glyphs.
+     A stage headline is `h1.silver > span.line[overflow:hidden] >
+     span.line__inner`, and WebKit does not carry an ancestor's text-clipped
+     background across that overflow clip: Chrome painted the shimmer, Safari
+     painted transparent glyphs over nothing and every stage title on iPhone
+     was simply missing. Naming the inner span puts the background on the same
+     element as the text, which both engines clip correctly. */
+  .silver,
+  .silver .line__inner {
     background-image: linear-gradient(
       100deg,
       var(--w-70) 0% 35%,
@@ -344,7 +352,8 @@ body[data-virtual-scroll] .stage-scroll { height: 100svh; }
     -webkit-text-fill-color: transparent;
     animation: silver-sweep 9s linear infinite;
   }
-  [data-chrome='dark'] .silver {
+  [data-chrome='dark'] .silver,
+  [data-chrome='dark'] .silver .line__inner {
     background-image: linear-gradient(
       100deg,
       var(--k-55) 0% 35%,
@@ -359,7 +368,8 @@ body[data-virtual-scroll] .stage-scroll { height: 100svh; }
   100% { background-position: -200% 0; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .silver { animation: none; background-position: 50% 0; }
+  .silver,
+  .silver .line__inner { animation: none; background-position: 50% 0; }
 }
 
 /* ---- Pointer pass-through on the cinematic route ----
@@ -404,35 +414,3 @@ body[data-virtual-scroll] .stage-scroll { height: 100svh; }
   body[data-experience] { overflow-x: clip; overflow-y: visible; }
 }
 
-/* ---- Silver shimmer ----
-   The reference's own treatment, transcribed from its stylesheet: the text is
-   a clipped gradient rather than a fill, and the gradient is twice the width
-   of the box so it can be swept across. Nine seconds, linear, forever. */
-.silver {
-  -webkit-text-fill-color: transparent;
-  background-image: linear-gradient(
-    100deg,
-    var(--w-70) 0% 35%,
-    var(--c-white) 50%,
-    var(--w-70) 65% 100%
-  );
-  background-size: 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: silver-sweep 9s linear infinite;
-}
-[data-chrome='dark'] .silver {
-  background-image: linear-gradient(
-    100deg,
-    var(--k-55) 0% 35%,
-    var(--c-carbon) 50%,
-    var(--k-55) 65% 100%
-  );
-}
-@keyframes silver-sweep {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .silver { animation: none; background-position: 50% 0; }
-}

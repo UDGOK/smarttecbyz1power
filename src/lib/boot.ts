@@ -188,7 +188,7 @@ function run(): void {
       // What does belong here is the stage threshold check, which only means
       // anything while there is a world to advance.
       host.onFrame(() => {
-        if (!swapping && performance.now() > lockedUntil) {
+        if (!nativeScroll && !swapping && performance.now() > lockedUntil) {
           const p = scroller.progress;
           const t = p <= CROSS_START ? 0 : (p - CROSS_START) / (1 - CROSS_START);
           if (t >= 0.995) void advance();
@@ -230,20 +230,114 @@ function run(): void {
   };
   requestAnimationFrame(tick);
 
-  /** Progress through the current stage, read from the document's own scroll. */
+  // --- The continuous spine (touch) --------------------------------------
+  /**
+   * On touch, all five stages sit in the document at once — each is a 250vh
+   * section with a sticky panel — and the browser's own scrolling moves
+   * between them. Nothing is hidden, nothing is ever scrolled back to zero.
+   *
+   * The previous arrangement kept one panel and reset the scroll on each
+   * advance. iOS momentum does not stop for a `scrollTo`, so the reset landed
+   * you at the top of the next stage still travelling at speed, which hit the
+   * end and advanced again: one flick ran through every world, no headline
+   * stayed up long enough to read, and because "back" was wired to the virtual
+   * scroller — which touch no longer uses — there was no way to return.
+   *
+   * Reading the spine instead of driving it makes reverse free: scrolling up
+   * is just scrolling up, and each stage re-enters exactly as it left.
+   */
+
+  /** Signed progress through a stage. Below 0 is above it, above 1 is past. */
+  function panelProgress(index: number): number {
+    const panel = panels[index];
+    if (!panel) return 0;
+    const rect = panel.getBoundingClientRect();
+    const travel = Math.max(1, rect.height - window.innerHeight);
+    return -rect.top / travel;
+  }
+
+  /**
+   * The stage that owns the screen: the last one whose predecessor has run out
+   * of track.
+   *
+   * Not "the last section whose top has passed the viewport top" — that is a
+   * whole viewport later. A panel is `position: sticky` inside a 250vh
+   * section, so it unpins and rides away at 150vh, while the next section's
+   * top does not arrive until 250vh. Switching on the section boundary left
+   * every join with a screenful of scrolling in which the outgoing headline
+   * had already faded out and the incoming one had not been revealed yet —
+   * the missing section titles, and a third of the journey.
+   *
+   * Handing over at the end of the pin instead means the outgoing copy leaves
+   * exactly as the incoming copy rises into view.
+   */
+  function spineIndex(): number {
+    for (let i = panels.length - 1; i > 0; i -= 1) {
+      if (panelProgress(i - 1) >= 1) return i;
+    }
+    return 0;
+  }
+
+  let spineSwapping = false;
+
+  /**
+   * Take the world to `index`. Called in both directions and for jumps of more
+   * than one, because a fast fling can cross two boundaries inside one frame.
+   */
+  async function spineSwap(index: number): Promise<void> {
+    const to = stages[index];
+    const from = stages[current];
+    if (!to || spineSwapping || index === current) return;
+    spineSwapping = true;
+    swapping = true;
+    const forward = index > current;
+
+    if (host && from.scene !== to.scene) {
+      host.setStage(await loadScene(to.scene));
+      host.setClearColor(to.ground);
+    }
+    host?.endTransition();
+    host?.setWorldMix(ENTRY_MIX[to.id] ?? 0);
+    crossing = false;
+
+    audio.stop(AMBIENT[from.id], { fadeOut: 0.5 });
+    audio.play(AMBIENT[to.id], { fadeIn: 0.5, volume: 0.45 });
+
+    current = index;
+    applyChrome(index);
+    setPower(STAGE_KW[index] ?? 1);
+    if (forward) topupBadge();
+
+    // Whichever way you came, the panel you land on is fully present and its
+    // copy plays in. Going back used to leave the headline at whatever opacity
+    // the crossing had faded it to.
+    const sticky = panels[index].querySelector<HTMLElement>('[data-stage-sticky]');
+    if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
+    reveal(index);
+
+    if (to.scene === 'campus') enterCampus(); else exitCampus();
+    if (stages[index + 1]) warmScene(stages[index + 1].scene);
+    if (stages[index - 1]) warmScene(stages[index - 1].scene);
+
+    swapping = false;
+    spineSwapping = false;
+    readSpine();
+  }
+
   let nativeTicking = false;
+  function readSpine(): void {
+    if (spineSwapping) return;
+    const index = spineIndex();
+    if (index !== current) { void spineSwap(index); return; }
+    onProgress(Math.min(1, Math.max(0, panelProgress(index))));
+  }
+
   function onNativeScroll(): void {
     if (nativeTicking) return;
     nativeTicking = true;
     requestAnimationFrame(() => {
       nativeTicking = false;
-      const panel = panels[current];
-      if (!panel || panel.hidden || swapping) return;
-      const rect = panel.getBoundingClientRect();
-      const travel = Math.max(1, rect.height - window.innerHeight);
-      const p = Math.min(1, Math.max(0, -rect.top / travel));
-      onProgress(p);
-      if (p >= 0.995 && performance.now() > lockedUntil) void advance();
+      readSpine();
     });
   }
 
@@ -255,7 +349,13 @@ function run(): void {
 
     if (sceneState === 'ready' && nativeScroll) {
       // The document scrolls; we only read it. Nothing is taken away, so
-      // nothing can freeze.
+      // nothing can freeze. Every stage joins the spine — the markup ships
+      // with all but the first hidden so a no-JS visitor gets one clean
+      // screen rather than five stacked ones.
+      for (const panel of panels) {
+        panel.hidden = false;
+        panel.removeAttribute('aria-hidden');
+      }
       window.addEventListener('scroll', onNativeScroll, { passive: true });
       window.addEventListener('resize', onNativeScroll, { passive: true });
       onNativeScroll();
@@ -300,6 +400,10 @@ function run(): void {
   }
 
   function showPanel(index: number): void {
+    // On the continuous spine every stage is in the document at once and the
+    // browser decides which one you are looking at. Hiding four of five is
+    // what made the phone show one headline and then none.
+    if (nativeScroll) return;
     panels.forEach((p, i) => {
       p.hidden = i !== index;
       p.setAttribute('aria-hidden', String(i !== index));
@@ -408,9 +512,14 @@ function run(): void {
     // The tail of every stage is the crossing into the next one.
     const t = p <= CROSS_START ? 0 : (p - CROSS_START) / (1 - CROSS_START);
     cross(t);
-    if (sticky) sticky.style.opacity = String(Math.max(0, 1 - t * 2.2));
+    // The copy holds through the first half of the crossing and only clears in
+    // the last stretch. It used to be gone by t = 0.45 — the final 11% of a
+    // track — which on a phone is where a single flick keeps landing you: the
+    // world changed on schedule but the headline had already left, so stage
+    // after stage read as untitled. It stays lit for 90% of the stage now.
+    if (sticky) sticky.style.opacity = String(1 - Math.max(0, (t - 0.5) / 0.5));
 
-    if (t >= 0.995 && performance.now() > lockedUntil) void advance();
+    if (!nativeScroll && t >= 0.995 && performance.now() > lockedUntil) void advance();
   }
 
   // --- Advance ----------------------------------------------------------
@@ -437,8 +546,7 @@ function run(): void {
     setPower(STAGE_KW[next] ?? 1);
     topupBadge();
 
-    if (nativeScroll) window.scrollTo({ top: 0, behavior: 'auto' });
-    else armStage(next);
+    armStage(next);
     const sticky = panels[next].querySelector<HTMLElement>('[data-stage-sticky]');
     if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
 
@@ -496,14 +604,8 @@ function run(): void {
     applyChrome(prev);
     setPower(STAGE_KW[prev] ?? 0);
 
-    if (nativeScroll) {
-      const panel = panels[prev];
-      const travel = Math.max(1, panel.getBoundingClientRect().height - window.innerHeight);
-      window.scrollTo({ top: travel * RETREAT_LANDING, behavior: 'auto' });
-    } else {
-      armStage(prev);
-      scroller.setScrollImmediate(trackLength(prev) * RETREAT_LANDING);
-    }
+    armStage(prev);
+    scroller.setScrollImmediate(trackLength(prev) * RETREAT_LANDING);
 
     const sticky = panels[prev].querySelector<HTMLElement>('[data-stage-sticky]');
     if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
@@ -550,8 +652,13 @@ function run(): void {
     showPanel(index);
     applyChrome(index);
     setPower(STAGE_KW[index] ?? 0);
-    if (nativeScroll) window.scrollTo({ top: 0, behavior: 'auto' });
-    else armStage(index);
+    if (nativeScroll) {
+      // Land a little inside the track so the stage reads as entered rather
+      // than balanced on its own boundary.
+      const panel = panels[index];
+      const top = window.scrollY + panel.getBoundingClientRect().top;
+      window.scrollTo({ top: top + 4, behavior: 'auto' });
+    } else armStage(index);
     // Clear any parallax left inline by the previous stage's scroll.
     const jumped = panels[index].querySelector<HTMLElement>('[data-stage-sticky]');
     if (jumped) { jumped.style.opacity = '1'; jumped.style.transform = 'none'; }
@@ -613,13 +720,15 @@ function run(): void {
     const scene = campus();
     if (!scene || !campusUI) return;
     campusPull = 0;
-    window.addEventListener('wheel', campusWheel, { passive: true });
-    window.addEventListener('touchstart', campusTouchStart, { passive: true });
-    window.addEventListener('touchmove', campusTouchMove, { passive: true });
-    // The journey is over: give the page back to the browser so the
-    // configurator and the reading path below can actually be reached.
-    scroller.disable();
-    delete document.body.dataset.virtualScroll;
+    if (!nativeScroll) {
+      window.addEventListener('wheel', campusWheel, { passive: true });
+      window.addEventListener('touchstart', campusTouchStart, { passive: true });
+      window.addEventListener('touchmove', campusTouchMove, { passive: true });
+      // The journey is over: give the page back to the browser so the
+      // configurator and the reading path below can actually be reached.
+      scroller.disable();
+      delete document.body.dataset.virtualScroll;
+    }
     campusUI.hidden = false;
     if (after) after.hidden = false;
     scene.setInteractive(true);
@@ -687,13 +796,15 @@ function run(): void {
   }
 
   function exitCampus(): void {
-    window.removeEventListener('wheel', campusWheel);
-    window.removeEventListener('touchstart', campusTouchStart);
-    window.removeEventListener('touchmove', campusTouchMove);
     campusPull = 0;
-    scroller.enable();
-    document.body.dataset.virtualScroll = '';
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    if (!nativeScroll) {
+      window.removeEventListener('wheel', campusWheel);
+      window.removeEventListener('touchstart', campusTouchStart);
+      window.removeEventListener('touchmove', campusTouchMove);
+      scroller.enable();
+      document.body.dataset.virtualScroll = '';
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
     cancelAnimationFrame(hotspotRaf);
     if (campusUI) campusUI.hidden = true;
     if (after) after.hidden = true;
