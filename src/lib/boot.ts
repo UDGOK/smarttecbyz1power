@@ -34,6 +34,20 @@ const CROSS_START = 0.8;
 const SWAP_LOCKOUT_MS = 620;
 
 /**
+ * How far past the top of a stage you may pull before it hands you back to the
+ * previous world, as a fraction of the track. Small enough that it takes
+ * intent, large enough that it never fires on the bounce at the top.
+ */
+const RETREAT_MARGIN = 0.055;
+
+/**
+ * Where you land when you go back: near the end of the previous stage, but
+ * short of the point where its crossing begins — so arriving does not
+ * immediately push you forward again.
+ */
+const RETREAT_LANDING = 0.74;
+
+/**
  * How much longer a stage's track is than its nominal height.
  *
  * Calibrated by measurement, not taste: at 1.0 a single wheel notch advanced
@@ -106,6 +120,13 @@ export function boot(): void {
    * same units or a dozen wheel notches cross the entire stage. One notch of
    * roughly 100px therefore advances about 100px worth of the track.
    */
+  /** Sets the track and allows a small overscroll upward for the retreat. */
+  function armStage(index: number): void {
+    const len = trackLength(index);
+    scroller.setActiveStage(len);
+    scroller.setScrollClamp(index > 0 ? -len * RETREAT_MARGIN * 1.6 : 0, len);
+  }
+
   const trackLength = (index: number): number =>
     ((stages[index]?.scrollVh ?? 250) / 100) * window.innerHeight * DELTA_SCALE * STAGE_TRACK_SCALE;
 
@@ -130,6 +151,14 @@ export function boot(): void {
       host.onFrame((dt) => {
         scroller.update(dt);
         rig.update(dt);
+
+        if (!swapping && performance.now() > lockedUntil) {
+          const p = scroller.progress;
+          const t = p <= CROSS_START ? 0 : (p - CROSS_START) / (1 - CROSS_START);
+          if (t >= 0.995) void advance();
+          else if (p <= -RETREAT_MARGIN && current > 0) void retreat();
+        }
+
         host?.setRigOffset(
           rig.offsetX * SCROLL_CONFIG.CAMERA_RIG.MAX_OFFSET * 6,
           rig.offsetY * SCROLL_CONFIG.CAMERA_RIG.MAX_OFFSET * 6,
@@ -290,7 +319,7 @@ export function boot(): void {
     setPower(STAGE_KW[next] ?? 1);
     topupBadge();
 
-    scroller.setActiveStage(trackLength(next));
+    armStage(next);
     const sticky = panels[next].querySelector<HTMLElement>('[data-stage-sticky]');
     if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
 
@@ -319,6 +348,63 @@ export function boot(): void {
     requestAnimationFrame(() => onProgress(0));
   }
 
+  /** advance() run backwards: the same crossing, played the other way. */
+  async function retreat(): Promise<void> {
+    const prev = current - 1;
+    const to = stages[prev];
+    if (!to || swapping) return;
+    swapping = true;
+    lockedUntil = performance.now() + SWAP_LOCKOUT_MS;
+
+    const from = stages[current];
+    audio.stop(AMBIENT[from.id], { fadeOut: 0.6 });
+    audio.play(AMBIENT[to.id], { fadeIn: 0.5, volume: 0.45 });
+
+    // Cover the swap with the crossing that separates these two worlds — the
+    // one the visitor came through — so going back retraces the same door.
+    host?.beginTransition(to.exit, from.ground, to.ground);
+    host?.setTransitionProgress(1);
+
+    if (from.scene !== to.scene && host) {
+      host.setStage(await loadScene(to.scene));
+      host.setClearColor(to.ground);
+    }
+
+    current = prev;
+    showPanel(prev);
+    applyChrome(prev);
+    setPower(STAGE_KW[prev] ?? 0);
+
+    armStage(prev);
+    scroller.setScrollImmediate(trackLength(prev) * RETREAT_LANDING);
+
+    const sticky = panels[prev].querySelector<HTMLElement>('[data-stage-sticky]');
+    if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
+
+    const resolve = { t: 1 };
+    gsap.to(resolve, {
+      t: 0,
+      duration: reduced ? 0 : 0.95,
+      ease: 'power2.inOut',
+      onUpdate: () => {
+        host?.setTransitionProgress(resolve.t);
+        host?.setWorldMix((ENTRY_MIX[to.id] ?? 0) + resolve.t * (1 - (ENTRY_MIX[to.id] ?? 0)));
+      },
+      onComplete: () => {
+        host?.endTransition();
+        host?.setWorldMix(ENTRY_MIX[to.id] ?? 0);
+      },
+    });
+
+    crossing = false;
+    reveal(prev);
+    if (stages[prev - 1]) warmScene(stages[prev - 1].scene);
+    exitCampus();
+
+    swapping = false;
+    requestAnimationFrame(() => onProgress(RETREAT_LANDING));
+  }
+
   async function goToStage(index: number): Promise<void> {
     const to = stages[index];
     if (!to || swapping) return;
@@ -337,7 +423,7 @@ export function boot(): void {
     showPanel(index);
     applyChrome(index);
     setPower(STAGE_KW[index] ?? 0);
-    scroller.setActiveStage(trackLength(index));
+    armStage(index);
     // Clear any parallax left inline by the previous stage's scroll.
     const jumped = panels[index].querySelector<HTMLElement>('[data-stage-sticky]');
     if (jumped) { jumped.style.opacity = '1'; jumped.style.transform = 'none'; }
@@ -356,9 +442,27 @@ export function boot(): void {
     return s && s.id === 'campus' ? (s as CampusScene) : null;
   }
 
+  /**
+   * On the campus the page scrolls natively, so the manager cannot see an
+   * overscroll. Watch for a sustained pull upward at the top of the document
+   * and hand back to the compute hall — the same gesture, the same result.
+   */
+  let campusPull = 0;
+  const campusWheel = (e: WheelEvent): void => {
+    if (swapping || stages[current]?.scene !== 'campus') return;
+    if (window.scrollY > 2 || e.deltaY >= 0) { campusPull = 0; return; }
+    campusPull += -e.deltaY;
+    if (campusPull > 260 && performance.now() > lockedUntil) {
+      campusPull = 0;
+      void retreat();
+    }
+  };
+
   function enterCampus(): void {
     const scene = campus();
     if (!scene || !campusUI) return;
+    campusPull = 0;
+    window.addEventListener('wheel', campusWheel, { passive: true });
     // The journey is over: give the page back to the browser so the
     // configurator and the reading path below can actually be reached.
     scroller.disable();
@@ -418,6 +522,8 @@ export function boot(): void {
   }
 
   function exitCampus(): void {
+    window.removeEventListener('wheel', campusWheel);
+    campusPull = 0;
     scroller.enable();
     document.body.dataset.virtualScroll = '';
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -518,8 +624,8 @@ export function boot(): void {
   // still its own chunk; we simply stop waiting for idle to ask for it.
   void initScene();
   scroller.onScrub(onProgress);
-  scroller.setActiveStage(trackLength(0));
-  window.addEventListener('resize', () => scroller.setActiveStage(trackLength(current)));
+  armStage(0);
+  window.addEventListener('resize', () => armStage(current));
 
   initLoader(() => {
     reveal(0);
