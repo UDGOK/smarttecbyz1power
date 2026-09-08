@@ -6,9 +6,10 @@
  *  2. one-shot FX whose playback rate is scaled so a hold sound always lands
  *     exactly when the progress ring completes.
  *
- * No .mp3 assets ship yet, so every track falls back to a small WebAudio
- * synth. Drop real files into /assets/audio and set `src` to swap them in —
- * nothing else has to change.
+ * No .mp3 assets ship yet. Rather than fake it with a bare oscillator — which
+ * sounds like a test tone, not a place — each ambience is a filtered noise bed
+ * plus a detuned drone pair, which is how these are actually built. Drop real
+ * files into /assets/audio and set `src` to swap them in; nothing else changes.
  */
 
 export interface TrackOptions {
@@ -16,50 +17,74 @@ export interface TrackOptions {
   type: 'ambient' | 'fx';
   loop?: boolean;
   volume?: number;
-  fadeIn?: number;
-  fadeOut?: number;
-  /** Synth fallback shape, used when `src` is absent. */
-  synth?: { wave: OscillatorType; from: number; to: number; duration: number };
+  /** Ambience shape: a noise bed under a detuned drone pair. */
+  bed?: { cutoff: number; q: number; drone: number; detune: number; wave: OscillatorType };
+  /** FX shape. */
+  fx?: { wave: OscillatorType; from: number; to: number; duration: number; noise?: number };
   /** Multiplier applied to playback rate when driven by a hold. */
   holdRateScale?: number;
 }
 
 const REGISTRY: Record<string, TrackOptions> = {
-  'stage-land-ambient':   { type: 'ambient', loop: true, volume: 0.5, synth: { wave: 'sine',     from: 110, to: 110, duration: 0 } },
-  'stage-wait-ambient':   { type: 'ambient', loop: true, volume: 0.5, synth: { wave: 'sawtooth', from: 70,  to: 70,  duration: 0 } },
-  'stage-power-ambient':  { type: 'ambient', loop: true, volume: 0.5, synth: { wave: 'triangle', from: 146, to: 146, duration: 0 } },
-  'stage-machine-ambient':{ type: 'ambient', loop: true, volume: 0.5, synth: { wave: 'sine',     from: 55,  to: 55,  duration: 0 } },
-  'stage-campus-ambient': { type: 'ambient', loop: true, volume: 0.5, synth: { wave: 'sine',     from: 196, to: 196, duration: 0 } },
-  'hold-button':          { type: 'fx', volume: 0.85, holdRateScale: 1, synth: { wave: 'triangle', from: 220, to: 660, duration: 1.2 } },
-  'energise':             { type: 'fx', volume: 0.8,  synth: { wave: 'sawtooth', from: 120, to: 900, duration: 0.9 } },
-  'power-on':             { type: 'fx', volume: 0.8,  synth: { wave: 'square',   from: 90,  to: 520, duration: 0.7 } },
-  'xp-topup':             { type: 'fx', volume: 0.55, synth: { wave: 'sine',     from: 660, to: 1320, duration: 0.22 } },
-  'click':                { type: 'fx', volume: 0.6,  synth: { wave: 'square',   from: 880, to: 440, duration: 0.06 } },
-  'whoosh':               { type: 'fx', volume: 0.7,  synth: { wave: 'sine',     from: 400, to: 60,  duration: 0.5 } },
+  // Open air over cold ground: high, thin, almost nothing.
+  'stage-land-ambient':    { type: 'ambient', loop: true, volume: 0.5, bed: { cutoff: 620, q: 0.7, drone: 110, detune: 4, wave: 'sine' } },
+  // The queue: pressure. Lower, narrower, with beating between the drones.
+  'stage-wait-ambient':    { type: 'ambient', loop: true, volume: 0.5, bed: { cutoff: 340, q: 2.4, drone: 73.4, detune: 11, wave: 'sawtooth' } },
+  // Switchgear hum, near mains frequency.
+  'stage-power-ambient':   { type: 'ambient', loop: true, volume: 0.5, bed: { cutoff: 900, q: 1.2, drone: 120, detune: 2, wave: 'triangle' } },
+  // A hall full of fans: broadband, no pitch to speak of.
+  'stage-machine-ambient': { type: 'ambient', loop: true, volume: 0.5, bed: { cutoff: 1800, q: 0.4, drone: 55, detune: 1, wave: 'sine' } },
+  // Outside again, and open.
+  'stage-campus-ambient':  { type: 'ambient', loop: true, volume: 0.5, bed: { cutoff: 1400, q: 0.5, drone: 196, detune: 6, wave: 'sine' } },
+
+  'hold-button':   { type: 'fx', volume: 0.5, holdRateScale: 1, fx: { wave: 'triangle', from: 220, to: 660, duration: 1.2 } },
+  'click':         { type: 'fx', volume: 0.35, fx: { wave: 'square',   from: 880, to: 440, duration: 0.05 } },
+  'whoosh':        { type: 'fx', volume: 0.5,  fx: { wave: 'sine',     from: 400, to: 60,  duration: 0.7, noise: 0.7 } },
+  'energise':      { type: 'fx', volume: 0.5,  fx: { wave: 'sawtooth', from: 120, to: 900, duration: 0.9 } },
+  'power-on':      { type: 'fx', volume: 0.5,  fx: { wave: 'square',   from: 90,  to: 520, duration: 0.7 } },
+  'xp-topup':      { type: 'fx', volume: 0.4,  fx: { wave: 'sine',     from: 660, to: 1320, duration: 0.22 } },
 };
 
 interface LiveTrack {
-  osc: OscillatorNode;
+  nodes: AudioScheduledSourceNode[];
   gain: GainNode;
-  target: number;
 }
 
 class AudioBus {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
+  private noise: AudioBuffer | null = null;
   private live = new Map<string, LiveTrack>();
   private muted = true;
 
   /** Browsers require a gesture before audio may start. */
   unlock(): void {
     if (this.ctx) { void this.ctx.resume(); this.muted = false; return; }
-    const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const Ctor = window.AudioContext
+      ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!Ctor) return;
     this.ctx = new Ctor();
     this.master = this.ctx.createGain();
-    this.master.gain.value = 0.6;
+    this.master.gain.value = 0.5;
     this.master.connect(this.ctx.destination);
+    this.noise = this.makeNoise(this.ctx);
     this.muted = false;
+  }
+
+  /** Two seconds of pink-ish noise, looped. Cheap and good enough for a bed. */
+  private makeNoise(ctx: AudioContext): AudioBuffer {
+    const len = ctx.sampleRate * 2;
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      b0 = 0.997 * b0 + w * 0.0555179;
+      b1 = 0.963 * b1 + w * 0.0750759;
+      b2 = 0.573 * b2 + w * 0.1538520;
+      d[i] = (b0 + b1 + b2 + w * 0.1848) * 0.22;
+    }
+    return buf;
   }
 
   getTrackOption<K extends keyof TrackOptions>(id: string, key: K): TrackOptions[K] | undefined {
@@ -67,7 +92,7 @@ class AudioBus {
   }
 
   getDuration(id: string): number | null {
-    return REGISTRY[id]?.synth?.duration ?? null;
+    return REGISTRY[id]?.fx?.duration ?? null;
   }
 
   play(id: string, opts: { fadeIn?: number; volume?: number; rate?: number } = {}): void {
@@ -75,36 +100,88 @@ class AudioBus {
     if (!track || this.muted || !this.ctx || !this.master) return;
     if (this.live.has(id) && track.loop) return;
 
-    const shape = track.synth;
-    if (!shape) return;
-
-    const now = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+    const gain = ctx.createGain();
     const volume = opts.volume ?? track.volume ?? 0.5;
-    const rate = opts.rate ?? 1;
+    const nodes: AudioScheduledSourceNode[] = [];
 
-    osc.type = shape.wave;
-    osc.frequency.setValueAtTime(shape.from, now);
-    if (shape.to !== shape.from && shape.duration > 0) {
-      osc.frequency.exponentialRampToValueAtTime(Math.max(1, shape.to), now + shape.duration / rate);
-    }
+    if (track.bed) {
+      const { cutoff, q, drone, detune, wave } = track.bed;
 
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(volume, now + (opts.fadeIn ?? 0.02));
+      if (this.noise) {
+        const src = ctx.createBufferSource();
+        src.buffer = this.noise;
+        src.loop = true;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = cutoff;
+        filter.Q.value = q;
+        src.connect(filter);
+        filter.connect(gain);
+        src.start(now);
+        nodes.push(src);
+      }
 
-    osc.connect(gain);
-    gain.connect(this.master);
-    osc.start(now);
+      // A detuned pair beats slowly against itself, which is what stops a
+      // drone sounding like a synthesizer left switched on.
+      for (const cents of [-detune, detune]) {
+        const osc = ctx.createOscillator();
+        osc.type = wave;
+        osc.frequency.value = drone;
+        osc.detune.value = cents;
+        const g = ctx.createGain();
+        g.gain.value = 0.16;
+        osc.connect(g);
+        g.connect(gain);
+        osc.start(now);
+        nodes.push(osc);
+      }
+    } else if (track.fx) {
+      const { wave, from, to, duration, noise } = track.fx;
+      const rate = opts.rate ?? 1;
+      const end = now + duration / rate;
 
-    if (!track.loop && shape.duration > 0) {
-      const end = now + shape.duration / rate;
-      gain.gain.linearRampToValueAtTime(0, end);
-      osc.stop(end + 0.02);
+      const osc = ctx.createOscillator();
+      osc.type = wave;
+      osc.frequency.setValueAtTime(from, now);
+      if (to !== from) osc.frequency.exponentialRampToValueAtTime(Math.max(1, to), end);
+      osc.connect(gain);
+      osc.start(now);
+      osc.stop(end + 0.03);
+      nodes.push(osc);
+
+      if (noise && this.noise) {
+        const src = ctx.createBufferSource();
+        src.buffer = this.noise;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(from * 2, now);
+        filter.frequency.exponentialRampToValueAtTime(Math.max(60, to), end);
+        filter.Q.value = 0.8;
+        const g = ctx.createGain();
+        g.gain.value = noise;
+        src.connect(filter);
+        filter.connect(g);
+        g.connect(gain);
+        src.start(now);
+        src.stop(end + 0.03);
+        nodes.push(src);
+      }
+
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(volume, now + Math.min(0.04, duration * 0.2));
+      gain.gain.exponentialRampToValueAtTime(0.0001, end);
+      gain.connect(this.master);
+      this.live.set(id, { nodes, gain });
       osc.onended = () => this.live.delete(id);
+      return;
     }
 
-    this.live.set(id, { osc, gain, target: volume });
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.linearRampToValueAtTime(Math.max(0.0001, volume), now + (opts.fadeIn ?? 0.4));
+    gain.connect(this.master);
+    this.live.set(id, { nodes, gain });
   }
 
   /** Used by hold-driven cross-fades — set a live track's level directly. */
@@ -112,7 +189,6 @@ class AudioBus {
     const t = this.live.get(id);
     if (!t || !this.ctx) return;
     t.gain.gain.linearRampToValueAtTime(Math.max(0.0001, volume), this.ctx.currentTime + 0.05);
-    t.target = volume;
   }
 
   stop(id: string, { fadeOut = 0.1 }: { fadeOut?: number } = {}): void {
@@ -120,7 +196,9 @@ class AudioBus {
     if (!t || !this.ctx) return;
     const end = this.ctx.currentTime + fadeOut;
     t.gain.gain.linearRampToValueAtTime(0.0001, end);
-    t.osc.stop(end + 0.02);
+    for (const n of t.nodes) {
+      try { n.stop(end + 0.03); } catch { /* already stopped */ }
+    }
     this.live.delete(id);
   }
 

@@ -442,6 +442,9 @@ export function boot(): void {
   setPower(0);
   gsap.set(rootEl.querySelectorAll('.line__inner'), { yPercent: 115, opacity: 0 });
 
+  // The gate is transparent and the world renders behind it, so the scene is
+  // the first screen — not something deferred until after it. Three.js is
+  // still its own chunk; we simply stop waiting for idle to ask for it.
   void initScene();
   window.addEventListener('scroll', onScroll, { passive: true });
 
