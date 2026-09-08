@@ -51,16 +51,33 @@ revalidates, since content changes without the asset hashes moving.
 
 Enforce these in CI before they drift:
 
-| Metric | Budget |
-|---|---|
-| Critical JS, gzip | 60 KB |
-| Any single deferred stage chunk, gzip | 15 KB |
-| Three.js chunk, gzip | 130 KB |
-| HTML per page | 20 KB |
-| Media bytes above the fold | 0 |
+| Metric | Budget | Now |
+|---|---|---|
+| Entry script + GSAP, gzip | 40 KB | ~36 KB |
+| Three.js chunk, gzip | 130 KB | 127 KB |
+| Any single stage chunk, gzip | 12 KB | 7.4–9.9 KB |
+| Configurator chunk, gzip | 14 KB | 11.1 KB |
+| HTML per page, gzip | 12 KB | 7.3–8.4 KB |
+| Media bytes above the fold | 0 | 0 |
 
-The last line is a real constraint, not an aspiration: every world is a shader,
-so there is nothing to download before the first screen is meaningful.
+Two notes on how to read this.
+
+**Three.js is fetched immediately, not on idle.** The entry gate is a
+transparent overlay and the visitor draws over the live world, so the 3D scene
+*is* the first screen — deferring it would mean gating on a blank panel. It is
+still a separate chunk and still does not block the entry script; we simply
+stop waiting for idle before requesting it. First-screen JavaScript is
+therefore about 170 KB gzip, and that is a deliberate trade, not an oversight.
+
+**Measure HTML gzipped, not raw.** The homepage is 53 KB raw because the
+configurator server-renders all five questions, all twenty cards and a no-JS
+spec-sheet fallback. That is the right call for search engines and for anyone
+with JavaScript blocked, and it compresses to 8.4 KB, which is what actually
+crosses the wire. Vercel serves it compressed by default.
+
+The zero on the last line is a real constraint, not an aspiration: every world
+is a shader, so there is nothing to download before the first screen is
+meaningful.
 
 ## What is not wired
 
