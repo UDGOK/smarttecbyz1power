@@ -59,8 +59,11 @@ const FRAG = /* glsl */ `
   uniform vec3  uWaitLow;
   uniform vec3  uWaitHigh;
   uniform float uFog;
+  uniform float uScroll;
   varying vec2  vUv;
   varying float vH;
+
+  float hash1(float n){ return fract(sin(n) * 43758.5453123); }
 
   void main(){
     float h = clamp(vH * 1.6 + 0.5, 0.0, 1.0);
@@ -79,6 +82,20 @@ const FRAG = /* glsl */ `
     col = mix(col, mix(vec3(0.72,0.83,0.78), vec3(0.62,0.22,0.18), uWorld), haze * 0.6);
     float near = smoothstep(0.55, 0.0, vUv.y);
     col *= 1.0 - near * 0.72;
+
+    // Volumetric shafts. Faint over the land, and the whole subject of the
+    // world we are travelling toward.
+    float shafts = 0.0;
+    for (int i = 0; i < 5; i++) {
+      float fi = float(i);
+      float x  = hash1(fi * 12.7) * 1.4 - 0.2;
+      float w  = 0.012 + hash1(fi * 31.3) * 0.05;
+      float sway = sin(uTime * (0.10 + hash1(fi * 5.1) * 0.14) + fi) * 0.025;
+      float band = smoothstep(w, 0.0, abs(vUv.x - x - sway));
+      shafts += band * (0.35 + 0.65 * hash1(fi * 77.7));
+    }
+    shafts *= smoothstep(0.0, 0.75, vUv.y);
+    col += shafts * mix(vec3(0.05, 0.09, 0.05), vec3(0.55, 0.10, 0.06), uWorld) * (0.35 + uWorld * 1.5);
 
     // Film grain keeps large flat gradients from banding.
     float g = fract(sin(dot(gl_FragCoord.xy + uTime, vec2(12.9898, 78.233))) * 43758.5453);
@@ -121,6 +138,10 @@ export class Experience {
   private lastFrame = performance.now();
   private disposeTier: () => void;
   private running = false;
+  private scrollProgress = 0;
+  private baseZ = 14;
+  private baseY = -22;
+  private baseLook = 6;
 
   constructor(private canvas: HTMLCanvasElement, private reducedMotion = false) {
     this.renderer = new THREE.WebGLRenderer({
@@ -156,6 +177,7 @@ export class Experience {
         uAmp: { value: 6.5 },
         uWorld: { value: 0 },
         uFog: { value: settings.fog ? 1 : 0 },
+        uScroll: { value: 0 },
         // Muted field greens. The bright signal green is reserved for UI that
         // means "live" — putting it on the terrain would spend it for nothing.
         uLandLow: { value: new THREE.Color('#0e2419') },
@@ -197,6 +219,12 @@ export class Experience {
     this.scene.add(this.motes);
   }
 
+  /** 0..1 through the current stage's scroll track. Dollies the camera. */
+  setScrollProgress(p: number): void {
+    this.scrollProgress = p;
+    this.material.uniforms.uScroll.value = p;
+  }
+
   /** 0 = the land, 1 = the interconnection queue. Driven by the hold ring. */
   setWorldMix(t: number): void {
     this.material.uniforms.uWorld.value = t;
@@ -215,10 +243,13 @@ export class Experience {
     // Re-compose for portrait rather than shrinking the desktop framing: pull
     // back, widen the lens, and lift the horizon into the lower third.
     const narrow = w < 700;
-    this.camera.position.z = narrow ? 16 : 14;
-    this.camera.position.y = narrow ? -16 : -22;
+    this.baseZ = narrow ? 16 : 14;
+    this.baseY = narrow ? -16 : -22;
+    this.baseLook = narrow ? 10 : 6;
+    this.camera.position.z = this.baseZ;
+    this.camera.position.y = this.baseY;
     this.camera.fov = narrow ? 58 : 38;
-    this.camera.lookAt(0, narrow ? 10 : 6, 0);
+    this.camera.lookAt(0, this.baseLook, 0);
     this.camera.updateProjectionMatrix();
   };
 
@@ -235,6 +266,12 @@ export class Experience {
       if (!this.reducedMotion) {
         this.motes.rotation.z = t * 0.008;
         this.terrain.position.y = Math.sin(t * 0.12) * 0.4;
+        // Scroll flies the camera down toward the land and tilts it up.
+        const p = this.scrollProgress;
+        this.camera.position.z = this.baseZ - p * 7.5;
+        this.camera.position.y = this.baseY + p * 5.0;
+        this.camera.rotation.z = p * 0.03;
+        this.camera.lookAt(0, this.baseLook + p * 4.0, 0);
       }
       this.renderer.render(this.scene, this.camera);
       this.raf = requestAnimationFrame(loop);

@@ -1,15 +1,17 @@
 /**
  * Cinematic route boot.
  *
- * Vertical slice: stage 1 (THE LAND) renders, reveals and hands off to stage 2
- * (THE WAIT) through the hold interaction — the hold scrubs the shader's world
- * mix, the ambient audio cross-fade and the chrome tint together, and releasing
- * early unwinds all three. The remaining stages plug into the same contract.
+ * Stage 1 → 2 end to end. Scroll drives the ruler, the camera and the text
+ * parallax; reaching the end of a stage's scroll track arms the hold button;
+ * holding scrubs the world, the ambience and the chrome across to the next
+ * stage. Every later stage plugs into the same contract.
  */
 
 import gsap from 'gsap';
 import type { Experience } from './scene/experience';
 import { HoldButton, prefersReducedMotion } from './hold-button';
+import { initLoader } from './loader';
+import { initCursor } from './cursor';
 import { audio } from './audio';
 import { stages } from '../data/site';
 
@@ -29,25 +31,24 @@ export function boot(): void {
   const root = document.querySelector<HTMLElement>('[data-stage-root]');
   const holdSlot = document.querySelector<HTMLElement>('#hold-slot');
   const readout = document.querySelector<HTMLElement>('#ruler-readout');
+  const rulerTrack = document.querySelector<HTMLElement>('.scroll-ruler-track');
   const powerValue = document.querySelector<HTMLElement>('#power-value');
   if (!canvas || !root || !holdSlot) return;
 
-  // Signals to CSS that the cinematic path is live, which retires the static one.
   document.documentElement.classList.add('js-ready');
 
-  // Re-bind after the guard so the narrowed types survive into the closures below.
   const canvasEl: HTMLCanvasElement = canvas;
   const rootEl: HTMLElement = root;
+  const slot: HTMLElement = holdSlot;
 
   const reduced = prefersReducedMotion();
   const panels = Array.from(rootEl.querySelectorAll<HTMLElement>('[data-stage-panel]'));
 
-  // --- 3D ---------------------------------------------------------------
-  // Three.js is the single heaviest dependency, so it is code-split and pulled
-  // in only after the first screen has painted. The CSS gradient behind the
-  // canvas is a complete picture until it arrives — and if it never does.
   let experience: Experience | null = null;
+  let current = 0;
+  let button: HoldButton | null = null;
 
+  // --- 3D, code-split and idle-loaded ----------------------------------
   async function initScene(): Promise<void> {
     if (!supportsWebGL()) {
       canvasEl.hidden = true;
@@ -59,7 +60,6 @@ export function boot(): void {
       experience = new Experience(canvasEl, reduced);
       experience.start();
       window.addEventListener('resize', experience.resize);
-      // Handle for automated visual verification (pause the loop before capture).
       (window as unknown as { __experience?: Experience }).__experience = experience;
     } catch {
       canvasEl.hidden = true;
@@ -67,12 +67,7 @@ export function boot(): void {
     }
   }
 
-  const idle = window.requestIdleCallback ?? ((fn: () => void) => setTimeout(fn, 200));
-  idle(() => void initScene());
-
-  // --- Stage state ------------------------------------------------------
-  let current = 0;
-
+  // --- Chrome ----------------------------------------------------------
   function applyStage(index: number, mix: number): void {
     const stage = stages[index];
     if (!stage) return;
@@ -91,101 +86,138 @@ export function boot(): void {
     });
   }
 
-  // --- Reveal -----------------------------------------------------------
-  const first = panels[0];
-  if (first && !reduced) {
-    const lines = first.querySelectorAll<HTMLElement>('[data-reveal]');
-    gsap.set(lines, { yPercent: 40, opacity: 0 });
-    gsap.to(lines, {
-      yPercent: 0,
-      opacity: 1,
-      duration: 1.1,
-      ease: 'power3.out',
-      stagger: 0.09,
-      delay: 0.25,
+  function setPower(fraction: number): void {
+    if (powerValue) powerValue.textContent = String(Math.round(PHASE_1A_KW * fraction));
+  }
+
+  // --- Masked line reveal ----------------------------------------------
+  function reveal(index: number): void {
+    const panel = panels[index];
+    if (!panel) return;
+    const inners = panel.querySelectorAll<HTMLElement>('.line__inner');
+    if (reduced) { gsap.set(inners, { yPercent: 0, opacity: 1 }); return; }
+    gsap.fromTo(
+      inners,
+      { yPercent: 115, opacity: 0 },
+      { yPercent: 0, opacity: 1, duration: 1.15, ease: 'expo.out', stagger: 0.075, delay: 0.15 },
+    );
+  }
+
+  // --- Scroll ----------------------------------------------------------
+  let ticking = false;
+
+  function onScroll(): void {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      const panel = panels[current];
+      if (!panel || panel.hidden) return;
+
+      const rect = panel.getBoundingClientRect();
+      const travel = Math.max(1, rect.height - window.innerHeight);
+      const p = Math.min(1, Math.max(0, -rect.top / travel));
+
+      // The ruler physically travels with the scroll, as in the reference.
+      if (rulerTrack) rulerTrack.style.transform = `translateX(${-p * 190}px)`;
+
+      // Camera dolly + text parallax, both transform-only.
+      experience?.setScrollProgress(p);
+      const sticky = panel.querySelector<HTMLElement>('[data-stage-sticky]');
+      if (sticky && !reduced) {
+        sticky.style.transform = `translate3d(0, ${-p * 8}vh, 0)`;
+        sticky.style.opacity = String(1 - Math.max(0, (p - 0.65) / 0.35) * 0.85);
+      }
+
+      const cue = panel.querySelector<HTMLElement>('[data-scroll-cue]');
+      if (cue) cue.style.opacity = String(Math.max(0, 1 - p * 4));
+
+      // Arm the hold once the stage has actually been read through.
+      slot.classList.toggle('is-armed', p > 0.82 && !!button);
     });
   }
 
-  // --- Power badge count-up --------------------------------------------
-  function setPower(fraction: number): void {
-    if (!powerValue) return;
-    powerValue.textContent = String(Math.round(PHASE_1A_KW * fraction));
+  // --- Hold ------------------------------------------------------------
+  function mountHold(index: number): void {
+    const cfg = stages[index]?.hold;
+    button?.destroy();
+    button = null;
+    if (!cfg) return;
+
+    button = new HoldButton({
+      label: cfg.label,
+      holdLabel: cfg.holdLabel,
+      holdDuration: cfg.duration,
+      audioTrack: 'hold-button',
+
+      onStart() {
+        audio.play('stage-land-ambient', { fadeIn: 0.4, volume: 0.5 });
+        audio.play('stage-wait-ambient', { fadeIn: 0, volume: 0 });
+      },
+
+      onProgress(p) {
+        experience?.setWorldMix(p);
+        audio.setLevel('stage-land-ambient', { volume: (1 - p) * 0.5 });
+        audio.setLevel('stage-wait-ambient', { volume: p * 0.5 });
+        setPower(p * 0.25);
+        const sticky = panels[current]?.querySelector<HTMLElement>('[data-stage-sticky]');
+        if (sticky) sticky.style.opacity = String(1 - p * 0.9);
+      },
+
+      onCancel() {
+        experience?.setWorldMix(0);
+        audio.stop('stage-wait-ambient', { fadeOut: 0.3 });
+        audio.setLevel('stage-land-ambient', { volume: 0.5 });
+        setPower(0);
+        const sticky = panels[current]?.querySelector<HTMLElement>('[data-stage-sticky]');
+        if (sticky) sticky.style.opacity = '1';
+      },
+
+      onComplete() { advance(); },
+    });
+    slot.appendChild(button.el);
   }
-  setPower(0);
 
-  // --- The hold ---------------------------------------------------------
-  const stage1 = stages[0];
-  const holdConfig = stage1.hold;
+  function advance(): void {
+    const next = current + 1;
+    if (!panels[next]) return;
+    audio.stop('stage-land-ambient', { fadeOut: 0.6 });
+    audio.play('whoosh');
+    slot.classList.remove('is-armed');
 
-  const button = new HoldButton({
-    label: holdConfig?.label ?? 'Continue',
-    holdLabel: holdConfig?.holdLabel,
-    holdDuration: holdConfig?.duration ?? 0,
-    audioTrack: 'hold-button',
+    current = next;
+    showPanel(next);
+    applyStage(next, 1);
+    setPower(0.25);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    const sticky = panels[next].querySelector<HTMLElement>('[data-stage-sticky]');
+    if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
+    reveal(next);
+    mountHold(next);
+  }
 
-    onStart() {
-      audio.play('stage-land-ambient', { fadeIn: 0.4, volume: 0.5 });
-      audio.play('stage-wait-ambient', { fadeIn: 0, volume: 0 });
-    },
+  function goToStage(index: number): void {
+    if (!panels[index]) return;
+    current = index;
+    showPanel(index);
+    applyStage(index, index === 0 ? 0 : 1);
+    setPower(index === 0 ? 0 : 0.25);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+    reveal(index);
+    mountHold(index);
+  }
 
-    // One callback drives the shader, both ambiences, the chrome and the badge.
-    onProgress(p) {
-      experience?.setWorldMix(p);
-      audio.setLevel('stage-land-ambient', { volume: (1 - p) * 0.5 });
-      audio.setLevel('stage-wait-ambient', { volume: p * 0.5 });
-      setPower(p * 0.25);
-      if (first) first.style.opacity = String(1 - p * 0.85);
-    },
-
-    onCancel() {
-      experience?.setWorldMix(0);
-      audio.stop('stage-wait-ambient', { fadeOut: 0.3 });
-      audio.setLevel('stage-land-ambient', { volume: 0.5 });
-      setPower(0);
-      if (first) first.style.opacity = '1';
-    },
-
-    onComplete() {
-      current = 1;
-      audio.stop('stage-land-ambient', { fadeOut: 0.6 });
-      audio.play('whoosh');
-      if (first) first.style.opacity = '1';
-      showPanel(1);
-      applyStage(1, 1);
-      setPower(0.25);
-      const next = panels[1];
-      if (next && !reduced) {
-        gsap.fromTo(
-          next.querySelectorAll<HTMLElement>('[data-reveal]'),
-          { yPercent: 40, opacity: 0 },
-          { yPercent: 0, opacity: 1, duration: 1, ease: 'power3.out', stagger: 0.08 },
-        );
-      }
-      button.destroy();
-    },
-  });
-  holdSlot.appendChild(button.el);
-
-  // --- Ruler jump buttons ----------------------------------------------
   rootEl.querySelectorAll<HTMLElement>('[data-goto]').forEach((btn, index) => {
     btn.addEventListener('click', () => {
       audio.unlock();
       audio.play('click');
-      if (index > 1) return; // stages 3–5 are not built yet in this slice
-      current = index;
-      showPanel(index);
-      applyStage(index, index === 0 ? 0 : 1);
-      setPower(index === 0 ? 0 : 0.25);
+      if (index > 1) return; // stages 3–5 not built yet
+      goToStage(index);
     });
   });
 
-  // --- Back control -----------------------------------------------------
   document.querySelector<HTMLElement>('[data-back]')?.addEventListener('click', () => {
-    if (current === 0) return;
-    current -= 1;
-    showPanel(current);
-    applyStage(current, current === 0 ? 0 : 1);
-    setPower(current === 0 ? 0 : 0.25);
+    if (current > 0) goToStage(current - 1);
   });
 
   // --- Capture form -----------------------------------------------------
@@ -203,6 +235,20 @@ export function boot(): void {
     form.reset();
   });
 
+  // --- Go ---------------------------------------------------------------
+  initCursor();
   applyStage(0, 0);
   showPanel(0);
+  setPower(0);
+  gsap.set(rootEl.querySelectorAll('.line__inner'), { yPercent: 115, opacity: 0 });
+
+  void initScene();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  initLoader(() => {
+    reveal(0);
+    mountHold(0);
+    audio.play('stage-land-ambient', { fadeIn: 1.2, volume: 0.35 });
+    onScroll();
+  });
 }

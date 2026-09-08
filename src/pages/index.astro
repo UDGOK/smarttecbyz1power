@@ -4,9 +4,12 @@ import ScrollRuler from '../components/chrome/ScrollRuler.astro';
 import PowerBadge from '../components/chrome/PowerBadge.astro';
 import Brandmark from '../components/chrome/Brandmark.astro';
 import CtaBar from '../components/chrome/CtaBar.astro';
+import Loader from '../components/chrome/Loader.astro';
 import { company, site, stages } from '../data/site';
 
-const visible = stages.slice(0, 2); // vertical slice: stages 1–2
+const visible = stages.slice(0, 2);
+const grain =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")";
 ---
 <Base
   title={`${company.full} — AI data centers, Mead Oklahoma`}
@@ -15,6 +18,9 @@ const visible = stages.slice(0, 2); // vertical slice: stages 1–2
 >
   <canvas id="experience-canvas" aria-hidden="true"></canvas>
   <div class="scrim" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true" style={`--grain-src: ${grain};`}></div>
+
+  <Loader />
 
   <main id="main" data-stage-root>
     <Brandmark />
@@ -23,23 +29,31 @@ const visible = stages.slice(0, 2); // vertical slice: stages 1–2
 
     {visible.map((stage, i) => (
       <section
-        class="stage-panel"
+        class="stage-scroll"
         data-stage-panel
         data-stage={stage.id}
+        data-scroll-vh={stage.scrollVh}
         hidden={i !== 0}
         aria-label={stage.kicker}
+        style={`--scroll-vh: ${stage.scrollVh}vh;`}
       >
-        <p class="stage-panel__kicker mono-label" data-reveal>{stage.kicker}</p>
-        {i === 0 ? (
-          <h1 class="stage-panel__title" data-reveal>
-            {stage.title.split('\n').map((line) => <span class="line">{line}</span>)}
-          </h1>
-        ) : (
-          <h2 class="stage-panel__title" data-reveal>
-            {stage.title.split('\n').map((line) => <span class="line">{line}</span>)}
-          </h2>
-        )}
-        <p class="stage-panel__lede" data-reveal>{stage.lede}</p>
+        <div class="stage-panel" data-stage-sticky>
+          <p class="stage-panel__kicker mono-label"><span class="line"><span class="line__inner">{stage.kicker}</span></span></p>
+
+          {i === 0 ? (
+            <h1 class="stage-panel__title">
+              {stage.title.split('\n').map((l) => <span class="line"><span class="line__inner">{l}</span></span>)}
+            </h1>
+          ) : (
+            <h2 class="stage-panel__title">
+              {stage.title.split('\n').map((l) => <span class="line"><span class="line__inner">{l}</span></span>)}
+            </h2>
+          )}
+
+          <p class="stage-panel__lede"><span class="line"><span class="line__inner">{stage.lede}</span></span></p>
+
+          <p class="stage-panel__cue mono-label" data-scroll-cue aria-hidden="true">Scroll</p>
+        </div>
       </section>
     ))}
 
@@ -47,8 +61,6 @@ const visible = stages.slice(0, 2); // vertical slice: stages 1–2
     <CtaBar />
   </main>
 
-  <!-- Complete static reading path: present for search engines, screen readers
-       and anyone the cinematic layer cannot serve. -->
   <section class="static-path" id="static-path">
     <h2>Site 01 — {site.address}</h2>
     <dl>
@@ -71,12 +83,9 @@ const visible = stages.slice(0, 2); // vertical slice: stages 1–2
     width: 100%;
     height: 100%;
     z-index: var(--z-canvas);
-    /* Painted before WebGL initialises, and the whole picture if it never does. */
     background: radial-gradient(120% 90% at 50% 15%, #2d6a54 0%, #1c4839 45%, #0d2119 100%);
   }
 
-  /* Readability scrim: guarantees contrast for the lede and the floating
-     chrome regardless of what the shader is doing behind them. */
   .scrim {
     position: fixed;
     inset: auto 0 0 0;
@@ -86,47 +95,63 @@ const visible = stages.slice(0, 2); // vertical slice: stages 1–2
     background: linear-gradient(to top, #071410cc 0%, #07141066 45%, #0714100a 100%);
   }
 
-  main {
-    position: relative;
-    z-index: var(--z-content);
-    min-height: 100svh;
-    display: grid;
-    place-items: center;
-    padding: calc(var(--chrome-inset) * 6) var(--s-5) 140px;
-  }
+  main { position: relative; z-index: var(--z-content); }
 
-  @media (max-width: 640px) {
-    main { padding: calc(var(--chrome-inset) * 4) var(--s-4) 170px; }
-    .scrim { height: 56vh; }
-  }
+  /* Each stage owns a tall scroll track; the panel sticks inside it. Native
+     sticky rather than a pinned ScrollTrigger — cheaper, and it keeps the
+     keyboard and scrollbar behaving normally. */
+  .stage-scroll { height: var(--scroll-vh, 250vh); }
 
   .stage-panel {
-    max-width: 72ch;
+    position: sticky;
+    top: 0;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    transition: opacity var(--d-base) var(--e-out);
+    padding: calc(var(--chrome-inset) * 6) var(--s-5) 150px;
+    max-width: 78ch;
+    margin: 0 auto;
+    will-change: transform, opacity;
   }
-  .stage-panel__kicker { display: block; margin: 0 0 var(--s-5); }
+
+  .stage-panel__kicker { margin: 0 0 var(--s-5); }
 
   .stage-panel__title,
   h2.stage-panel__title {
-    margin: 0 0 var(--s-5);
+    margin: 0 0 var(--s-6);
     font-family: var(--f-display);
+    font-optical-sizing: auto;
     font-weight: 400;
     font-size: var(--t-display);
-    line-height: 0.94;
-    letter-spacing: -0.02em;
+    line-height: 0.92;
+    letter-spacing: -0.025em;
     color: var(--chrome-fg-loud);
     text-wrap: balance;
   }
-  .stage-panel__title .line { display: block; }
 
   .stage-panel__lede {
     margin: 0 auto;
     max-width: 52ch;
     font-size: var(--t-lede);
-    line-height: 1.45;
+    line-height: 1.5;
     color: var(--chrome-fg);
     text-wrap: pretty;
+  }
+
+  .stage-panel__cue {
+    position: absolute;
+    bottom: 96px;
+    margin: 0;
+    color: var(--chrome-fg);
+    opacity: 0.7;
+    animation: cue-breathe 2.6s var(--e-inout) infinite;
+  }
+  @keyframes cue-breathe {
+    0%, 100% { opacity: 0.25; transform: translateY(0); }
+    50%      { opacity: 0.8;  transform: translateY(4px); }
   }
 
   .hold-slot {
@@ -135,7 +160,11 @@ const visible = stages.slice(0, 2); // vertical slice: stages 1–2
     bottom: 104px;
     transform: translateX(-50%);
     z-index: var(--z-chrome);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--d-base) var(--e-out);
   }
+  .hold-slot.is-armed { opacity: 1; pointer-events: auto; }
 
   .static-path {
     position: relative;
@@ -151,7 +180,11 @@ const visible = stages.slice(0, 2); // vertical slice: stages 1–2
   .static-path dt { flex: 0 0 9rem; font-family: var(--f-mono); font-size: var(--t-label); letter-spacing: var(--ls-wide); text-transform: uppercase; color: var(--w-45); }
   .static-path dd { margin: 0; }
 
-  /* Static path is a fallback, not a second hero — hidden once JS confirms the
-     experience is running, but always in the DOM for crawlers and AT. */
   :global(html.js-ready) .static-path { display: none; }
+
+  @media (max-width: 640px) {
+    .stage-panel { padding: calc(var(--chrome-inset) * 4) var(--s-4) 180px; }
+    .scrim { height: 56vh; }
+    .stage-panel__cue { bottom: 128px; }
+  }
 </style>

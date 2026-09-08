@@ -51,17 +51,21 @@
   --chrome-veil:    #14141aa6;
 
   /* --- Type --- */
+  /* The reference licenses PP Supply Mono, STK Bureau Serif and Bethany
+     Elingston. These are the closest freely licensable faces by contrast,
+     axis and register — not by name. */
   --f-mono:    'Google Sans Code', ui-monospace, 'SF Mono', monospace;
-  --f-sans:    'Google Sans Flex', Inter, system-ui, -apple-system, sans-serif;
-  --f-display: 'Newsreader', 'Times New Roman', Georgia, serif;
-  --f-script:  'Caveat', 'Newsreader', cursive;
+  --f-sans:    Inter, system-ui, -apple-system, sans-serif;
+  --f-display: 'Bodoni Moda', 'Didot', 'Times New Roman', serif;
+  --f-script:  'Pinyon Script', 'Bodoni Moda', cursive;
 
   --t-micro: 10px;   /* ruler ticks, stage labels */
   --t-label: 11px;   /* nav, badges */
   --t-ui:    12px;   /* buttons */
   --t-read:  15px;
   --t-lede:  clamp(1.05rem, 0.9rem + 0.6vw, 1.4rem);
-  --t-display: clamp(2.6rem, 1.1rem + 5.4vw, 6.25rem);
+  --t-display: clamp(2.8rem, 1.0rem + 6.6vw, 7.5rem);
+  --t-script:  clamp(3.2rem, 1.2rem + 7.6vw, 8.5rem);
 
   --ls-wide: 0.12em;  /* the reference's signature UI tracking */
   --ls-mid:  0.08em;
