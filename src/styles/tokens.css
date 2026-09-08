@@ -2,12 +2,23 @@
    SmartTec by Z1Power — design tokens
    Palette and type scale read from why.zero.university (reference),
    re-pointed at an energy/compute subject.
+
+   Every value marked "ref" below was measured, not eyeballed: from the
+   reference's compiled stylesheet (assets/main-*.css), from its index.html,
+   from its JS bundle, or from getComputedStyle on the live page. Where a
+   value is ours — because our subject has stages the reference does not —
+   it says so.
    ============================================================ */
 
 :root {
   /* --- Ground colours: one per narrative stage --- */
+  /* ref: body { background-color: rgb(28,72,57) } — measured live, and the
+     100% stop of its #bg-gradient. The reference has no green darker than
+     this, so the page ground and the deep end are the same colour; anything
+     that wants a true shadow green uses --c-land-shadow. */
   --c-land:      #1c4839; /* stage 1 — the land (reference body ground) */
-  --c-land-deep: #123027;
+  --c-land-deep: #1c4839;
+  --c-land-shadow: #123027; /* ours: a vignette green below the reference's floor */
   --c-wait:      #8c110c; /* stage 2 — the interconnection queue */
   --c-wait-deep: #4d0806;
   --c-power:     #f2b705; /* stage 3 — solar + storage */
@@ -16,39 +27,100 @@
   --c-machine-deep:#070a0f;
   --c-campus:    #eef1ef; /* stage 5 — daylight campus */
 
+  /* The reference's stage-1 ground is not flat: a radial ellipse lifts a lit
+     horizon out of the base. Stops transcribed verbatim from the inline
+     #bg-gradient rule in its index.html — the same ramp its WebGL bgPass
+     draws, so the DOM and the canvas never disagree. */
+  --c-land-h0: #d4f6eb;  /* 15.855% — the horizon itself */
+  --c-land-h1: #b3ded1;  /* 26.169% */
+  --c-land-h2: #91c7b7;  /* 36.483% */
+  --c-land-h3: #70af9c;  /* 46.797% */
+  --c-land-h4: #4e9782;  /* 57.111% */
+  --c-land-h5: #356f5e;  /* 78.555% — last stop before the ground */
+  --g-land: radial-gradient(
+    126.7vw 143.4vh at 50% 130%,
+    var(--c-land-h0) 15.855%,
+    var(--c-land-h1) 26.169%,
+    var(--c-land-h2) 36.483%,
+    var(--c-land-h3) 46.797%,
+    var(--c-land-h4) 57.111%,
+    var(--c-land-h5) 78.555%,
+    var(--c-land) 100%
+  );
+
   /* --- Brand --- */
-  --c-signal:  #7be88a;  /* live / online / go */
-  --c-moss:    #2d6a54;
-  --c-gold:    #ffc832;  /* stored energy, XP */
-  --c-carbon:  #1f1d1e;
+  --c-signal:  #7be88a;  /* live / online / go — ref ::selection background */
+  --c-moss:    #2d6a54;  /* ref: the accent its chrome takes on light stages */
+  --c-gold:    #ffc832;  /* stored energy, XP — ref xpStrokeGlow border */
+  --c-amber:   #ffbe28;  /* ref: the warmer half of that glow, used in its shadow */
+  --c-carbon:  #1f1d1e;  /* ref ::selection foreground */
+  --c-ink:     #141414;  /* ref: the ink its chrome inverts to, not pure black */
   --c-white:   #ffffff;
 
   /* --- White alpha ladder: UI that floats over any scene --- */
+  /* Every rung from --w-08 up is a literal in the reference's stylesheet.
+     --w-04 is ours: it has no reference rung, and the surfaces built on it
+     would double in weight if rounded up to the reference's 8%. */
   --w-04: #ffffff0a;
   --w-08: #ffffff14;
   --w-10: #ffffff1a;
+  --w-15: #ffffff26;
+  --w-22: #ffffff38;
+  --w-24: #ffffff3d;
   --w-25: #ffffff40;
   --w-30: #ffffff4d;
+  --w-32: #ffffff52;
+  --w-35: #ffffff59;
+  --w-40: #ffffff66;
   --w-45: #ffffff73;
   --w-50: #ffffff80;
   --w-55: #ffffff8c;
+  --w-60: #ffffff99;
   --w-70: #ffffffb3;
+  --w-80: #ffffffcc;
   --w-85: #ffffffd9;
   --w-90: #ffffffe6;
+  --w-92: #ffffffeb;
   --w-95: #fffffff2;
 
   /* --- Black alpha ladder: same chrome, inverted on light stages --- */
   --k-06: #0000000f;
+  --k-08: #00000014;
+  --k-12: #0000001f;
+  --k-18: #0000002e;
+  --k-20: #00000033;
   --k-30: #0000004d;
+  --k-32: #00000052;
+  --k-35: #00000059;
   --k-40: #0006;
+  --k-45: #00000073;
+  --k-50: #00000080;
   --k-55: #0000008c;
+  --k-60: #00000099;
+  --k-65: #000000a6;
   --k-70: #000000b3;
+  --k-75: #000000bf;
+  --k-80: #000000cc;
+
+  /* --- Ink alpha ladder: the reference inverts to #141414, never to #000 ---
+     Two rungs, because that is all it uses: 65% for quiet text, 90% for loud. */
+  --i-65: #141414a6;
+  --i-90: #141414e6;
 
   /* --- Chrome tint: flipped per stage by [data-chrome] --- */
+  /* Measured off the reference's .hud-xp / .hud-menu-dropdown / .scroll-indicator
+     — its whole floating chrome layer is one recipe:
+       text quiet  #ffffffb3   text loud #ffffffe6
+       surface     #0006       border    #ffffff1a  (1px, hairline)
+     The border is the one that had drifted furthest: ours was 55% white, a
+     hard outline where the reference draws a whisper. 55% white is real, but
+     in the reference it is a drawn rule (.scroll-ruler-nav-line), not a
+     container edge — so it lives on as --chrome-rule. */
   --chrome-fg:      var(--w-70);
-  --chrome-fg-loud: var(--w-95);
-  --chrome-line:    var(--w-55);
-  --chrome-veil:    #14141aa6;
+  --chrome-fg-loud: var(--w-90);
+  --chrome-line:    var(--w-10);
+  --chrome-rule:    var(--w-55);
+  --chrome-veil:    var(--k-40);
 
   /* --- Type --- */
   /* Each stack names the reference's own face first, then the closest
@@ -59,7 +131,7 @@
 
      Google Sans Code, Google Sans Flex, Inter, Newsreader and Caveat are
      the faces the reference loads from Google Fonts; those are exact. */
-  --f-mono:    'PP Supply Mono', 'Google Sans Code', ui-monospace, 'SF Mono', monospace;
+  --f-mono:    'PP Supply Mono', 'PP Supply Sans', 'Google Sans Code', ui-monospace, 'SF Mono', monospace;
   --f-sans:    'PP Supply Sans', 'Google Sans Flex', Inter, system-ui, -apple-system, sans-serif;
   --f-display: 'STK Bureau Serif', 'Bodoni Moda', Didot, 'Times New Roman', serif;
   --f-script:  'Pinyon Script', 'Bodoni Moda', cursive;
@@ -68,20 +140,44 @@
   /* Its handwritten annotation face, used verbatim. */
   --f-hand:    Caveat, 'Bradley Hand', cursive;
 
-  --t-micro: 10px;   /* ruler ticks, stage labels */
-  --t-label: 11px;   /* nav, badges */
-  --t-ui:    12px;   /* buttons */
-  --t-read:  15px;
-  --t-lede:  clamp(1.05rem, 0.9rem + 0.6vw, 1.4rem);
-  --t-display: clamp(2.9rem, 0.8rem + 7.4vw, 8.2rem);
-  /* Display weight. The reference sets its didone heavy and enormous; at that
-     scale a Book weight reads as timid. */
+  /* The reference's whole size scale, in its own order:
+     10 11 12 15 16px, then .9 1.05 1.25 1.4 6.25rem. Nothing between
+     1.4rem and 6.25rem exists in it — the jump is the point. */
+  --t-micro: 10px;   /* ruler ticks, stage labels — ref .scroll-ruler-nav-btn */
+  --t-label: 11px;   /* nav, badges — ref .mtl-count */
+  --t-ui:    12px;   /* buttons — ref .ruler-label */
+  --t-note:  0.9rem; /* ref .loader-degree, the quietest readable line */
+  --t-read:  15px;   /* ref .hud-menu-item */
+  --t-chip:  16px;   /* ref .hud-xp, the one chip that sets the chrome's height */
+  --t-lede:  clamp(1.05rem, 0.9rem + 0.6vw, 1.4rem); /* ref .scroll-indicator → .next-stage-label */
+
+  /* Display. The reference's only display size is a flat 6.25rem — it never
+     clamps, because the thing set at it is a two-digit counter that cannot
+     wrap. Ours is a headline, so it stays fluid, but the ceiling is now the
+     reference's number instead of 8.2rem: at 1440 we were rendering 119px
+     against its 100px, and at 1920 we hit 131px while it held 100px. The
+     ramp is drawn so the cap engages at exactly 1440. */
+  --t-display: clamp(2.6rem, 1.32rem + 5.48vw, 6.25rem);
+  /* Display weight. Confirmed, not assumed: every display-scale line in the
+     reference — .loader-text, .next-stage-label, its pre-canvas counter — is
+     700. It is 700 in a grotesque and ours is 700 in a didone, which reads
+     heavier for the same number, but the reference's own number is 700. */
   --fw-display: 700;
-  --ls-display: -0.035em;
+  /* The reference sets no negative tracking anywhere; its display letter-spacing
+     is normal and its .scroll-indicator-label is an explicit 0. Ours at -0.035em
+     was invented. Pulled most of the way back — a didone at 100px still wants a
+     hair of tightening that a grotesque does not. */
+  --ls-display: -0.015em;
   --t-script:  clamp(3.4rem, 1.2rem + 8.4vw, 9rem);
+
+  /* Its UI weights: 400 for reading, 500 for every chip and menu item
+     (Google Sans Flex 500 is the only weight it loads of that face). */
+  --fw-ui:   500;
+  --fw-body: 400;
 
   --ls-wide: 0.12em;  /* the reference's signature UI tracking */
   --ls-mid:  0.08em;
+  --ls-close:0.06em;  /* its tabular counters — .mtl-count, .mtl-menu-label */
   --ls-tight:0.05em;
 
   /* --- Space (4px base) --- */
@@ -94,12 +190,34 @@
   --r-sm:   8px;
 
   /* --- Motion --- */
+  /* Durations, counted off the reference's bundle: .3 (8 uses), .6 (7),
+     .5 (7), .45 (7), .65 (6), .4 (4). Its CSS transitions run .2–.6s. There
+     is no .8 cluster, so --d-slow comes down to the top of the real one. */
   --d-fast:  0.2s;
   --d-base:  0.4s;
-  --d-slow:  0.8s;
-  --d-stage: 1.6s;
-  --e-out:   cubic-bezier(0.22, 1, 0.36, 1);
-  --e-inout: cubic-bezier(0.65, 0, 0.35, 1);
+  --d-quick: 0.3s;   /* its most common tween */
+  --d-mid:   0.45s;
+  --d-glass: 0.6s;   /* its colour/background/border cross-fade on chrome */
+  --d-slow:  0.65s;
+  --d-stage: 1.4s;   /* its longest narrative move */
+
+  /* Easing. The reference's vocabulary is overwhelmingly GSAP power2:
+     power2.out 28 uses, power2.inOut 11, power2.in 10, then power3.inOut 5,
+     sine.inOut 3, back.out(2) 3. --e-out was an expo-grade quint curve, which
+     is a whole ease family more aggressive than anything in the reference;
+     it is now power2.out. The quint curve is kept as --e-quint because the
+     reference's own CSS does use it, once, on a 0.38s transform. */
+  --e-out:      cubic-bezier(0.33, 1, 0.68, 1);    /* power2.out */
+  --e-in:       cubic-bezier(0.32, 0, 0.67, 0);    /* power2.in */
+  --e-inout:    cubic-bezier(0.65, 0, 0.35, 1);    /* power2.inOut */
+  --e-inout-deep: cubic-bezier(0.76, 0, 0.24, 1);  /* power3.inOut */
+  --e-sine-io:  cubic-bezier(0.37, 0, 0.63, 1);    /* sine.inOut */
+  --e-back:     cubic-bezier(0.34, 1.48, 0.64, 1); /* back.out overshoot */
+  --e-quint:    cubic-bezier(0.22, 1, 0.36, 1);    /* ref CSS, transform .38s */
+  /* Its one registered CustomEase, 'osmoNav': M0,0 C0.625,0.05 0,1 1,1.
+     Four uses, all on the nav overlay opening — the signature move.
+     chrome.css mirrors this token; the two must stay identical. */
+  --e-osmo:     cubic-bezier(0.625, 0.05, 0, 1);
 
   /* --- Layout --- */
   --chrome-inset: 16px;
@@ -112,9 +230,15 @@
 }
 
 /* Light stages invert the entire chrome layer in one place. */
+/* This is the reference's own .nav-black recipe, rung for rung:
+     text quiet #141414a6   text loud #141414e6
+     surface    #ffffff73   border    #0000000f
+   Note it inverts to ink, not to black, and its inverted border is 6% —
+   the same hairline discipline as the dark polarity, not the 40% we had. */
 [data-chrome='dark'] {
-  --chrome-fg:      var(--k-55);
-  --chrome-fg-loud: var(--c-carbon);
-  --chrome-line:    var(--k-40);
-  --chrome-veil:    #ffffffcc;
+  --chrome-fg:      var(--i-65);
+  --chrome-fg-loud: var(--i-90);
+  --chrome-line:    var(--k-06);
+  --chrome-rule:    var(--k-30);
+  --chrome-veil:    var(--w-45);
 }

@@ -19,6 +19,7 @@
  */
 
 import gsap from 'gsap';
+import { CustomEase } from 'gsap/CustomEase';
 import { prefersReducedMotion } from './hold-button';
 import {
   assumptions,
@@ -32,6 +33,20 @@ import {
   type FitLevel,
   type QuestionId,
 } from '../data/configurator';
+
+/**
+ * The reference's motion vocabulary, adopted wholesale.
+ *
+ * `power2.out` is its workhorse — 28 of the eases in its bundle, against three
+ * for `power3.out` and none at all for `expo.out` — and its gestures sit
+ * between 0.3s and 0.65s. `osmoNav` is its signature curve, the CustomEase
+ * `M0,0 C0.625,0.05 0,1 1,1`: a long, quiet start that arrives hard. It is
+ * reserved here for the theatrical moves — the chosen card's flight into its
+ * chip and the masked line rise that swaps one question for the next.
+ */
+gsap.registerPlugin(CustomEase);
+const OSMO_NAV = 'osmoNav';
+CustomEase.create(OSMO_NAV, 'M0,0 C0.625,0.05 0,1 1,1');
 
 export type Answers = Partial<Record<QuestionId, string>>;
 
@@ -404,12 +419,12 @@ export class Configurator {
     const tl = gsap.timeline({ onComplete: () => this.goTo(to, true) });
     this.exit = { tl, els: [...siblings, ...lines, card, outgoing] };
 
-    tl.to(siblings, { opacity: 0, y: 12, duration: 0.26, ease: 'power2.in', stagger: 0.035 }, 0);
-    tl.to(lines, { yPercent: -115, duration: 0.36, ease: 'power2.in', stagger: 0.04 }, 0.06);
+    tl.to(siblings, { opacity: 0, y: 12, duration: 0.3, ease: 'power2.in', stagger: 0.035 }, 0);
+    tl.to(lines, { yPercent: -115, duration: 0.4, ease: 'power2.in', stagger: 0.04 }, 0.06);
     // The chosen card is handed to the ghost, so it is cut rather than faded.
     if (flying) tl.set(card, { opacity: 0 }, 0.03);
-    else tl.to(card, { opacity: 0, y: 12, duration: 0.26, ease: 'power2.in' }, 0.06);
-    tl.to(outgoing, { opacity: 0, duration: 0.2, ease: 'power1.in' }, 0.28);
+    else tl.to(card, { opacity: 0, y: 12, duration: 0.3, ease: 'power2.in' }, 0.06);
+    tl.to(outgoing, { opacity: 0, duration: 0.3, ease: 'power2.in' }, 0.3);
   }
 
   /** Undo whatever the outgoing timeline left inline, wherever it got to. */
@@ -455,15 +470,17 @@ export class Configurator {
       scaleX: to.width / Math.max(1, from.width),
       scaleY: to.height / Math.max(1, from.height),
       opacity: 0.12,
-      duration: 0.54,
-      ease: 'power3.inOut',
+      // The single most theatrical move on the page, so it takes the
+      // reference's signature curve rather than its default one.
+      duration: 0.65,
+      ease: OSMO_NAV,
       onComplete: () => this.clearGhost(),
     });
     // The chip catches it: the answer lands rather than appears.
     gsap.fromTo(
       chip,
       { opacity: 0, scale: 0.84 },
-      { opacity: 1, scale: 1, duration: 0.42, delay: 0.34, ease: 'back.out(2.2)', clearProps: 'transform' },
+      { opacity: 1, scale: 1, duration: 0.45, delay: 0.4, ease: 'back.out(2)', clearProps: 'transform' },
     );
   }
 
@@ -515,7 +532,9 @@ export class Configurator {
       gsap.fromTo(
         lines,
         { yPercent: 118, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 0.66, ease: 'power3.out', stagger: 0.055, clearProps: 'transform,opacity' },
+        // The other half of the swap, so it answers the card's flight on the
+        // same curve.
+        { yPercent: 0, opacity: 1, duration: 0.65, ease: OSMO_NAV, stagger: 0.05, clearProps: 'transform,opacity' },
       );
     }
     if (cards.length) {
@@ -524,7 +543,7 @@ export class Configurator {
         { y: 22, opacity: 0, scale: 0.985 },
         {
           y: 0, opacity: 1, scale: 1,
-          duration: 0.55, ease: 'power3.out', stagger: 0.05, delay: 0.14,
+          duration: 0.45, ease: 'power2.out', stagger: 0.05, delay: 0.16,
           clearProps: 'transform,opacity',
         },
       );
@@ -554,7 +573,7 @@ export class Configurator {
       tl.fromTo(
         slab,
         { opacity: 0, y: 30, scale: 0.985 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.72, ease: 'power3.out', clearProps: 'transform,opacity' },
+        { opacity: 1, y: 0, scale: 1, duration: 0.65, ease: 'power2.out', clearProps: 'transform,opacity' },
         0,
       );
     }
@@ -562,15 +581,15 @@ export class Configurator {
       tl.fromTo(
         lines,
         { yPercent: 118, opacity: 0 },
-        { yPercent: 0, opacity: 1, duration: 0.72, ease: 'power3.out', stagger: 0.06, clearProps: 'transform,opacity' },
-        0.14,
+        { yPercent: 0, opacity: 1, duration: 0.65, ease: OSMO_NAV, stagger: 0.06, clearProps: 'transform,opacity' },
+        0.16,
       );
     }
     if (seal) {
       tl.fromTo(
         seal,
         { opacity: 0, scale: 0.86 },
-        { opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(2)', clearProps: 'transform,opacity' },
+        { opacity: 1, scale: 1, duration: 0.45, ease: 'back.out(2)', clearProps: 'transform,opacity' },
         0.3,
       );
     }
@@ -578,7 +597,7 @@ export class Configurator {
       tl.fromTo(
         drawn,
         { scaleX: 0 },
-        { scaleX: 1, duration: 0.62, ease: 'power3.inOut', stagger: 0.06, clearProps: 'transform' },
+        { scaleX: 1, duration: 0.6, ease: 'power2.inOut', stagger: 0.06, clearProps: 'transform' },
         0.3,
       );
     }
@@ -586,24 +605,24 @@ export class Configurator {
       tl.fromTo(
         cells,
         { opacity: 0, y: 14 },
-        { opacity: 1, y: 0, duration: 0.52, ease: 'power3.out', stagger: 0.06, clearProps: 'transform,opacity' },
-        0.34,
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', stagger: 0.06, clearProps: 'transform,opacity' },
+        0.35,
       );
     }
     if (notes.length) {
       tl.fromTo(
         notes,
         { opacity: 0, y: 8 },
-        { opacity: 1, y: 0, duration: 0.44, ease: 'power2.out', stagger: 0.05, clearProps: 'transform,opacity' },
-        0.62,
+        { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out', stagger: 0.05, clearProps: 'transform,opacity' },
+        0.6,
       );
     }
     if (cta) {
       tl.fromTo(
         cta,
         { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.52, ease: 'back.out(1.5)', clearProps: 'transform,opacity' },
-        0.78,
+        { opacity: 1, y: 0, duration: 0.5, ease: 'back.out(2)', clearProps: 'transform,opacity' },
+        0.8,
       );
     }
 
@@ -632,8 +651,8 @@ export class Configurator {
       el.textContent = format(0);
       this.tallies.push(gsap.to(proxy, {
         v: target,
-        duration: 0.95,
-        delay: 0.36 + i * 0.09,
+        duration: 1,
+        delay: 0.4 + i * 0.09,
         ease: 'power2.out',
         onUpdate: () => { el.textContent = format(proxy.v); },
         onComplete: () => { el.textContent = format(target); },
@@ -723,7 +742,7 @@ export class Configurator {
 
     gsap.to(p, {
       v: value,
-      duration: 0.55 + Math.min(0.45, span * 0.45),
+      duration: 0.45 + Math.min(0.35, span * 0.35),
       ease: 'power2.out',
       onUpdate: () => write(p.v),
       onComplete: () => { write(value); this.pop(pops); },
@@ -737,7 +756,7 @@ export class Configurator {
       els,
       { scale: 1 },
       {
-        scale: 1.05, duration: 0.13, ease: 'power2.out',
+        scale: 1.05, duration: 0.16, ease: 'power2.out',
         transformOrigin: 'left center', yoyo: true, repeat: 1,
         clearProps: 'transform',
       },
@@ -749,7 +768,7 @@ export class Configurator {
     const el = this.root.querySelector<HTMLElement>('[data-flash]');
     if (!el || this.reduced) return;
     gsap.killTweensOf(el);
-    gsap.fromTo(el, { opacity: 0 }, { opacity: 0.18, duration: 0.18, ease: 'power2.out', yoyo: true, repeat: 1 });
+    gsap.fromTo(el, { opacity: 0 }, { opacity: 0.18, duration: 0.16, ease: 'power2.out', yoyo: true, repeat: 1 });
   }
 
   /** The gamified bit: how many GPUs that answer just moved the estimate by. */
@@ -764,7 +783,7 @@ export class Configurator {
       .fromTo(
         el,
         { opacity: 0, y: -10, scale: 0.9 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.36, ease: 'back.out(2.4)' },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out(2)' },
       )
       .to(el, { opacity: 0, y: -6, duration: 0.3, ease: 'power2.in', delay: 1.6 });
   }
@@ -818,7 +837,7 @@ export class Configurator {
     if (bar) {
       const share = Math.min(1, r.gpus / envelope.rentableGpus);
       if (this.reduced) gsap.set(bar, { scaleX: share });
-      else gsap.to(bar, { scaleX: share, duration: 0.7, ease: 'power3.out' });
+      else gsap.to(bar, { scaleX: share, duration: 0.65, ease: 'power2.out' });
       bar.parentElement?.setAttribute('aria-valuenow', String(Math.round(share * 100)));
     }
 

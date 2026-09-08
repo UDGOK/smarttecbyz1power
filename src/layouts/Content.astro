@@ -143,13 +143,10 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
   }
 
   .doc {
-    /* The reference's motion vocabulary, kept in one place. power2.out is its
-       workhorse — 28 of the eases in its bundle — and its gestures sit between
-       0.3s and 0.65s. Ours ran on an expo-shaped curve at 0.8–1.3s, which is
-       what read as aggressive rather than gentle. Deferred to a tokens.css
-       token the moment one exists. */
-    --e-p2: var(--e-power2-out, cubic-bezier(0.33, 1, 0.68, 1));
-
+    /* Motion here follows the reference's vocabulary: power2.out — `--e-p2`
+       from the shared set in chrome.css — at 0.3–0.65s. These pages ran on an
+       expo-shaped curve at 0.8–1.3s, which is what read as aggressive rather
+       than gentle. */
     --doc-w: 1240px;
     --doc-read: 66ch;
     --rail: 8.5rem;

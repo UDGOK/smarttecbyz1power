@@ -74,12 +74,10 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 
 <style>
   .nav {
-    /* The reference's motion vocabulary. power2.out is its workhorse — 28 of
-       the eases in its bundle — at 0.3–0.65s; ours used to be an expo-shaped
-       curve at 0.2/0.4/0.8, which is what read as snappy. tokens.css is the
-       home for these, so both defer to a token the moment one exists. */
-    --e-p2: var(--e-power2-out, cubic-bezier(0.33, 1, 0.68, 1));
-
+    /* Timing follows the reference: power2.out — `--e-p2` from the shared
+       motion vocabulary in chrome.css — at 0.3–0.65s. The expo-grade
+       `--e-out`/`--d-*` pairing this nav used to run on is what read as snappy.
+       See content-motion.ts for the damped half of the condense. */
     position: sticky;
     top: 0;
     z-index: var(--z-chrome);

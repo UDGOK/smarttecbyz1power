@@ -95,10 +95,8 @@ const groups = [
 
 <style>
   .foot {
-    /* The reference's default gesture: power2.out at 0.3–0.65s. Deferred to a
-       tokens.css token the moment one exists. */
-    --e-p2: var(--e-power2-out, cubic-bezier(0.33, 1, 0.68, 1));
-
+    /* The reference's default gesture: power2.out (`--e-p2`, from the shared
+       motion vocabulary in chrome.css) at 0.3–0.65s. */
     margin-top: clamp(var(--s-8), 10vh, 140px);
     padding: clamp(var(--s-8), 9vh, 120px) var(--s-4) var(--s-6);
     background: color-mix(in srgb, var(--c-land-deep) 55%, var(--c-carbon));

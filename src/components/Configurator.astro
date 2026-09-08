@@ -243,14 +243,11 @@ const pad = (n: number): string => String(n).padStart(2, '0');
      with the chrome the same way the rest of the UI does. The hairlines and
      shadows are mixed off `--chrome-fg-loud`, so they invert on their own. */
   .cfg {
-    /* The reference's motion vocabulary. power2.out at 0.3–0.65s is its
-       default gesture — 28 of the eases in its bundle — and it is what every
-       resting state below is timed to. The theatrical moves (the card flight,
-       the question swap) are GSAP's, and configurator.ts times those on the
-       reference's osmoNav curve. Deferred to a tokens.css token the moment one
-       exists. */
-    --e-p2: var(--e-power2-out, cubic-bezier(0.33, 1, 0.68, 1));
-
+    /* Resting states are timed to the reference's default gesture: power2.out
+       — `--e-p2`, from the shared motion vocabulary in chrome.css — at
+       0.3–0.65s. The theatrical moves (the card's flight into its chip, the
+       question-to-question swap) belong to GSAP, and configurator.ts times
+       those on the reference's own osmoNav curve. */
     --cfg-line: var(--w-25);
     --cfg-hair: color-mix(in srgb, var(--chrome-fg-loud) 20%, transparent);
     --cfg-hair-soft: color-mix(in srgb, var(--chrome-fg-loud) 11%, transparent);
