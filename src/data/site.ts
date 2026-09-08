@@ -62,6 +62,8 @@ export const compute = {
 export const stages = [
   {
     id: 'land',
+    /** How this world breaks apart on the way out. */
+    exit: 'shatter' as const,
     // Dawn over water: generous bloom on the caustics, gentle fringing.
     post: { bloomStrength: 0.72, bloomThreshold: 0.8, bloomRadius: 0.6, aberration: 0.0035, vignette: 0.42 },
     index: 0,
@@ -77,6 +79,8 @@ export const stages = [
   },
   {
     id: 'wait',
+    /** How this world breaks apart on the way out. */
+    exit: 'tunnel' as const,
     // Pressure: hotter bloom, harder fringing, heavier corners.
     post: { bloomStrength: 1.15, bloomThreshold: 0.58, bloomRadius: 0.5, aberration: 0.008, vignette: 0.5 },
     index: 1,
@@ -92,6 +96,8 @@ export const stages = [
   },
   {
     id: 'power',
+    /** How this world breaks apart on the way out. */
+    exit: 'wipe' as const,
     // A low sun and lit charge strips are the whole subject — let them burn.
     post: { bloomStrength: 1.35, bloomThreshold: 0.52, bloomRadius: 0.7, aberration: 0.005, vignette: 0.42 },
     index: 2,
@@ -107,6 +113,8 @@ export const stages = [
   },
   {
     id: 'machine',
+    /** How this world breaks apart on the way out. */
+    exit: 'tunnel' as const,
     // Emissive LEDs in a dark hall: tight, cold bloom, minimal haze.
     post: { bloomStrength: 1.05, bloomThreshold: 0.62, bloomRadius: 0.38, aberration: 0.0045, vignette: 0.44 },
     index: 3,
@@ -122,6 +130,8 @@ export const stages = [
   },
   {
     id: 'campus',
+    /** How this world breaks apart on the way out. */
+    exit: 'wipe' as const,
     // Daylight. Restraint — bloom here would only look like fog.
     post: { bloomStrength: 0.45, bloomThreshold: 0.86, bloomRadius: 0.45, aberration: 0.0015, vignette: 0.22 },
     index: 4,

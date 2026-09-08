@@ -10,6 +10,7 @@
 import * as THREE from 'three';
 import { quality, type Tier } from '../quality';
 import { PostChain, type PostSettings } from './post';
+import { Transition, type TransitionKind } from './transition';
 import type { SceneContext, StageScene, TierSettings } from './types';
 
 export class SceneHost {
@@ -23,6 +24,7 @@ export class SceneHost {
   private stage: StageScene | null = null;
   private scroll = 0;
   private post: PostChain;
+  private transition: Transition;
 
   running = false;
 
@@ -40,6 +42,13 @@ export class SceneHost {
       canvas.clientWidth || window.innerWidth,
       canvas.clientHeight || window.innerHeight,
       quality.current,
+    );
+
+    this.transition = new Transition(
+      this.renderer,
+      canvas.clientWidth || window.innerWidth,
+      canvas.clientHeight || window.innerHeight,
+      { reducedMotion },
     );
 
     this.disposeTier = quality.onChange((tier: Tier, settings) => {
@@ -93,6 +102,21 @@ export class SceneHost {
     this.post.set(settings);
   }
 
+  /** Crossings are scrubbed straight from scroll position. */
+  beginTransition(kind: TransitionKind, from: THREE.ColorRepresentation, to: THREE.ColorRepresentation): void {
+    this.transition.begin(kind, from, to);
+  }
+
+  setTransitionProgress(p: number): void {
+    this.transition.setProgress(p);
+  }
+
+  endTransition(): void {
+    this.transition.end();
+  }
+
+  get transitionActive(): boolean { return this.transition.active; }
+
   resize = (): void => {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
@@ -101,6 +125,7 @@ export class SceneHost {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.post.setSize(w, h);
+    this.transition.setSize(w, h);
     this.stage?.frame(this.ctx());
   };
 
@@ -116,6 +141,8 @@ export class SceneHost {
       const elapsed = this.reducedMotion ? 0 : this.clock.getElapsedTime();
       this.stage?.update(elapsed, delta, this.scroll, this.ctx());
       this.post.render(this.scene, this.camera, elapsed);
+      // Composites straight onto the frame the post chain just wrote.
+      this.transition.render(this.camera, elapsed);
       this.raf = requestAnimationFrame(loop);
     };
     this.raf = requestAnimationFrame(loop);
@@ -132,6 +159,7 @@ export class SceneHost {
     this.stage?.dispose();
     this.scene.clear();
     this.post.dispose();
+    this.transition.dispose();
     this.renderer.dispose();
   }
 }

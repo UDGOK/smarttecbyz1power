@@ -3,7 +3,7 @@
  *
  * Five stage worlds on one scroll spine. Scrolling drives the ruler, the camera
  * and the copy; reaching the end of a stage arms the hold; holding scrubs the
- * outgoing world apart while a colour veil carries the eye into the next one.
+ * outgoing world apart while a shader effect carries the eye into the next one.
  * Arriving at the campus hands control back to the visitor.
  */
 
@@ -11,7 +11,7 @@ import gsap from 'gsap';
 import { SceneHost } from './scene/host';
 import { loadScene, warmScene } from './scene/registry';
 import type { CampusScene } from './scene/stage-campus';
-import { HoldButton, prefersReducedMotion } from './hold-button';
+import { prefersReducedMotion } from './hold-button';
 import { initLoader } from './loader';
 import { initCursor } from './cursor';
 import { initConfigurator } from './configurator';
@@ -19,6 +19,17 @@ import { audio } from './audio';
 import { stages, ENTRY_MIX } from '../data/site';
 
 const PHASE_1A_KW = 114;
+
+/**
+ * Where in a stage's scroll track the next world starts bleeding in. Before
+ * this you are reading; after it, the crossing is already underway and your
+ * own scrolling is what drives it. No button, no gate — the reference advances
+ * the same way, at its own scroll threshold.
+ */
+const CROSS_START = 0.8;
+
+/** Ignore scroll for this long after a swap, or momentum re-triggers it. */
+const SWAP_LOCKOUT_MS = 620;
 
 /** kW committed by the time each stage has been reached. */
 const STAGE_KW = [0, 0.08, 0.35, 1, 1];
@@ -55,7 +66,6 @@ export function boot(): void {
   const readout = document.querySelector<HTMLElement>('#ruler-readout');
   const rulerTrack = document.querySelector<HTMLElement>('.scroll-ruler-track');
   const powerValue = document.querySelector<HTMLElement>('#power-value');
-  const veil = document.querySelector<HTMLElement>('#veil');
   const campusUI = document.querySelector<HTMLElement>('#campus-ui');
   const hotspotLayer = document.querySelector<HTMLElement>('#campus-hotspots');
   const after = document.querySelector<HTMLElement>('#after');
@@ -65,8 +75,9 @@ export function boot(): void {
 
   let host: SceneHost | null = null;
   let current = 0;
-  let button: HoldButton | null = null;
   let swapping = false;
+  let lockedUntil = 0;
+  let crossing = false;
 
   // --- Scene host, code-split and idle-loaded ---------------------------
   async function initScene(): Promise<void> {
@@ -144,13 +155,59 @@ export function boot(): void {
 
   // --- Scroll ------------------------------------------------------------
   let ticking = false;
+
+  /**
+   * One callback drives the whole crossing: the outgoing world dissolves, the
+   * effect carries the eye across, both ambiences cross-fade and the committed
+   * capacity climbs — all from the scroll position, continuously.
+   */
+  function cross(t: number): void {
+    const from = stages[current];
+    const to = stages[current + 1];
+    if (!from || !to) return;
+
+    if (!crossing && t > 0) {
+      crossing = true;
+      // Each world breaks apart in its own way on the way out.
+      host?.beginTransition(from.exit, from.ground, to.ground);
+      audio.play(AMBIENT[from.id], { fadeIn: 0.3, volume: 0.45 });
+      audio.play(AMBIENT[to.id], { fadeIn: 0, volume: 0 });
+      warmScene(to.scene);
+    }
+    if (crossing && t <= 0) {
+      crossing = false;
+      host?.endTransition();
+      audio.stop(AMBIENT[to.id], { fadeOut: 0.3 });
+      audio.setLevel(AMBIENT[from.id], { volume: 0.45 });
+    }
+
+    host?.setTransitionProgress(t);
+
+    // The outgoing world also dissolves underneath, so the effect is not
+    // merely painted over a frame that is still going about its business.
+    if (from.scene !== to.scene) {
+      host?.setWorldMix(t);
+    } else {
+      const a = ENTRY_MIX[from.id] ?? 0;
+      const b = ENTRY_MIX[to.id] ?? 1;
+      host?.setWorldMix(a + (b - a) * t);
+    }
+
+    audio.setLevel(AMBIENT[from.id], { volume: (1 - t) * 0.45 });
+    audio.setLevel(AMBIENT[to.id], { volume: t * 0.45 });
+
+    const kwA = STAGE_KW[current] ?? 0;
+    const kwB = STAGE_KW[current + 1] ?? 1;
+    setPower(kwA + (kwB - kwA) * t);
+  }
+
   function onScroll(): void {
     if (ticking) return;
     ticking = true;
     requestAnimationFrame(() => {
       ticking = false;
       const panel = panels[current];
-      if (!panel || panel.hidden) return;
+      if (!panel || panel.hidden || swapping) return;
 
       const rect = panel.getBoundingClientRect();
       const travel = Math.max(1, rect.height - window.innerHeight);
@@ -162,136 +219,72 @@ export function boot(): void {
       const sticky = panel.querySelector<HTMLElement>('[data-stage-sticky]');
       if (sticky && !reduced) {
         sticky.style.transform = `translate3d(0, ${-p * 8}vh, 0)`;
-        sticky.style.opacity = String(1 - Math.max(0, (p - 0.65) / 0.35) * 0.85);
       }
 
       const cue = panel.querySelector<HTMLElement>('[data-scroll-cue]');
       if (cue) cue.style.opacity = String(Math.max(0, 1 - p * 4));
 
-      slot.classList.toggle('is-armed', p > 0.82 && !!button && !swapping);
+      // The tail of every stage is the crossing into the next one.
+      const t = p <= CROSS_START ? 0 : (p - CROSS_START) / (1 - CROSS_START);
+      cross(t);
+      // Clear the copy early — it should be gone before the effect peaks,
+      // not still legible through the fracture.
+      if (sticky) sticky.style.opacity = String(Math.max(0, 1 - t * 2.2));
+
+      if (t >= 0.995 && performance.now() > lockedUntil) void advance();
     });
   }
 
-  // --- Hold --------------------------------------------------------------
-  function mountHold(index: number): void {
-    button?.destroy();
-    button = null;
-    const cfg = stages[index]?.hold;
-    if (!cfg) return;
-
-    const from = stages[index];
-    const to = stages[index + 1];
-    if (!to) return;
-
-    const fromAmbient = AMBIENT[from.id];
-    const toAmbient = AMBIENT[to.id];
-    const sceneChanges = from.scene !== to.scene;
-
-    button = new HoldButton({
-      label: cfg.label,
-      holdLabel: cfg.holdLabel,
-      holdDuration: cfg.duration,
-      audioTrack: 'hold-button',
-
-      onStart() {
-        audio.play(fromAmbient, { fadeIn: 0.3, volume: 0.45 });
-        audio.play(toAmbient, { fadeIn: 0, volume: 0 });
-        if (veil) veil.style.setProperty('--veil-color', to.ground);
-        warmScene(to.scene);
-      },
-
-      // One callback: the outgoing world dissolves, the veil carries the eye
-      // across, both ambiences cross-fade, the badge climbs.
-      onProgress(p) {
-        if (sceneChanges) {
-          host?.setWorldMix(p);
-          if (veil) veil.style.opacity = String(Math.pow(p, 1.7) * 0.92);
-        } else {
-          // Same scene, different palette: scrub the shader straight across.
-          const a = ENTRY_MIX[from.id] ?? 0;
-          const b = ENTRY_MIX[to.id] ?? 1;
-          host?.setWorldMix(a + (b - a) * p);
-        }
-        audio.setLevel(fromAmbient, { volume: (1 - p) * 0.45 });
-        audio.setLevel(toAmbient, { volume: p * 0.45 });
-
-        const a = STAGE_KW[index] ?? 0;
-        const b = STAGE_KW[index + 1] ?? 1;
-        setPower(a + (b - a) * p);
-
-        const sticky = panels[current]?.querySelector<HTMLElement>('[data-stage-sticky]');
-        if (sticky) sticky.style.opacity = String(1 - p * 0.9);
-      },
-
-      onCancel() {
-        host?.setWorldMix(ENTRY_MIX[from.id] ?? 0);
-        if (veil) veil.style.opacity = '0';
-        audio.stop(toAmbient, { fadeOut: 0.3 });
-        audio.setLevel(fromAmbient, { volume: 0.45 });
-        setPower(STAGE_KW[index] ?? 0);
-        const sticky = panels[current]?.querySelector<HTMLElement>('[data-stage-sticky]');
-        if (sticky) sticky.style.opacity = '1';
-      },
-
-      onComplete() { void advance(); },
-    });
-    slot.appendChild(button.el);
-  }
-
+  // --- Advance ----------------------------------------------------------
   async function advance(): Promise<void> {
     const next = current + 1;
     const to = stages[next];
     if (!to || swapping) return;
     swapping = true;
-    slot.classList.remove('is-armed');
+    lockedUntil = performance.now() + SWAP_LOCKOUT_MS;
 
     const from = stages[current];
     audio.stop(AMBIENT[from.id], { fadeOut: 0.6 });
-    audio.play('whoosh');
 
+    // The transition is fully opaque by now, so the swap behind it is unseen.
     if (from.scene !== to.scene && host) {
-      // Swap behind the veil, then lift it while the new world resolves.
       host.setStage(await loadScene(to.scene));
       host.setClearColor(to.ground);
       host.setWorldMix(1);
-      if (veil) {
-        gsap.to(veil, {
-          opacity: 0,
-          duration: reduced ? 0 : 0.9,
-          ease: 'power2.out',
-        });
-      }
-      const mix = { v: 1 };
-      gsap.to(mix, {
-        v: ENTRY_MIX[to.id] ?? 0,
-        duration: reduced ? 0 : 1.4,
-        ease: 'power2.inOut',
-        onUpdate: () => host?.setWorldMix(mix.v),
-      });
-    } else {
-      host?.setWorldMix(ENTRY_MIX[to.id] ?? 0);
-      if (veil) veil.style.opacity = '0';
     }
 
     current = next;
     showPanel(next);
     applyChrome(next);
     setPower(STAGE_KW[next] ?? 1);
-    flash();
     topupBadge();
 
     window.scrollTo({ top: 0, behavior: 'auto' });
     const sticky = panels[next].querySelector<HTMLElement>('[data-stage-sticky]');
     if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
+
+    // Resolve the effect out and settle the new world in behind it.
+    const resolve = { t: 1 };
+    gsap.to(resolve, {
+      t: 0,
+      duration: reduced ? 0 : 1.05,
+      ease: 'power2.inOut',
+      onUpdate: () => {
+        host?.setTransitionProgress(resolve.t);
+        host?.setWorldMix((ENTRY_MIX[to.id] ?? 0) + resolve.t * (1 - (ENTRY_MIX[to.id] ?? 0)));
+      },
+      onComplete: () => {
+        host?.endTransition();
+        host?.setWorldMix(ENTRY_MIX[to.id] ?? 0);
+      },
+    });
+
+    crossing = false;
     reveal(next);
-    mountHold(next);
     if (stages[next + 1]) warmScene(stages[next + 1].scene);
     if (to.scene === 'campus') enterCampus();
 
     swapping = false;
-    // Next frame: the scroll reset and the panel swap must both have settled
-    // before the parallax is recomputed, or the incoming panel inherits the
-    // outgoing one's progress and arrives faded out.
     requestAnimationFrame(onScroll);
   }
 
@@ -305,7 +298,9 @@ export function boot(): void {
       host.setClearColor(to.ground);
     }
     host?.setWorldMix(ENTRY_MIX[to.id] ?? 0);
-    if (veil) veil.style.opacity = '0';
+    host?.endTransition();
+    crossing = false;
+    lockedUntil = performance.now() + SWAP_LOCKOUT_MS;
 
     current = index;
     showPanel(index);
@@ -316,7 +311,6 @@ export function boot(): void {
     const jumped = panels[index].querySelector<HTMLElement>('[data-stage-sticky]');
     if (jumped) { jumped.style.opacity = '1'; jumped.style.transform = 'none'; }
     reveal(index);
-    mountHold(index);
     if (to.scene === 'campus') enterCampus(); else exitCampus();
 
     swapping = false;
@@ -452,7 +446,6 @@ export function boot(): void {
 
   initLoader(() => {
     reveal(0);
-    mountHold(0);
     audio.play('stage-land-ambient', { fadeIn: 1.2, volume: 0.35 });
     onScroll();
   });

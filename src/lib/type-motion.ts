@@ -236,8 +236,20 @@ function guarded(el: HTMLElement, group: Group, run: () => TypeMotionHandle): Ty
 }
 
 /** A handle for the reduced-motion path: nothing running, nothing to undo. */
-function staticHandle(el: HTMLElement, group: Group, undo?: () => void): TypeMotionHandle {
-  return new Treatment({ element: el, group, reduced: true, final: () => {}, undo: undo ?? null });
+function staticHandle(
+  el: HTMLElement,
+  group: Group,
+  undo?: (() => void) | null,
+  owned = false,
+): TypeMotionHandle {
+  return new Treatment({
+    element: el,
+    group,
+    reduced: true,
+    final: () => {},
+    undo: undo ?? null,
+    owned,
+  });
 }
 
 /* ==================================================================
@@ -295,6 +307,19 @@ function makeSpan(className: string, cssText: string): HTMLSpanElement {
   return span;
 }
 
+/**
+ * Roles that take a name from the author. `aria-label` is *prohibited* on the
+ * generic roles — `span`, `div`, `p` — which is most of what a designer wants
+ * to split, so those elements need the mirror below as well as the label.
+ */
+const NAMEABLE = new Set(['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BUTTON', 'LI', 'TD', 'TH', 'SUMMARY']);
+
+function takesAriaLabel(el: HTMLElement): boolean {
+  if (el.hasAttribute('role')) return true;
+  if (el.tagName === 'A') return el.hasAttribute('href');
+  return NAMEABLE.has(el.tagName);
+}
+
 /** The visually-hidden copy that keeps the string reachable whatever the role. */
 function mirror(text: string): HTMLSpanElement {
   const span = makeSpan('', SR_ONLY);
@@ -306,13 +331,17 @@ function mirror(text: string): HTMLSpanElement {
 /**
  * Marks the element as split for assistive tech.
  *
- * Two belts, because `aria-label` is only honoured on roles that allow a name
- * from the author — it works on the headings this site splits, but is ignored
- * on a bare `<p>` or `<span>`. So the string also goes in as a clipped mirror
- * node that is *not* aria-hidden. Exactly one of the two is ever announced:
- * where the label applies it replaces the contents, and where it does not the
- * mirror is the only readable content left, since every visual node under it
- * is aria-hidden.
+ * `aria-label` goes on unconditionally, and on a heading, button, link or
+ * list item that is the whole story: the label replaces the contents, and the
+ * split spans below it are all aria-hidden.
+ *
+ * On a `<p>` or `<span>` the label is *prohibited* by the role and silently
+ * ignored, which would leave the element with nothing readable at all — so
+ * those, and only those, also get a clipped mirror node carrying the string,
+ * which is the one generated child not marked aria-hidden. Exactly one of the
+ * two is ever announced, never both. The cost is that `el.textContent` on such
+ * an element reads doubled while it is split; `unsplit()` ends that, and it is
+ * why the mirror is not added where the label alone does the job.
  */
 function labelSplit(el: HTMLElement, record: SplitRecord): void {
   const label = record.text.replace(/\n/g, ' ');
@@ -421,7 +450,7 @@ function splitLines(el: HTMLElement, names: LineClassNames): SplitRecord {
       parts.push(inner);
     }
 
-    el.appendChild(mirror(text));
+    if (!takesAriaLabel(el)) el.appendChild(mirror(text));
 
     const record: SplitRecord = {
       kind: 'lines',
@@ -482,7 +511,7 @@ function splitChars(el: HTMLElement): SplitRecord {
       });
     });
 
-    el.appendChild(mirror(text));
+    if (!takesAriaLabel(el)) el.appendChild(mirror(text));
 
     const record: SplitRecord = {
       kind: 'chars',
@@ -517,14 +546,24 @@ export function unsplit(el: HTMLElement): void {
 
   if (record.adopted) {
     // Not ours: leave the authored markup exactly where it is, just drop the
-    // inline transform/opacity the tween left behind.
-    gsap.set(record.parts, { clearProps: 'transform,opacity,willChange' });
+    // inline transform/opacity the tween left behind. GSAP 3 writes the
+    // individual `translate`/`rotate`/`scale` properties as well as
+    // `transform`, and leaves an empty style attribute behind either way.
+    gsap.set(record.parts, {
+      clearProps: 'transform,translate,rotate,scale,opacity,willChange',
+    });
+    record.parts.forEach(tidyStyle);
     return;
   }
 
   unlabelSplit(el, record);
   el.textContent = '';
   if (record.original) el.appendChild(record.original);
+}
+
+/** Drops a style attribute GSAP emptied, so the markup reads as it was authored. */
+function tidyStyle(node: HTMLElement): void {
+  if (node.getAttribute('style') === '') node.removeAttribute('style');
 }
 
 /** Whether an element currently carries a split of ours. */
@@ -603,17 +642,29 @@ export function revealLines(el: HTMLElement, opts: RevealLinesOptions = {}): Typ
     const o = { ...LINE_DEFAULTS, ...opts };
     preempt(el, 'text');
 
+    if (prefersReducedMotion()) {
+      // Nothing gets split that was not already. Markup that ships the mask
+      // pair — or an element left split by an earlier call — still has to be
+      // put into the end state, because something (boot, CSS) may be holding
+      // it hidden; anything else is simply left as the server wrote it.
+      const authored = el.querySelector(`.${o.innerClass}`);
+      if (authored || isSplit(el)) {
+        const held = splitLines(el, { lineClass: o.lineClass, innerClass: o.innerClass });
+        gsap.set(held.parts, { yPercent: 0, opacity: 1, clearProps: 'willChange' });
+        o.onComplete?.();
+        return staticHandle(el, 'text', null, true);
+      }
+      gsap.set(el, { opacity: 1, visibility: 'visible' });
+      o.onComplete?.();
+      return staticHandle(el, 'text', () => gsap.set(el, { clearProps: 'opacity,visibility' }));
+    }
+
     const record = splitLines(el, { lineClass: o.lineClass, innerClass: o.innerClass });
     const parts = record.parts;
     const final = (): void => {
       gsap.set(parts, { yPercent: 0, opacity: 1, clearProps: 'willChange' });
       o.onComplete?.();
     };
-
-    if (prefersReducedMotion()) {
-      final();
-      return staticHandle(el, 'text');
-    }
 
     const tween = gsap.fromTo(
       parts,
@@ -626,6 +677,11 @@ export function revealLines(el: HTMLElement, opts: RevealLinesOptions = {}): Typ
         ease: o.ease,
         stagger: o.stagger,
         paused: o.paused,
+        // GSAP defers a tween's first render to the end of the tick by
+        // default. On a delayed reveal that shows one frame of the *finished*
+        // headline before it drops back into the mask, so: render now.
+        immediateRender: true,
+        lazy: false,
         onComplete: final,
       },
     );
@@ -636,7 +692,10 @@ export function revealLines(el: HTMLElement, opts: RevealLinesOptions = {}): Typ
       reduced: false,
       final,
       tween,
-      owned: !record.adopted,
+      // Always "owned": for an adopted split unsplit() only strips the inline
+      // props the tween left on the authored markup, which is exactly the
+      // cleanup restore() should do.
+      owned: true,
     });
   });
 }
@@ -684,8 +743,10 @@ export function revealChars(el: HTMLElement, opts: RevealCharsOptions = {}): Typ
     preempt(el, 'text');
 
     // Under reduce the split is pure decoration, so it is not performed at all
-    // and the element keeps its own untouched text nodes.
+    // and the element keeps its own untouched text nodes — including one left
+    // split by an earlier call made before the preference changed.
     if (prefersReducedMotion()) {
+      unsplit(el);
       ensureVisible(el);
       o.onComplete?.();
       return staticHandle(el, 'text', () => gsap.set(el, { clearProps: 'opacity,visibility' }));
@@ -717,6 +778,8 @@ export function revealChars(el: HTMLElement, opts: RevealCharsOptions = {}): Typ
         ease: o.ease,
         stagger: { each: o.stagger, from: o.from },
         paused: o.paused,
+        immediateRender: true,
+        lazy: false,
         onComplete: final,
       },
     );
@@ -803,6 +866,7 @@ export function scramble(el: HTMLElement, opts: ScrambleOptions = {}): TypeMotio
     preempt(el, 'text');
 
     if (prefersReducedMotion()) {
+      unsplit(el);
       ensureVisible(el);
       o.onComplete?.();
       return staticHandle(el, 'text', () => gsap.set(el, { clearProps: 'opacity,visibility' }));

@@ -89,6 +89,16 @@ const COMMON = /* glsl */ `
 
   float ease(float x) { return x * x * (3.0 - 2.0 * x); }
 
+  /* The stage grounds are very dark once they are in linear space (#0e2419 is
+     0.018 at its brightest channel), so anything built by adding a constant to
+     them comes out neutral grey. Normalise the hue and set the level instead —
+     the set pieces then read in the colour of the world they are leaving or
+     arriving at. Raw uFrom/uTo are still used wherever the value has to land
+     exactly on the stage's ground colour. */
+  vec3 lift(vec3 c, float level) {
+    return c / max(max(c.r, max(c.g, c.b)), 0.02) * level;
+  }
+
   /* Premultiplied back-to-front compositing: each call puts c in FRONT. */
   void layer(inout vec4 dst, vec3 c, float a) {
     a = clamp(a, 0.0, 1.0);
@@ -181,9 +191,11 @@ const SHATTER_FRAG = /* glsl */ `
 
     vec4 acc = vec4(0.0);
 
-    /* --- the destination, seen through the gaps and then flooding --- */
-    float veil = smoothstep(0.80, 1.0, p);
-    float pane = 1.0 - smoothstep(0.84, 0.98, p);
+    /* --- the destination, seen through the gaps and then flooding ---
+       Flat destination colour from 0.94 on: the host swaps the stage behind
+       this layer at the top of the range, and the swap has to be invisible. */
+    float veil = smoothstep(0.74, 0.94, p);
+    float pane = 1.0 - smoothstep(0.78, 0.92, p);
 
     float shard = 0.0;
     float tint = 0.0;
@@ -203,7 +215,7 @@ const SHATTER_FRAG = /* glsl */ `
       float lw = clamp(0.0022 * RINGS / max(pr, 0.05), 0.003, 0.055);
 
       float cellR = exp(v.z / RINGS);
-      float delay = clamp(cellR * 0.80, 0.0, 0.58) + v.y * 0.13;
+      float delay = clamp(cellR * 0.55, 0.0, 0.42) + v.y * 0.10;
       float crackP = smoothstep(delay, delay + 0.09, p);
       float fall = smoothstep(delay + 0.08, delay + 0.52, p);
 
@@ -215,22 +227,22 @@ const SHATTER_FRAG = /* glsl */ `
          pieces catch the light the same way. Kept faint — the world has to
          stay legible through the glass until the shards actually leave. */
       float facet = 0.35 * v.y + 0.65 * (1.0 - clamp(v.w, 0.0, 1.0));
-      glass = mix(uFrom * 0.75 + 0.03, vec3(1.0), 0.05 + 0.30 * facet);
+      glass = mix(lift(uFrom, 0.10), vec3(1.0), 0.05 + 0.30 * facet);
       tint = shard * smoothstep(0.03, 0.28, p) * (0.05 + 0.30 * fall);
     }
 
     float gap = (1.0 - shard) * smoothstep(0.16, 0.60, p) * 0.94;
     layer(acc, uTo, max(veil, gap));
     layer(acc, glass, tint);
-    layer(acc, mix(vec3(1.0), uTo, 0.35), crackA * 0.6);
+    layer(acc, mix(vec3(1.0), lift(uTo, 0.9), 0.35), crackA * 0.52);
 
     /* The strike itself: one bloom out of the impact point, early and brief. */
-    float ft = (p - 0.07) / 0.055;
-    float flash = exp(-ft * ft) * smoothstep(0.60, 0.0, length(q));
-    layer(acc, mix(vec3(1.0), uTo, 0.25), flash * 0.55);
+    float ft = (p - 0.10) / 0.05;
+    float flash = exp(-ft * ft) * smoothstep(0.22, 0.0, length(q));
+    layer(acc, mix(vec3(1.0), lift(uTo, 0.8), 0.25), flash * 0.50);
 
     /* --- debris: the same field, magnified and falling --------------- */
-    float dw = smoothstep(0.22, 0.44, p) * (1.0 - smoothstep(0.62, 0.97, p));
+    float dw = smoothstep(0.22, 0.44, p) * (1.0 - smoothstep(0.60, 0.90, p));
     if (dw > 0.002) {
       /* The debris has to arrive already at a different scale from the pane,
          or the two voronoi fields sit on top of each other and read as one
@@ -244,9 +256,9 @@ const SHATTER_FRAG = /* glsl */ `
       float keep = step(0.40, dv.y);
       float body = smoothstep(dlw * 1.2, dlw * 5.0, dv.x) * keep;
       float rim = (1.0 - smoothstep(dlw * 0.7, dlw * 2.4, dv.x)) * keep;
-      vec3 dcol = mix(uFrom * 0.60 + 0.03, vec3(1.0), 0.06 + 0.40 * dv.y);
-      layer(acc, dcol, body * dw * 0.38);
-      layer(acc, mix(vec3(1.0), uTo, 0.22), rim * dw * 0.62);
+      vec3 dcol = mix(lift(uFrom, 0.13), vec3(1.0), 0.06 + 0.40 * dv.y);
+      layer(acc, dcol, body * dw * 0.26);
+      layer(acc, mix(vec3(1.0), lift(uTo, 0.9), 0.22), rim * dw * 0.50);
     }
 
     writeOut(acc);
@@ -292,20 +304,23 @@ const TUNNEL_FRAG = /* glsl */ `
     shade *= 0.93 + 0.07 * sin(uTime * 2.4 + depth * 0.6);
 
     float core = smoothstep(0.46, 0.03, r);
-    vec3 wall = mix(uFrom * 0.90 + 0.045, uTo * 1.30 + 0.07, core) * shade;
-    wall += uTo * core * core * (0.60 + 0.60 * p);
-    wall = mix(wall, uTo, smoothstep(0.72, 1.0, p));
+    vec3 wall = mix(lift(uFrom, 0.14), lift(uTo, 0.50), core) * shade;
+    wall += lift(uTo, 0.70) * core * core * (0.40 + 0.60 * p);
+    wall = mix(wall, uTo, smoothstep(0.70, 0.92, p));
 
     /* The iris: everything outside rInner is corridor, everything inside is
        still the outgoing world. rInner starts off-frame and closes past zero. */
-    float rInner = mix(1.55, -0.06, ease(p));
+    /* Starts a hair beyond the corners so p=0 is empty, then closes on a
+       curve that bites immediately — an iris that does nothing for the first
+       third of the hold is a third of the hold wasted. */
+    float rInner = mix(1.16, -0.06, pow(p, 0.82));
     float a = smoothstep(rInner - 0.13, rInner, r);
     float e = (r - rInner) / 0.055;
-    float rim = exp(-e * e) * (1.0 - smoothstep(0.90, 1.0, p)) * smoothstep(0.0, 0.05, p);
+    float rim = exp(-e * e) * (1.0 - smoothstep(0.82, 0.92, p)) * smoothstep(0.0, 0.05, p);
 
     vec4 acc = vec4(0.0);
     layer(acc, wall, a);
-    layer(acc, mix(uTo, vec3(1.0), 0.25), rim * 0.32);
+    layer(acc, mix(lift(uTo, 0.6), vec3(1.0), 0.30), rim * 0.32);
     writeOut(acc);
   }
 `;
@@ -336,14 +351,14 @@ const WIPE_FRAG = /* glsl */ `
     float th = mix(-0.16, 1.20, p);
     float soft = 0.075;
     float cover = 1.0 - smoothstep(th - soft, th + soft, field);
-    float e = (field - th) / (soft * 1.35);
-    float rim = exp(-e * e) * smoothstep(0.0, 0.05, p) * (1.0 - smoothstep(0.90, 1.0, p));
+    float e = (field - th) / (soft * 0.8);
+    float rim = exp(-e * e) * smoothstep(0.0, 0.05, p) * (1.0 - smoothstep(0.86, 0.96, p));
 
-    vec3 col = mix(uFrom * 0.9, uTo, smoothstep(0.0, 0.75, p));
+    vec3 col = mix(lift(uFrom, 0.08), uTo, smoothstep(0.0, 0.60, p));
 
     vec4 acc = vec4(0.0);
     layer(acc, col, cover);
-    layer(acc, mix(uTo, vec3(1.0), 0.5), rim * 0.80);
+    layer(acc, mix(lift(uTo, 0.7), vec3(1.0), 0.5), rim * 0.62);
     writeOut(acc);
   }
 `;
