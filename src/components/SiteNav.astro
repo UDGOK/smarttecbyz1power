@@ -1,0 +1,146 @@
+---
+/**
+ * Primary navigation for the content routes.
+ *
+ * The cinematic route has its own fixed chrome (Brandmark / ScrollRuler /
+ * PowerBadge) and deliberately does not use this. These are reading pages, so
+ * the nav is a real sticky <header> with a real <nav> landmark, and the current
+ * page is marked with aria-current.
+ *
+ * Below ~700px the link strip scrolls inside itself rather than wrapping into
+ * a second row or pushing the page wider than the viewport.
+ */
+import { company } from '../data/site';
+
+const links = [
+  { href: '/site', label: 'Site 01' },
+  { href: '/power', label: 'Power' },
+  { href: '/colocation', label: 'Colocation' },
+  { href: '/compute', label: 'Compute' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
+] as const;
+
+/** Astro serves /site in dev and /site/ from the directory build. Normalise. */
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+---
+
+<header class="nav">
+  <div class="nav__inner">
+    <a class="nav__brand" href="/" aria-current={path === '/' ? 'page' : undefined}>
+      <svg viewBox="0 0 40 40" width="28" height="28" aria-hidden="true">
+        <circle cx="20" cy="20" r="19" fill="none" stroke="currentColor" stroke-width="1.25" opacity="0.55" />
+        <path d="M12 14h16l-11 12h11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span class="nav__wordmark">
+        {company.name}<span class="nav__parent"> by {company.parent}</span>
+      </span>
+    </a>
+
+    <nav class="nav__nav" aria-label="Primary">
+      <ul class="nav__list">
+        {links.map((l) => (
+          <li>
+            <a
+              class="nav__link"
+              href={l.href}
+              aria-current={path === l.href ? 'page' : undefined}
+            >{l.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-chrome);
+    border-bottom: 1px solid var(--w-10);
+    background: var(--c-land-deep);
+    background: color-mix(in srgb, var(--c-land-deep) 90%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  .nav__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--s-5);
+    width: min(1120px, 100%);
+    margin: 0 auto;
+    padding: var(--s-3) var(--s-4);
+  }
+
+  .nav__brand {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    color: var(--w-95);
+    text-decoration: none;
+    transition: color var(--d-fast);
+  }
+  .nav__brand svg { transition: transform var(--d-fast) var(--e-out); }
+  .nav__brand:hover svg { transform: rotate(-8deg) scale(1.06); }
+
+  .nav__wordmark {
+    font-family: var(--f-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .nav__parent { color: var(--w-45); }
+
+  .nav__nav {
+    flex: 1 1 auto;
+    min-width: 0;
+    /* The strip, not the page, takes the overflow. */
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .nav__nav::-webkit-scrollbar { display: none; }
+
+  .nav__list {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--s-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav__link {
+    display: block;
+    padding: var(--s-2) var(--s-3);
+    border-radius: var(--r-pill);
+    color: var(--w-55);
+    font-family: var(--f-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--ls-mid);
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--d-fast), background var(--d-fast);
+  }
+  .nav__link:hover { color: var(--w-95); background: var(--w-08); }
+  .nav__link[aria-current='page'] {
+    color: var(--c-signal);
+    background: color-mix(in srgb, var(--c-signal) 12%, transparent);
+  }
+
+  @media (max-width: 760px) {
+    .nav__inner { flex-direction: column; align-items: stretch; gap: var(--s-2); }
+    .nav__list { justify-content: flex-start; }
+    /* Bleed the strip to the screen edges so it reads as scrollable. */
+    .nav__nav { margin: 0 calc(var(--s-4) * -1); padding: 0 var(--s-4); }
+  }
+
+  @media (max-width: 400px) {
+    .nav__parent { display: none; }
+  }
+</style>

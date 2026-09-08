@@ -1,0 +1,170 @@
+---
+import Content from '../layouts/Content.astro';
+import { company, site, power, network, compute } from '../data/site';
+---
+
+<Content
+  title={`About ${company.full} — the data center arm of ${company.parent}`}
+  description={`${company.name} is the AI data center business of ${company.parent}. One site today: ${site.acres} owned acres in ${site.name}, behind-the-meter power, no interconnection queue, ${site.powerOn} power-on.`}
+  kicker={`About ${company.name}`}
+  heading={`${company.name} is the data center arm of ${company.parent}.`}
+  lede={`${company.tagline} One company owns the land, the electrical service and the battery cabinets, which is why the schedule on this site is ours to keep rather than somebody else's to grant.`}
+>
+  <section aria-labelledby="what" data-reveal>
+    <p class="eyebrow" aria-hidden="true">01 — What we do</p>
+    <h2 id="what">We build AI data centers starting from the power, not the rendering</h2>
+
+    <div class="split">
+      <div>
+        <p>
+          {company.name} develops and operates AI data center capacity. The company has
+          one site: {site.designation}, {site.acres} acres at {site.address} in
+          {' '}{site.county}, Oklahoma, {site.ownership.toLowerCase()}. Phase 1A is
+          {' '}{compute.systems} in the first of {site.buildings.length} buildings,
+          targeting {site.powerOn}.
+        </p>
+        <p>
+          Most operators start with a site plan and then go looking for electrons. We
+          started from the opposite end. The parcel was bought because a
+          {' '}{power.transformer} service was already energised on it and three buildings
+          were already standing — which is why the company can talk about a fit-out
+          schedule while the industry talks about an interconnection queue of
+          {' '}{power.industryQueue}.
+        </p>
+      </div>
+
+      <dl class="spec">
+        <div><dt>Company</dt><dd>{company.full}</dd></div>
+        <div><dt>Parent</dt><dd>{company.parent}</dd></div>
+        <div><dt>Sites</dt><dd>{site.designation} — {site.name}</dd></div>
+        <div><dt>Land</dt><dd>{site.acres} acres, {site.ownership.toLowerCase()}</dd></div>
+        <div><dt>First capacity</dt><dd>{site.powerOn}</dd></div>
+        <div><dt>Legal entity</dt><dd><span class="todo">[PLACEHOLDER: registered entity name, state of incorporation, and formation date]</span></dd></div>
+        <div><dt>Headquarters</dt><dd><span class="todo">[PLACEHOLDER: corporate office address, if different from the site]</span></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section aria-labelledby="parentage" data-reveal>
+    <p class="eyebrow" aria-hidden="true">02 — {company.parent}</p>
+    <h2 id="parentage">Why the parentage changes the economics</h2>
+
+    <p>
+      {company.parent} builds LFP battery cabinets. {company.name} is its data center
+      business. Storage therefore reaches {site.designation} as
+      {' '}<strong>{power.storage.toLowerCase()}</strong> rather than at an integrator's
+      margin on top of a distributor's margin.
+    </p>
+    <p>
+      That is not a branding point, it is a sizing point. When energy storage costs what
+      it costs to manufacture, the amount of it that makes economic sense on a site goes
+      up, and behind-the-meter storage stops being a resilience line item and starts being
+      part of how the site is powered. Paired with {power.solarPlanned} of planned solar
+      on {site.acres} acres, that is a materially different position from buying the same
+      equipment on the open market.
+    </p>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Land</h3>
+        <p>{site.acres} acres in {site.county}, {site.ownership.toLowerCase()}. No ground lease and no option to exercise.</p>
+      </div>
+      <div class="card">
+        <h3>Power</h3>
+        <p>{power.transformer} at {power.voltage} already on site, {power.headroom.toLowerCase()}, {power.interconnectionQueue.toLowerCase()}.</p>
+      </div>
+      <div class="card">
+        <h3>Storage</h3>
+        <p>{company.parent} LFP cabinets, at manufacturer cost, on our side of the utility meter.</p>
+      </div>
+      <div class="card">
+        <h3>Network</h3>
+        <p>{network.speed} from {network.provider}, on a {network.term.toLowerCase()}.</p>
+      </div>
+    </div>
+
+    <p style="margin-top: var(--s-6);">
+      Detail on the parent company that a counterparty will reasonably ask for —
+      {' '}<span class="todo">[PLACEHOLDER: {company.parent} founding date, ownership structure, manufacturing locations, and product range]</span>
+      {' '}and <span class="todo">[PLACEHOLDER: whether {company.name} is a subsidiary, a division, or a separate entity under common ownership]</span>.
+    </p>
+  </section>
+
+  <section aria-labelledby="how" data-reveal>
+    <p class="eyebrow" aria-hidden="true">03 — How we publish</p>
+    <h2 id="how">Two rules about what appears on this site</h2>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Real photographs or nothing</h3>
+        <p>
+          Every image on this site is a photograph of this site. Where a photograph has
+          not been taken yet, you get an empty frame that says so and describes what
+          belongs there. No stock library, no rendered hall, no borrowed data center
+          interior. It costs us some polish and it saves you a site visit that turns into
+          a disappointment.
+        </p>
+      </div>
+      <div class="card">
+        <h3>No invented numbers</h3>
+        <p>
+          Every figure on these pages comes from the owner-confirmed site record, or is
+          arithmetic on figures from it with the working shown. Anything we do not know —
+          a rack density, a PUE, a price, an SLA — is printed as a visible placeholder
+          instead of a plausible number. There are a lot of them, and that is the point.
+        </p>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top: var(--s-6);">
+      <p>
+        If a competing proposal quotes you a PUE, a tier and a price for a site that has
+        not been energised, ask which of those three is measured. We would rather show
+        you our gaps now than defend them at contract.
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="people" data-reveal>
+    <p class="eyebrow" aria-hidden="true">04 — People</p>
+    <h2 id="people">Who you would be dealing with</h2>
+
+    <p>
+      <span class="todo">[PLACEHOLDER: leadership — names, roles, and relevant operating background, for {company.name} and for {company.parent}]</span>
+    </p>
+    <p>
+      <span class="todo">[PLACEHOLDER: who is on site at {site.name}, and whether the site is staffed during construction and after power-on]</span>
+    </p>
+
+    <figure class="photo">
+      <div class="photo__frame">
+        <svg class="photo__icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <rect x="2.5" y="6" width="19" height="14" rx="2" />
+          <circle cx="12" cy="13" r="3.5" />
+          <path d="M8.5 6l1.4-2.2h4.2L15.5 6" />
+          <path d="M3 3l18 18" />
+        </svg>
+        <p class="photo__state">Photograph not taken yet</p>
+      </div>
+      <figcaption>
+        <b>[PHOTO NEEDED]</b> The team on the parcel, and the {company.parent}
+        manufacturing floor where the LFP cabinets are built. Both are real places that
+        can be photographed; neither has been photographed for this site yet.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="talk" data-reveal>
+    <p class="eyebrow" aria-hidden="true">05 — Next</p>
+    <h2 id="talk">Come and look at it</h2>
+    <p>
+      The site is at {site.address}. If you are evaluating capacity for
+      {' '}{site.powerOn} or later, the fastest way to test everything on these pages is
+      to stand on the parcel and look at the transformer.
+    </p>
+    <div class="actions">
+      <a class="btn" href="/contact">Get in touch</a>
+      <a class="btn btn--ghost" href="/site">See {site.designation}</a>
+    </div>
+  </section>
+</Content>

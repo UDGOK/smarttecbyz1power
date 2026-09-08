@@ -1,0 +1,278 @@
+---
+import Content from '../layouts/Content.astro';
+import { company, site, power } from '../data/site';
+
+/* Derived from the published figures rather than retyped, so the arithmetic can
+   never drift from the site record. */
+const drawKw = Number(power.phase1aDraw.replace(/[^\d.]/g, ''));
+const rateUsd = Number(power.rate.replace(/[^\d.]/g, ''));
+const annualKwh = drawKw * 8760;
+const annualCost = Math.round(annualKwh * rateUsd);
+---
+
+<Content
+  title={`Power — behind the meter, no interconnection queue | ${company.full}`}
+  description={`The industry interconnection queue runs ${power.industryQueue}. ${site.designation} never joined it: a ${power.transformer} service already on site at ${power.rate}, ${power.headroom}, plus ${power.solarPlanned} of solar and ${company.parent} LFP storage behind the meter.`}
+  kicker="The power story"
+  heading="Everyone else is in a queue. We never joined it."
+  lede={`The average interconnection queue runs ${power.industryQueue}. GPUs stopped being the constraint some time ago; energised capacity is the constraint. ${site.designation} has a ${power.transformer} service standing on owned land, with ${power.headroom.toLowerCase()}.`}
+>
+  <section aria-labelledby="queue" data-reveal>
+    <p class="eyebrow" aria-hidden="true">01 — The problem</p>
+    <h2 id="queue">The queue is the whole industry's problem</h2>
+
+    <div class="split">
+      <div>
+        <p>
+          A greenfield AI data center has to ask a utility for load. That request becomes
+          a study: feasibility, system impact, facilities. Behind it sits a queue of
+          generation and load requests on the same transmission system, and the position
+          you take in that queue is the position you keep. The industry average runs
+          {' '}<strong>{power.industryQueue}</strong>.
+        </p>
+        <p>
+          Nothing about that timeline is fixed by having capital, having GPUs, or having
+          a signed tenant. You can hold a purchase order for accelerators that ship in
+          months and still be four years from energising them. That is the gap the market
+          is currently paying a premium to close.
+        </p>
+      </div>
+
+      <div class="callout is-warning">
+        <p style="margin:0;">
+          <strong>Interconnection queue, industry average</strong>
+        </p>
+        <p style="margin:0; font-family: var(--f-display); font-size: clamp(2.4rem, 1.6rem + 3vw, 3.6rem); line-height:1;">
+          {power.industryQueue}
+        </p>
+        <p style="margin:0;">
+          Time from filing a request to energised service. This is the number every other
+          site on your shortlist is quietly working around.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="btm" data-reveal>
+    <p class="eyebrow" aria-hidden="true">02 — Behind the meter</p>
+    <h2 id="btm">Why {site.designation} is not in it</h2>
+
+    <p>
+      Two separate things put a project in a queue, and this site avoids both.
+    </p>
+
+    <div class="cards">
+      <div class="card">
+        <h3>No new load request</h3>
+        <p>
+          The {power.transformer} service at {power.voltage} is already on the parcel and
+          already energised. Phase 1A draws {power.phase1aDraw} against it —
+          {' '}{power.phase1aUtilisation}. There is no new large-load application to file,
+          so there is no study queue to enter.
+        </p>
+      </div>
+      <div class="card">
+        <h3>No generator interconnection</h3>
+        <p>
+          The planned {power.solarPlanned} of solar and the {company.parent} storage sit
+          on our side of the utility meter and serve on-site load. Behind-the-meter
+          generation that does not export is not a generator interconnection request. It
+          is a load reduction.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Queue position</h3>
+        <p>
+          {power.interconnectionQueue}. Not "expedited", not "advanced" — absent, because
+          the application that would create one was never required.
+        </p>
+      </div>
+    </div>
+
+    <div class="callout" style="margin-top: var(--s-6);">
+      <p>
+        <strong>The one sentence that matters.</strong> Every competing site is selling you
+        a date it has to be granted by somebody else. {site.designation} is selling you a
+        fit-out schedule inside a building that already has power on it, targeting
+        {' '}{site.powerOn}.
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="service" data-reveal>
+    <p class="eyebrow" aria-hidden="true">03 — The service</p>
+    <h2 id="service">What is standing on the parcel</h2>
+
+    <dl class="spec">
+      <div><dt>Transformer</dt><dd>{power.transformer}<span class="note">On site, energised.</span></dd></div>
+      <div><dt>Distribution</dt><dd>{power.voltage}</dd></div>
+      <div><dt>Energy rate</dt><dd>{power.rate}<span class="note">The published rate for the site. Tenant pass-through terms are on the colocation page.</span></dd></div>
+      <div><dt>Phase 1A draw</dt><dd>{power.phase1aDraw} IT load</dd></div>
+      <div><dt>Service utilisation at Phase 1A</dt><dd>{power.phase1aUtilisation}</dd></div>
+      <div><dt>Headroom</dt><dd>{power.headroom}</dd></div>
+      <div><dt>Interconnection queue</dt><dd>{power.interconnectionQueue}</dd></div>
+      <div><dt>Utility of record</dt><dd><span class="todo">[PLACEHOLDER: serving utility / cooperative name and account status]</span></dd></div>
+    </dl>
+
+    <p style="margin-top: var(--s-6);">
+      The headroom figure is the one to hold onto. Phase 1A consumes roughly a twentieth
+      of what is already installed. A tenant growing from a few racks to a few hundred
+      kilowatts does not trigger a utility upgrade, a new study, or a new date — it
+      consumes capacity that is already sitting there.
+    </p>
+
+    <figure class="photo" style="margin-top: var(--s-6);">
+      <div class="photo__frame">
+        <svg class="photo__icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <rect x="2.5" y="6" width="19" height="14" rx="2" />
+          <circle cx="12" cy="13" r="3.5" />
+          <path d="M8.5 6l1.4-2.2h4.2L15.5 6" />
+          <path d="M3 3l18 18" />
+        </svg>
+        <p class="photo__state">Photograph not taken yet</p>
+      </div>
+      <figcaption>
+        <b>[PHOTO NEEDED]</b> The {power.transformer} transformer on its pad, and the
+        service entrance into Building 1. For a buyer evaluating this page, this is the
+        single most load-bearing photograph on the whole site — it is the proof that the
+        power claim is not a plan.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="solar" data-reveal>
+    <p class="eyebrow" aria-hidden="true">04 — Generation and storage</p>
+    <h2 id="solar">Solar and storage, on our side of the meter</h2>
+
+    <div class="split">
+      <div>
+        <p>
+          {power.solarPlanned} of solar is planned on the parcel — there is no shortage of
+          land for it on {site.acres} acres. Paired with it, {power.storage.toLowerCase()}.
+        </p>
+        <p>
+          The storage is the part most operators cannot replicate cheaply. {company.parent}
+          builds LFP cabinets; {company.name} is the data center arm of the same company.
+          Storage lands on this site at manufacturer cost rather than at a system
+          integrator's margin, which changes what is economically sensible to install.
+        </p>
+        <p>
+          Behind the meter, that combination does three jobs: it shaves what the site
+          draws through the utility service during the day, it holds energy for the hours
+          it is worth more, and it puts real stored energy behind the load without an
+          export arrangement or a queue position.
+        </p>
+      </div>
+
+      <dl class="figures">
+        <div>
+          <dt>Solar, planned</dt>
+          <dd class="is-gold">{power.solarPlanned}<span class="sub">On the parcel, behind the meter</span></dd>
+        </div>
+        <div>
+          <dt>Storage</dt>
+          <dd>LFP<span class="sub">{power.storage}</span></dd>
+        </div>
+        <div>
+          <dt>Export to grid</dt>
+          <dd>None<span class="sub">Serves on-site load, so no generator interconnection request</span></dd>
+        </div>
+      </dl>
+    </div>
+
+    <p style="margin-top: var(--s-6);">
+      Sizing detail a buyer will want before modelling anything —
+      {' '}<span class="todo">[PLACEHOLDER: battery cabinet count, usable kWh, C-rate and expected daily cycles]</span>,
+      {' '}<span class="todo">[PLACEHOLDER: solar array configuration, tilt, expected annual yield in MWh]</span>,
+      and <span class="todo">[PLACEHOLDER: construction and commissioning dates for the solar array and the battery plant]</span>.
+    </p>
+  </section>
+
+  <section aria-labelledby="economics" data-reveal>
+    <p class="eyebrow" aria-hidden="true">05 — Economics</p>
+    <h2 id="economics">What the power actually costs</h2>
+
+    <p>
+      One published rate, {power.rate}, and one worked example so you can check our
+      arithmetic rather than take a "competitive rates" claim on trust.
+    </p>
+
+    <div class="scroller" tabindex="0" role="region" aria-label="Phase 1A energy arithmetic, scrollable">
+      <table>
+        <caption>Phase 1A energy, worked from published figures</caption>
+        <thead>
+          <tr>
+            <th scope="col">Line</th>
+            <th scope="col">Figure</th>
+            <th scope="col">Where it comes from</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">IT load</th>
+            <td class="num">{power.phase1aDraw}</td>
+            <td>Published Phase 1A draw</td>
+          </tr>
+          <tr>
+            <th scope="row">Hours in a year</th>
+            <td class="num">8,760</td>
+            <td>Continuous operation, 100% utilisation</td>
+          </tr>
+          <tr>
+            <th scope="row">Annual energy</th>
+            <td class="num">{annualKwh.toLocaleString()} kWh</td>
+            <td>Load × hours</td>
+          </tr>
+          <tr>
+            <th scope="row">Energy rate</th>
+            <td class="num">{power.rate}</td>
+            <td>Published site rate</td>
+          </tr>
+          <tr>
+            <th scope="row">Annual energy cost</th>
+            <td class="num">≈ ${annualCost.toLocaleString()}</td>
+            <td>Energy × rate. IT load only.</td>
+          </tr>
+          <tr>
+            <th scope="row">Cooling and facility overhead</th>
+            <td class="num"><span class="todo">[PLACEHOLDER: measured PUE]</span></td>
+            <td>Not modelled here. Direct-to-chip liquid cooling changes this materially; we will publish a measured number, not a design number.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top: var(--s-5);">
+      This is arithmetic on two published numbers at full utilisation, for IT load only.
+      It is not a quote, it is not a tenant price, and it does not include cooling
+      overhead, network, or space. Tenant commercial terms are on the
+      {' '}<a href="/colocation">colocation page</a>.
+    </p>
+  </section>
+
+  <section aria-labelledby="unclaimed" data-reveal>
+    <p class="eyebrow" aria-hidden="true">06 — Not yet claimed</p>
+    <h2 id="unclaimed">What we are not claiming about resilience</h2>
+
+    <p>
+      A behind-the-meter position solves schedule. It does not by itself make a claim
+      about uptime, and we are not going to imply one. Every item below is a question a
+      serious tenant asks in the first meeting, and every one of them is open.
+    </p>
+
+    <ul class="bullets">
+      <li><span class="todo">[PLACEHOLDER: UPS topology and ride-through duration for the IT load]</span></li>
+      <li><span class="todo">[PLACEHOLDER: standby generation — whether any is installed, fuel type, run time]</span></li>
+      <li><span class="todo">[PLACEHOLDER: electrical redundancy — N, N+1, or 2N, at the distribution and UPS levels]</span></li>
+      <li><span class="todo">[PLACEHOLDER: whether the site targets a formal resilience classification, and which]</span></li>
+      <li><span class="todo">[PLACEHOLDER: switchgear arrangement and single points of failure between the transformer and the racks]</span></li>
+      <li><span class="todo">[PLACEHOLDER: uptime SLA offered to tenants, and the service credit schedule behind it]</span></li>
+      <li><span class="todo">[PLACEHOLDER: maintenance windows and how they are notified]</span></li>
+    </ul>
+
+    <div class="actions">
+      <a class="btn" href="/colocation">Colocation terms</a>
+      <a class="btn btn--ghost" href="/site">See the site</a>
+    </div>
+  </section>
+</Content>

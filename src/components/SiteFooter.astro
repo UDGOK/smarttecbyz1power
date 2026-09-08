@@ -1,0 +1,175 @@
+---
+/**
+ * Footer for the content routes. Repeats the primary navigation as a real link
+ * list (the sticky strip scrolls on small screens, so this is the reliable
+ * copy), plus the site address and the two facts a buyer scanning the page
+ * bottom is actually looking for: where it is and when it turns on.
+ */
+import { company, site, power } from '../data/site';
+
+const year = new Date().getFullYear();
+
+const groups = [
+  {
+    heading: 'The site',
+    links: [
+      { href: '/site', label: 'Site 01 — Mead, Oklahoma' },
+      { href: '/power', label: 'Power' },
+    ],
+  },
+  {
+    heading: 'What you can buy',
+    links: [
+      { href: '/colocation', label: 'Colocation' },
+      { href: '/compute', label: 'GPU capacity' },
+    ],
+  },
+  {
+    heading: 'Company',
+    links: [
+      { href: '/about', label: `About ${company.name}` },
+      { href: '/contact', label: 'Contact' },
+    ],
+  },
+] as const;
+---
+
+<footer class="foot">
+  <div class="foot__inner">
+    <div class="foot__lead">
+      <p class="foot__mark">
+        <a href="/">{company.full}</a>
+      </p>
+      <p class="foot__line">{company.tagline}</p>
+      <address class="foot__address">
+        {site.designation} · {site.address}<br />
+        {site.county}, {site.acres} acres, {site.ownership.toLowerCase()}
+      </address>
+      <p class="foot__status mono-label">
+        <span class="foot__dot" aria-hidden="true"></span>
+        Interconnection queue: {power.interconnectionQueue} · Power-on {site.powerOn}
+      </p>
+    </div>
+
+    <nav class="foot__nav" aria-label="Footer">
+      {groups.map((g) => (
+        <div class="foot__group">
+          <h2 class="foot__heading mono-label">{g.heading}</h2>
+          <ul class="foot__list">
+            {g.links.map((l) => (
+              <li><a class="foot__link" href={l.href}>{l.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </nav>
+  </div>
+
+  <div class="foot__rule">
+    <p class="foot__fine">© {year} {company.full}. {company.domain}</p>
+    <p class="foot__fine">
+      Figures on this site are the owner-confirmed site record. Anything not yet
+      confirmed is shown as a visible placeholder rather than an estimate.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    border-top: 1px solid var(--w-10);
+    margin-top: var(--s-9);
+    padding: var(--s-8) var(--s-4) var(--s-6);
+    background: var(--c-land-deep);
+    background: color-mix(in srgb, var(--c-land-deep) 62%, var(--c-carbon));
+  }
+
+  .foot__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.6fr);
+    gap: var(--s-8) var(--s-6);
+    width: min(1120px, 100%);
+    margin: 0 auto;
+  }
+
+  .foot__mark {
+    margin: 0 0 var(--s-3);
+    font-family: var(--f-display);
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+  .foot__mark a { color: var(--w-95); text-decoration: none; }
+  .foot__mark a:hover { color: var(--c-signal); }
+
+  .foot__line { margin: 0 0 var(--s-4); color: var(--w-55); max-width: 32ch; }
+
+  .foot__address {
+    margin: 0 0 var(--s-4);
+    font-style: normal;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--w-70);
+  }
+
+  .foot__status {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin: 0;
+    color: var(--w-70);
+    line-height: 1.6;
+  }
+  .foot__dot {
+    flex: 0 0 auto;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c-signal);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-signal) 18%, transparent);
+  }
+
+  .foot__nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--s-6) var(--s-5);
+  }
+
+  .foot__heading {
+    margin: 0 0 var(--s-4);
+    color: var(--w-45);
+    font-weight: 400;
+  }
+
+  .foot__list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--s-3); }
+
+  .foot__link {
+    color: var(--w-85);
+    font-size: 14px;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color var(--d-fast), border-color var(--d-fast);
+  }
+  .foot__link:hover { color: var(--c-signal); border-bottom-color: currentColor; }
+
+  .foot__rule {
+    width: min(1120px, 100%);
+    margin: var(--s-8) auto 0;
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--w-10);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3) var(--s-6);
+    justify-content: space-between;
+  }
+  .foot__fine {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--w-45);
+  }
+
+  @media (max-width: 780px) {
+    .foot__inner { grid-template-columns: minmax(0, 1fr); gap: var(--s-7); }
+  }
+</style>

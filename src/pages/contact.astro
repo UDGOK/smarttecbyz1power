@@ -1,0 +1,269 @@
+---
+import Content from '../layouts/Content.astro';
+import { company, site, power, compute } from '../data/site';
+---
+
+<Content
+  title={`Reserve capacity at ${site.designation} | ${company.full}`}
+  description={`Talk to ${company.full} about colocation or GPU capacity at ${site.name}. ${power.headroom} behind the meter, ${site.powerOn} power-on, and no interconnection queue in front of you.`}
+  kicker="Contact"
+  heading="Reserve capacity before Phase 1A fills."
+  lede={`Phase 1A is one building and ${compute.rentable} rentable GPUs. Tell us the load in kilowatts and the date you need it live, and you will get an answer about real capacity rather than a place on a waiting list.`}
+>
+  <section aria-labelledby="form-heading" data-reveal>
+    <p class="eyebrow" aria-hidden="true">01 — Tell us what you need</p>
+    <h2 id="form-heading">Capacity enquiry</h2>
+
+    <p class="form-note">
+      <span class="todo">[PLACEHOLDER: form endpoint — this form posts to /api/reserve, which is not implemented yet. Wire it to the CRM or mail relay before launch.]</span>
+    </p>
+
+    <form class="form" method="post" action="/api/reserve">
+      <fieldset class="form__set">
+        <legend class="form__legend">You</legend>
+
+        <div class="form__grid">
+          <p class="field">
+            <label class="field__label" for="name">Full name <span class="field__req" aria-hidden="true">*</span></label>
+            <input class="field__input" id="name" name="name" type="text" autocomplete="name" required />
+          </p>
+
+          <p class="field">
+            <label class="field__label" for="org">Company <span class="field__req" aria-hidden="true">*</span></label>
+            <input class="field__input" id="org" name="company" type="text" autocomplete="organization" required />
+          </p>
+
+          <p class="field">
+            <label class="field__label" for="email">Work email <span class="field__req" aria-hidden="true">*</span></label>
+            <input
+              class="field__input"
+              id="email"
+              name="email"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              aria-describedby="email-hint"
+              required
+            />
+            <span class="field__hint" id="email-hint">We reply from a person, not a sequence.</span>
+          </p>
+
+          <p class="field">
+            <label class="field__label" for="phone">Phone</label>
+            <input class="field__input" id="phone" name="phone" type="tel" autocomplete="tel" />
+          </p>
+        </div>
+      </fieldset>
+
+      <fieldset class="form__set">
+        <legend class="form__legend">The deployment</legend>
+
+        <div class="form__grid">
+          <p class="field">
+            <label class="field__label" for="offering">What you are looking for <span class="field__req" aria-hidden="true">*</span></label>
+            <select class="field__input" id="offering" name="offering" required>
+              <option value="">Choose one</option>
+              <option value="colocation">Colocation — I bring the hardware</option>
+              <option value="gpu-capacity">GPU capacity — I rent yours</option>
+              <option value="whole-building">A whole building</option>
+              <option value="unsure">Not sure yet</option>
+            </select>
+          </p>
+
+          <p class="field">
+            <label class="field__label" for="load">Load required, in kW <span class="field__req" aria-hidden="true">*</span></label>
+            <input
+              class="field__input"
+              id="load"
+              name="load_kw"
+              type="number"
+              min="1"
+              step="1"
+              inputmode="numeric"
+              aria-describedby="load-hint"
+              required
+            />
+            <span class="field__hint" id="load-hint">
+              IT load, not floor area. Phase 1A itself is {compute.load}. If you only know
+              a GPU count, put the count in the notes instead.
+            </span>
+          </p>
+
+          <p class="field">
+            <label class="field__label" for="live">Target live date</label>
+            <input class="field__input" id="live" name="live_date" type="month" aria-describedby="live-hint" />
+            <span class="field__hint" id="live-hint">Site power-on target is {site.powerOn}.</span>
+          </p>
+
+          <p class="field">
+            <label class="field__label" for="cooling">Cooling requirement</label>
+            <select class="field__input" id="cooling" name="cooling">
+              <option value="">Choose one</option>
+              <option value="liquid">Direct-to-chip liquid</option>
+              <option value="air">Air cooled</option>
+              <option value="mixed">Both — dense racks plus air-cooled support kit</option>
+              <option value="unsure">Not sure yet</option>
+            </select>
+          </p>
+        </div>
+
+        <p class="field field--wide">
+          <label class="field__label" for="notes">Anything else we should know</label>
+          <textarea
+            class="field__input field__input--area"
+            id="notes"
+            name="notes"
+            rows="5"
+            aria-describedby="notes-hint"></textarea>
+          <span class="field__hint" id="notes-hint">
+            Workload shape, GPU count, compliance gates, and the diligence items you need
+            answered before you can sign. The open items on these pages are open on
+            purpose — asking about them is the fastest route to a real answer.
+          </span>
+        </p>
+      </fieldset>
+
+      <div class="form__actions">
+        <button class="btn" type="submit">Send enquiry</button>
+        <span class="form__req-note">Fields marked * are required.</span>
+      </div>
+    </form>
+  </section>
+
+  <section aria-labelledby="direct" data-reveal>
+    <p class="eyebrow" aria-hidden="true">02 — Direct</p>
+    <h2 id="direct">Other ways to reach us</h2>
+
+    <div class="split">
+      <dl class="spec">
+        <div><dt>Email</dt><dd><span class="todo">[PLACEHOLDER: sales email address]</span></dd></div>
+        <div><dt>Phone</dt><dd><span class="todo">[PLACEHOLDER: phone number and hours it is answered]</span></dd></div>
+        <div>
+          <dt>Site address</dt>
+          <dd>
+            <address class="addr">
+              {company.full}<br />
+              {site.designation}<br />
+              {site.address}<br />
+              {site.county}, Oklahoma
+            </address>
+          </dd>
+        </div>
+        <div><dt>Site visits</dt><dd>Arranged individually. <span class="todo">[PLACEHOLDER: notice required for a site visit, and who escorts]</span></dd></div>
+        <div><dt>Response time</dt><dd><span class="todo">[PLACEHOLDER: committed response time for enquiries]</span></dd></div>
+      </dl>
+
+      <div class="stack">
+        <div class="callout">
+          <p>
+            <strong>The short version, if you are comparing sites.</strong> The industry
+            interconnection queue runs {power.industryQueue}. {site.designation} never
+            entered it, because the {power.transformer} service is already energised on
+            land we own and the generation sits behind the meter. Phase 1A uses
+            {' '}{power.phase1aUtilisation} of it.
+          </p>
+        </div>
+
+        <div>
+          <h3>What happens after you send this</h3>
+          <ol class="bullets">
+            <li>We read it. A person, usually the same day the enquiry lands.</li>
+            <li>We tell you what is genuinely available at {site.designation} for your load and your date — including if the answer is no.</li>
+            <li>We answer the open items on these pages that are gates for you, in writing.</li>
+            <li>Site visit at {site.name}, if the numbers survive step two.</li>
+          </ol>
+          <p class="fineprint">
+            Step 1 timing above is our intent, not a contractual commitment — see the
+            response-time placeholder opposite.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Content>
+
+<style>
+  .form-note { margin-bottom: var(--s-5); }
+
+  .form { display: grid; gap: var(--s-6); max-width: 780px; }
+
+  .form__set {
+    margin: 0;
+    padding: var(--s-5);
+    border: 1px solid var(--w-10);
+    border-radius: var(--r-card);
+    background: var(--w-04);
+  }
+
+  .form__legend {
+    padding: 0 var(--s-2);
+    margin-left: calc(var(--s-2) * -1);
+    font-family: var(--f-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-70);
+  }
+
+  .form__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: var(--s-5) var(--s-4);
+  }
+
+  .field { display: grid; gap: var(--s-2); margin: 0; min-width: 0; }
+  .field--wide { margin-top: var(--s-5); }
+
+  .field__label {
+    font-family: var(--f-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--ls-mid);
+    text-transform: uppercase;
+    color: var(--w-70);
+  }
+  .field__req { color: var(--c-gold); }
+
+  .field__input {
+    width: 100%;
+    min-width: 0;
+    padding: 11px 13px;
+    border: 1px solid var(--w-25);
+    border-radius: var(--r-sm);
+    background: var(--w-08);
+    color: var(--w-95);
+    font-family: var(--f-sans);
+    font-size: var(--t-read);
+    line-height: 1.4;
+    transition: border-color var(--d-fast), background var(--d-fast);
+  }
+  .field__input:hover { border-color: var(--w-45); }
+  .field__input:focus { border-color: var(--c-signal); background: var(--w-10); }
+  .field__input--area { resize: vertical; min-height: 7em; font-family: var(--f-sans); }
+
+  /* The native select popup is drawn by the OS, so its options need a colour
+     that survives being rendered on a light system menu. */
+  .field__input option { color: var(--c-carbon); background: var(--c-white); }
+
+  .field__hint {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--w-55);
+  }
+
+  .form__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-5);
+  }
+  .form__req-note {
+    font-family: var(--f-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--ls-mid);
+    color: var(--w-45);
+  }
+
+  .addr { font-style: normal; line-height: 1.7; }
+
+  .fineprint { font-size: 13px; color: var(--w-45); }
+</style>

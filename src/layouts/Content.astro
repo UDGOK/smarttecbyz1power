@@ -1,0 +1,472 @@
+---
+/**
+ * The reading shell.
+ *
+ * Base.astro owns the document; this owns the page. Content routes never pass
+ * `experience` — they scroll normally, render server-side, and carry no WebGL,
+ * no audio and no loader. The only motion is a single quiet reveal, gated on
+ * IntersectionObserver and skipped entirely under prefers-reduced-motion.
+ *
+ * The typographic primitives below are `is:global` because they style slotted
+ * page content, which Astro's scoping cannot reach. Every rule is descended
+ * from `.doc` so nothing leaks onto the cinematic route.
+ */
+import Base from './Base.astro';
+import SiteNav from '../components/SiteNav.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Small mono line above the h1 — where you are, not what this is. */
+  kicker: string;
+  /** The single h1 for the page. */
+  heading: string;
+  /** One paragraph. The argument, not a summary. */
+  lede: string;
+}
+
+const { title, description, kicker, heading, lede } = Astro.props;
+---
+
+<Base title={title} description={description}>
+  <script is:inline>
+    /* Runs before the page paints so revealed sections never flash in and out.
+       No observer support, or reduced motion, means no class and no hiding. */
+    (function () {
+      if (!('IntersectionObserver' in window)) return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      var root = document.documentElement;
+      root.classList.add('reveal-on');
+      var io = new IntersectionObserver(function (entries) {
+        for (var i = 0; i < entries.length; i++) {
+          if (entries[i].isIntersecting) {
+            entries[i].target.classList.add('is-in');
+            io.unobserve(entries[i].target);
+          }
+        }
+      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.04 });
+      var start = function () {
+        var els = document.querySelectorAll('[data-reveal]');
+        for (var i = 0; i < els.length; i++) io.observe(els[i]);
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start);
+      } else {
+        start();
+      }
+    })();
+  </script>
+
+  <SiteNav />
+
+  <main class="doc" id="main">
+    <header class="doc__head">
+      <p class="doc__kicker mono-label">{kicker}</p>
+      <h1 class="doc__title">{heading}</h1>
+      <p class="doc__lede">{lede}</p>
+    </header>
+
+    <slot />
+  </main>
+
+  <SiteFooter />
+</Base>
+
+<style is:global>
+  /* ============================================================
+     Reading-page primitives. All descended from .doc.
+     ============================================================ */
+
+  .doc {
+    --doc-w: 1120px;
+    --doc-read: 68ch;
+    --t-page-title: clamp(2.1rem, 1.15rem + 3.6vw, 4.1rem);
+    --t-h2: clamp(1.5rem, 1.15rem + 1.4vw, 2.3rem);
+    --t-h3: clamp(1.05rem, 0.98rem + 0.35vw, 1.2rem);
+
+    width: min(var(--doc-w), 100%);
+    margin: 0 auto;
+    padding: 0 var(--s-4);
+  }
+
+  /* ---- Page header ---- */
+  .doc__head {
+    padding: clamp(var(--s-8), 8vw, var(--s-9)) 0 var(--s-7);
+    border-bottom: 1px solid var(--w-10);
+  }
+  .doc__kicker { margin: 0 0 var(--s-5); }
+  .doc__title {
+    margin: 0 0 var(--s-5);
+    max-width: 18ch;
+    font-family: var(--f-display);
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-size: var(--t-page-title);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--w-95);
+    text-wrap: balance;
+  }
+  .doc__lede {
+    margin: 0;
+    max-width: 56ch;
+    font-size: var(--t-lede);
+    line-height: 1.5;
+    color: var(--w-70);
+    text-wrap: pretty;
+  }
+
+  /* ---- Sections ---- */
+  .doc section {
+    padding: clamp(var(--s-7), 7vw, var(--s-9)) 0;
+    border-bottom: 1px solid var(--w-10);
+  }
+  .doc section:last-of-type { border-bottom: 0; }
+
+  .doc h2 {
+    margin: 0 0 var(--s-5);
+    max-width: 24ch;
+    font-family: var(--f-display);
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-size: var(--t-h2);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    color: var(--w-95);
+    text-wrap: balance;
+  }
+
+  .doc h3 {
+    margin: 0 0 var(--s-3);
+    font-family: var(--f-sans);
+    font-size: var(--t-h3);
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--w-95);
+  }
+
+  .doc h4 {
+    margin: 0 0 var(--s-2);
+    font-family: var(--f-mono);
+    font-size: var(--t-label);
+    font-weight: 400;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-45);
+  }
+
+  .doc p, .doc li { color: var(--w-85); line-height: 1.65; text-wrap: pretty; }
+  .doc p { margin: 0 0 var(--s-4); max-width: var(--doc-read); }
+  .doc p:last-child { margin-bottom: 0; }
+
+  .doc a:not([class]) {
+    color: var(--c-signal);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in srgb, var(--c-signal) 45%, transparent);
+  }
+  .doc a:not([class]):hover { text-decoration-color: currentColor; }
+
+  /* Section index label, e.g. "01 — The land" */
+  .doc .eyebrow {
+    display: flex;
+    align-items: baseline;
+    gap: var(--s-3);
+    margin: 0 0 var(--s-4);
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-45);
+  }
+  .doc .eyebrow::after {
+    content: '';
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--w-10);
+  }
+
+  /* ---- Body lists ---- */
+  .doc ul.bullets, .doc ol.bullets {
+    margin: 0 0 var(--s-4);
+    padding-left: 1.1em;
+    max-width: var(--doc-read);
+    display: grid;
+    gap: var(--s-3);
+  }
+  .doc ul.bullets { list-style: none; padding-left: 0; }
+  .doc ul.bullets > li { position: relative; padding-left: 1.4em; }
+  .doc ul.bullets > li::before {
+    content: '';
+    position: absolute;
+    left: 0.2em;
+    top: 0.62em;
+    width: 6px;
+    height: 1px;
+    background: var(--c-signal);
+  }
+
+  /* ---- Spec list: the dt/dd rhythm the homepage fallback uses ---- */
+  .doc .spec { display: grid; gap: 0; margin: 0; }
+  .doc .spec > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-4);
+    padding: var(--s-3) 0;
+    border-top: 1px solid var(--w-10);
+  }
+  .doc .spec > div:last-child { border-bottom: 1px solid var(--w-10); }
+  .doc .spec dt {
+    flex: 0 0 13rem;
+    font-family: var(--f-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-45);
+    line-height: 1.7;
+  }
+  .doc .spec dd {
+    flex: 1 1 16rem;
+    min-width: 0;
+    margin: 0;
+    color: var(--w-90);
+  }
+  .doc .spec dd .note { display: block; margin-top: 2px; font-size: 13px; color: var(--w-45); }
+
+  @media (max-width: 560px) {
+    .doc .spec dt { flex-basis: 100%; }
+  }
+
+  /* ---- Number blocks ---- */
+  .doc .figures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+    gap: 1px;
+    margin: 0;
+    background: var(--w-10);
+    border: 1px solid var(--w-10);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .doc .figures > div {
+    min-width: 0;
+    padding: var(--s-5);
+    background: var(--c-land-deep);
+  }
+  .doc .figures dt {
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-45);
+  }
+  .doc .figures dd {
+    margin: var(--s-2) 0 0;
+    font-family: var(--f-display);
+    font-optical-sizing: auto;
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2.1rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: var(--w-95);
+    overflow-wrap: anywhere;
+  }
+  .doc .figures dd .sub {
+    display: block;
+    margin-top: var(--s-2);
+    font-family: var(--f-sans);
+    font-size: 13px;
+    line-height: 1.5;
+    letter-spacing: 0;
+    color: var(--w-55);
+  }
+  .doc .figures dd.is-signal { color: var(--c-signal); }
+  .doc .figures dd.is-gold { color: var(--c-gold); }
+
+  /* ---- Cards ---- */
+  .doc .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+    gap: var(--s-4);
+  }
+  .doc .card {
+    min-width: 0;
+    padding: var(--s-5);
+    border: 1px solid var(--w-10);
+    border-radius: var(--r-card);
+    background: var(--w-04);
+  }
+  .doc .card > :last-child { margin-bottom: 0; }
+  .doc .card__tag { margin: 0 0 var(--s-2); color: var(--w-45); }
+  .doc .card p { font-size: 14px; color: var(--w-70); }
+
+  /* ---- Callout: the one argument that carries the site ---- */
+  .doc .callout {
+    display: grid;
+    gap: var(--s-4);
+    padding: var(--s-6);
+    border: 1px solid color-mix(in srgb, var(--c-signal) 30%, transparent);
+    border-left-width: 3px;
+    border-radius: var(--r-card);
+    background: color-mix(in srgb, var(--c-signal) 7%, transparent);
+  }
+  .doc .callout p { max-width: 62ch; color: var(--w-90); }
+  .doc .callout.is-warning {
+    border-color: color-mix(in srgb, var(--c-wait) 55%, var(--c-white) 25%);
+    background: color-mix(in srgb, var(--c-wait) 22%, transparent);
+  }
+
+  /* ---- Wide content scrolls inside itself, never the page ---- */
+  .doc .scroller {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    border: 1px solid var(--w-10);
+    border-radius: var(--r-card);
+  }
+  .doc .scroller:focus-visible { outline-offset: 0; }
+  .doc table {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .doc caption {
+    padding: var(--s-3) var(--s-4);
+    text-align: left;
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-45);
+    border-bottom: 1px solid var(--w-10);
+  }
+  .doc th, .doc td {
+    padding: var(--s-3) var(--s-4);
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--w-08);
+  }
+  .doc thead th {
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    font-weight: 400;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-45);
+    white-space: nowrap;
+  }
+  .doc tbody th { font-weight: 500; color: var(--w-95); }
+  .doc td { color: var(--w-85); }
+  .doc tbody tr:last-child th, .doc tbody tr:last-child td { border-bottom: 0; }
+  .doc .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+  /* ---- Honest empty states ---- */
+  /* Company policy is real photographs or nothing. Until the photograph
+     exists, the slot says so in plain language and takes no visual credit. */
+  .doc .photo { margin: 0; }
+  .doc .photo__frame {
+    display: grid;
+    place-items: center;
+    gap: var(--s-3);
+    min-height: clamp(180px, 30vw, 300px);
+    padding: var(--s-6) var(--s-4);
+    border: 1px dashed var(--w-25);
+    border-radius: var(--r-card);
+    background:
+      repeating-linear-gradient(
+        135deg,
+        var(--w-04) 0 10px,
+        transparent 10px 20px
+      );
+    text-align: center;
+  }
+  .doc .photo__icon { color: var(--w-30); }
+  .doc .photo__state {
+    margin: 0;
+    font-family: var(--f-mono);
+    font-size: var(--t-label);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-55);
+  }
+  .doc .photo figcaption {
+    margin-top: var(--s-3);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--w-55);
+  }
+  .doc .photo figcaption b {
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    font-weight: 400;
+    letter-spacing: var(--ls-mid);
+    color: var(--c-gold);
+  }
+
+  /* Inline "we do not know this yet" marker. */
+  .doc .todo {
+    display: inline;
+    font-family: var(--f-mono);
+    font-size: 0.86em;
+    letter-spacing: var(--ls-tight);
+    color: var(--c-gold);
+    background: color-mix(in srgb, var(--c-gold) 12%, transparent);
+    border-radius: var(--r-sm);
+    padding: 1px 6px;
+    overflow-wrap: anywhere;
+  }
+
+  /* ---- Buttons ---- */
+  .doc .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding: 12px 22px;
+    border: 1px solid transparent;
+    border-radius: var(--r-pill);
+    background: var(--c-signal);
+    color: var(--c-carbon);
+    font-family: var(--f-sans);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform var(--d-fast) var(--e-out), background var(--d-fast);
+  }
+  .doc .btn:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--c-signal) 82%, var(--c-white)); }
+  .doc .btn--ghost {
+    background: none;
+    border-color: var(--w-25);
+    color: var(--w-95);
+  }
+  .doc .btn--ghost:hover { background: var(--w-08); border-color: var(--w-45); }
+
+  .doc .actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-5); }
+
+  /* ---- Two-column reading layout: prose left, figures right ---- */
+  .doc .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--s-7) var(--s-8);
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .doc .split { grid-template-columns: minmax(0, 1fr); gap: var(--s-6); }
+  }
+
+  .doc .stack { display: grid; gap: var(--s-5); }
+
+  /* ---- The one motion: an 8px lift as a block enters ---- */
+  .reveal-on .doc [data-reveal] {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity var(--d-slow) var(--e-out), transform var(--d-slow) var(--e-out);
+  }
+  .reveal-on .doc [data-reveal].is-in { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal-on .doc [data-reveal] { opacity: 1; transform: none; }
+  }
+</style>

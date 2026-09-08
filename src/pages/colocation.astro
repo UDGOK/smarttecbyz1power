@@ -1,0 +1,251 @@
+---
+import Content from '../layouts/Content.astro';
+import { company, site, power, network, compute } from '../data/site';
+
+/* Derived from the published network quote rather than retyped. */
+const netMonthly = Number(network.cost.replace(/[^\d.]/g, ''));
+const netGbps = Number((network.speed.match(/[\d.]+/) ?? ['0'])[0]);
+const headroomFactor = power.headroom.split(' ')[0];
+const netAnnual = netMonthly * 12;
+const netPerGbps = netMonthly / netGbps;
+---
+
+<Content
+  title={`Colocation and GPU capacity at ${site.designation} | ${company.full}`}
+  description={`Liquid-cooled colocation in ${site.name}. ${power.rate} energy behind the meter, ${power.headroom}, ${network.speed} from ${network.provider}, and no interconnection queue between you and ${site.powerOn}.`}
+  kicker="Colocation and GPU capacity"
+  heading="Rack space where the power already exists."
+  lede={`Take space and power in Building 1, or take GPU capacity on our hardware. Either way the constraint you are buying past is the same one: ${power.industryQueue} of interconnection queue that this site never entered.`}
+>
+  <section aria-labelledby="two-ways" data-reveal>
+    <p class="eyebrow" aria-hidden="true">01 — Two ways to buy</p>
+    <h2 id="two-ways">Space and power, or capacity on our machines</h2>
+
+    <div class="cards">
+      <div class="card">
+        <p class="card__tag mono-label">Option A</p>
+        <h3>Colocation</h3>
+        <p>
+          You bring the hardware. We provide the space in Building 1, the power from the
+          existing {power.transformer} service, direct-to-chip liquid cooling, network,
+          and hands on site. You keep ownership of your accelerators and your software
+          stack; we keep the facility running.
+        </p>
+        <p>
+          Sensible for anyone who has already bought GPUs, or who has a procurement
+          relationship they do not want to give up.
+        </p>
+      </div>
+      <div class="card">
+        <p class="card__tag mono-label">Option B</p>
+        <h3>GPU capacity</h3>
+        <p>
+          You rent capacity on the Phase 1A fleet — {compute.systems},
+          {' '}{compute.rentable} of {compute.gpus} GPUs rentable. No capital outlay, no
+          hardware lead time, no depreciation schedule. Full specification is on the
+          {' '}<a href="/compute">compute page</a>.
+        </p>
+        <p>
+          Sensible for training and inference workloads that need Blackwell-class
+          hardware before their own order arrives.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="power-terms" data-reveal>
+    <p class="eyebrow" aria-hidden="true">02 — Power</p>
+    <h2 id="power-terms">Power is the product; everything else is logistics</h2>
+
+    <div class="split">
+      <div>
+        <p>
+          Colocation is normally sold by the kilowatt, not by the square foot, because
+          power is what runs out first. At {site.designation} it runs out last. Phase 1A
+          takes {power.phase1aDraw} — {power.phase1aUtilisation} of the installed service —
+          leaving {power.headroom.toLowerCase()}.
+        </p>
+        <p>
+          For a tenant, that has a specific commercial meaning: growth inside the
+          installed service does not reopen the schedule. You are not asking a utility for
+          more; you are asking us for more of what is already there.
+        </p>
+        <p>
+          Energy is {power.rate} at the site. How that reaches a tenant invoice —
+          metered pass-through, an all-in rate per kW, or a blend — is
+          {' '}<span class="todo">[PLACEHOLDER: tenant power billing model and whether energy is passed through at cost]</span>.
+        </p>
+      </div>
+
+      <dl class="figures">
+        <div>
+          <dt>Installed service</dt>
+          <dd class="is-gold">{power.transformer}<span class="sub">{power.voltage}, energised on site</span></dd>
+        </div>
+        <div>
+          <dt>Committed at Phase 1A</dt>
+          <dd>{power.phase1aDraw}<span class="sub">{power.phase1aUtilisation}</span></dd>
+        </div>
+        <div>
+          <dt>Headroom</dt>
+          <dd class="is-signal">{headroomFactor}<span class="sub">{power.headroom}</span></dd>
+        </div>
+        <div>
+          <dt>Energy</dt>
+          <dd>{power.rate}<span class="sub">Site rate. Tenant billing model still to be published.</span></dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section aria-labelledby="density" data-reveal>
+    <p class="eyebrow" aria-hidden="true">03 — Density and cooling</p>
+    <h2 id="density">Direct-to-chip liquid cooling, because the racks are dense</h2>
+
+    <p>
+      An air-cooled hall stops being able to remove heat long before a modern accelerator
+      rack stops wanting to produce it. That is the physical reason legacy colocation
+      cannot simply be repurposed for AI training: the electrical feed may exist, but the
+      thermal path does not.
+    </p>
+    <p>
+      Building 1 is fitted out for {compute.cooling.toLowerCase()} — coolant carried to a
+      cold plate sitting directly on the accelerator, rather than air pushed across a heat
+      sink. It is the reason a {site.buildings[0].sqft.toLocaleString()} sq ft hall can
+      take dense racks at all.
+    </p>
+
+    <dl class="spec">
+      <div><dt>Cooling method</dt><dd>{compute.cooling}</dd></div>
+      <div><dt>Design density</dt><dd><span class="todo">[PLACEHOLDER: supported kW per rack, and the rack count at that density]</span><span class="note">We will publish a measured figure once the loop is commissioned, not a design maximum from a datasheet.</span></dd></div>
+      <div><dt>Heat rejection</dt><dd><span class="todo">[PLACEHOLDER: heat rejection method — dry coolers, adiabatic, or chilled water — and whether it consumes water]</span></dd></div>
+      <div><dt>Coolant loop</dt><dd><span class="todo">[PLACEHOLDER: CDU vendor and model, loop redundancy, supply temperature]</span></dd></div>
+      <div><dt>Air-cooled space</dt><dd><span class="todo">[PLACEHOLDER: whether any air-cooled racks are offered for storage, networking and head nodes]</span></dd></div>
+      <div><dt>Efficiency</dt><dd><span class="todo">[PLACEHOLDER: measured PUE once Phase 1A is live]</span></dd></div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="network" data-reveal>
+    <p class="eyebrow" aria-hidden="true">04 — Network</p>
+    <h2 id="network">{network.speed} into a field in Oklahoma</h2>
+
+    <div class="split">
+      <div>
+        <p>
+          Rural sites are usually dismissed on connectivity before anyone looks at the
+          power. This one carries a signed quote from {network.provider} for
+          {' '}{network.speed} — dedicated internet access, symmetrical, not a shared
+          business broadband product — on a {network.term.toLowerCase()}.
+        </p>
+        <p>
+          At {network.cost}, that is roughly ${netPerGbps.toFixed(2)} per Gbps per month
+          committed, or ${netAnnual.toLocaleString()} a year, with installation waived.
+          The figure is here because a buyer will work it out anyway.
+        </p>
+        <p>
+          What that circuit does not yet include is a second one. Carrier diversity,
+          transit and peering arrangements, and whether cross-connects are available to
+          other tenants are all open:
+          {' '}<span class="todo">[PLACEHOLDER: second carrier / diverse path, IP transit arrangements, cross-connect availability and pricing]</span>.
+        </p>
+      </div>
+
+      <dl class="spec">
+        <div><dt>Provider</dt><dd>{network.provider}</dd></div>
+        <div><dt>Service</dt><dd>{network.speed}</dd></div>
+        <div><dt>Cost</dt><dd>{network.cost}</dd></div>
+        <div><dt>Term</dt><dd>{network.term}</dd></div>
+        <div><dt>Diversity</dt><dd><span class="todo">[PLACEHOLDER: is there a second physical path]</span></dd></div>
+        <div><dt>Tenant allocation</dt><dd><span class="todo">[PLACEHOLDER: how bandwidth is allocated or resold to tenants]</span></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section aria-labelledby="terms" data-reveal>
+    <p class="eyebrow" aria-hidden="true">05 — Commercial terms</p>
+    <h2 id="terms">Terms, including the ones we have not set</h2>
+
+    <p>
+      This table is deliberately half empty. The filled rows are contractual facts about
+      the site. The empty ones are decisions that have not been made, and we would rather
+      you negotiated them with us than read an invented number here.
+    </p>
+
+    <div class="scroller" tabindex="0" role="region" aria-label="Colocation terms, scrollable">
+      <table>
+        <caption>Colocation terms, {site.designation}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Term</th>
+            <th scope="col">Position</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Location</th><td>{site.address} — {site.county}, Oklahoma</td></tr>
+          <tr><th scope="row">Available space</th><td>Building 1, {site.buildings[0].sqft.toLocaleString()} sq ft. Buildings 2 and 3 available as expansion shells.</td></tr>
+          <tr><th scope="row">Service availability</th><td>{site.powerOn} power-on target</td></tr>
+          <tr><th scope="row">Energy</th><td>{power.rate} at the site</td></tr>
+          <tr><th scope="row">Cooling</th><td>{compute.cooling}</td></tr>
+          <tr><th scope="row">Network</th><td>{network.speed}, {network.provider}</td></tr>
+          <tr><th scope="row">Minimum commitment</th><td><span class="todo">[PLACEHOLDER: minimum kW or rack count per contract]</span></td></tr>
+          <tr><th scope="row">Contract length</th><td><span class="todo">[PLACEHOLDER: standard and minimum term lengths]</span></td></tr>
+          <tr><th scope="row">Pricing</th><td><span class="todo">[PLACEHOLDER: $ per kW per month, and whether space is billed separately]</span></td></tr>
+          <tr><th scope="row">Escalator</th><td><span class="todo">[PLACEHOLDER: annual escalator, if any]</span></td></tr>
+          <tr><th scope="row">Deposit</th><td><span class="todo">[PLACEHOLDER: security deposit or letter of credit requirement]</span></td></tr>
+          <tr><th scope="row">Uptime SLA</th><td><span class="todo">[PLACEHOLDER: uptime commitment and service credits]</span></td></tr>
+          <tr><th scope="row">Remote hands</th><td>Offered. <span class="todo">[PLACEHOLDER: included hours per month, hourly rate beyond that, response time, and 24×7 vs business-hours coverage]</span></td></tr>
+          <tr><th scope="row">Site access</th><td><span class="todo">[PLACEHOLDER: escorted vs unescorted access, hours, and the access request process]</span></td></tr>
+          <tr><th scope="row">Physical security</th><td><span class="todo">[PLACEHOLDER: perimeter, access control, CCTV retention, and whether the site is manned]</span></td></tr>
+          <tr><th scope="row">Compliance</th><td><span class="todo">[PLACEHOLDER: audits or attestations planned, if any. None are claimed today.]</span></td></tr>
+          <tr><th scope="row">Shipping and receiving</th><td><span class="todo">[PLACEHOLDER: receiving hours, dock or lift-gate access, and staging space for tenant deliveries]</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout" style="margin-top: var(--s-6);">
+      <p>
+        <strong>No certifications are claimed on this page.</strong> {company.name} holds
+        no audit attestation it has not named. If a compliance requirement is a gate for
+        you, say so in the first conversation and we will tell you honestly whether the
+        {' '}{site.powerOn} timeline can carry it.
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="hall" data-reveal>
+    <p class="eyebrow" aria-hidden="true">06 — The hall</p>
+    <h2 id="hall">Building 1, before fit-out</h2>
+
+    <figure class="photo">
+      <div class="photo__frame">
+        <svg class="photo__icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <rect x="2.5" y="6" width="19" height="14" rx="2" />
+          <circle cx="12" cy="13" r="3.5" />
+          <path d="M8.5 6l1.4-2.2h4.2L15.5 6" />
+          <path d="M3 3l18 18" />
+        </svg>
+        <p class="photo__state">Photograph not taken yet</p>
+      </div>
+      <figcaption>
+        <b>[PHOTO NEEDED]</b> Interior of Building 1 as it stands, plus the electrical
+        room. There is no photograph of a populated hall because the hall is not populated
+        yet — power-on is {site.powerOn}. We will not borrow someone else's data center
+        interior to fill this frame.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="reserve" data-reveal>
+    <p class="eyebrow" aria-hidden="true">07 — Next</p>
+    <h2 id="reserve">Reserve before Phase 1A fills</h2>
+    <p>
+      Phase 1A is one building and {compute.rentable} rentable GPUs. Tell us the load in
+      kilowatts, the shape of the workload, and the date you need it live, and we will
+      come back with a term sheet against real capacity rather than a waiting list.
+    </p>
+    <div class="actions">
+      <a class="btn" href="/contact">Reserve capacity</a>
+      <a class="btn btn--ghost" href="/power">Why there is no queue</a>
+    </div>
+  </section>
+</Content>

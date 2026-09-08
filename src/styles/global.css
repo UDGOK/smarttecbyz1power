@@ -245,3 +245,65 @@ html.has-custom-cursor * { cursor: none !important; }
   35%  { transform: scale(1.13); }
   100% { transform: scale(1); }
 }
+
+/* ---- Campus hotspots ----
+   Eight labels at once buries the campus. Default to a dot; the label only
+   appears for the hotspot being pointed at or driven from the legend. */
+.campus-hotspot {
+  position: absolute;
+  top: 0; left: 0;
+  width: 13px; height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  border-radius: 50%;
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--d-base);
+  will-change: transform;
+}
+.campus-hotspot::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--c-signal);
+  box-shadow: 0 0 0 4px #7be88a30;
+  transition: box-shadow var(--d-fast), transform var(--d-fast) var(--e-out);
+}
+.campus-hotspot:hover::before,
+.campus-hotspot.is-active::before {
+  box-shadow: 0 0 0 7px #7be88a45;
+  transform: scale(1.25);
+}
+.campus-hotspot__label {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: var(--chrome-veil);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--chrome-fg-loud);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--d-fast);
+}
+.campus-hotspot:hover .campus-hotspot__label,
+.campus-hotspot.is-active .campus-hotspot__label { opacity: 1; }
+
+.campus-legend__btn {
+  display: block;
+  width: 100%;
+  padding: 5px 10px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: none;
+  color: var(--chrome-fg);
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--d-fast), background var(--d-fast);
+}
+.campus-legend__btn:hover { color: var(--chrome-fg-loud); background: var(--chrome-veil); }

@@ -1,0 +1,222 @@
+---
+import Content from '../layouts/Content.astro';
+import { company, site, power, network, compute } from '../data/site';
+
+/* Everything below is arithmetic on the published Phase 1A figures. */
+const systems = Number((compute.systems.match(/[\d.]+/) ?? ['0'])[0]);
+const gpusPerSystem = compute.gpus / systems;
+const heldBack = compute.gpus - compute.rentable;
+const loadKw = Number((compute.load.match(/[\d.]+/) ?? ['0'])[0]);
+const perSystemKw = loadKw / systems;
+---
+
+<Content
+  title={`Phase 1A compute — ${compute.systems} | ${company.full}`}
+  description={`${compute.systems} at ${site.designation}, ${site.name}. ${compute.gpus} GPUs, ${compute.rentable} rentable, ${compute.load}, ${compute.cooling.toLowerCase()}, targeting ${compute.target}.`}
+  kicker="Phase 1A hardware"
+  heading="Sixty-four Blackwells, liquid cooled."
+  lede={`${compute.systems} in Building 1. ${compute.gpus} GPUs, ${compute.rentable} of them rentable, drawing ${compute.load} — ${power.phase1aUtilisation} of the service already standing on the parcel.`}
+>
+  <section aria-labelledby="fleet" data-reveal>
+    <p class="eyebrow" aria-hidden="true">01 — The fleet</p>
+    <h2 id="fleet">What Phase 1A is</h2>
+
+    <div class="split">
+      <div>
+        <p>
+          Phase 1A is deliberately small and deliberately real: {compute.systems},
+          installed in Building 1, cooled by {compute.cooling.toLowerCase()}, targeting
+          {' '}{compute.target}. It is one building out of {site.buildings.length} and
+          {' '}{power.phase1aUtilisation} of one transformer.
+        </p>
+        <p>
+          The point of publishing a fleet this size is that every number on this page is
+          checkable against the site record. A larger announced number would be a
+          forecast; this is a purchase and a fit-out.
+        </p>
+        <p>
+          {compute.rentable} of the {compute.gpus} GPUs are offered to tenants.
+          The remaining {heldBack} are not:
+          {' '}<span class="todo">[PLACEHOLDER: disposition of the {heldBack} non-rentable GPUs — spares, burn-in, internal use]</span>.
+        </p>
+      </div>
+
+      <dl class="figures">
+        <div>
+          <dt>Systems</dt>
+          <dd>{systems}<span class="sub">{compute.systems}</span></dd>
+        </div>
+        <div>
+          <dt>GPUs</dt>
+          <dd>{compute.gpus}<span class="sub">{gpusPerSystem} per system</span></dd>
+        </div>
+        <div>
+          <dt>Rentable</dt>
+          <dd class="is-signal">{compute.rentable}<span class="sub">Offered to tenants at Phase 1A</span></dd>
+        </div>
+        <div>
+          <dt>IT load</dt>
+          <dd class="is-gold">{compute.load}<span class="sub">{power.phase1aUtilisation} of the {power.transformer} service</span></dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section aria-labelledby="arithmetic" data-reveal>
+    <p class="eyebrow" aria-hidden="true">02 — Per system</p>
+    <h2 id="arithmetic">The power arithmetic, per system</h2>
+
+    <p>
+      Accelerated compute is bought in kilowatts as much as in GPUs. Here is the
+      published Phase 1A load divided by the published system count, so you can see the
+      density this hall has to carry.
+    </p>
+
+    <div class="scroller" tabindex="0" role="region" aria-label="Phase 1A per-system arithmetic, scrollable">
+      <table>
+        <caption>Phase 1A, worked from published figures</caption>
+        <thead>
+          <tr>
+            <th scope="col">Line</th>
+            <th scope="col">Figure</th>
+            <th scope="col">Basis</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">Systems</th><td class="num">{systems}</td><td>{compute.systems}</td></tr>
+          <tr><th scope="row">GPUs per system</th><td class="num">{gpusPerSystem}</td><td>{compute.gpus} GPUs ÷ {systems} systems</td></tr>
+          <tr><th scope="row">Total IT load</th><td class="num">{compute.load}</td><td>Published Phase 1A draw</td></tr>
+          <tr><th scope="row">Load per system</th><td class="num">≈ {perSystemKw.toFixed(1)} kW</td><td>Total load ÷ system count</td></tr>
+          <tr><th scope="row">Rack density</th><td class="num"><span class="todo">[PLACEHOLDER: systems per rack, and the resulting kW per rack]</span></td><td>Depends on the final rack layout, which is not fixed</td></tr>
+          <tr><th scope="row">Service utilisation</th><td class="num">{power.phase1aUtilisation}</td><td>Against the {power.transformer} service on site</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top: var(--s-5);">
+      Roughly {perSystemKw.toFixed(0)} kW per system is why this is a liquid-cooled hall
+      and not an air-cooled one. Once systems of that draw are racked together, the
+      per-rack figure lands far above what a conventional raised-floor hall can remove
+      with air, whatever its electrical capacity says.
+    </p>
+  </section>
+
+  <section aria-labelledby="cooling" data-reveal>
+    <p class="eyebrow" aria-hidden="true">03 — Cooling</p>
+    <h2 id="cooling">Direct-to-chip, not a retrofit</h2>
+
+    <div class="split">
+      <div>
+        <p>
+          {compute.cooling} means coolant is carried to a cold plate sitting on the
+          package itself, so the majority of the heat leaves the rack as liquid rather
+          than as hot air pushed into a containment aisle. It is what makes dense
+          accelerator racks practical, and it is far easier to design into a fit-out than
+          to retrofit into an operating hall.
+        </p>
+        <p>
+          Building 1 is being fitted out for it from empty. Buildings 2 and 3 are shells,
+          so the same is true for them — a second tenant is not inheriting somebody's
+          air-cooled legacy.
+        </p>
+      </div>
+
+      <dl class="spec">
+        <div><dt>Method</dt><dd>{compute.cooling}</dd></div>
+        <div><dt>CDU</dt><dd><span class="todo">[PLACEHOLDER: coolant distribution unit vendor, model, capacity and redundancy]</span></dd></div>
+        <div><dt>Supply temperature</dt><dd><span class="todo">[PLACEHOLDER: facility water supply temperature and delta-T]</span></dd></div>
+        <div><dt>Heat rejection</dt><dd><span class="todo">[PLACEHOLDER: dry cooler / adiabatic / chilled water, and water consumption if any]</span></dd></div>
+        <div><dt>Residual air load</dt><dd><span class="todo">[PLACEHOLDER: share of heat still removed by air, and the air-cooling capacity provided for it]</span></dd></div>
+        <div><dt>Leak detection</dt><dd><span class="todo">[PLACEHOLDER: leak detection and isolation approach in the hall]</span></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section aria-labelledby="stack" data-reveal>
+    <p class="eyebrow" aria-hidden="true">04 — The rest of the stack</p>
+    <h2 id="stack">What we have not specified yet</h2>
+
+    <p>
+      The accelerator count is settled. The rest of a training cluster — fabric, storage,
+      host configuration, scheduler — is not, and inventing it here would be the fastest
+      way to lose a technical buyer in the second meeting. These are the open items.
+    </p>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Fabric</h3>
+        <p>
+          <span class="todo">[PLACEHOLDER: east-west fabric — InfiniBand or Ethernet, speed per GPU, topology, and whether all {systems} systems sit in one non-blocking domain]</span>
+        </p>
+      </div>
+      <div class="card">
+        <h3>Storage</h3>
+        <p>
+          <span class="todo">[PLACEHOLDER: parallel filesystem or object store, usable capacity, and read throughput available to a full-fleet training run]</span>
+        </p>
+      </div>
+      <div class="card">
+        <h3>Host configuration</h3>
+        <p>
+          <span class="todo">[PLACEHOLDER: CPU model and core count, system memory, and local NVMe per system]</span>
+        </p>
+      </div>
+      <div class="card">
+        <h3>Software</h3>
+        <p>
+          <span class="todo">[PLACEHOLDER: operating system, driver and CUDA baseline, container runtime, and scheduler — bare metal, Slurm, or Kubernetes]</span>
+        </p>
+      </div>
+      <div class="card">
+        <h3>Tenancy model</h3>
+        <p>
+          <span class="todo">[PLACEHOLDER: whether GPUs are let bare-metal by the system, by the GPU, or virtualised, and the isolation guarantee between tenants]</span>
+        </p>
+      </div>
+      <div class="card">
+        <h3>External connectivity</h3>
+        <p>
+          {network.speed} from {network.provider} serves the site.
+          <span class="todo">[PLACEHOLDER: bandwidth allocated per tenant and any egress policy]</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="buying" data-reveal>
+    <p class="eyebrow" aria-hidden="true">05 — Buying it</p>
+    <h2 id="buying">How capacity is sold</h2>
+
+    <dl class="spec">
+      <div><dt>Available from</dt><dd>{compute.target}</dd></div>
+      <div><dt>Rentable units</dt><dd>{compute.rentable} GPUs across {systems} systems</dd></div>
+      <div><dt>Minimum allocation</dt><dd><span class="todo">[PLACEHOLDER: minimum bookable unit — a GPU, a system, or a block of systems]</span></dd></div>
+      <div><dt>Pricing</dt><dd><span class="todo">[PLACEHOLDER: $ per GPU-hour or per system-month, and any reserved-term discount]</span></dd></div>
+      <div><dt>Term</dt><dd><span class="todo">[PLACEHOLDER: on-demand, reserved, or committed-term options]</span></dd></div>
+      <div><dt>Support</dt><dd><span class="todo">[PLACEHOLDER: hardware replacement SLA and who is on the end of the phone at 3am]</span></dd></div>
+    </dl>
+
+    <figure class="photo" style="margin-top: var(--s-6);">
+      <div class="photo__frame">
+        <svg class="photo__icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+          <rect x="2.5" y="6" width="19" height="14" rx="2" />
+          <circle cx="12" cy="13" r="3.5" />
+          <path d="M8.5 6l1.4-2.2h4.2L15.5 6" />
+          <path d="M3 3l18 18" />
+        </svg>
+        <p class="photo__state">Photograph not taken yet</p>
+      </div>
+      <figcaption>
+        <b>[PHOTO NEEDED]</b> The Phase 1A systems as delivered and as racked, once they
+        are on site. Power-on is {compute.target}, so no photograph of this hardware in
+        this building exists yet. Vendor press imagery is not a photograph of our fleet
+        and will not be used as one.
+      </figcaption>
+    </figure>
+
+    <div class="actions">
+      <a class="btn" href="/contact">Ask what is available</a>
+      <a class="btn btn--ghost" href="/colocation">Colocation terms</a>
+    </div>
+  </section>
+</Content>

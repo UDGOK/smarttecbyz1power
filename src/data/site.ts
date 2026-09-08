@@ -63,6 +63,8 @@ export const stages = [
   {
     id: 'land',
     index: 0,
+    scene: 'land' as const,
+    ground: '#0e2419',
     ruler: '-100 BP',
     kicker: 'Site 01 · Mead, Oklahoma',
     title: 'Thirty acres,\nalready ours.',
@@ -74,6 +76,8 @@ export const stages = [
   {
     id: 'wait',
     index: 1,
+    scene: 'land' as const,
+    ground: '#4d0806',
     ruler: '-75 BP',
     kicker: 'The industry problem',
     title: "Everyone else\nis in a queue.",
@@ -85,17 +89,21 @@ export const stages = [
   {
     id: 'power',
     index: 2,
+    scene: 'power' as const,
+    ground: '#1a1204',
     ruler: '-50 BP',
     kicker: 'Behind the meter',
     title: 'We never\njoined it.',
     lede: `${power.transformer} at ${power.voltage}, owned on site. ${power.solarPlanned} of solar and Z1Power LFP storage. No interconnection application, because none is required.`,
-    chrome: 'dark' as const,
+    chrome: 'light' as const,
     scrollVh: 300,
     hold: { label: 'Hold to energise', holdLabel: 'Energising', duration: 2.0 },
   },
   {
     id: 'machine',
     index: 3,
+    scene: 'machine' as const,
+    ground: '#070a0f',
     ruler: '-25 BP',
     kicker: 'Phase 1A',
     title: 'Sixty-four\nBlackwells.',
@@ -107,6 +115,8 @@ export const stages = [
   {
     id: 'campus',
     index: 4,
+    scene: 'campus' as const,
+    ground: '#dfe5e1',
     ruler: '0 BP',
     kicker: `${site.powerOn}`,
     title: 'Live.',
@@ -118,3 +128,9 @@ export const stages = [
 ] as const;
 
 export type Stage = (typeof stages)[number];
+export type SceneId = Stage['scene'];
+
+/** Stage 2 is the land scene already crossed over to the queue palette. */
+export const ENTRY_MIX: Record<string, number> = {
+  land: 0, wait: 1, power: 0, machine: 0, campus: 0,
+};

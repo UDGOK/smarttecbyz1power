@@ -41,6 +41,9 @@ export class SceneHost {
     this.resize();
   }
 
+  /** Current frame context — hosts of DOM overlays need it to project. */
+  get context(): SceneContext { return this.ctx(); }
+
   private ctx(): SceneContext {
     return {
       scene: this.scene,

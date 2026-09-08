@@ -5,9 +5,9 @@ import PowerBadge from '../components/chrome/PowerBadge.astro';
 import Brandmark from '../components/chrome/Brandmark.astro';
 import CtaBar from '../components/chrome/CtaBar.astro';
 import Loader from '../components/chrome/Loader.astro';
+import Configurator from '../components/Configurator.astro';
 import { company, site, stages } from '../data/site';
 
-const visible = stages.slice(0, 2);
 const grain =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")";
 ---
@@ -18,6 +18,7 @@ const grain =
 >
   <canvas id="experience-canvas" aria-hidden="true"></canvas>
   <div class="scrim" aria-hidden="true"></div>
+  <div class="veil" id="veil" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true" style={`--grain-src: ${grain};`}></div>
   <div class="flash" id="flash" aria-hidden="true"></div>
 
@@ -28,12 +29,12 @@ const grain =
     <ScrollRuler />
     <PowerBadge />
 
-    {visible.map((stage, i) => (
+    {stages.map((stage, i) => (
       <section
         class="stage-scroll"
         data-stage-panel
         data-stage={stage.id}
-        data-scroll-vh={stage.scrollVh}
+        data-scene={stage.scene}
         hidden={i !== 0}
         aria-label={stage.kicker}
         style={`--scroll-vh: ${stage.scrollVh}vh;`}
@@ -53,14 +54,35 @@ const grain =
 
           <p class="stage-panel__lede"><span class="line"><span class="line__inner">{stage.lede}</span></span></p>
 
-          <p class="stage-panel__cue mono-label" data-scroll-cue aria-hidden="true">Scroll</p>
+          {stage.hold && <p class="stage-panel__cue mono-label" data-scroll-cue aria-hidden="true">Scroll</p>}
         </div>
       </section>
     ))}
 
     <div id="hold-slot" class="hold-slot"></div>
+
+    <!-- Campus explorer chrome. Inert until stage 5 hands over control. -->
+    <div class="campus-ui" id="campus-ui" hidden>
+      <div class="campus-hotspots" id="campus-hotspots" aria-hidden="true"></div>
+      <nav class="campus-controls" aria-label="Campus view">
+        <button type="button" class="campus-btn" data-campus="in" aria-label="Zoom in">+</button>
+        <div class="campus-controls__row">
+          <button type="button" class="campus-btn" data-campus="left" aria-label="Orbit left">‹</button>
+          <button type="button" class="campus-btn" data-campus="right" aria-label="Orbit right">›</button>
+        </div>
+        <button type="button" class="campus-btn" data-campus="out" aria-label="Zoom out">−</button>
+        <button type="button" class="campus-btn campus-btn--wide mono-label" data-campus="reset">Reset</button>
+      </nav>
+      <ul class="campus-legend" id="campus-legend"></ul>
+    </div>
+
     <CtaBar />
   </main>
+
+  <!-- Released once the campus is reached: the configurator and the reading path. -->
+  <section class="after" id="after" hidden>
+    <Configurator />
+  </section>
 
   <section class="static-path" id="static-path">
     <h2>Site 01 — {site.address}</h2>
@@ -94,13 +116,23 @@ const grain =
     z-index: 1;
     pointer-events: none;
     background: linear-gradient(to top, #071410cc 0%, #07141066 45%, #0714100a 100%);
+    transition: opacity var(--d-slow) var(--e-out);
+  }
+  :global([data-chrome='dark']) .scrim { opacity: 0.25; }
+
+  /* Colour veil: the hold scrubs this toward the next world's ground while the
+     outgoing scene dissolves, so a scene swap never reads as a cut. */
+  .veil {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    background: var(--veil-color, #000);
   }
 
   main { position: relative; z-index: var(--z-content); }
 
-  /* Each stage owns a tall scroll track; the panel sticks inside it. Native
-     sticky rather than a pinned ScrollTrigger — cheaper, and it keeps the
-     keyboard and scrollbar behaving normally. */
   .stage-scroll { height: var(--scroll-vh, 250vh); }
 
   .stage-panel {
@@ -147,7 +179,6 @@ const grain =
     bottom: 96px;
     margin: 0;
     color: var(--chrome-fg);
-    opacity: 0.7;
     animation: cue-breathe 2.6s var(--e-inout) infinite;
   }
   @keyframes cue-breathe {
@@ -166,6 +197,70 @@ const grain =
     transition: opacity var(--d-base) var(--e-out);
   }
   .hold-slot.is-armed { opacity: 1; pointer-events: auto; }
+
+  /* ---- Campus explorer ---- */
+  .campus-ui { position: fixed; inset: 0; z-index: var(--z-chrome); pointer-events: none; }
+  .campus-hotspots { position: absolute; inset: 0; }
+
+  .campus-controls {
+    position: absolute;
+    right: var(--chrome-inset);
+    bottom: 96px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--s-2);
+    pointer-events: auto;
+  }
+  .campus-controls__row { display: flex; gap: var(--s-2); }
+  .campus-btn {
+    display: grid;
+    place-items: center;
+    width: 42px; height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: var(--chrome-veil);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--chrome-fg-loud);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform var(--d-fast) var(--e-out), background var(--d-fast);
+  }
+  .campus-btn:hover { transform: scale(1.08); }
+  .campus-btn--wide { width: auto; height: 34px; border-radius: var(--r-pill); padding: 0 14px; font-size: var(--t-micro); }
+
+  .campus-legend {
+    position: absolute;
+    left: var(--chrome-inset);
+    bottom: 96px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 2px;
+    pointer-events: auto;
+  }
+
+  /* Campus: the copy steps aside so the model owns the frame. */
+  [data-stage="campus"] .stage-panel {
+    align-items: flex-start;
+    text-align: left;
+    max-width: 46ch;
+    margin: 0;
+    padding-left: max(var(--s-6), 4vw);
+    justify-content: flex-end;
+    padding-bottom: 190px;
+  }
+  [data-stage="campus"] .stage-panel__title { font-size: clamp(2.4rem, 1rem + 4vw, 4.4rem); }
+  [data-stage="campus"] .stage-panel__lede { max-width: 38ch; }
+
+  @media (max-width: 640px) {
+    [data-stage="campus"] .stage-panel { padding-bottom: 230px; }
+  }
+
+  .after { position: relative; z-index: var(--z-content); background: var(--c-campus); }
 
   .static-path {
     position: relative;
@@ -187,5 +282,7 @@ const grain =
     .stage-panel { padding: calc(var(--chrome-inset) * 4) var(--s-4) 180px; }
     .scrim { height: 56vh; }
     .stage-panel__cue { bottom: 128px; }
+    .campus-controls { bottom: 150px; }
+    .campus-legend { display: none; }
   }
 </style>
