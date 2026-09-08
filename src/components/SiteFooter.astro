@@ -95,6 +95,10 @@ const groups = [
 
 <style>
   .foot {
+    /* The reference's default gesture: power2.out at 0.3–0.65s. Deferred to a
+       tokens.css token the moment one exists. */
+    --e-p2: var(--e-power2-out, cubic-bezier(0.33, 1, 0.68, 1));
+
     margin-top: clamp(var(--s-8), 10vh, 140px);
     padding: clamp(var(--s-8), 9vh, 120px) var(--s-4) var(--s-6);
     background: color-mix(in srgb, var(--c-land-deep) 55%, var(--c-carbon));
@@ -154,7 +158,7 @@ const groups = [
   .foot__mark a {
     color: var(--w-70);
     text-decoration: none;
-    transition: color var(--d-fast);
+    transition: color 0.3s var(--e-p2);
   }
   .foot__mark a:hover { color: var(--c-signal); }
 
@@ -197,7 +201,7 @@ const groups = [
     font-size: 14px;
     line-height: 1.5;
     text-decoration: none;
-    transition: color var(--d-fast), transform var(--d-fast) var(--e-out);
+    transition: color 0.3s var(--e-p2), transform 0.3s var(--e-p2);
   }
   .foot__link:hover { color: var(--c-signal); transform: translateX(3px); }
 

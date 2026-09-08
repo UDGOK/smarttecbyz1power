@@ -95,19 +95,33 @@
     }
 
     // --- count-up ---------------------------------------------------------
+    // The reels chase the live value rather than being set to it, and they
+    // chase it in seconds: `shown += diff * 0.14` closed 14% of the gap per
+    // *frame*, so on a 120Hz display the same top-up landed in half the time.
+    // `1 - exp(-dt / tc)` closes the same fraction per second instead. The
+    // constant is the reference's own camera-rig smoothing time, 0.12s, which
+    // is within a hair of what the old per-frame figure worked out to at 60Hz.
+    const SMOOTH_TC = 0.12;
+
     let shown = 0;
     let target = 0;
     let raf = 0;
+    let lastFrame = 0;
 
-    function run(): void {
+    function run(frame: number): void {
+      // Clamped so a backgrounded tab does not resume on one enormous step.
+      const dt = lastFrame ? Math.min(0.064, (frame - lastFrame) / 1000) : 1 / 60;
+      lastFrame = frame;
+
       raf = 0;
       const diff = target - shown;
       if (Math.abs(diff) < 0.01) {
         shown = target;
+        lastFrame = 0;
         paint(shown, true);
         return;
       }
-      shown += diff * 0.14;
+      shown += diff * (1 - Math.exp(-dt / SMOOTH_TC));
       paint(shown, true);
       raf = requestAnimationFrame(run);
     }

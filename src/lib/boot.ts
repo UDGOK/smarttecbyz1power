@@ -16,6 +16,7 @@ import { initLoader } from './loader';
 import { initCursor } from './cursor';
 import { initConfigurator } from './configurator';
 import { revealLines, scramble } from './type-motion';
+import { ScrollManager, CameraRig, SCROLL_CONFIG, DELTA_SCALE } from './scroll';
 import { audio } from './audio';
 import { stages, ENTRY_MIX } from '../data/site';
 
@@ -80,6 +81,23 @@ export function boot(): void {
   let lockedUntil = 0;
   let crossing = false;
 
+  // The reference does not use native scroll: it damps its own position, which
+  // is most of why its motion reads smooth. Same model here.
+  const scroller = new ScrollManager({ reducedMotion: reduced });
+  const rig = new CameraRig({ reducedMotion: reduced });
+  document.body.dataset.virtualScroll = '';
+
+  /**
+   * A stage's scroll track, in the manager's own units.
+   *
+   * The manager multiplies raw wheel/touch deltas by DELTA_SCALE (35), which
+   * is the reference's own figure — so the track has to be expressed in those
+   * same units or a dozen wheel notches cross the entire stage. One notch of
+   * roughly 100px therefore advances about 100px worth of the track.
+   */
+  const trackLength = (index: number): number =>
+    ((stages[index]?.scrollVh ?? 250) / 100) * window.innerHeight * DELTA_SCALE;
+
   // --- Scene host, code-split and idle-loaded ---------------------------
   async function initScene(): Promise<void> {
     if (!supportsWebGL()) {
@@ -94,6 +112,19 @@ export function boot(): void {
       host.start();
       window.addEventListener('resize', host.resize);
       (window as unknown as { __experience?: SceneHost }).__experience = host;
+
+      // One clock for everything: the host's own delta drives the damped
+      // scroll and the parallax rig, so they can never drift out of step
+      // with the frame they are moving.
+      host.onFrame((dt) => {
+        scroller.update(dt);
+        rig.update(dt);
+        host?.setRigOffset(
+          rig.offsetX * SCROLL_CONFIG.CAMERA_RIG.MAX_OFFSET * 6,
+          rig.offsetY * SCROLL_CONFIG.CAMERA_RIG.MAX_OFFSET * 6,
+          rig.focalDistance,
+        );
+      });
       warmScene(stages[1].scene);
     } catch {
       canvasEl.hidden = true;
@@ -149,7 +180,9 @@ export function boot(): void {
     // The mono kicker resolves out of noise; the display lines rise out of
     // their masks. Two different arrivals rather than the same one twice.
     const kicker = panel.querySelector<HTMLElement>('.stage-panel__kicker');
-    if (kicker) scramble(kicker, { duration: 0.85, delay: 0.1, from: 'start' });
+    // Duration left to the module's default, which is set to the reference's
+    // vocabulary; 0.85 is not a value it uses.
+    if (kicker) scramble(kicker, { delay: 0.1, from: 'start' });
 
     for (const el of panel.querySelectorAll<HTMLElement>('.stage-panel__title, .stage-panel__lede')) {
       revealLines(el, { delay: el.matches('.stage-panel__lede') ? 0.34 : 0.16 });
@@ -157,8 +190,6 @@ export function boot(): void {
   }
 
   // --- Scroll ------------------------------------------------------------
-  let ticking = false;
-
   /**
    * One callback drives the whole crossing: the outgoing world dissolves, the
    * effect carries the eye across, both ambiences cross-fade and the committed
@@ -171,7 +202,6 @@ export function boot(): void {
 
     if (!crossing && t > 0) {
       crossing = true;
-      // Each world breaks apart in its own way on the way out.
       host?.beginTransition(from.exit, from.ground, to.ground);
       audio.play(AMBIENT[from.id], { fadeIn: 0.3, volume: 0.45 });
       audio.play(AMBIENT[to.id], { fadeIn: 0, volume: 0 });
@@ -204,38 +234,25 @@ export function boot(): void {
     setPower(kwA + (kwB - kwA) * t);
   }
 
-  function onScroll(): void {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      ticking = false;
-      const panel = panels[current];
-      if (!panel || panel.hidden || swapping) return;
+  function onProgress(p: number): void {
+    const panel = panels[current];
+    if (!panel || panel.hidden || swapping) return;
 
-      const rect = panel.getBoundingClientRect();
-      const travel = Math.max(1, rect.height - window.innerHeight);
-      const p = Math.min(1, Math.max(0, -rect.top / travel));
+    if (rulerTrack) rulerTrack.style.transform = `translateX(${-(current + p) * 62}px)`;
+    host?.setScrollProgress(p);
 
-      if (rulerTrack) rulerTrack.style.transform = `translateX(${-(current + p) * 62}px)`;
-      host?.setScrollProgress(p);
+    const sticky = panel.querySelector<HTMLElement>('[data-stage-sticky]');
+    if (sticky && !reduced) sticky.style.transform = `translate3d(0, ${-p * 8}vh, 0)`;
 
-      const sticky = panel.querySelector<HTMLElement>('[data-stage-sticky]');
-      if (sticky && !reduced) {
-        sticky.style.transform = `translate3d(0, ${-p * 8}vh, 0)`;
-      }
+    const cue = panel.querySelector<HTMLElement>('[data-scroll-cue]');
+    if (cue) cue.style.opacity = String(Math.max(0, 1 - p * 4));
 
-      const cue = panel.querySelector<HTMLElement>('[data-scroll-cue]');
-      if (cue) cue.style.opacity = String(Math.max(0, 1 - p * 4));
+    // The tail of every stage is the crossing into the next one.
+    const t = p <= CROSS_START ? 0 : (p - CROSS_START) / (1 - CROSS_START);
+    cross(t);
+    if (sticky) sticky.style.opacity = String(Math.max(0, 1 - t * 2.2));
 
-      // The tail of every stage is the crossing into the next one.
-      const t = p <= CROSS_START ? 0 : (p - CROSS_START) / (1 - CROSS_START);
-      cross(t);
-      // Clear the copy early — it should be gone before the effect peaks,
-      // not still legible through the fracture.
-      if (sticky) sticky.style.opacity = String(Math.max(0, 1 - t * 2.2));
-
-      if (t >= 0.995 && performance.now() > lockedUntil) void advance();
-    });
+    if (t >= 0.995 && performance.now() > lockedUntil) void advance();
   }
 
   // --- Advance ----------------------------------------------------------
@@ -262,7 +279,7 @@ export function boot(): void {
     setPower(STAGE_KW[next] ?? 1);
     topupBadge();
 
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    scroller.setActiveStage(trackLength(next));
     const sticky = panels[next].querySelector<HTMLElement>('[data-stage-sticky]');
     if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
 
@@ -288,7 +305,7 @@ export function boot(): void {
     if (to.scene === 'campus') enterCampus();
 
     swapping = false;
-    requestAnimationFrame(onScroll);
+    requestAnimationFrame(() => onProgress(0));
   }
 
   async function goToStage(index: number): Promise<void> {
@@ -309,7 +326,7 @@ export function boot(): void {
     showPanel(index);
     applyChrome(index);
     setPower(STAGE_KW[index] ?? 0);
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    scroller.setActiveStage(trackLength(index));
     // Clear any parallax left inline by the previous stage's scroll.
     const jumped = panels[index].querySelector<HTMLElement>('[data-stage-sticky]');
     if (jumped) { jumped.style.opacity = '1'; jumped.style.transform = 'none'; }
@@ -317,7 +334,7 @@ export function boot(): void {
     if (to.scene === 'campus') enterCampus(); else exitCampus();
 
     swapping = false;
-    requestAnimationFrame(onScroll);
+    requestAnimationFrame(() => onProgress(0));
   }
 
   // --- Campus ------------------------------------------------------------
@@ -331,6 +348,10 @@ export function boot(): void {
   function enterCampus(): void {
     const scene = campus();
     if (!scene || !campusUI) return;
+    // The journey is over: give the page back to the browser so the
+    // configurator and the reading path below can actually be reached.
+    scroller.disable();
+    delete document.body.dataset.virtualScroll;
     campusUI.hidden = false;
     if (after) after.hidden = false;
     scene.setInteractive(true);
@@ -386,6 +407,9 @@ export function boot(): void {
   }
 
   function exitCampus(): void {
+    scroller.enable();
+    document.body.dataset.virtualScroll = '';
+    window.scrollTo({ top: 0, behavior: 'auto' });
     cancelAnimationFrame(hotspotRaf);
     if (campusUI) campusUI.hidden = true;
     if (after) after.hidden = true;
@@ -482,11 +506,14 @@ export function boot(): void {
   // the first screen — not something deferred until after it. Three.js is
   // still its own chunk; we simply stop waiting for idle to ask for it.
   void initScene();
-  window.addEventListener('scroll', onScroll, { passive: true });
+  scroller.onScrub(onProgress);
+  scroller.setActiveStage(trackLength(0));
+  window.addEventListener('resize', () => scroller.setActiveStage(trackLength(current)));
 
   initLoader(() => {
     reveal(0);
     audio.play('stage-land-ambient', { fadeIn: 1.2, volume: 0.35 });
-    onScroll();
+    scroller.enable();
+    onProgress(0);
   });
 }

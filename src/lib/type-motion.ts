@@ -618,10 +618,10 @@ export interface RevealLinesOptions extends MotionOptions {
 }
 
 const LINE_DEFAULTS = {
-  duration: 1.15,
+  duration: 0.65,
   delay: 0.15,
   stagger: 0.075,
-  ease: 'expo.out',
+  ease: 'power2.out',
   y: 115,
   opacityFrom: 0,
   lineClass: 'line',
@@ -632,10 +632,15 @@ const LINE_DEFAULTS = {
 /**
  * The workhorse: each line rides up out of an `overflow: hidden` mask.
  *
- * Identical in output to the reveal it replaces — yPercent 115 → 0 with
- * opacity, `expo.out`, 1.15s, 0.075s stagger — and it adopts the
- * `.line > .line__inner` pair when the markup already provides it, so it can
- * be swapped in without touching a template.
+ * yPercent 115 → 0 with opacity, `power2.out`, 0.65s, 0.075s stagger. Those
+ * are the reference's numbers, not ours: power2.out is its default gesture by
+ * a wide margin and 0.65s is the long end of its UI band. It reads gentler and
+ * shorter than the 1.15s `expo.out` this used to run — an expo arrives almost
+ * all at once and then crawls, which is what made our chrome feel snappier and
+ * more aggressive than the site it is modelled on.
+ *
+ * It adopts the `.line > .line__inner` pair when the markup already provides
+ * it, so it can be swapped in without touching a template.
  */
 export function revealLines(el: HTMLElement, opts: RevealLinesOptions = {}): TypeMotionHandle {
   return guarded(el, 'text', () => {
@@ -721,10 +726,10 @@ export interface RevealCharsOptions extends MotionOptions {
 }
 
 const CHAR_DEFAULTS = {
-  duration: 0.9,
+  duration: 0.5,
   delay: 0,
   stagger: 0.024,
-  ease: 'expo.out',
+  ease: 'power2.out',
   from: 'start' as CharOrigin,
   y: 90,
   rotate: 0,
@@ -736,6 +741,9 @@ const CHAR_DEFAULTS = {
 /**
  * Characters arrive one by one. Use it on a short display line — a word, a
  * figure, a two-word headline — where the line rise reads as too polite.
+ *
+ * `power2.out` at 0.5s: shorter than the line rise because a stagger of a
+ * couple of dozen characters is already carrying the length.
  */
 export function revealChars(el: HTMLElement, opts: RevealCharsOptions = {}): TypeMotionHandle {
   return guarded(el, 'text', () => {
@@ -795,7 +803,7 @@ export function revealChars(el: HTMLElement, opts: RevealCharsOptions = {}): Typ
 export interface ScrambleOptions {
   /** Glyph pool cycled through before a character settles. */
   chars?: string;
-  /** Seconds for the whole label to settle. Default 0.9. */
+  /** Seconds for the whole label to settle. Default 0.65. */
   duration?: number;
   /** Seconds before it starts. Default 0. */
   delay?: number;
@@ -816,7 +824,7 @@ export interface ScrambleOptions {
 
 const SCRAMBLE_DEFAULTS = {
   chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/\\<>[]=+*#%',
-  duration: 0.9,
+  duration: 0.65,
   delay: 0,
   tick: 42,
   ease: 'power2.out',
@@ -974,11 +982,11 @@ export interface CountUpOptions {
   from?: number;
   /** End value. Default: the number already in the element. */
   to?: number;
-  /** Seconds. Default 1.2. */
+  /** Seconds. Default 0.8. */
   duration?: number;
   /** Seconds before it starts. Default 0. */
   delay?: number;
-  /** Default 'expo.out'. */
+  /** Default 'power2.out'. */
   ease?: string;
   /** Decimal places. Default: as many as the element's own text carries. */
   decimals?: number;
@@ -1114,9 +1122,11 @@ export function countUp(el: HTMLElement, opts: CountUpOptions = {}): TypeMotionH
     const state = { value: from };
     const tween = gsap.to(state, {
       value: to,
-      duration: opts.duration ?? 1.2,
+      // 0.8s is the top of the reference's band, kept rather than shortened
+      // further: a figure has to be legible on the way up, not just at rest.
+      duration: opts.duration ?? 0.8,
       delay: opts.delay ?? 0,
-      ease: opts.ease ?? 'expo.out',
+      ease: opts.ease ?? 'power2.out',
       paused: opts.paused ?? false,
       onUpdate: () => {
         el.textContent = format(state.value);
@@ -1177,7 +1187,7 @@ export interface EmphasisOptions {
   sheenOpacity?: number;
   /** sheen: band width as a fraction of the box. Default 0.3. */
   sheenWidth?: number;
-  /** sheen: seconds of stillness between passes. Default 3.4. */
+  /** sheen: seconds of stillness between passes. Default 3.5. */
   interval?: number;
 }
 
@@ -1216,7 +1226,8 @@ export function emphasis(el: HTMLElement, opts: EmphasisOptions = {}): TypeMotio
       const tween = gsap.to(state, {
         w: w1,
         o: opsz ? opsz[1] : 0,
-        duration: opts.duration ?? 3.2,
+        // Ambient, so it takes the reference's scene-scale end: 3.5s.
+        duration: opts.duration ?? 3.5,
         delay,
         ease: opts.ease ?? 'sine.inOut',
         repeat,
@@ -1269,11 +1280,11 @@ export function emphasis(el: HTMLElement, opts: EmphasisOptions = {}): TypeMotio
         { xPercent: -travel },
         {
           xPercent: travel,
-          duration: opts.duration ?? 1.6,
+          duration: opts.duration ?? 1,
           delay,
           ease: opts.ease ?? 'power2.inOut',
           repeat,
-          repeatDelay: opts.interval ?? 3.4,
+          repeatDelay: opts.interval ?? 3.5,
         },
       );
 
@@ -1300,7 +1311,7 @@ export function emphasis(el: HTMLElement, opts: EmphasisOptions = {}): TypeMotio
     const tween = gsap.to(el, {
       scale: opts.scale ?? 1.014,
       opacity: opts.opacity ?? 0.86,
-      duration: opts.duration ?? 2.6,
+      duration: opts.duration ?? 2,
       delay,
       ease: opts.ease ?? 'sine.inOut',
       repeat,

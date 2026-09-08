@@ -56,7 +56,7 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
        The reveal deliberately lives here rather than in the bundled module:
        if the module ever fails to load, the reading path must still be whole.
        The timer below is the second belt — if nothing has marked itself in
-       after 2.5s, the hiding class is dropped and everything is simply there. */
+       after 2s, the hiding class is dropped and everything is simply there. */
     (function () {
       if (!('IntersectionObserver' in window)) return;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -143,6 +143,13 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
   }
 
   .doc {
+    /* The reference's motion vocabulary, kept in one place. power2.out is its
+       workhorse — 28 of the eases in its bundle — and its gestures sit between
+       0.3s and 0.65s. Ours ran on an expo-shaped curve at 0.8–1.3s, which is
+       what read as aggressive rather than gentle. Deferred to a tokens.css
+       token the moment one exists. */
+    --e-p2: var(--e-power2-out, cubic-bezier(0.33, 1, 0.68, 1));
+
     --doc-w: 1240px;
     --doc-read: 66ch;
     --rail: 8.5rem;
@@ -237,7 +244,7 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
   }
   .reveal-on .doc__rule::before {
     transform: scaleX(0);
-    animation: doc-rule-draw 1.3s var(--e-out) 0.15s forwards;
+    animation: doc-rule-draw 0.65s var(--e-p2) 0.15s forwards;
   }
   @keyframes doc-rule-draw {
     to { transform: scaleX(1); }
@@ -301,7 +308,7 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
   }
   .reveal-on .doc > section::before {
     transform: scaleX(0);
-    transition: transform 1.1s var(--e-out);
+    transition: transform 0.65s var(--e-p2);
   }
   .reveal-on .doc > section.is-in::before { transform: scaleX(1); }
 
@@ -402,7 +409,7 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
       display: block;
       margin: 0;
       padding-top: 0.35em;
-      transition: color var(--d-base);
+      transition: color 0.3s var(--e-p2);
     }
     .doc .eyebrow::after {
       display: block;
@@ -411,14 +418,14 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
       margin-top: var(--s-4);
       background: var(--w-25);
       transform-origin: 50% 0;
-      transition: transform var(--d-slow) var(--e-out), background var(--d-base);
+      transition: transform 0.45s var(--e-p2), background 0.3s var(--e-p2);
     }
     .doc .eyebrow__n {
       display: block;
       margin-bottom: var(--s-3);
       font-size: var(--t-label);
       color: var(--w-45);
-      transition: color var(--d-base);
+      transition: color 0.3s var(--e-p2);
     }
     .doc .eyebrow__t {
       display: block;
@@ -462,7 +469,7 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
     gap: var(--s-2) var(--s-4);
     padding: var(--s-4) 0;
     border-top: 1px solid var(--w-10);
-    transition: border-color var(--d-fast);
+    transition: border-color 0.3s var(--e-p2);
   }
   .doc .spec > div:last-child { border-bottom: 1px solid var(--w-10); }
   .doc .spec > div:hover { border-top-color: var(--w-25); }
@@ -617,7 +624,7 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
     min-width: 0;
     padding: var(--s-5) 0 var(--s-5);
     border-top: 1px solid var(--w-25);
-    transition: border-color var(--d-base);
+    transition: border-color 0.3s var(--e-p2);
   }
   .doc .card:hover { border-top-color: var(--c-signal); }
   .doc .card > :last-child { margin-bottom: 0; }
@@ -791,7 +798,7 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
     text-transform: uppercase;
     text-decoration: none;
     cursor: pointer;
-    transition: transform var(--d-fast) var(--e-out), background var(--d-fast);
+    transition: transform 0.3s var(--e-p2), background 0.3s var(--e-p2);
   }
   .doc .btn:hover { transform: translateY(-1px); background: color-mix(in srgb, var(--c-signal) 82%, var(--c-white)); }
   .doc .btn--ghost {
@@ -829,7 +836,7 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
   .reveal-on .doc [data-reveal] {
     opacity: 0;
     transform: translateY(14px);
-    transition: opacity var(--d-slow) var(--e-out), transform var(--d-slow) var(--e-out);
+    transition: opacity 0.45s var(--e-p2), transform 0.6s var(--e-p2);
   }
   .reveal-on .doc [data-reveal].is-in { opacity: 1; transform: none; }
 

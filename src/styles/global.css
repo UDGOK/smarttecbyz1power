@@ -305,3 +305,11 @@ body[data-experience] main > [data-stage='campus'] { pointer-events: none; }
    layout — and if it is a full-bleed overlay, it silently eats every click
    underneath it. */
 [hidden] { display: none !important; }
+
+/* ---- Virtual scroll ----
+   While the damped scroll manager owns the journey the document itself must
+   not scroll, or the two compete and the page jitters. The stage tracks
+   collapse to one viewport; they are restored the moment the campus hands
+   control back so the configurator and reading path below are reachable. */
+body[data-virtual-scroll] { overflow: hidden; height: 100svh; }
+body[data-virtual-scroll] .stage-scroll { height: 100svh; }

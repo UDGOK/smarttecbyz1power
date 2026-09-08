@@ -243,6 +243,14 @@ const pad = (n: number): string => String(n).padStart(2, '0');
      with the chrome the same way the rest of the UI does. The hairlines and
      shadows are mixed off `--chrome-fg-loud`, so they invert on their own. */
   .cfg {
+    /* The reference's motion vocabulary. power2.out at 0.3–0.65s is its
+       default gesture — 28 of the eases in its bundle — and it is what every
+       resting state below is timed to. The theatrical moves (the card flight,
+       the question swap) are GSAP's, and configurator.ts times those on the
+       reference's osmoNav curve. Deferred to a tokens.css token the moment one
+       exists. */
+    --e-p2: var(--e-power2-out, cubic-bezier(0.33, 1, 0.68, 1));
+
     --cfg-line: var(--w-25);
     --cfg-hair: color-mix(in srgb, var(--chrome-fg-loud) 20%, transparent);
     --cfg-hair-soft: color-mix(in srgb, var(--chrome-fg-loud) 11%, transparent);
@@ -358,9 +366,9 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     font-size: var(--t-ui);
     cursor: pointer;
     transition:
-      border-color var(--d-fast),
-      box-shadow var(--d-fast),
-      transform var(--d-fast) var(--e-out);
+      border-color 0.3s var(--e-p2),
+      box-shadow 0.3s var(--e-p2),
+      transform 0.3s var(--e-p2);
   }
   .cfg__chip:hover, .cfg__chip:focus-visible {
     border-color: var(--chrome-fg-loud);
@@ -417,9 +425,9 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     text-align: left;
     cursor: pointer;
     transition:
-      border-color var(--d-fast),
-      box-shadow var(--d-base) var(--e-out),
-      transform var(--d-base) var(--e-out);
+      border-color 0.3s var(--e-p2),
+      box-shadow 0.3s var(--e-p2),
+      transform 0.3s var(--e-p2);
   }
   /* Hover and keyboard focus get the identical lift; focus adds the ring. */
   .cfg__card:hover,
@@ -440,7 +448,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     box-shadow: var(--cfg-lift-2);
   }
 
-  .cfg__card-idx { color: var(--chrome-fg); transition: color var(--d-fast); }
+  .cfg__card-idx { color: var(--chrome-fg); transition: color 0.3s var(--e-p2); }
   .cfg__card-label { font-size: 1.35rem; line-height: 1.1; letter-spacing: -0.02em; }
   .cfg__card-detail { font-size: var(--t-ui); line-height: 1.5; color: var(--chrome-fg); }
   .cfg__card:hover .cfg__card-idx { color: var(--chrome-fg-loud); }
@@ -455,7 +463,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     display: flex;
     opacity: 0;
     transform: translateX(-6px);
-    transition: opacity var(--d-fast), transform var(--d-base) var(--e-out);
+    transition: opacity 0.3s var(--e-p2), transform 0.45s var(--e-p2);
   }
   .cfg__card:hover .cfg__card-mark,
   .cfg__card:focus-visible .cfg__card-mark { opacity: 1; transform: translateX(0); }
@@ -480,7 +488,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     border-radius: var(--r-pill);
     background: var(--cfg-hair);
     transform-origin: left center;
-    transition: background var(--d-base), transform var(--d-base) var(--e-out);
+    transition: background 0.3s var(--e-p2), transform 0.45s var(--e-p2);
   }
   .cfg__pip[data-on] { background: var(--chrome-fg-loud); }
   .cfg__pip[data-now] { background: var(--cfg-dot); transform: scaleX(1.5); }
@@ -500,7 +508,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     letter-spacing: var(--ls-wide);
     text-transform: uppercase;
     cursor: pointer;
-    transition: border-color var(--d-fast), background var(--d-fast), transform var(--d-fast) var(--e-out);
+    transition: border-color 0.3s var(--e-p2), background 0.3s var(--e-p2), transform 0.3s var(--e-p2);
   }
   .cfg__ghost-btn:hover { border-color: var(--chrome-fg-loud); background: var(--cfg-surface); transform: translateY(-1px); }
 
@@ -641,7 +649,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     flex: 0 0 auto;
     border-radius: 50%;
     background: var(--cfg-dot);
-    transition: background var(--d-base);
+    transition: background 0.3s var(--e-p2);
   }
   .cfg__verdict-dot::after {
     content: '';
@@ -651,7 +659,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     border: 1px solid var(--cfg-dot);
     opacity: 0;
   }
-  .cfg[data-state='complete'] .cfg__verdict-dot::after { animation: cfg-ping 2.6s var(--e-out) infinite; }
+  .cfg[data-state='complete'] .cfg__verdict-dot::after { animation: cfg-ping 2.6s var(--e-p2) infinite; }
   @keyframes cfg-ping {
     0%   { opacity: 0.9; transform: scale(0.6); }
     70%  { opacity: 0;   transform: scale(1.9); }
@@ -742,7 +750,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
     letter-spacing: var(--ls-wide);
     text-transform: uppercase;
     text-decoration: none;
-    transition: transform var(--d-fast) var(--e-out), filter var(--d-fast);
+    transition: transform 0.3s var(--e-p2), filter 0.3s var(--e-p2);
   }
   .cfg__reserve:hover { transform: translateY(-2px); filter: brightness(0.92); }
   .cfg__ghost-btn--slab { border-color: var(--cfg-slab-line); color: var(--cfg-slab-loud); }

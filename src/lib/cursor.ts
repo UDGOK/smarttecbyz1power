@@ -33,6 +33,32 @@ const TEXTUAL = new Set([
 const INTERACTIVE =
   'a[href], button, [role="button"], [role="link"], summary, select, label[for]';
 
+/**
+ * Frame-rate-independent damping.
+ *
+ * `v += (target - v) * k` closes k of the remaining gap *per frame*, so the
+ * identical code settles more than twice as fast on a 144Hz display as it does
+ * on a 60Hz one — the cursor was literally a different cursor per monitor.
+ * `1 - exp(-dt / tc)` closes the same fraction *per second* instead: `tc` is
+ * the time constant, the seconds it takes to close ~63% of the gap, and the
+ * result is the same motion at any refresh rate.
+ */
+function damp(current: number, target: number, tc: number, dt: number): number {
+  if (tc <= 0) return target;
+  return current + (target - current) * (1 - Math.exp(-dt / tc));
+}
+
+/* Time constants, on the order of the reference's own damping constants
+   (SCROLL_LERP 0.075, CAMERA_LERP 0.08, SCROLL_VELOCITY_SMOOTHING 0.1, camera
+   rig 0.12). The two position constants are also what the old per-frame 0.2
+   and 0.09 actually worked out to at 60Hz, so the feel is preserved exactly
+   where it was already right and only the frame-rate dependence is gone. */
+const RING_TC = 0.075;        // ring lag
+const TRAIL_TC = 0.16;        // trail lag — roughly twice the ring's
+const SPEED_RISE_TC = 0.03;   // velocity readout, rising
+const SPEED_FALL_TC = 0.2;    // velocity readout, decaying at rest
+const DIR_TC = 0.05;          // direction of travel
+
 const GLYPHS: Partial<Record<CursorState, string>> = {
   draw:
     '<path d="M4 16.2 5.3 12.6l8-8a1.7 1.7 0 0 1 2.4 2.4l-8 8L4 16.2Z"/>' +
@@ -112,8 +138,10 @@ export function initCursor(): void {
   let down = false;
   let live = false;
 
-  const ringLag = reduced ? 1 : 0.2;
-  const trailLag = reduced ? 1 : 0.09;
+  // Under reduce a time constant of 0 means "already there": damp() returns
+  // the target, so the rig tracks the pointer exactly with no lag at all.
+  const ringTc = reduced ? 0 : RING_TC;
+  const trailTc = reduced ? 0 : TRAIL_TC;
 
   function campusLive(): boolean {
     const ui = document.getElementById('campus-ui');
@@ -190,14 +218,18 @@ export function initCursor(): void {
     lastY = ty;
 
     if (!reduced) {
+      const dts = dt / 1000;
       const px = Math.hypot(dx, dy) / Math.max(1, dt);   // px per ms
       // 2 px/ms is a brisk flick; anything above that is already at full tilt.
       const target = Math.min(1, px / 2);
-      speed += (target - speed) * 0.45;
+      // Pointer events do not arrive on a fixed cadence either — a high-rate
+      // mouse fires far more often than a trackpad — so the rise is damped
+      // against the event's own dt, not counted per event.
+      speed = damp(speed, target, SPEED_RISE_TC, dts);
       if (px > 0.02) {
         const inv = 1 / Math.hypot(dx, dy);
-        dirX += (dx * inv - dirX) * 0.3;
-        dirY += (dy * inv - dirY) * 0.3;
+        dirX = damp(dirX, dx * inv, DIR_TC, dts);
+        dirY = damp(dirY, dy * inv, DIR_TC, dts);
       }
     }
 
@@ -234,17 +266,24 @@ export function initCursor(): void {
   }, 260);
 
   // --- loop ---------------------------------------------------------------
-  const loop = (): void => {
-    rx += (tx - rx) * ringLag;
-    ry += (ty - ry) * ringLag;
-    sx += (tx - sx) * trailLag;
-    sy += (ty - sy) * trailLag;
+  let lastFrame = 0;
+  const loop = (now: number): void => {
+    // Clamped so a backgrounded tab does not resume with one enormous step.
+    const dt = lastFrame ? Math.min(0.064, (now - lastFrame) / 1000) : 1 / 60;
+    lastFrame = now;
+
+    rx = damp(rx, tx, ringTc, dt);
+    ry = damp(ry, ty, ringTc, dt);
+    sx = damp(sx, tx, trailTc, dt);
+    sy = damp(sy, ty, trailTc, dt);
 
     ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
     trail.style.transform = `translate3d(${sx}px, ${sy}px, 0)`;
 
     if (!reduced) {
-      speed *= 0.93;                      // decay when the pointer rests
+      // Decay when the pointer rests — an exponential in seconds, so the smear
+      // fades over the same wall-clock time on any display.
+      speed *= Math.exp(-dt / SPEED_FALL_TC);
       if (speed < 0.002) speed = 0;
       const cv = speed.toFixed(3);
       if (cv !== lastCv) {

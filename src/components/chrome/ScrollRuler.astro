@@ -70,10 +70,23 @@ const pads = Array.from({ length: PAD_SEGMENTS });
    * the cheapest honest source of scroll speed is the delta on that inline
    * transform — no second scroll listener, no layout read. The value lands on
    * --v, which chrome.css uses to stretch the indicator and bloom its smear.
+   *
+   * Both the measurement and the smoothing are in seconds rather than frames.
+   * A per-frame delta reads as twice the speed on a 120Hz display for the same
+   * flick, and a per-frame lerp then settles it twice as fast — so the readout
+   * is a rate (px/s) damped by `1 - exp(-dt / tc)`, which is the same number on
+   * any monitor. The falling constant is the reference's own
+   * SCROLL_VELOCITY_SMOOTHING; the rise stays much shorter, because the smear
+   * should trail the movement rather than lead it.
    */
   const ruler = document.querySelector<HTMLElement>('.scroll-ruler');
   const track = document.querySelector<HTMLElement>('.scroll-ruler-track');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /** Full tilt: 360 px of track per second — a hard flick. */
+  const FULL_TILT = 360;
+  const RISE_TC = 0.035;
+  const FALL_TC = 0.1;
 
   if (ruler && track && !reduced) {
     const readX = (): number => {
@@ -84,16 +97,20 @@ const pads = Array.from({ length: PAD_SEGMENTS });
     let last = readX();
     let v = 0;
     let written = '';
+    let lastFrame = 0;
 
-    const tick = (): void => {
+    const tick = (frame: number): void => {
+      // Clamped so a backgrounded tab does not resume on one enormous step.
+      const dt = lastFrame ? Math.min(0.064, (frame - lastFrame) / 1000) : 1 / 60;
+      lastFrame = frame;
+
       const now = readX();
       const delta = Math.abs(now - last);
       last = now;
 
-      // ~6px of track in one frame is a hard flick.
-      const target = Math.min(1, delta / 6);
-      // Rise fast, fall slow: the smear should trail the movement, not lead it.
-      v += (target - v) * (target > v ? 0.55 : 0.11);
+      const target = Math.min(1, delta / dt / FULL_TILT);
+      const tc = target > v ? RISE_TC : FALL_TC;
+      v += (target - v) * (1 - Math.exp(-dt / tc));
       if (v < 0.004) v = 0;
 
       const out = v.toFixed(3);

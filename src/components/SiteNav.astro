@@ -74,26 +74,34 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 
 <style>
   .nav {
+    /* The reference's motion vocabulary. power2.out is its workhorse — 28 of
+       the eases in its bundle — at 0.3–0.65s; ours used to be an expo-shaped
+       curve at 0.2/0.4/0.8, which is what read as snappy. tokens.css is the
+       home for these, so both defer to a token the moment one exists. */
+    --e-p2: var(--e-power2-out, cubic-bezier(0.33, 1, 0.68, 1));
+
     position: sticky;
     top: 0;
     z-index: var(--z-chrome);
     background: color-mix(in srgb, var(--c-land-deep) 78%, transparent);
     backdrop-filter: blur(16px) saturate(1.1);
     -webkit-backdrop-filter: blur(16px) saturate(1.1);
-    transition: background var(--d-base);
+    transition: background 0.3s var(--e-p2);
   }
   /* Off the top of the page the nav is a floating strip with no edge; the
-     moment the page moves under it, it grows one. */
+     moment the page moves under it, it grows one. `--nav-condense` and
+     `--nav-lift` are both damped per frame by content-motion.ts, so this edge
+     arrives continuously rather than being switched on at a threshold. With
+     the module absent the properties are simply unset and the nav sits open,
+     which is the same nav minus the compression. */
   .nav::after {
     content: '';
     position: absolute;
     inset: auto 0 0 0;
     height: 1px;
     background: var(--w-10);
-    opacity: 0;
-    transition: opacity var(--d-base);
+    opacity: var(--nav-lift, 0);
   }
-  .nav.is-scrolled::after { opacity: 1; }
   .nav.is-scrolled { background: color-mix(in srgb, var(--c-land-deep) 92%, transparent); }
 
   .nav__inner {
@@ -103,7 +111,7 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
     width: min(1240px, 100%);
     margin: 0 auto;
     padding: var(--s-4) var(--s-4);
-    transition: padding var(--d-base) var(--e-out);
+    transition: padding 0.45s var(--e-p2), gap 0.45s var(--e-p2);
   }
   .nav.is-condensed .nav__inner { padding-top: var(--s-2); padding-bottom: var(--s-2); }
 
@@ -115,7 +123,7 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
     color: var(--w-95);
     text-decoration: none;
   }
-  .nav__mark { transition: transform var(--d-base) var(--e-out); }
+  .nav__mark { transition: transform 0.3s var(--e-p2); }
   .nav__brand:hover .nav__mark { transform: rotate(-8deg) scale(1.06); }
 
   .nav__wordmark {
@@ -144,6 +152,9 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    /* The continuous half of the condense: the live line thins out as the bar
+       closes, on the damped scalar rather than on a class. */
+    opacity: calc(1 - 0.7 * var(--nav-condense, 0));
   }
   .nav__dot {
     flex: 0 0 auto;
@@ -185,7 +196,7 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
     text-transform: uppercase;
     text-decoration: none;
     white-space: nowrap;
-    transition: color var(--d-fast);
+    transition: color 0.3s var(--e-p2);
   }
   /* A hairline that grows out of the baseline rather than a pill. */
   .nav__link::after {
@@ -198,7 +209,7 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
     background: currentColor;
     transform: scaleX(0);
     transform-origin: 0 50%;
-    transition: transform var(--d-base) var(--e-out);
+    transition: transform 0.45s var(--e-p2);
   }
   .nav__link:hover { color: var(--w-95); }
   .nav__link:hover::after { transform: scaleX(1); }
@@ -212,7 +223,7 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
     border: 1px solid var(--w-25);
     border-radius: var(--r-pill);
     color: var(--w-95);
-    transition: color var(--d-fast), border-color var(--d-fast), background var(--d-fast);
+    transition: color 0.3s var(--e-p2), border-color 0.3s var(--e-p2), background 0.3s var(--e-p2);
   }
   .nav__link--cta::after { display: none; }
   .nav__link--cta:hover { border-color: var(--c-signal); background: color-mix(in srgb, var(--c-signal) 12%, transparent); }
@@ -250,5 +261,6 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 
   @media (prefers-reduced-motion: reduce) {
     .nav__link::after { transition: none; }
+    .nav__inner { transition: none; }
   }
 </style>

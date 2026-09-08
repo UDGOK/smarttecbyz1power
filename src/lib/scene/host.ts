@@ -23,6 +23,14 @@ export class SceneHost {
   private disposeTier: () => void;
   private stage: StageScene | null = null;
   private scroll = 0;
+  private rigX = 0;
+  private rigY = 0;
+  private rigFocal = 1;
+  private frameCbs = new Set<(dt: number, elapsed: number) => void>();
+  private fwd = new THREE.Vector3();
+  private aim = new THREE.Vector3();
+  private right = new THREE.Vector3();
+  private up = new THREE.Vector3();
   private post: PostChain;
   private transition: Transition;
 
@@ -92,6 +100,24 @@ export class SceneHost {
 
   setScrollProgress(p: number): void { this.scroll = p; }
 
+  /**
+   * Pointer/gyro parallax. Applied after the stage has placed the camera:
+   * the aim point is captured `focal` units ahead, the camera is nudged along
+   * its own right and up, then re-aimed at that same point — which reads as
+   * parallax rather than as the whole frame sliding.
+   */
+  setRigOffset(x: number, y: number, focal = 1): void {
+    this.rigX = x;
+    this.rigY = y;
+    this.rigFocal = focal;
+  }
+
+  /** Driven every frame with the host's own delta, so callers stay in step. */
+  onFrame(fn: (dt: number, elapsed: number) => void): () => void {
+    this.frameCbs.add(fn);
+    return () => this.frameCbs.delete(fn);
+  }
+
   setClearColor(color: THREE.ColorRepresentation): void {
     this.renderer.setClearColor(color, 1);
   }
@@ -139,13 +165,27 @@ export class SceneHost {
 
       const delta = this.clock.getDelta();
       const elapsed = this.reducedMotion ? 0 : this.clock.getElapsedTime();
+      for (const fn of this.frameCbs) fn(delta, elapsed);
       this.stage?.update(elapsed, delta, this.scroll, this.ctx());
+      this.applyRig();
       this.post.render(this.scene, this.camera, elapsed);
       // Composites straight onto the frame the post chain just wrote.
       this.transition.render(this.camera, elapsed);
       this.raf = requestAnimationFrame(loop);
     };
     this.raf = requestAnimationFrame(loop);
+  }
+
+  private applyRig(): void {
+    if (this.rigX === 0 && this.rigY === 0) return;
+    const cam = this.camera;
+    cam.getWorldDirection(this.fwd);
+    this.aim.copy(cam.position).addScaledVector(this.fwd, this.rigFocal);
+    this.right.setFromMatrixColumn(cam.matrixWorld, 0).normalize();
+    this.up.setFromMatrixColumn(cam.matrixWorld, 1).normalize();
+    cam.position.addScaledVector(this.right, this.rigX);
+    cam.position.addScaledVector(this.up, this.rigY);
+    cam.lookAt(this.aim);
   }
 
   stop(): void {
