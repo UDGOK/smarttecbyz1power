@@ -33,8 +33,8 @@ export const power = {
   transformer: '3 MVA',
   voltage: '208V three-phase',
   rate: '$0.08 / kWh',
-  phase1aDraw: '~114 kW',
-  phase1aUtilisation: '~4% of transformer capacity',
+  phase1aDraw: '~7.5 kW (estimated)',
+  phase1aUtilisation: '~0.25% of transformer capacity',
   headroom: '20× headroom before any utility upgrade',
   interconnectionQueue: 'None — behind-the-meter',
   industryQueue: '4–7 years',
@@ -50,11 +50,17 @@ export const network = {
 } as const;
 
 export const compute = {
-  systems: '8 × NVIDIA HGX B200',
-  gpus: 64,
-  rentable: 60,
-  load: '~114 kW IT load',
-  cooling: 'Direct-to-chip liquid cooling',
+  systems: '2 nodes · 4 × NVIDIA RTX 6000 Blackwell each',
+  gpus: 8,
+  rentable: 8,
+  /**
+   * ESTIMATED, not from the site record. Derived as 8 × 600 W board power for
+   * the RTX 6000 Blackwell, plus roughly 1.2 kW per node for host, networking
+   * and supply losses: 4.8 + 2.4 ≈ 7.2, carried at 7.5 kW. Replace with the
+   * measured figure once Phase 1A is energised.
+   */
+  load: '~7.5 kW IT load (estimated)',
+  cooling: '[PLACEHOLDER: cooling method for the RTX 6000 Blackwell nodes — air or direct-to-chip]',
   target: 'Q4 2026 power-on',
 } as const;
 
@@ -122,8 +128,8 @@ export const stages = [
     ground: '#070a0f',
     ruler: '-25 BP',
     kicker: 'Phase 1A',
-    title: 'Sixty-four\nBlackwells.',
-    lede: `${compute.systems}. ${compute.gpus} GPUs, ${compute.rentable} rentable. ${compute.load}, liquid cooled, drawing ${power.phase1aUtilisation}.`,
+    title: 'Eight\nBlackwells.',
+    lede: `${compute.systems}. ${compute.gpus} GPUs, all of them rentable. ${compute.load}, drawing ${power.phase1aUtilisation}.`,
     chrome: 'light' as const,
     scrollVh: 300,
     hold: { label: 'Hold to power on', holdLabel: 'Powering on', duration: 2.2 },

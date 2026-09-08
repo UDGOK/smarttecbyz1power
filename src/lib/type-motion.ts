@@ -1013,7 +1013,7 @@ interface ParsedFigure {
   suffix: string;
 }
 
-/** Pulls the figure out of text like `114 kW`, `$1,250.50`, `99.9%`. */
+/** Pulls the figure out of text like `7.5 kW`, `$1,250.50`, `99.9%`. */
 function parseFigure(text: string): ParsedFigure | null {
   const match = /^(\D*?)([-+]?\d[\d,  ]*(?:\.\d+)?)(.*)$/s.exec(text);
   if (!match) return null;

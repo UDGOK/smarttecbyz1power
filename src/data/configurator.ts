@@ -14,7 +14,7 @@
 
 import { compute, power, site } from './site';
 
-/** Pull the first number out of a site-record string ("~114 kW" -> 114). */
+/** Pull the first number out of a site-record string ("~7.5 kW" -> 7.5). */
 function firstNumber(source: string, fallback: number): number {
   const match = source.match(/-?\d+(?:\.\d+)?/);
   return match ? Number(match[0]) : fallback;
@@ -22,7 +22,7 @@ function firstNumber(source: string, fallback: number): number {
 
 const nf = new Intl.NumberFormat('en-US');
 
-const PHASE_1A_KW = firstNumber(power.phase1aDraw, 114);          // '~114 kW'
+const PHASE_1A_KW = firstNumber(power.phase1aDraw, 7.5);         // '~7.5 kW (estimated)'
 const TRANSFORMER_KVA = firstNumber(power.transformer, 3) * 1000; // '3 MVA'
 const ENERGY_RATE = firstNumber(power.rate, 0.08);                // '$0.08 / kWh'
 
@@ -124,8 +124,8 @@ export const questions: ConfiguratorQuestion[] = [
         chip: 'Training',
         effects: {
           drawFactor: 1,
-          gpuFloor: 8,
-          gpuFloorReason: 'a training run wants a whole HGX node',
+          gpuFloor: 4,
+          gpuFloorReason: 'a training run wants a whole node',
           note: 'Sustained training holds the GPUs near rated draw — sized at full load.',
         },
       },
@@ -136,7 +136,7 @@ export const questions: ConfiguratorQuestion[] = [
         chip: 'Fine-tuning',
         effects: {
           drawFactor: 0.9,
-          gpuFloor: 4,
+          gpuFloor: 2,
           gpuFloorReason: 'a fine-tune wants at least half a node',
           note: 'Fine-tuning runs hot but bursty — sized just under rated load.',
         },
@@ -184,7 +184,7 @@ export const questions: ConfiguratorQuestion[] = [
         chip: '10–70B',
         effects: {
           gpuFloor: 2,
-          gpuFloorReason: 'a 10–70B model wants at least two GPUs',
+          gpuFloorReason: 'a 10–70B model wants at least two cards',
           note: 'A 10–70B model wants two GPUs or more once cache is accounted for.',
         },
       },
@@ -195,8 +195,8 @@ export const questions: ConfiguratorQuestion[] = [
         chip: '70–200B',
         effects: {
           gpuFloor: 4,
-          gpuFloorReason: 'a 70–200B model wants half a node to hold weights and cache',
-          note: 'A 70–200B model is sharded across at least half an HGX node.',
+          gpuFloorReason: 'a 70–200B model wants a whole node to hold weights and cache',
+          note: 'A 70–200B model is sharded across a whole node.',
         },
       },
       {
@@ -206,7 +206,7 @@ export const questions: ConfiguratorQuestion[] = [
         chip: '200B+',
         effects: {
           gpuFloor: 8,
-          gpuFloorReason: 'a 200B+ model wants a full HGX node',
+          gpuFloorReason: 'a 200B+ model wants both nodes',
           note: 'A 200B+ model is sized across a full node so the NVLink domain stays intact.',
         },
       },
@@ -220,34 +220,34 @@ export const questions: ConfiguratorQuestion[] = [
     chipLabel: 'GPUs',
     options: [
       {
-        id: 'small',
-        label: '1 – 4',
-        detail: 'A slice of one system. Enough to serve or to prototype.',
-        chip: '1–4 GPUs',
-        effects: { gpuRange: { min: 1, max: 4 }, note: 'A partial node, carved out of a shared system.' },
+        id: 'single',
+        label: '1',
+        detail: 'One card. Enough to serve a model or to prototype against.',
+        chip: '1 GPU',
+        effects: { gpuRange: { min: 1, max: 1 }, note: 'A single RTX 6000 Blackwell, carved out of a shared node.' },
+      },
+      {
+        id: 'pair',
+        label: '2',
+        detail: 'A pair in the same node — no fabric hop between them.',
+        chip: '2 GPUs',
+        effects: { gpuRange: { min: 2, max: 2 }, note: 'Two cards in one node, sharing its host and its supply.' },
       },
       {
         id: 'node',
-        label: '8',
-        detail: 'One whole HGX B200 — a full NVLink domain, nothing shared.',
-        chip: '8 GPUs',
-        effects: { gpuRange: { min: 8, max: 8 }, note: 'One dedicated HGX B200, all eight GPUs on one NVLink fabric.' },
-      },
-      {
-        id: 'cluster',
-        label: '16 – 32',
-        detail: 'Two to four systems, fabric-joined.',
-        chip: '16–32 GPUs',
-        effects: { gpuRange: { min: 16, max: 32 }, note: 'A multi-node cluster, quoted at the top of the range.' },
+        label: '4',
+        detail: 'One whole node. Nothing shared with another tenant.',
+        chip: '4 GPUs',
+        effects: { gpuRange: { min: 4, max: 4 }, note: 'One dedicated node, all four cards on the same host.' },
       },
       {
         id: 'hall',
-        label: `Full ${compute.rentable}`,
-        detail: `Every rentable GPU in Phase 1A. ${compute.systems}, ${compute.gpus} installed.`,
+        label: `All ${compute.rentable}`,
+        detail: `Both nodes. ${compute.systems}.`,
         chip: `${compute.rentable} GPUs`,
         effects: {
           gpuRange: { min: compute.rentable, max: compute.rentable },
-          note: `All ${compute.rentable} rentable GPUs — the whole of Phase 1A, with ${compute.gpus - compute.rentable} held back as spares.`,
+          note: `All ${compute.rentable} rentable GPUs — the whole of Phase 1A.`,
         },
       },
     ],
@@ -342,7 +342,7 @@ export const fitLevels: Record<FitLevel, FitCopy> = {
   'phase-1a': {
     label: 'Fits Phase 1A',
     headline: 'It fits Phase 1A.',
-    detail: `Building ${envelope.hall.id} — ${nf.format(envelope.hall.sqft)} sqft, ${envelope.systems}, direct-to-chip liquid cooled — absorbs this inside the ${power.phase1aDraw} Phase 1A load, and the ${envelope.transformerLabel} transformer barely notices.`,
+    detail: `Building ${envelope.hall.id} — ${nf.format(envelope.hall.sqft)} sqft, ${envelope.systems} — absorbs this inside the ${power.phase1aDraw} Phase 1A load, and the ${envelope.transformerLabel} transformer barely notices.`,
   },
   'phase-1a-tight': {
     label: 'Fills Phase 1A',

@@ -14,7 +14,7 @@ const perSystemKw = loadKw / systems;
   title={`Phase 1A compute — ${compute.systems} | ${company.full}`}
   description={`${compute.systems} at ${site.designation}, ${site.name}. ${compute.gpus} GPUs, ${compute.rentable} rentable, ${compute.load}, ${compute.cooling.toLowerCase()}, targeting ${compute.target}.`}
   kicker="Phase 1A hardware"
-  heading="Sixty-four Blackwells, liquid cooled."
+  heading="Eight Blackwells, in two nodes."
   lede={`${compute.systems} in Building 1. ${compute.gpus} GPUs, ${compute.rentable} of them rentable, drawing ${compute.load} — ${power.phase1aUtilisation} of the service already standing on the parcel.`}
   meta={[
     { label: 'Systems', value: String(systems), note: compute.systems, count: true },
@@ -41,9 +41,19 @@ const perSystemKw = loadKw / systems;
           forecast; this is a purchase and a fit-out.
         </p>
         <p>
-          {compute.rentable} of the {compute.gpus} GPUs are offered to tenants.
-          The remaining {heldBack} are not:
-          {' '}<span class="todo">[PLACEHOLDER: disposition of the {heldBack} non-rentable GPUs — spares, burn-in, internal use]</span>.
+          {heldBack > 0 ? (
+            <>
+              {compute.rentable} of the {compute.gpus} GPUs are offered to tenants.
+              The remaining {heldBack} are not:
+              {' '}<span class="todo">[PLACEHOLDER: disposition of the {heldBack} non-rentable GPUs — spares, burn-in, internal use]</span>.
+            </>
+          ) : (
+            <>
+              All {compute.gpus} GPUs are offered to tenants. Nothing is held back for
+              spares or internal use, which is worth saying plainly: at this size a
+              reserve would be a quarter of the deployment.
+            </>
+          )}
         </p>
       </div>
 
@@ -54,7 +64,10 @@ const perSystemKw = loadKw / systems;
         </div>
         <div>
           <dt>Held back</dt>
-          <dd><span data-count>{heldBack}</span><span class="sub">Disposition not yet published</span></dd>
+          <dd>
+            <span data-count>{heldBack}</span>
+            <span class="sub">{heldBack > 0 ? 'Disposition not yet published' : 'Every card is rentable'}</span>
+          </dd>
         </div>
       </dl>
     </div>
@@ -109,7 +122,7 @@ const perSystemKw = loadKw / systems;
 
   <section aria-labelledby="cooling" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Cooling</span></p>
-    <h2 id="cooling">Direct-to-chip, not a retrofit</h2>
+    <h2 id="cooling">Cooling is not settled yet</h2>
 
     <div class="split">
       <div>

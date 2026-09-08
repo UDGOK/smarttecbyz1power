@@ -58,7 +58,7 @@ const REGISTRY: Record<string, TrackOptions> = {
   'stage-wait-ambient':    { type: 'ambient', loop: true, volume: 0.5, bed: 'wait' },
   // Behind the meter: array, bank, a 3 MVA transformer breathing at 120 Hz.
   'stage-power-ambient':   { type: 'ambient', loop: true, volume: 0.5, bed: 'power' },
-  // Phase 1A: 64 GPUs, fan walls, coolant, packets on the fibre.
+  // Phase 1A: eight RTX 6000 Blackwells, fan walls, coolant, packets on the fibre.
   'stage-machine-ambient': { type: 'ambient', loop: true, volume: 0.5, bed: 'machine' },
   // Daylight, outdoors, finished. The plant is audible but far away.
   'stage-campus-ambient':  { type: 'ambient', loop: true, volume: 0.5, bed: 'campus' },

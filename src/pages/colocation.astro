@@ -36,7 +36,7 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
         <h3>Colocation</h3>
         <p>
           You bring the hardware. We provide the space in Building 1, the power from the
-          existing {power.transformer} service, direct-to-chip liquid cooling, network,
+          existing {power.transformer} service, cooling, network,
           and hands on site. You keep ownership of your accelerators and your software
           stack; we keep the facility running.
         </p>
@@ -101,7 +101,7 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
 
   <section aria-labelledby="density" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Density and cooling</span></p>
-    <h2 id="density">Direct-to-chip liquid cooling, because the racks are dense</h2>
+    <h2 id="density">Density, and what it asks of the cooling</h2>
 
     <p>
       An air-cooled hall stops being able to remove heat long before a modern accelerator
@@ -110,10 +110,11 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
       thermal path does not.
     </p>
     <p>
-      Building 1 is fitted out for {compute.cooling.toLowerCase()} — coolant carried to a
-      cold plate sitting directly on the accelerator, rather than air pushed across a heat
-      sink. It is the reason a {site.buildings[0].sqft.toLocaleString()} sq ft hall can
-      take dense racks at all.
+      Phase 1A is {compute.systems.toLowerCase()}, which is a modest thermal load for a
+      {site.buildings[0].sqft.toLocaleString()} sq ft hall. The cooling method has not been
+      fixed yet, and we are not going to claim one before it is:
+      {' '}<span class="todo">{compute.cooling}</span>. What the building will support at
+      higher density is a separate question, answered below.
     </p>
 
     <dl class="spec">

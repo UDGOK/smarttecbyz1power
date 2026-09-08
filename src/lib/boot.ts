@@ -18,9 +18,14 @@ import { initConfigurator } from './configurator';
 import { revealLines, scramble } from './type-motion';
 import { ScrollManager, CameraRig, SCROLL_CONFIG, DELTA_SCALE } from './scroll';
 import { audio } from './audio';
-import { stages, ENTRY_MIX } from '../data/site';
+import { stages, ENTRY_MIX, power } from '../data/site';
 
-const PHASE_1A_KW = 114;
+/**
+ * Read from the record rather than hard-coded — it moved from 114 kW to 7.5
+ * when Phase 1A changed from eight HGX B200s to two RTX 6000 Blackwell nodes,
+ * and a literal here would have silently kept counting to the old number.
+ */
+const PHASE_1A_KW = Number.parseFloat(power.phase1aDraw.replace(/[^0-9.]/g, '')) || 7.5;
 
 /**
  * Where in a stage's scroll track the next world starts bleeding in. Before
@@ -199,7 +204,11 @@ export function boot(): void {
   }
 
   function setPower(fraction: number): void {
-    if (powerValue) powerValue.textContent = String(Math.round(PHASE_1A_KW * fraction));
+    if (!powerValue) return;
+    const kw = PHASE_1A_KW * fraction;
+    // At 7.5 kW a whole-number counter only has eight steps in it, so it reads
+    // as stuttering rather than climbing. One decimal under 20 kW.
+    powerValue.textContent = PHASE_1A_KW < 20 ? kw.toFixed(1) : String(Math.round(kw));
   }
 
   function flash(): void {
