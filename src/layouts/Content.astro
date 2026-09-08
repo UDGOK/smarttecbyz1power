@@ -58,42 +58,83 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
        The timer below is the second belt — if nothing has marked itself in
        after 2s, the hiding class is dropped and everything is simply there. */
     (function () {
-      if (!('IntersectionObserver' in window)) return;
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       var root = document.documentElement;
-      root.classList.add('reveal-on');
-      var observed = false;
-      var io = new IntersectionObserver(function (entries) {
-        observed = true;
-        for (var i = 0; i < entries.length; i++) {
-          if (entries[i].isIntersecting) {
-            entries[i].target.classList.add('is-in');
-            io.unobserve(entries[i].target);
+
+      /* Order matters more than anything else here. `reveal-on` is what HIDES
+         the content; it must not be added until the machinery that reveals it
+         again is known to exist and to work. The previous version added it
+         first and then constructed the observer — so anything that made that
+         constructor throw (a stubbed API, an extension, an older engine) left
+         every section below the fold permanently invisible with no way back.
+         The whole block is wrapped, and any failure undoes the hiding. */
+      try {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (typeof window.IntersectionObserver !== 'function') return;
+
+        var observed = false;
+        var io = new IntersectionObserver(function (entries) {
+          observed = true;
+          for (var i = 0; i < entries.length; i++) {
+            if (entries[i].isIntersecting) {
+              entries[i].target.classList.add('is-in');
+              io.unobserve(entries[i].target);
+            }
           }
+        }, { rootMargin: '0px 0px 22% 0px', threshold: 0 });
+
+        /* Plain arithmetic, no observer involved: anything whose top has come
+           within a screen of the fold is revealed. A second mechanism, so a
+           single failure cannot leave the page's own words invisible. */
+        var sweep = function () {
+          var els = document.querySelectorAll('[data-reveal]:not(.is-in)');
+          if (!els.length) { window.removeEventListener('scroll', onScroll); return; }
+          var limit = window.innerHeight * 1.25;
+          for (var i = 0; i < els.length; i++) {
+            if (els[i].getBoundingClientRect().top < limit) els[i].classList.add('is-in');
+          }
+        };
+        var ticking = false;
+        var onScroll = function () {
+          if (ticking) return;
+          ticking = true;
+          window.requestAnimationFrame(function () { ticking = false; sweep(); });
+        };
+
+        var start = function () {
+          try {
+            var els = document.querySelectorAll('[data-reveal]');
+            for (var i = 0; i < els.length; i++) io.observe(els[i]);
+            sweep();
+          } catch (e) { root.classList.remove('reveal-on'); }
+        };
+
+        // Only now is it safe to hide anything.
+        root.classList.add('reveal-on');
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', start);
+        } else {
+          start();
         }
-        /* Fire *before* the block enters, not after. With a negative bottom
-           margin and a 4% threshold a section had to be roughly 130px into
-           view to reveal — so a heading sat on screen blank and then snapped
-           in, which reads as the heading having disappeared. Especially now
-           that a fast scroll actually covers ground. A positive bottom margin
-           extends the root below the fold, so a block is already revealed by
-           the time it is visible. */
-      }, { rootMargin: '0px 0px 22% 0px', threshold: 0 });
-      var start = function () {
-        var els = document.querySelectorAll('[data-reveal]');
-        for (var i = 0; i < els.length; i++) io.observe(els[i]);
-      };
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', start);
-      } else {
-        start();
+
+        // The observer reports on every target as soon as it is observed, so
+        // silence means something is wrong.
+        window.setTimeout(function () {
+          if (!observed) root.classList.remove('reveal-on');
+        }, 2000);
+
+        // Last resort: nothing stays hidden forever. The effect has had its
+        // chance and the words matter more.
+        window.setTimeout(function () {
+          if (document.querySelectorAll('[data-reveal]:not(.is-in)').length) {
+            root.classList.remove('reveal-on');
+          }
+        }, 10000);
+      } catch (e) {
+        root.classList.remove('reveal-on');
       }
-      /* The observer reports on every target as soon as it is observed, so if
-         nothing has come back at all something is wrong — drop the hiding
-         class and leave the page simply readable. */
-      window.setTimeout(function () {
-        if (!observed) root.classList.remove('reveal-on');
-      }, 2000);
     })();
   </script>
 
