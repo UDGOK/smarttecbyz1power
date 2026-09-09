@@ -490,10 +490,20 @@
    still on screen.
    ============================================================ */
 
+/**
+ * How much room the badge needs in its corner, including the gap after it.
+ * The menu toggle is positioned from this. Measure the badge and update this
+ * if its content changes length — the two are coupled by geometry whether or
+ * not the stylesheet admits it, so it is admitted here.
+ */
+:root { --badge-clearance: 160px; }
+
 .power-badge {
   position: fixed;
   top: var(--chrome-inset);
   right: var(--chrome-inset);
+  /* Never grow past the clearance the toggle was placed from. */
+  max-width: calc(var(--badge-clearance) - 14px);
   z-index: var(--z-chrome);
   display: flex;
   align-items: center;
@@ -898,7 +908,15 @@
 .menu-toggle {
   position: fixed;
   top: var(--chrome-inset);
-  right: calc(var(--chrome-inset) + 108px);
+  /* Clear of the power badge, which shares this corner.
+     
+     This was `+ 108px`, a number measured against the badge as it read at the
+     time. Then the badge gained the word "planned" — a correctness fix — grew
+     to 137px, and the two overlapped by 29px at every desktop width, with the
+     toggle sitting under the badge. One number now governs both, declared
+     beside the badge itself, so widening one cannot silently collide with the
+     other again. */
+  right: calc(var(--chrome-inset) + var(--badge-clearance));
   z-index: var(--z-chrome);
   display: flex;
   align-items: center;

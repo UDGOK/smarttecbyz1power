@@ -130,6 +130,8 @@ function run(): void {
   let swapping = false;
   let lockedUntil = 0;
   let crossing = false;
+  let contextLost = false;
+  let restoreTried = false;
 
   // The reference does not use native scroll: it damps its own position, which
   // is most of why its motion reads smooth. Same model here.
@@ -191,6 +193,32 @@ function run(): void {
       window.addEventListener('resize', host.resize);
       (window as unknown as { __experience?: SceneHost }).__experience = host;
 
+      /**
+       * The GPU can take the context away at any time — a laptop switching
+       * graphics, a machine under memory pressure, waking from sleep, or too
+       * many WebGL tabs. Nothing here was listening for it, so when it
+       * happened the renderer stopped, the scroll machinery carried on, and
+       * the visitor was left scrolling through the canvas's own green
+       * background with the world gone. It looked exactly like the page had
+       * broken, and it is intermittent, which is the worst kind.
+       *
+       * preventDefault is what allows a restore to be attempted at all.
+       */
+      canvasEl.addEventListener('webglcontextlost', (event) => {
+        event.preventDefault();
+        contextLost = true;
+        host?.stop();
+        degradeToDocument();
+      });
+
+      canvasEl.addEventListener('webglcontextrestored', () => {
+        // Only worth attempting once: a context that is lost twice is a
+        // machine telling us something, and the reading path is already up.
+        if (!contextLost || restoreTried) return;
+        restoreTried = true;
+        void restoreScene();
+      });
+
       sceneState = 'ready';
       maybeArm();
 
@@ -218,6 +246,35 @@ function run(): void {
       document.body.dataset.noWebgl = '';
       sceneState = 'failed';
       maybeArm();
+    }
+  }
+
+  /**
+   * Put the world back after the GPU returns the context.
+   *
+   * Best-effort and deliberately quiet: if it works the scene reappears at the
+   * stage the visitor is on, and if it throws they keep the readable document
+   * they already have.
+   */
+  async function restoreScene(): Promise<void> {
+    try {
+      const stage = stages[current] ?? stages[0];
+      host?.dispose();
+      host = new SceneHost(canvasEl, reduced);
+      host.setStage(await loadScene(stage.scene));
+      host.setClearColor(stage.ground);
+      host.setWorldMix(ENTRY_MIX[stage.id] ?? 0);
+      host.setPost(stage.post);
+      host.start();
+      (window as unknown as { __experience?: SceneHost }).__experience = host;
+
+      canvasEl.hidden = false;
+      delete document.body.dataset.noWebgl;
+      contextLost = false;
+      applyChrome(current);
+      reveal(current);
+    } catch {
+      // Stay degraded. The page is readable either way.
     }
   }
 
@@ -353,6 +410,35 @@ function run(): void {
   }
 
   /** Hands the page to the experience, or to the browser if there is none. */
+  /**
+   * Hand the page back as an ordinary scrolling document.
+   *
+   * Used when there is no scene to drive and when a scene we had goes away.
+   * The canvas is hidden rather than left in place: it carries a green
+   * gradient as its background, so an unhidden dead canvas is a full-screen
+   * green wash with the whole journey behind it. Better to have no scene and a
+   * readable page than a scene-shaped hole.
+   */
+  function degradeToDocument(): void {
+    canvasEl.hidden = true;
+    document.body.dataset.noWebgl = '';
+    scroller.disable();
+    delete document.body.dataset.virtualScroll;
+    window.removeEventListener('scroll', onNativeScroll);
+
+    for (const panel of panels) {
+      panel.hidden = false;
+      panel.removeAttribute('aria-hidden');
+      const sticky = panel.querySelector<HTMLElement>('[data-stage-sticky]');
+      if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
+      for (const line of panel.querySelectorAll<HTMLElement>('.line__inner')) {
+        line.style.opacity = '1';
+        line.style.transform = 'none';
+      }
+    }
+    document.querySelector<HTMLElement>('#after')?.removeAttribute('hidden');
+  }
+
   function maybeArm(): void {
     if (!gateCleared || sceneState === 'pending') return;
     if (armed) return;
@@ -377,17 +463,7 @@ function run(): void {
     } else {
       // No scene to drive, so never take native scrolling away: that pairing
       // is what produces a page nothing can move.
-      for (const panel of panels) {
-        panel.hidden = false;
-        panel.removeAttribute('aria-hidden');
-        const sticky = panel.querySelector<HTMLElement>('[data-stage-sticky]');
-        if (sticky) { sticky.style.opacity = '1'; sticky.style.transform = 'none'; }
-        for (const line of panel.querySelectorAll<HTMLElement>('.line__inner')) {
-          line.style.opacity = '1';
-          line.style.transform = 'none';
-        }
-      }
-      document.querySelector<HTMLElement>('#after')?.removeAttribute('hidden');
+      degradeToDocument();
     }
     window.dispatchEvent(new Event('experience:ready'));
   }
