@@ -26,6 +26,12 @@ export default defineConfig({
             if (id.includes('node_modules/three')) return 'three';
             if (id.includes('node_modules/gsap')) return 'gsap';
             if (id.includes('node_modules/howler')) return 'howler';
+            // Forced into its own chunk so Astro cannot inline it. The
+            // investor CSP is `script-src 'self'` with no `unsafe-inline`,
+            // and an inlined login handler is a blocked script — which
+            // presents as the form doing a native GET with the password in
+            // the query string. See client/login.mjs.
+            if (id.includes('smarttec-investor/client/login')) return 'investor-login';
           },
         },
       },

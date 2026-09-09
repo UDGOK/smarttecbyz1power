@@ -293,6 +293,23 @@ const phone = { ...devices['iPhone 14'] };
     !/INVESTOR_(PASSWORD_HASH|SESSION_SECRET)|UPSTASH_REDIS_REST_TOKEN/.test(body) && !/scrypt\$/i.test(body),
   );
 
+  // The login form's handler must actually be attached. It shipped inline
+  // once, which the room's own `script-src 'self'` CSP refuses — so the
+  // handler never ran, the form fell back to a native submit, and the
+  // password went into the query string. The mechanism was there; the
+  // gesture was dead. Submit the form and read where the browser ends up.
+  const gate = await page(desktop);
+  const csp = [];
+  gate.on('console', (m) => { if (/Content Security Policy/i.test(m.text())) csp.push(m.text()); });
+  await gate.goto(`${BASE}/investors/login`, { waitUntil: 'load' });
+  await gate.fill('#password', 'not-the-password');
+  await gate.click('#inv-login button[type=submit]');
+  await gate.waitForTimeout(2500);
+  check('login script is not blocked by the CSP', csp.length === 0, csp.slice(0, 1).join('; '));
+  check('login never puts the password in the URL', !gate.url().includes('password='), gate.url());
+  check('a rejected password is reported in the page', (await gate.textContent('#login-status'))?.trim().length > 0);
+  await gate.close();
+
   // The survey PDF is served from the server bundle through an authenticated
   // handler. If it ever appears under /public it becomes a static file that
   // no session guards.
