@@ -1,0 +1,37 @@
+{
+  "address": "8460 US 70, Mead, OK 73449",
+  "source": "BM Surveying, Inc. \u2014 Land Boundary Survey Plat, sheet 1 of 1",
+  "platDate": "2025-12-28",
+  "scale": "1 inch = 80 feet at original 24 x 36 inch sheet size; screen zoom changes display scale",
+  "tracts": [
+    {
+      "id": 1,
+      "acres": 13.5,
+      "status": "Planned manufacturing",
+      "description": "Owner marks two proposed 200 \u00d7 150 ft factories: inverter manufacturing and battery assembly. Positions are conceptual."
+    },
+    {
+      "id": 2,
+      "acres": 7.51,
+      "status": "Existing structures",
+      "depthFeet": 495,
+      "description": "Owner marks data-center structures 1 (east), 2 (middle), 3 (west), plus a proposed 2,000 sq ft BESS area. A/B/C correspondence is unconfirmed."
+    },
+    {
+      "id": 3,
+      "acres": 18.2,
+      "status": "Proposed solar and storage",
+      "depthFeet": 1200,
+      "description": "Proposed solar development area. Former greenhouse/pad omitted from the proposed overlay as requested; historical source documents remain unchanged."
+    }
+  ],
+  "totalAcres": 39.21,
+  "highway": "US 70 along north frontage",
+  "easements": "Proposed 50-foot ingress/egress and utility easements appear on the plat. Obtain recorded documents and current title review.",
+  "limitations": [
+    "This is the supplied survey copy, not a new survey, title opinion, engineering design or construction plan.",
+    "The survey notes no benefit of abstract/title opinion and no easement documents provided to the surveyor.",
+    "Surveyed structures do not establish present condition, data-center commissioning, exact A/B/C identity or permitted use.",
+    "Do not use a screenshot or screen scale for construction staking."
+  ]
+}

@@ -6,7 +6,7 @@
  * browser. Run: node tools/fetch-news.mjs
  */
 import { writeFileSync } from 'node:fs';
-import { collect } from '../api/_feeds.mjs';
+import { collect } from '../src/lib/feeds.mjs';
 
 const data = await collect(60);
 if (!data.items.length) {

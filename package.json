@@ -5,19 +5,25 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "node tools/stage-brand-kit.mjs && (node tools/fetch-news.mjs || true)",
+    "stage": "node tools/stage-brand-kit.mjs && (node tools/fetch-news.mjs || true)",
+    "prebuild": "npm run stage",
     "build": "astro build",
-    "preview": "astro preview",
+    "prebuild:node": "npm run stage",
+    "build:node": "SMARTTEC_BUILD_TARGET=node astro build",
+    "preview": "npm run build:node && node dist/server/entry.mjs",
     "check": "astro check",
     "verify": "node tools/verify.mjs"
   },
   "dependencies": {
+    "@astrojs/vercel": "^9.0.5",
     "astro": "^5.14.1",
     "gsap": "^3.13.0",
     "howler": "^2.2.4",
+    "maplibre-gl": "^6.9.0",
     "three": "^0.180.0"
   },
   "devDependencies": {
+    "@astrojs/node": "^9.5.5",
     "@types/howler": "^2.2.12",
     "@types/three": "^0.180.0",
     "typescript": "^5.9.2"

@@ -37,13 +37,14 @@ const phone = { ...devices['iPhone 14'] };
   console.log('\nroutes');
   const p = await page(desktop);
   const bad = [];
-  // /api/* is a Vercel serverless function and does not exist under
-  // `astro preview`, so a 404 there against localhost is the expected local
-  // shape rather than a regression. Against a deployment it is a real failure.
+  // Every route answers everywhere now. `npm run preview` builds against the
+  // Node adapter and serves the real compiled output, so the on-demand routes
+  // — /api/news and the investor section — exist locally too. They used to be
+  // Vercel-only functions that 404'd under `astro preview`; that exemption is
+  // gone, and a failure here is a failure anywhere.
   const local = /^https?:\/\/(localhost|127\.0\.0\.1)/.test(BASE);
   p.on('response', (r) => {
     if (r.status() < 400) return;
-    if (local && r.url().includes('/api/')) return;
     bad.push(`${r.status()} ${r.url()}`);
   });
   const errs = [];
@@ -56,13 +57,11 @@ const phone = { ...devices['iPhone 14'] };
   check('no failed requests', bad.length === 0, bad.slice(0, 2).join('; '));
   check('no page errors', errs.length === 0, errs.slice(0, 1).join('; '));
 
-  if (!local) {
+  {
     const res = await p.request.get(`${BASE}/api/news`);
     let items = 0;
     try { items = ((await res.json()).items ?? []).length; } catch { /* not json */ }
     check('/api/news serves a live feed', res.ok() && items > 0, `${res.status()}, ${items} items`);
-  } else {
-    console.log('  skip  /api/news — serverless, not served by astro preview');
   }
   await p.close();
 }
@@ -255,6 +254,69 @@ const phone = { ...devices['iPhone 14'] };
   check('phone spine reaches every stage', down.size >= 5, [...down].join(' '));
   check('phone spine comes back', up.size >= 5, [...up].join(' '));
   await ph.close();
+}
+
+/* 8. The private routes stay private. ----------------------------------
+   /investors is password-gated, and the failure that matters is the silent
+   one: a route that quietly starts serving the survey, the knowledge base or
+   the financial model to anyone who types the URL. So this asserts the
+   negative. Anonymous requests must never come back 200, whatever the reason
+   — redirected to login when the room is configured, refused outright when it
+   is not. Both are correct; a 200 never is.
+
+   It also checks the room stays out of the index. These pages carry owner
+   financials and a survey; a crawler finding them is a disclosure, not a
+   ranking problem. */
+{
+  console.log('\nthe investor room refuses anonymous callers');
+  const p = await page(desktop);
+
+  const room = await p.request.get(`${BASE}/investors`, { maxRedirects: 0 });
+  check('/investors does not answer anonymously', room.status() !== 200, String(room.status()));
+
+  // Every action behind the gate, not just the front door — each of these
+  // returns private material once a session exists.
+  for (const action of ['bootstrap', 'survey', 'survey-image', 'faq']) {
+    const res = await p.request.get(`${BASE}/api/investor/${action}`, { maxRedirects: 0 });
+    check(`/api/investor/${action} is gated`, res.status() !== 200, String(res.status()));
+  }
+
+  // The login page is the one private route that must render for a stranger.
+  // It may carry no private material of its own.
+  const login = await p.request.get(`${BASE}/investors/login`);
+  const body = await login.text();
+  check('/investors/login renders', login.status() === 200, String(login.status()));
+  check('login page is noindex', /noindex/i.test(login.headers()['x-robots-tag'] ?? ''), login.headers()['x-robots-tag'] ?? 'header absent');
+  check('login page is not cached', /no-store/.test(login.headers()['cache-control'] ?? ''), login.headers()['cache-control'] ?? 'header absent');
+  check(
+    'login page leaks no secret',
+    !/INVESTOR_(PASSWORD_HASH|SESSION_SECRET)|UPSTASH_REDIS_REST_TOKEN/.test(body) && !/scrypt\$/i.test(body),
+  );
+
+  // The login form's handler must actually be attached. It shipped inline
+  // once, which the room's own `script-src 'self'` CSP refuses — so the
+  // handler never ran, the form fell back to a native submit, and the
+  // password went into the query string. The mechanism was there; the
+  // gesture was dead. Submit the form and read where the browser ends up.
+  const gate = await page(desktop);
+  const csp = [];
+  gate.on('console', (m) => { if (/Content Security Policy/i.test(m.text())) csp.push(m.text()); });
+  await gate.goto(`${BASE}/investors/login`, { waitUntil: 'load' });
+  await gate.fill('#password', 'not-the-password');
+  await gate.click('#inv-login button[type=submit]');
+  await gate.waitForTimeout(2500);
+  check('login script is not blocked by the CSP', csp.length === 0, csp.slice(0, 1).join('; '));
+  check('login never puts the password in the URL', !gate.url().includes('password='), gate.url());
+  check('a rejected password is reported in the page', (await gate.textContent('#login-status'))?.trim().length > 0);
+  await gate.close();
+
+  // The survey PDF is served from the server bundle through an authenticated
+  // handler. If it ever appears under /public it becomes a static file that
+  // no session guards.
+  const stray = await p.request.get(`${BASE}/investor-assets/survey.pdf`);
+  check('survey is not a public static file', stray.status() === 404, String(stray.status()));
+
+  await p.close();
 }
 
 await browser.close();

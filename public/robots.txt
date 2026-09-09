@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://smarttec.z1power.com/sitemap-index.xml
+Sitemap: https://www.smarttec.dev/sitemap-index.xml

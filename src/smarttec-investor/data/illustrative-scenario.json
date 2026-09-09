@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "startMonth": "2026-10",
+  "horizonMonths": 60,
+  "siteCapex": 100000,
+  "softCosts": 20000,
+  "openingReserve": 50000,
+  "monthlyFixedOpex": 2500,
+  "monthlyNetworkCost": 8075,
+  "networkCommitmentMonths": 60,
+  "monthlyDemandCharges": 0,
+  "energyRatePerKwh": 0.1,
+  "pue": 1.4,
+  "extraITPeakKw": 2,
+  "extraITAverageFraction": 0.5,
+  "annualOpexEscalation": 0.03,
+  "annualDiscountRate": 0.15,
+  "exitSaleProceeds": 0,
+  "exitDecommissionCost": 10000,
+  "exitOtherLiabilities": 0,
+  "investorProRataFraction": null,
+  "debt": {
+    "principal": 0,
+    "annualRate": 0,
+    "termMonths": 60
+  },
+  "capexEvents": [],
+  "rows": [
+    {
+      "id": "rtx-illustration",
+      "ownership": "owned",
+      "systems": 2,
+      "gpusPerSystem": 4,
+      "completeSystemCost": 80000,
+      "peakKwPerSystem": 5,
+      "averagePowerFraction": 0.7,
+      "operatingStartMonth": 4,
+      "operatingEndMonth": 60,
+      "contracts": [
+        {
+          "startMonth": 4,
+          "endMonth": 60,
+          "billing": "system_month",
+          "rate": 9000,
+          "paidOccupancy": 0.8,
+          "collectionFraction": 0.98,
+          "salesFeeFraction": 0.02,
+          "annualRateEscalation": 0,
+          "collectionLagMonths": 0
+        }
+      ]
+    }
+  ]
+}

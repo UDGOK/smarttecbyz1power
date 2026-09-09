@@ -126,7 +126,8 @@ screen paints. Quality tiers downgrade above 22 ms/frame and upgrade below
    nothing" — site, building and Z1Power cabinet photos are needed for the
    content pages.
 3. **Form endpoint and analytics** destinations.
-4. **Domain** — `smarttec.z1power.com` assumed in `astro.config.mjs`.
+4. **Domain** — `www.smarttec.dev`, set in `astro.config.mjs`. The apex
+   redirects to it; canonical tags, OG URLs and robots.txt all use the www form.
 5. **Logo** — the brandmark is a placeholder wordless glyph pending real assets.
 
 ## Content sources

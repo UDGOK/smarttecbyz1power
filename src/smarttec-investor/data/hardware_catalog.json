@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-09",
+  "purpose": "Private planning catalog; no complete system quotes verified",
+  "profiles": [
+    {
+      "id": "rtx-pro-6000-blackwell-server",
+      "name": "RTX PRO 6000 Blackwell Server Edition",
+      "quantityUnit": "complete server",
+      "acceleratorMemoryGB": 96,
+      "suggestedGpusPerSystem": 4,
+      "suggestedSystems": 2,
+      "completeSystemCost": null,
+      "peakKwPerSystem": null,
+      "cooling": "OEM-supported configuration required; air or liquid depends on system",
+      "source": "https://www.nvidia.com/en-us/data-center/rtx-pro-6000-blackwell-server-edition/",
+      "status": "GPU specification documented; complete server and price require quote"
+    },
+    {
+      "id": "dgx-b300-ac",
+      "name": "NVIDIA DGX B300 AC reference",
+      "quantityUnit": "complete system",
+      "gpusPerSystem": 8,
+      "completeSystemCost": null,
+      "peakKwPerSystemReference": 19.7,
+      "estimatedSystemKwReference": 15,
+      "peakKwPerSystem": null,
+      "cooling": "DGX AC reference air-cooled; verify exact ordered configuration and engineering",
+      "source": "https://docs.nvidia.com/dgx-pdf/data-center-best-practices-with-dgx-b300-v1.pdf",
+      "status": "Reference power is not measured average or universal HGX power; quote and site design required"
+    },
+    {
+      "id": "amd-custom",
+      "name": "AMD Instinct OEM platform \u2014 exact selection required",
+      "quantityUnit": "complete system",
+      "exampleAccelerator": "MI355X",
+      "exampleAcceleratorMemoryGB": 288,
+      "gpusPerSystem": null,
+      "completeSystemCost": null,
+      "peakKwPerSystem": null,
+      "source": "https://www.amd.com/en/products/accelerators/instinct/mi350/mi355x.html",
+      "status": "Example is not a newest-product claim; exact OEM model, accelerator count, software and cooling must be selected"
+    },
+    {
+      "id": "cerebras-custom",
+      "name": "Cerebras \u2014 exact vendor configuration required",
+      "quantityUnit": "vendor system",
+      "model": null,
+      "gpusPerSystem": null,
+      "completeSystemCost": null,
+      "peakKwPerSystem": null,
+      "source": "https://www.cerebras.ai/",
+      "status": "Vendor currently promotes CS-4; exact system/service scope and benchmark required; no GPU conversion"
+    },
+    {
+      "id": "customer-owned-hosting",
+      "name": "Customer-owned equipment hosting",
+      "quantityUnit": "hosted system",
+      "ownership": "customer",
+      "completeSystemCost": 0,
+      "peakKwPerSystem": null,
+      "status": "Explicitly zero SmartTec equipment purchase only; all site, network and operating costs still required"
+    }
+  ]
+}

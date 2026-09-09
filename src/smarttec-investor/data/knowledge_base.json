@@ -1,0 +1,396 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-09",
+  "publicationState": "owner-review-required",
+  "policy": "Private server-side content; citations preserve evidence status; do not treat this draft as title, engineering or legal verification",
+  "sources": {
+    "owner-brief": {
+      "title": "Owner statements in project conversation",
+      "type": "owner-reported",
+      "url": null
+    },
+    "live-site": {
+      "title": "Live SmartTec website reviewed 9 September 2026",
+      "url": "https://www.smarttec.dev/colocation",
+      "type": "public-claim-not-contract"
+    },
+    "prior-financial-brief": {
+      "title": "Earlier conversation financial summary; not a reconstructed quote-backed workbook",
+      "url": null,
+      "type": "planning-assumption"
+    },
+    "nvidia-rtx": {
+      "title": "NVIDIA RTX PRO 6000 Blackwell Server Edition",
+      "url": "https://www.nvidia.com/en-us/data-center/rtx-pro-6000-blackwell-server-edition/",
+      "type": "manufacturer"
+    },
+    "amd": {
+      "title": "AMD Instinct MI355X",
+      "url": "https://www.amd.com/en/products/accelerators/instinct/mi350/mi355x.html",
+      "type": "manufacturer"
+    },
+    "cerebras": {
+      "title": "Cerebras official website",
+      "url": "https://www.cerebras.ai/",
+      "type": "manufacturer"
+    },
+    "model-spec": {
+      "title": "SmartTec ROI model specification and tested reference engine",
+      "url": null,
+      "type": "internal-methodology"
+    },
+    "design-brief": {
+      "title": "SmartTec investor experience handoff",
+      "url": null,
+      "type": "implementation-specification"
+    },
+    "sec": {
+      "title": "SEC exempt offerings: Rule 506(b) and Rule 506(c)",
+      "url": "https://www.sec.gov/resources-small-businesses/exempt-offerings/general-solicitation-rule-506c",
+      "additionalUrl": "https://www.sec.gov/resources-small-businesses/exempt-offerings/private-placements-rule-506b",
+      "type": "regulator"
+    },
+    "survey": {
+      "title": "BM Surveying, Inc. \u2014 Land Boundary Survey Plat, sheet 1 of 1 dated 28 December 2025",
+      "url": "/api/investor/survey",
+      "type": "supplied-boundary-survey-copy"
+    },
+    "marked-survey": {
+      "title": "Owner-marked campus survey supplied in this conversation",
+      "url": "/api/investor/marked-survey",
+      "type": "owner-marked-document"
+    }
+  },
+  "facts": [
+    {
+      "id": "F01",
+      "question": "What is SmartTec developing?",
+      "answer": "SmartTec is developing a campus in Mead, Oklahoma with a proposed first compute phase and planned manufacturing, solar and storage activities. Commissioned operations and customer contracts have not been established in the reviewed records.",
+      "status": "owner-reported",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F02",
+      "question": "How much land is there?",
+      "answer": "The supplied survey labels three tracts of 13.50, 7.51 and 18.20 acres, totaling 39.21 acres. Approximately 40 acres is rounded wording. Current title and ownership require separate review.",
+      "status": "document-reviewed",
+      "sourceIds": [
+        "survey"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F03",
+      "question": "What is planned on Tract 1?",
+      "answer": "Two planned 30,000 sq ft buildings, totaling 60,000 sq ft, for inverter manufacturing and battery assembly activities. Allocation of uses between buildings, permits, funded cost and notice to proceed need confirmation.",
+      "status": "owner-reported",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F04",
+      "question": "What buildings are available for the data center?",
+      "answer": "The owner reports Building A at 1,500 sq ft, B at 2,083 and C at 3,535, totaling 7,118 sq ft of gross candidate space on Tract 2. Gross area is not commissioned IT space.",
+      "status": "owner-reported",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F05",
+      "question": "Is the house or office included in compute space?",
+      "answer": "No. The separately reported 6,500 sq ft house/office is excluded from the 7,118 sq ft compute-building total and has its own reported 200 A service.",
+      "status": "owner-reported",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F06",
+      "question": "What electrical capacity is available?",
+      "answer": "The owner reports shared 3,000 A, 208 V, three-phase distribution from Building C to A, B and C. The arithmetic is approximately 1.081 MVA apparent power. Approved usable IT kW, existing loads, utility allocation and continuous distribution limits remain unverified.",
+      "status": "owner-reported",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F07",
+      "question": "How much cooling is installed?",
+      "answer": "The stated schedule repeats Building C: 15 tons in C, 10 in B and another 10 in C. Allocation must be clarified. If these are three distinct units, total nominal cooling is 35 tons, approximately 123.1 kW thermal; that is not approved IT capacity.",
+      "status": "unresolved",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F08",
+      "question": "How long will the battery run the servers?",
+      "answer": "Runtime is not established. A prior brief mentions 2 MW output, but usable stored energy in MWh, installation status, losses, load and transfer design are not confirmed. MW alone does not determine duration.",
+      "status": "unresolved",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F09",
+      "question": "What is the network plan?",
+      "answer": "The owner reports proposed Dobson 100 Gbps asymmetrical connectivity in roughly 30 days, with a second simultaneous 100 Gbps option. Exact bandwidth profile, delivery commitment, cost, SLA and route diversity require carrier documentation. Two links are not automatically two independent failure paths.",
+      "status": "owner-reported",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F10",
+      "question": "Is the network cost confirmed?",
+      "answer": "No reviewed carrier contract is available here. The website has referred to $8,075 per month and 60 months. Treat those as unverified commercial figures until reconciled with the carrier order; at that price the arithmetic is $96,900 per year and $484,500 over 60 months before other charges.",
+      "status": "unresolved",
+      "sourceIds": [
+        "live-site"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F11",
+      "question": "What is Phase 1 compute?",
+      "answer": "The proposed configuration is two supported servers with four RTX PRO 6000 Blackwell Server Edition GPUs each: eight GPUs total. Complete OEM quotes, site approval, support terms and customer workload tests remain prerequisites.",
+      "status": "planning-assumption",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F12",
+      "question": "Does eight GPUs mean one large shared memory pool?",
+      "answer": "No. The RTX PRO 6000 Blackwell Server Edition specification is 96 GB per GPU. Do not present eight cards as one unified GPU memory pool; workload scaling depends on the software and supported system topology.",
+      "status": "document-reviewed",
+      "sourceIds": [
+        "nvidia-rtx"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F13",
+      "question": "Must RTX use liquid cooling?",
+      "answer": "Do not infer that from a rough server kW number. NVIDIA describes air- and liquid-cooled RTX Server Edition deployments. The exact supported OEM system and facility design determine the requirement.",
+      "status": "document-reviewed",
+      "sourceIds": [
+        "nvidia-rtx"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F14",
+      "question": "When would SmartTec buy B300?",
+      "answer": "After a defined customer workload, complete system quote, funding and approved power/cooling/network design support that purchase. It is a separate platform decision, not a GPU swap into an RTX chassis.",
+      "status": "planning-assumption",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F15",
+      "question": "Can AMD be compared in the calculator?",
+      "answer": "Yes, after choosing the exact accelerator and OEM system and entering its complete price, power and revenue assumptions. MI355X is a catalog example, not a claim that it is the newest AMD product or the right fit for every workload.",
+      "status": "planning-assumption",
+      "sourceIds": [
+        "amd"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F16",
+      "question": "How do you compare Cerebras?",
+      "answer": "Use the exact vendor system or service scope and a supported workload benchmark. Do not convert it into generic GPU counts or infer token revenue from peak compute claims. Vendor quotes and commercial terms are required.",
+      "status": "planning-assumption",
+      "sourceIds": [
+        "cerebras"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F17",
+      "question": "How much funding is required?",
+      "answer": "The prior first-compute-phase planning allowance was approximately $330,000, including $50,000 working capital. It is not a verified current quote or the full campus budget. Construction, solar, storage and major infrastructure work require separate budgets.",
+      "status": "planning-assumption",
+      "sourceIds": [
+        "prior-financial-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F18",
+      "question": "Is the $2 million property investor collateral?",
+      "answer": "The $2 million is an owner-reported gross value, not automatically investor collateral, cash or net equity. Title, debt, valuation date, issuer ownership and any security arrangements must be documented.",
+      "status": "owner-reported",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F19",
+      "question": "What ROI will I receive?",
+      "answer": "There is no established guaranteed return. The calculator reports a conditional project scenario. Investor cash flows require actual investment terms; its optional pro-rata view assumes equal participation in all equity contributions and distributions.",
+      "status": "planning-assumption",
+      "sourceIds": [
+        "model-spec"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F20",
+      "question": "What happens if customers do not pay or utilization is low?",
+      "answer": "Revenue and cash collection fall while many operating and financing costs continue. The model consumes the reserve first, then reports additional capital needed and unrecovered capital. The investor should review downside assumptions and actual contractual rights.",
+      "status": "document-reviewed",
+      "sourceIds": [
+        "model-spec"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F21",
+      "question": "Does operating profit mean the investment has paid back?",
+      "answer": "No. Operating cash is calculated before capital recovery and may be positive while the investment remains unrecovered. Total ROI, annualized monthly IRR, cash after debt and payback are shown separately.",
+      "status": "document-reviewed",
+      "sourceIds": [
+        "model-spec"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F22",
+      "question": "Are customer contracts signed?",
+      "answer": "No signed customer contract has been supplied and verified in this package. Proposed rates, workload discussions and inquiry submissions must not be represented as contracted revenue.",
+      "status": "unresolved",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F23",
+      "question": "Is solar revenue included in the pilot return?",
+      "answer": "No. Tract 3 solar and potential BESS locations are development concepts. Their capital cost, output, utility arrangements and revenue require separate engineering and finance models.",
+      "status": "planning-assumption",
+      "sourceIds": [
+        "model-spec"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F24",
+      "question": "Is construction already underway?",
+      "answer": "The owner expressed a target to start the two planned manufacturing buildings in two weeks. A dated schedule, approvals and notice to proceed have not been verified here. Do not represent that target as completed work.",
+      "status": "owner-reported",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F25",
+      "question": "Does SmartTec have an SEC-approved investment?",
+      "answer": "No SEC approval or filing has been established by these records, and an SEC filing would not endorse an investment. The issuer and counsel must determine the applicable offering route and disclosures.",
+      "status": "unresolved",
+      "sourceIds": [
+        "sec"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F26",
+      "question": "Does a password make this a compliant private offering?",
+      "answer": "No. Password protection is access control. It does not establish investor eligibility or compliance with an offering exemption. Counsel must assess solicitation, investor verification and required filings.",
+      "status": "document-reviewed",
+      "sourceIds": [
+        "sec"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F27",
+      "question": "What makes this project different?",
+      "answer": "Its proposed approach combines an existing property, a defined small compute phase and potential later energy/manufacturing integration. Those features can support a differentiated plan, but savings, demand, operating performance and investor protections still need evidence.",
+      "status": "planning-assumption",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F28",
+      "question": "Can I reserve capacity or invest through this page?",
+      "answer": "This experience supports diligence and scenario analysis. It does not itself accept an investment or guarantee a capacity reservation. Use the configured inquiry process for a technical and commercial discussion.",
+      "status": "planning-assumption",
+      "sourceIds": [
+        "design-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F29",
+      "question": "Are exact travel times verified?",
+      "answer": "No. Use the Mead address and southern Oklahoma location. Specific travel times and implied relationships with nearby businesses have not been validated in this package.",
+      "status": "unresolved",
+      "sourceIds": [
+        "owner-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F30",
+      "question": "Can the assistant answer anything from past chats?",
+      "answer": "No. It uses only approved project records and authenticated deterministic scenario outputs. Unconfirmed or unavailable facts must be identified as such.",
+      "status": "document-reviewed",
+      "sourceIds": [
+        "design-brief"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F31",
+      "question": "What does the survey confirm?",
+      "answer": "The supplied BM Surveying plat dated 28 December 2025 labels Tract 1 at 13.50 acres, Tract 2 at 7.51 acres and Tract 3 at 18.20 acres, with US 70 at the north frontage. Tract 2 is described as 495 feet deep and Tract 3 as 1,200 feet. The survey includes proposed 50-foot easements; recording and title still require review.",
+      "status": "document-reviewed",
+      "sourceIds": [
+        "survey"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F32",
+      "question": "Which surveyed structures are Buildings A, B and C?",
+      "answer": "The marked survey identifies three data-center structures as 1, 2 and 3, running east to west. Their correspondence to earlier A/B/C names is not explicitly supplied. The interactive map uses the owner numbered labels.",
+      "status": "unresolved",
+      "sourceIds": [
+        "marked-survey"
+      ],
+      "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F33",
+      "question": "Where are the planned factories, BESS and solar?",
+      "answer": "Owner markings place a 200 \u00d7 150 ft inverter factory in northern Tract 1 and a 200 \u00d7 150 ft battery assembly factory farther south in that tract. A 2,000 sq ft BESS area is marked south of the data-center buildings on Tract 2. Tract 3 is designated for solar; the owner asks to omit the former greenhouse/pad from the proposed display. Positions are concept placements, not approved construction setbacks.",
+      "status": "owner-proposed",
+      "sourceIds": [
+        "marked-survey"
+      ],
+      "reviewedAt": "2026-09-09"
+    }
+  ]
+}

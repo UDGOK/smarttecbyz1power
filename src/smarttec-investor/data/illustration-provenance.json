@@ -1,0 +1,16 @@
+{
+  "status": "HYPOTHETICAL ILLUSTRATION \u2014 NOT A QUOTE, FORECAST OR INVESTMENT OFFER",
+  "reviewedAt": "2026-09-09",
+  "scenarioFile": "illustrative-scenario.json",
+  "notes": [
+    "Initial capital costs total $280,000 plus $50,000 reserve, solely to illustrate the prior $330,000 planning scale. The $80,000 complete-server cost, $100,000 site allowance and $20,000 soft costs are synthetic allocations, not verified prices.",
+    "The $8,075/month network assumption is an unverified figure on the website; a 60-month obligation is modeled explicitly. Confirm it before underwriting.",
+    "Monthly $9,000/system rate, 80% paid occupancy, 98% collection and 2% sales fees are hypothetical and do not represent signed contracts.",
+    "Service is assumed to begin in month 4 and a hypothetical revenue segment runs through month 60; no renewal or signed term is implied.",
+    "Peak 5 kW/system, 70% average fraction, supporting IT and PUE 1.4 are planning assumptions, not engineering approval or metered consumption.",
+    "Zero demand charge is an explicit unverified assumption and must be replaced with the actual tariff. Fixed operations of $2,500/month may be insufficient; confirm staffing, insurance, support, software, taxes and maintenance scope.",
+    "Recurring costs escalate 3% annually. No resale value, debt, taxes or property value is included. Terminal decommissioning is an illustrative $10,000.",
+    "No inference that manufacturing, solar, storage or future systems can be funded with this pilot allowance.",
+    "Load this example only through an explicit labeled illustration action. Default fresh scenarios require quotes and user-entered assumptions."
+  ]
+}
