@@ -948,6 +948,9 @@
   display: grid;
   place-items: center;
   padding: clamp(var(--s-5), 4vh, var(--s-7)) var(--s-5);
+  /* Room at the top for the chrome that sits above this: the reading pages'
+     sticky bar, or the cinematic route's fixed toggle. */
+  padding-top: max(clamp(var(--s-5), 4vh, var(--s-7)), 92px);
   background: #05100af2;
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
@@ -960,6 +963,22 @@
 /* `display: grid` above defeats the hidden attribute, so a closed menu was
    still a full-viewport layer sitting over the chrome and eating its clicks. */
 .menu[hidden] { display: none; }
+
+/* The toggle has to outrank the overlay, or it cannot close it.
+   
+   The overlay sits at --z-overlay - 1 and the chrome at --z-chrome, so an open
+   menu covered its own close button: clicking the X did nothing, Escape was
+   the only way out, and a full-screen overlay that will not close reads as a
+   page that has stopped scrolling. It was survivable while the menu was a
+   corner affordance on one route. It is not now that it is the navigation for
+   the whole site.
+
+   The cinematic toggle is fixed and lifts on its own. The reading pages' one
+   is inside .nav, which is a stacking context — a child cannot climb out of
+   it, so the bar itself is what rises, and the wordmark and the X stay legible
+   above the index. */
+html.menu-open .menu-toggle,
+html.menu-open .nav { z-index: calc(var(--z-overlay) + 1); }
 [data-chrome='dark'] .menu { background: #eef1eff2; }
 
 .menu__inner {
