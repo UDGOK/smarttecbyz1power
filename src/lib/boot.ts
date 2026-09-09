@@ -99,6 +99,24 @@ function run(): void {
 
   document.documentElement.classList.add('js-ready');
 
+  /**
+   * Nothing to scroll into until the experience is armed.
+   *
+   * The stage sections are 250vh each, so from the first paint the document is
+   * taller than the viewport — while the scene chunk is still downloading and
+   * neither the virtual scroller nor the spine reader is listening yet. Scroll
+   * in that window and you slid past the sticky panel into empty space with
+   * the fixed canvas behind it: a full screen of the canvas's own green
+   * gradient. Then the scene armed, took the document's scrolling away, and
+   * left you parked there with no way back. That is the green screen, and the
+   * reason waiting for the entry card made it go away.
+   *
+   * This collapses the sections to one viewport until something is listening.
+   * A height cap, deliberately, and not `overflow: hidden` — taking scrolling
+   * away is what has repeatedly shipped a page that could not be moved.
+   */
+  document.body.dataset.booting = '';
+
   // The reading path below the experience ships visible so a no-JS visitor
   // still gets it. Now that JS is running, hide it until the campus.
   document.querySelector<HTMLElement>('#after')?.setAttribute('hidden', '');
@@ -420,6 +438,7 @@ function run(): void {
    * readable page than a scene-shaped hole.
    */
   function degradeToDocument(): void {
+    delete document.body.dataset.booting;
     canvasEl.hidden = true;
     document.body.dataset.noWebgl = '';
     scroller.disable();
@@ -443,6 +462,9 @@ function run(): void {
     if (!gateCleared || sceneState === 'pending') return;
     if (armed) return;
     armed = true;
+    // The sections take their real height only now that something is reading
+    // them. Whichever branch runs below, this comes off first.
+    delete document.body.dataset.booting;
 
     if (sceneState === 'ready' && nativeScroll) {
       // The document scrolls; we only read it. Nothing is taken away, so
@@ -1052,6 +1074,7 @@ function run(): void {
 export function boot(): void {
   const recover = (why: string, err?: unknown): void => {
     document.documentElement.classList.remove('js-ready');
+    delete document.body.dataset.booting;
     delete document.body.dataset.virtualScroll;
     document.querySelector<HTMLElement>('#after')?.removeAttribute('hidden');
     const loader = document.querySelector<HTMLElement>('#loader');

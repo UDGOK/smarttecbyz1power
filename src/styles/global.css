@@ -320,6 +320,20 @@ body[data-virtual-scroll] .stage-scroll { height: 100svh; }
   body[data-experience] { overflow-x: clip; overflow-y: visible; }
 }
 
+/* ---- Booting ----
+   Between first paint and the moment the experience starts listening, the
+   stage sections are their full 250vh but nothing is driving them. Scrolling
+   there put the visitor past the sticky panel into empty space over the fixed
+   canvas — a screen of its green gradient — and the arming that followed took
+   the document's scrolling away and left them stranded in it.
+
+   Collapsing the sections gives the document nothing to scroll into for that
+   window. A height cap rather than `overflow: hidden`: this codebase has
+   shipped an unscrollable page more than once by taking scrolling away, and
+   never once by leaving a document short. boot.ts removes the attribute the
+   instant anything is listening, and again on every failure path. */
+body[data-booting] .stage-scroll { height: 100svh; }
+
 /* ---- Silver shimmer ----
    The reference's own treatment: the text is a clipped gradient rather than a
    fill, swept across on a nine-second loop.
