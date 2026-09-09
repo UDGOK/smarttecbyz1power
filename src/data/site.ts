@@ -114,6 +114,13 @@ export const site = {
    * not exist. These are gross existing building areas, not certified white
    * space and not sellable rack area, and none has an established fit-out or
    * commissioning status.
+   *
+   * Not to be confused with the owner's marks 1, 2 and 3 on the survey, which
+   * are a different numbering: those are the real east, middle and west
+   * buildings, and the owner confirmed on 9 September 2026 that they are A, B
+   * and C in that order. The investor room's campus map uses that mapping. The
+   * areas below rank in the same order as the traced footprints, which is why
+   * the mapping is credible rather than merely asserted.
    */
   buildings: [
     { id: 'A', sqft: 1500, role: 'Designated for data-center use' },
