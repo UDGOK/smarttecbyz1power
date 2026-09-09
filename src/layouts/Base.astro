@@ -32,8 +32,17 @@ interface Props {
   description: string;
   /** Cinematic routes take over the viewport; content routes scroll normally. */
   experience?: boolean;
+  /**
+   * Keep the page out of search results and off the sitemap.
+   *
+   * Unlisted, which is not the same as private: anyone holding the URL can
+   * open it, and the files it links to are served from the same public origin
+   * whether or not this page exists. Use it to keep a page out of the way, not
+   * to keep anything secret.
+   */
+  noindex?: boolean;
 }
-const { title, description, experience = false } = Astro.props;
+const { title, description, experience = false, noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 
 /**
@@ -68,7 +77,9 @@ const ogImageAlt = 'SmartTec by Z1Power — data centers and colocation';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {noindex
+      ? <meta name="robots" content="noindex, nofollow" />
+      : <link rel="canonical" href={canonical} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- .ico for the browsers and crawlers that still ask for one by name. -->
     <link rel="icon" sizes="32x32" href="/favicon.ico" />

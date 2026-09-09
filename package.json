@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "node tools/fetch-news.mjs || true",
+    "prebuild": "node tools/stage-brand-kit.mjs && (node tools/fetch-news.mjs || true)",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",

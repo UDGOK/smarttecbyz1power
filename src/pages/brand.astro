@@ -1,0 +1,480 @@
+---
+import Content from '../layouts/Content.astro';
+import { company } from '../data/site';
+import kit from '../data/brand-kit.json';
+
+/**
+ * Brand assets — the team's download page.
+ *
+ * Unlisted: not in the menu, not in search results. That is not privacy. The
+ * files are served from the same public origin as everything else, so anyone
+ * holding a URL can fetch them; this only keeps the page out of the way.
+ *
+ * Organised by what someone is trying to do rather than by file type, because
+ * "I need the logo for a slide" and "I need it for a polo" are different
+ * questions with different answers, and the kit has a right answer for each.
+ */
+const B = '/brand-kit';
+const mb = (n: number) => `${(n / 1048576).toFixed(1)} MB`;
+const kb = (n: number) => (n >= 1048576 ? mb(n) : `${Math.max(1, Math.round(n / 1024))} KB`);
+
+/** Look a file up in the staged manifest so sizes are never retyped. */
+const size = (path: string): string => {
+  const f = kit.files.find((x) => x.path === path);
+  return f ? kb(f.bytes) : '';
+};
+const has = (path: string) => kit.files.some((x) => x.path === path);
+
+const marks = [
+  {
+    id: 'lockup', name: 'Lockup', file: 'smarttec-lockup',
+    use: 'The main logo. Wordmark with “by Z1Power” underneath.',
+    when: 'Anywhere there is room to read the endorsement — decks, documents, signage, the top of a page.',
+    ratio: '1231 / 298',
+  },
+  {
+    id: 'wordmark', name: 'Wordmark', file: 'smarttec-wordmark',
+    use: 'SmartTec alone, without the endorsement.',
+    when: 'Navigation bars, app headers, garment chest logos — anywhere “by Z1Power” would set too small to read.',
+    ratio: '1231 / 215',
+  },
+  {
+    id: 'symbol', name: 'Symbol', file: 'smarttec-symbol',
+    use: 'The architectural S with its green core.',
+    when: 'Favicons, avatars, badges, and anywhere the name is already established.',
+    ratio: '204 / 215',
+  },
+];
+
+const variants = [
+  { id: 'offwhite-green', name: 'Off-white + green', on: 'dark', swatch: '#eef1ef', note: 'The default. Use on the forest ground and on photography.' },
+  { id: 'forest-green', name: 'Forest + green', on: 'light', swatch: '#1c4839', note: 'For white and light backgrounds.' },
+  { id: 'black', name: 'Black', on: 'light', swatch: '#141414', note: 'Single-colour print, faxes, stamps, anything that cannot hold two inks.' },
+  { id: 'white', name: 'White', on: 'dark', swatch: '#ffffff', note: 'Single-colour reversed, and cut vinyl.' },
+];
+
+const palette = [
+  { name: 'Forest', hex: '#1C4839', use: 'The ground. Backgrounds, the dark half of the mark.' },
+  { name: 'Signal green', hex: '#7BE88A', use: 'The core of the S, live states, one accent at a time.' },
+  { name: 'Off-white', hex: '#EEF1EF', use: 'The mark on dark, and body text on the forest ground.' },
+  { name: 'Ink', hex: '#141414', use: 'Single-colour artwork and text on light.' },
+];
+
+const embroidery = [
+  { file: 'embroidery-pes/refined-satin/smarttec-wordmark-3in-dark-fabric-SATIN-TEST-SEWOUT.pes', label: 'Wordmark · 3 in · dark fabric', stitches: '2,367', mm: '76.2 × 13.0 mm' },
+  { file: 'embroidery-pes/refined-satin/smarttec-wordmark-3in-light-fabric-SATIN-TEST-SEWOUT.pes', label: 'Wordmark · 3 in · light fabric', stitches: '2,367', mm: '76.2 × 13.0 mm' },
+  { file: 'embroidery-pes/refined-satin/smarttec-wordmark-3p25in-dark-fabric-SATIN-TEST-SEWOUT.pes', label: 'Wordmark · 3.25 in · dark fabric', stitches: '2,525', mm: '82.6 × 14.0 mm' },
+  { file: 'embroidery-pes/refined-satin/smarttec-wordmark-3p25in-light-fabric-SATIN-TEST-SEWOUT.pes', label: 'Wordmark · 3.25 in · light fabric', stitches: '2,525', mm: '82.6 × 14.0 mm' },
+  { file: 'embroidery-pes/refined-satin/smarttec-monogram-2p5in-dark-fabric-SATIN-TEST-SEWOUT.pes', label: 'S monogram · 2.5 in · dark fabric', stitches: '5,533', mm: '63.6 × 65.4 mm' },
+  { file: 'embroidery-pes/refined-satin/smarttec-monogram-2p5in-light-fabric-SATIN-TEST-SEWOUT.pes', label: 'S monogram · 2.5 in · light fabric', stitches: '5,533', mm: '63.6 × 65.4 mm' },
+].filter((e) => has(e.file));
+
+const motion = [
+  { file: 'animated/smarttec-energy-loop-1920x1080.mp4', label: 'Energy loop', spec: '1920 × 1080 · MP4 · 12 s · silent', use: 'Screens, stands, a background behind a talk.' },
+  { file: 'animated/smarttec-particle-reveal-1920x1080.mp4', label: 'Particle reveal', spec: '1920 × 1080 · MP4 · 12 s', use: 'An intro. It gathers into the wordmark — it is not a seamless loop.' },
+  { file: 'animated/smarttec-energy-transparent-1200x630.webm', label: 'Transparent overlay', spec: '1200 × 630 · VP9 WebM with alpha', use: 'Over other footage. Alpha video support varies by player.' },
+  { file: 'animated/smarttec-energy-loop-960x540.gif', label: 'Energy loop, GIF', spec: '960 × 540 · 12 fps · 128 colours', use: 'Email and anywhere video will not play.' },
+].filter((e) => has(e.file));
+
+const social = [
+  { file: 'social/smarttec-og-1200x630.png', label: 'Link preview', spec: '1200 × 630 · PNG', use: 'Already wired into this site as og:image. Use it anywhere a URL is shared.' },
+  { file: 'social/smarttec-square-1080.png', label: 'Square still', spec: '1080 × 1080 · PNG', use: 'Profile grids and square posts.' },
+  { file: 'social/smarttec-story-1080x1920.png', label: 'Story still', spec: '1080 × 1920 · PNG', use: 'Vertical stories and reels.' },
+  { file: 'social/smarttec-social-loop-1080x1080.mp4', label: 'Square loop', spec: '1080 × 1080 · MP4', use: 'Animated square posts. Upload the video itself — pointing og:image at a GIF does not animate a link card.' },
+  { file: 'social/smarttec-story-loop-1080x1920.mp4', label: 'Story loop', spec: '1080 × 1920 · MP4', use: 'Animated vertical posts.' },
+].filter((e) => has(e.file));
+---
+
+<Content
+  noindex
+  title={`Brand assets — internal | ${company.full}`}
+  description="Logos, icons, social, motion and apparel artwork for the SmartTec team, with what each file is for."
+  kicker="Brand assets · internal"
+  heading="Everything, and what each piece is for."
+  lede={`The complete ${company.full} kit — ${kit.fileCount} files. Organised by what you are trying to do rather than by file type, because "I need the logo for a slide" and "I need it for a polo" have different right answers. This page is unlisted rather than private: anyone with the link can open it.`}
+  meta={[
+    { label: 'Files', value: String(kit.fileCount), note: 'Logos, icons, social, motion, apparel', count: true },
+    { label: 'Everything', value: mb(kit.zipBytes), note: 'One ZIP, all of it' },
+    { label: 'Palette', value: '4', note: 'Forest, signal, off-white, ink', count: true },
+    { label: 'Updated', value: kit.generated, note: 'Staged from the designer kit', tone: 'signal' },
+  ]}
+>
+  <section aria-labelledby="all" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">Take it all</span></p>
+    <h2 id="all">The whole kit</h2>
+    <p>
+      Everything below in one archive, in the folder structure the designer supplied,
+      including the source files and the reproduction scripts.
+    </p>
+    <div class="actions">
+      <a class="btn" href={`${B}/smarttec-brand-kit.zip`} download>Download the kit — {mb(kit.zipBytes)}</a>
+      <a class="btn btn--ghost" href={`${B}/README-DESIGNER.md`}>Designer's handoff notes</a>
+    </div>
+  </section>
+
+  <section aria-labelledby="marks" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">The marks</span></p>
+    <h2 id="marks">Three marks, three jobs</h2>
+    <p>
+      Pick by how much room you have and whether the name is already established. If
+      “by Z1Power” would set too small to read, that is the signal to drop to the
+      wordmark — not to shrink the lockup further.
+    </p>
+
+    {marks.map((m) => (
+      <article class="ba__mark">
+        <div class="ba__mark-head">
+          <h3>{m.name}</h3>
+          <p class="ba__use">{m.use}</p>
+          <p class="ba__when">{m.when}</p>
+        </div>
+
+        <div class="ba__previews">
+          <div class="ba__preview ba__preview--dark">
+            <img src={`${B}/logos/svg/${m.file}-offwhite-green.svg`} alt={`${m.name} on dark`} loading="lazy" />
+            <p class="ba__caption mono-label">On dark</p>
+          </div>
+          <div class="ba__preview ba__preview--light">
+            <img src={`${B}/logos/svg/${m.file}-forest-green.svg`} alt={`${m.name} on light`} loading="lazy" />
+            <p class="ba__caption mono-label">On light</p>
+          </div>
+        </div>
+
+        <div class="ba__files">
+          {variants.map((v) => (
+            <div class="ba__variant">
+              <p class="ba__variant-name mono-label">
+                <span class="ba__swatch" style={`--sw: ${v.swatch};`} aria-hidden="true"></span>{v.name}
+              </p>
+              <p class="ba__links">
+                <a href={`${B}/logos/svg/${m.file}-${v.id}.svg`} download>SVG</a>
+                {has(`logos/eps/${m.file}-${v.id}.eps`) && (
+                  <a href={`${B}/logos/eps/${m.file}-${v.id}.eps`} download>EPS</a>
+                )}
+                {has(`logos/png/${m.file}-${v.id}-2400.png`)
+                  ? <a href={`${B}/logos/png/${m.file}-${v.id}-2400.png`} download>PNG 2400</a>
+                  : has(`logos/png/${m.file}-${v.id}-1024.png`)
+                    ? <a href={`${B}/logos/png/${m.file}-${v.id}-1024.png`} download>PNG 1024</a>
+                    : null}
+                {has(`logos/png/${m.file}-${v.id}-1200.png`)
+                  ? <a href={`${B}/logos/png/${m.file}-${v.id}-1200.png`} download>PNG 1200</a>
+                  : has(`logos/png/${m.file}-${v.id}-256.png`)
+                    ? <a href={`${B}/logos/png/${m.file}-${v.id}-256.png`} download>PNG 256</a>
+                    : null}
+              </p>
+            </div>
+          ))}
+        </div>
+      </article>
+    ))}
+
+    <dl class="spec">
+      <div><dt>SVG</dt><dd>Screens, web, anything that scales<span class="note">Editable outline paths. No live fonts, no embedded bitmaps.</span></dd></div>
+      <div><dt>EPS</dt><dd>Print, large format, signage, stickers<span class="note">True vector RGB. Your printer sets final size, colour conversion, bleed and any cut contour.</span></dd></div>
+      <div><dt>PNG</dt><dd>Slides, documents, anywhere vector is awkward<span class="note">Transparent. Lockups and wordmarks at 1200 and 2400 px wide; symbols at 256 and 1024.</span></dd></div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="rules" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Using it</span></p>
+    <h2 id="rules">The five rules</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>Keep the proportions</h3>
+        <p>Scale it, never stretch it. The green element stays exactly where it sits inside the S.</p>
+      </div>
+      <div class="card">
+        <h3>Leave clear space</h3>
+        <p>At least the height of the green core on every side. Nothing else in that margin.</p>
+      </div>
+      <div class="card">
+        <h3>Keep it flat</h3>
+        <p>No glow, no shadow, no gradient on the letterforms. Motion belongs to the particles, not to the mark.</p>
+      </div>
+      <div class="card">
+        <h3>Pick the variant, don't recolour</h3>
+        <p>Four variants exist so nobody has to invent a fifth. Off-white on dark, forest on light.</p>
+      </div>
+      <div class="card">
+        <h3>Drop the endorsement before shrinking it</h3>
+        <p>If “by Z1Power” is too small to read, use the wordmark. Do not scale the lockup down further.</p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="palette" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Colour</span></p>
+    <h2 id="palette">Four values</h2>
+    <div class="ba__palette">
+      {palette.map((c) => (
+        <button type="button" class="ba__colour" data-copy={c.hex}>
+          <span class="ba__chip" style={`--sw: ${c.hex};`} aria-hidden="true"></span>
+          <span class="ba__colour-name">{c.name}</span>
+          <span class="ba__colour-hex mono-label">{c.hex}</span>
+          <span class="ba__colour-use">{c.use}</span>
+          <span class="ba__copied mono-label" aria-hidden="true">Copied</span>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <section aria-labelledby="icons" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Icons</span></p>
+    <h2 id="icons">Favicons and app icons</h2>
+    <p>The symbol on forest, rounded. Already wired into this site; here for everything else.</p>
+    <dl class="spec">
+      <div><dt><a href={`${B}/icons/favicon.svg`} download>favicon.svg</a></dt><dd>Vector browser tab icon<span class="note">{size('icons/favicon.svg')}</span></dd></div>
+      <div><dt><a href={`${B}/icons/favicon.ico`} download>favicon.ico</a></dt><dd>For anything still asking for one by name<span class="note">{size('icons/favicon.ico')}</span></dd></div>
+      <div><dt><a href={`${B}/icons/smarttec-icon-180.png`} download>180 px</a></dt><dd>Apple touch icon<span class="note">{size('icons/smarttec-icon-180.png')}</span></dd></div>
+      <div><dt><a href={`${B}/icons/smarttec-icon-512.png`} download>512 px</a></dt><dd>Web app manifest, store listings<span class="note">{size('icons/smarttec-icon-512.png')}</span></dd></div>
+      <div><dt><a href={`${B}/icons/smarttec-icon-64.png`} download>64 px</a> · <a href={`${B}/icons/smarttec-icon-32.png`} download>32 px</a></dt><dd>Small raster fallbacks</dd></div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="social" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">06</span><span class="eyebrow__t">Social</span></p>
+    <h2 id="social">Posts and link previews</h2>
+    <div class="scroller" tabindex="0" role="region" aria-label="Social assets, scrollable">
+      <table>
+        <caption>Social and share assets</caption>
+        <thead><tr><th scope="col">Asset</th><th scope="col">Spec</th><th scope="col">What it is for</th><th scope="col">File</th></tr></thead>
+        <tbody>
+          {social.map((s) => (
+            <tr>
+              <th scope="row">{s.label}</th>
+              <td class="num">{s.spec}</td>
+              <td>{s.use}</td>
+              <td><a href={`${B}/${s.file}`} download>{size(s.file)}</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="motion" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">07</span><span class="eyebrow__t">Motion</span></p>
+    <h2 id="motion">The animated logo</h2>
+    <p>
+      All clips are silent, 24 fps and twelve seconds, and start on the readable logo —
+      so the first frame is a usable still. The loops repeat on a deterministic cycle;
+      the reveal does not, because it is an intro.
+    </p>
+    <div class="scroller" tabindex="0" role="region" aria-label="Motion assets, scrollable">
+      <table>
+        <caption>Motion assets</caption>
+        <thead><tr><th scope="col">Clip</th><th scope="col">Spec</th><th scope="col">What it is for</th><th scope="col">File</th></tr></thead>
+        <tbody>
+          {motion.map((m) => (
+            <tr>
+              <th scope="row">{m.label}</th>
+              <td class="num">{m.spec}</td>
+              <td>{m.use}</td>
+              <td><a href={`${B}/${m.file}`} download>{size(m.file)}</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top: var(--s-5);">
+      On a web page, prefer the Canvas version over the video — it is a few kilobytes,
+      scales to any size and honours reduced-motion. It is running on
+      {' '}<a href="/about">the about page</a>. See <b>For developers</b> below.
+    </p>
+  </section>
+
+  <section aria-labelledby="apparel" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">08</span><span class="eyebrow__t">Apparel</span></p>
+    <h2 id="apparel">Polos, jackets and caps</h2>
+
+    <div class="callout">
+      <p>
+        <strong>Read this before sending anything to a shop.</strong> These are digitised
+        stitch programs that have never been sewn on fabric. They are drafts for a test
+        sew-out, not approved production masters. Have the shop sew a sample on the
+        actual polo and jacket fabric and adjust it before any garment run.
+      </p>
+    </div>
+
+    <p>
+      Six PES v6 files, in the refined satin edition. Each size is digitised
+      independently — <b>select the right file rather than resizing stitch data on the
+      machine</b>. The wordmark omits “by Z1Power”: at chest-logo size it would not hold.
+    </p>
+
+    <div class="scroller" tabindex="0" role="region" aria-label="Embroidery files, scrollable">
+      <table>
+        <caption>Embroidery — PES v6, refined satin</caption>
+        <thead><tr><th scope="col">Design</th><th scope="col">Stitch envelope</th><th scope="col">Stitches</th><th scope="col">File</th></tr></thead>
+        <tbody>
+          {embroidery.map((e) => (
+            <tr>
+              <th scope="row">{e.label}</th>
+              <td class="num">{e.mm}</td>
+              <td class="num">{e.stitches}</td>
+              <td><a href={`${B}/${e.file}`} download>PES · {size(e.file)}</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <dl class="spec" style="margin-top: var(--s-6);">
+      <div><dt>Thread order</dt><dd>Body first, then the green core<span class="note">Dark fabric: off-white #EEF1EF then #7BE88A. Light fabric: forest #1C4839 then #7BE88A. These are appearance targets, not thread manufacturer numbers — match physical swatches.</span></dd></div>
+      <div><dt>Shop artwork</dt><dd><a href={`${B}/embroidery-artwork/`}>embroidery-artwork/</a><span class="note">Simplified EPS and SVG in one- and two-colour versions, if the shop would rather digitise from vector themselves.</span></dd></div>
+      <div><dt>Earlier trials</dt><dd><a href={`${B}/embroidery-pes/`}>embroidery-pes/</a><span class="note">Basic horizontal-fill drafts, superseded by the satin edition above. Kept for reference.</span></dd></div>
+      <div><dt>Stickers and posters</dt><dd>Use the EPS artwork, not PES<span class="note">No cut contour is supplied — the printer sets the sticker shape and print specification.</span></dd></div>
+      <div><dt>What to check on the sample</dt><dd>Coverage, letter openings, the green core gap, puckering, thread breaks<span class="note">Plus fabric and stabiliser, needle and thread weight, tension, hoop clearance, and PES v6 support on the machine.</span></dd></div>
+    </dl>
+  </section>
+
+  <section aria-labelledby="dev" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">09</span><span class="eyebrow__t">For developers</span></p>
+    <h2 id="dev">Putting it in a page</h2>
+    <p>
+      A dependency-free Canvas animation: the particle renderer, a lifecycle wrapper,
+      its CSS and a transparent logo. It caps pixel density at 2×, pauses when the page
+      is hidden or scrolled away, and draws a single static frame under
+      {' '}<code>prefers-reduced-motion</code>. Keep a visible pause control wherever the
+      motion is persistent.
+    </p>
+    <dl class="spec">
+      <div><dt>Files</dt><dd><a href={`${B}/website/`}>website/</a><span class="note">Copy the folder to <code>/assets/smarttec/</code> and import <code>mountSmartTec</code> from <code>smarttec-particles.mjs</code>.</span></dd></div>
+      <div><dt>Example</dt><dd><a href={`${B}/website/example.html`}>example.html</a><span class="note">Serve it over HTTP — it uses modules.</span></dd></div>
+      <div><dt>Preview</dt><dd><a href={`${B}/previews/approved-particle-preview.html`}>approved-particle-preview.html</a><span class="note">Self-contained; opens straight from disk.</span></dd></div>
+      <div><dt>Source and reproduction</dt><dd><a href={`${B}/source/`}>source/</a><span class="note">Traced geometry, the approved concept image, and the scripts that regenerate every variant.</span></dd></div>
+    </dl>
+  </section>
+
+  <section class="is-end" aria-labelledby="index" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">10</span><span class="eyebrow__t">Everything else</span></p>
+    <h2 id="index">Full file index</h2>
+    <p>All {kit.fileCount} files, if you know what you are looking for.</p>
+    <details class="ba__index">
+      <summary class="mono-label">Show every file</summary>
+      <ul>
+        {kit.files.map((f) => (
+          <li><a href={`${B}/${f.path}`} download>{f.path}</a> <span class="mono-label">{kb(f.bytes)}</span></li>
+        ))}
+      </ul>
+    </details>
+  </section>
+</Content>
+
+<script>
+  // Click a colour to copy its hex. Falls back to selecting the text when the
+  // clipboard is unavailable, which it is on an insecure origin.
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
+    btn.addEventListener('click', async () => {
+      const hex = btn.dataset.copy ?? '';
+      try {
+        await navigator.clipboard.writeText(hex);
+        btn.classList.add('is-copied');
+        window.setTimeout(() => btn.classList.remove('is-copied'), 1400);
+      } catch {
+        const range = document.createRange();
+        const el = btn.querySelector('.ba__colour-hex');
+        if (el) { range.selectNodeContents(el); getSelection()?.removeAllRanges(); getSelection()?.addRange(range); }
+      }
+    });
+  }
+</script>
+
+<style>
+  .ba__mark {
+    margin: var(--s-6) 0;
+    padding-top: var(--s-5);
+    border-top: 1px solid var(--w-10);
+  }
+  .ba__mark-head h3 { margin: 0 0 var(--s-2); }
+  .ba__use { margin: 0 0 var(--s-1); color: var(--w-90); }
+  .ba__when { margin: 0; color: var(--w-55); }
+
+  .ba__previews {
+    display: grid;
+    gap: var(--s-3);
+    margin: var(--s-5) 0;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  }
+  .ba__preview {
+    display: grid;
+    place-items: center;
+    gap: var(--s-3);
+    padding: var(--s-5);
+    border-radius: var(--r-lg, 14px);
+    border: 1px solid var(--w-10);
+  }
+  .ba__preview--dark { background: var(--c-brand-forest); }
+  .ba__preview--light { background: var(--c-brand-offwhite); }
+  .ba__preview img { width: min(100%, 340px); height: auto; }
+  .ba__caption { margin: 0; }
+  .ba__preview--dark .ba__caption { color: var(--w-45); }
+  .ba__preview--light .ba__caption { color: #5d6b64; }
+
+  .ba__files { display: grid; gap: var(--s-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .ba__variant { padding-top: var(--s-3); border-top: 1px solid var(--w-10); }
+  .ba__variant-name { display: flex; align-items: center; gap: var(--s-2); margin: 0 0 var(--s-2); color: var(--w-90); }
+  .ba__swatch {
+    width: 12px; height: 12px; flex: 0 0 auto;
+    border-radius: 3px; background: var(--sw);
+    box-shadow: inset 0 0 0 1px var(--w-25);
+  }
+  .ba__links { display: flex; flex-wrap: wrap; gap: var(--s-2); margin: 0; }
+  .ba__links a {
+    padding: 5px 10px;
+    border: 1px solid var(--w-10);
+    border-radius: var(--r-pill);
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--w-55);
+    transition: color 0.3s var(--e-p2), border-color 0.3s var(--e-p2);
+  }
+  .ba__links a:hover { color: var(--c-signal); border-color: color-mix(in srgb, var(--c-signal) 45%, transparent); }
+
+  .ba__palette {
+    display: grid;
+    gap: var(--s-3);
+    margin-top: var(--s-5);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  }
+  .ba__colour {
+    position: relative;
+    display: grid;
+    gap: var(--s-2);
+    padding: var(--s-4);
+    text-align: left;
+    border: 1px solid var(--w-10);
+    border-radius: var(--r-lg, 14px);
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    min-height: 44px;
+    transition: border-color 0.3s var(--e-p2);
+  }
+  .ba__colour:hover { border-color: var(--w-25); }
+  .ba__chip { display: block; height: 46px; border-radius: 8px; background: var(--sw); box-shadow: inset 0 0 0 1px var(--w-10); }
+  .ba__colour-name { color: var(--w-95); }
+  .ba__colour-hex { color: var(--c-signal); }
+  .ba__colour-use { color: var(--w-55); font-size: var(--t-small, 0.92rem); line-height: 1.5; }
+  .ba__copied {
+    position: absolute;
+    top: var(--s-4); right: var(--s-4);
+    color: var(--c-signal);
+    opacity: 0;
+    transition: opacity 0.2s var(--e-p2);
+  }
+  .ba__colour.is-copied .ba__copied { opacity: 1; }
+
+  .ba__index ul { list-style: none; margin: var(--s-4) 0 0; padding: 0; columns: 2; column-gap: var(--s-6); }
+  .ba__index li { break-inside: avoid; padding: 3px 0; font-size: var(--t-small, 0.92rem); }
+  .ba__index .mono-label { color: var(--w-45); }
+  @media (max-width: 720px) { .ba__index ul { columns: 1; } }
+
+  @media (pointer: coarse), (max-width: 760px) {
+    .ba__links a { padding: 11px 14px; }
+  }
+</style>

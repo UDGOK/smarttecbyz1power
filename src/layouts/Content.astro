@@ -44,12 +44,14 @@ interface Props {
   lede: string;
   /** Four-ish figures set under the hero rule. Every value comes from site.ts. */
   meta?: HeroMeta[];
+  /** Pass through to Base: unlisted, not private. */
+  noindex?: boolean;
 }
 
-const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
+const { title, description, kicker, heading, lede, meta = [], noindex = false } = Astro.props;
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} noindex={noindex}>
   <script is:inline>
     /* Runs before the page paints so revealed sections never flash in and out.
        No observer support, or reduced motion, means no class and no hiding.

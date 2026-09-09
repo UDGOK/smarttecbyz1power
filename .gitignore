@@ -13,3 +13,7 @@ screenshots/
 SmartTec-Brand-Kit 2/
 SmartTec-Brand-Kit.zip
 Codex Image *.png
+
+# Staged from SmartTec-Brand-Kit/ at build time by tools/stage-brand-kit.mjs.
+# The repo keeps one copy of those 20MB, not two.
+public/brand-kit/
