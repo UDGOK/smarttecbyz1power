@@ -6,15 +6,15 @@ import { company, site, power, network, compute } from '../data/site';
 
 <Content
   title={`About ${company.full} — the data center arm of ${company.parent}`}
-  description={`${company.name} is the AI data center business of ${company.parent}. One site today: ${site.acres} owned acres in ${site.name}, behind-the-meter power, no interconnection queue, ${site.powerOn} power-on.`}
+  description={`${company.name} is the AI data center business of ${company.parent}. One campus today: ${site.acresRounded} in ${site.name}, across three tracts, with a ${site.powerOn} for first compute.`}
   kicker={`About ${company.name}`}
   heading={`${company.name} is the data center arm of ${company.parent}.`}
-  lede={`${company.tagline} One company owns the land, the electrical service and the battery cabinets, which is why the schedule on this site is ours to keep rather than somebody else's to grant.`}
+  lede={`A founder-led venture developing a single Oklahoma campus with three complementary activities: data-center services, inverter and battery assembly, and solar and storage development. Each is at a different stage, and this page tries to be exact about which.`}
   meta={[
     { label: 'Site', value: site.designation, note: `${site.name}, ${site.county}` },
-    { label: 'Land', value: `${site.acres} acres`, note: site.ownership, count: true },
-    { label: 'Service', value: power.transformer, note: `${power.voltage}, energised on site`, tone: 'gold' },
-    { label: 'First capacity', value: site.powerOn, note: compute.systems, tone: 'signal' },
+    { label: 'Land', value: `${site.acres} acres`, note: 'Three tracts, owner-reported', count: true },
+    { label: 'Service', value: power.service, note: 'Shared across Buildings A, B and C', tone: 'gold' },
+    { label: 'First compute', value: site.powerOn, note: `${compute.gpus} GPUs planned`, tone: 'signal' },
   ]}
 >
   <section aria-labelledby="what" data-reveal>
@@ -26,17 +26,18 @@ import { company, site, power, network, compute } from '../data/site';
         <p>
           {company.name} develops and operates AI data center capacity. The company has
           one site: {site.designation}, {site.acres} acres at {site.address} in
-          {' '}{site.county}, Oklahoma, {site.ownership.toLowerCase()}. Phase 1A is
-          {' '}{compute.systems} in the first of {site.buildings.length} buildings,
-          targeting {site.powerOn}.
+          {' '}{site.county}, Oklahoma. The first compute phase is
+          {' '}{compute.systems}, on a {site.powerOn}. Which building takes the first
+          installation is not yet confirmed.
         </p>
         <p>
-          Most operators start with a site plan and then go looking for electrons. We
-          started from the opposite end. The parcel was bought because a
-          {' '}{power.transformer} service was already energised on it and three buildings
-          were already standing — which is why the company can talk about a fit-out
-          schedule while the industry talks about an interconnection queue of
-          {' '}{power.industryQueue}.
+          Most operators start with a site plan and then go looking for electrons. This
+          one started from the opposite end: the parcel was bought with an electrical
+          service and three buildings already standing on it. What that buys is a
+          starting point, not a finished data center — Buildings A, B and C have no
+          established fit-out or commissioning status, and the usable IT capacity behind
+          that service follows an engineering review rather than an arithmetic
+          conversion of the service rating.
         </p>
       </div>
 
@@ -44,7 +45,7 @@ import { company, site, power, network, compute } from '../data/site';
         <div><dt>Company</dt><dd>{company.full}</dd></div>
         <div><dt>Parent</dt><dd>{company.parent}</dd></div>
         <div><dt>Sites</dt><dd>{site.designation} — {site.name}</dd></div>
-        <div><dt>Land</dt><dd>{site.acres} acres, {site.ownership.toLowerCase()}</dd></div>
+        <div><dt>Land</dt><dd>{site.acres} acres across three tracts</dd></div>
         <div><dt>First capacity</dt><dd>{site.powerOn}</dd></div>
         <div><dt>Legal entity</dt><dd><span class="todo">[PLACEHOLDER: registered entity name, state of incorporation, and formation date]</span></dd></div>
         <div><dt>Headquarters</dt><dd><span class="todo">[PLACEHOLDER: corporate office address, if different from the site]</span></dd></div>
@@ -58,42 +59,43 @@ import { company, site, power, network, compute } from '../data/site';
 
     <p>
       {company.parent} builds LFP battery cabinets. {company.name} is its data center
-      business. Storage therefore reaches {site.designation} as
-      {' '}<strong>{power.storage.toLowerCase()}</strong> rather than at an integrator's
-      margin on top of a distributor's margin.
+      business, and {site.manufacturing.buildings} buildings of
+      {' '}{site.manufacturing.sqftEach.toLocaleString()} sq ft each are planned on Tract 1 for
+      {' '}{site.manufacturing.scope.toLowerCase()}.
     </p>
     <p>
-      That is not a branding point, it is a sizing point. When energy storage costs what
-      it costs to manufacture, the amount of it that makes economic sense on a site goes
-      up, and behind-the-meter storage stops being a resilience line item and starts being
-      part of how the site is powered. Paired with {power.solarPlanned} of planned solar
-      on {site.acres} acres, that is a materially different position from buying the same
-      equipment on the open market.
+      The argument for that adjacency is a sizing argument rather than a branding one: if
+      storage reaches a site closer to what it costs to build, more of it makes economic
+      sense there. We have not evidenced that advantage yet, and it is not a claim this
+      page will make until it can be:
+      {' '}<span class="todo">[PLACEHOLDER: documented related-party equipment cost, warranty and service obligations before any manufacturer-cost or savings claim is published]</span>.
+      The planned scope uses purchased cells and components; it is not lithium-ion cell
+      fabrication and not a commissioned production line.
     </p>
 
     <div class="cards">
       <div class="card">
         <h3>Land</h3>
-        <p>{site.acres} acres in {site.county}, {site.ownership.toLowerCase()}. No ground lease and no option to exercise.</p>
+        <p>{site.acres} acres in {site.county}, across three tracts. {site.ownership}; the owning entity is being documented.</p>
       </div>
       <div class="card">
         <h3>Power</h3>
-        <p>{power.transformer} at {power.voltage} already on site, {power.headroom.toLowerCase()}, {power.interconnectionQueue.toLowerCase()}.</p>
+        <p>{power.service}, shared across Buildings A, B and C from Building C. {power.allocation}.</p>
       </div>
       <div class="card">
         <h3>Storage</h3>
-        <p>{company.parent} LFP cabinets, at manufacturer cost, on our side of the utility meter.</p>
+        <p>{power.storage}. {power.storageNote}</p>
       </div>
       <div class="card">
         <h3>Network</h3>
-        <p>{network.speed} from {network.provider}, on a {network.term.toLowerCase()}.</p>
+        <p>{network.service} from {network.provider}, planned. {network.status}.</p>
       </div>
     </div>
 
     <p style="margin-top: var(--s-6);">
       Detail on the parent company that a counterparty will reasonably ask for —
       {' '}<span class="todo">[PLACEHOLDER: {company.parent} founding date, ownership structure, manufacturing locations, and product range]</span>
-      {' '}and <span class="todo">[PLACEHOLDER: whether {company.name} is a subsidiary, a division, or a separate entity under common ownership]</span>.
+      {' '}and <span class="todo">[PLACEHOLDER: whether {company.name} is a subsidiary, a division, or a separate entity under common ownership — and which entity owns the land, leases the equipment, signs customer contracts and would issue any securities]</span>.
     </p>
   </section>
 

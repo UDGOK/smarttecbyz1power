@@ -5,22 +5,22 @@ import { company, site, power, network, compute } from '../data/site';
 /* Everything below is arithmetic on the published Phase 1A figures. */
 const systems = Number((compute.systems.match(/[\d.]+/) ?? ['0'])[0]);
 const gpusPerSystem = compute.gpus / systems;
-const heldBack = compute.gpus - compute.rentable;
+
 const loadKw = Number((compute.load.match(/[\d.]+/) ?? ['0'])[0]);
 const perSystemKw = loadKw / systems;
 ---
 
 <Content
-  title={`Phase 1A compute — ${compute.systems} | ${company.full}`}
-  description={`${compute.systems} at ${site.designation}, ${site.name}. ${compute.gpus} GPUs, ${compute.rentable} rentable, ${compute.load}, ${compute.cooling.toLowerCase()}, targeting ${compute.target}.`}
+  title={`Compute — an eight-GPU first deployment | ${company.full}`}
+  description={`${compute.systems} planned at ${site.designation}, ${site.name}. ${compute.gpus} GPUs, ${compute.vramPerGpu} each, ${compute.load}. ${compute.status}.`}
   kicker="Phase 1A hardware"
   heading="Eight Blackwells, in two nodes."
-  lede={`${compute.systems} in Building 1. ${compute.gpus} GPUs, ${compute.rentable} of them rentable, drawing ${compute.load} — ${power.phase1aUtilisation} of the service already standing on the parcel.`}
+  lede={`Two planned servers, four ${compute.gpuModel} each, ${compute.vramPerGpu} per GPU. ${compute.status}, and the building it goes into is not yet assigned.`}
   meta={[
     { label: 'Systems', value: String(systems), note: compute.systems, count: true },
     { label: 'GPUs', value: String(compute.gpus), note: `${gpusPerSystem} per system`, count: true },
-    { label: 'Rentable', value: String(compute.rentable), note: 'Offered to tenants at Phase 1A', tone: 'signal', count: true },
-    { label: 'IT load', value: compute.load, note: `${power.phase1aUtilisation} of the ${power.transformer} service`, tone: 'gold' },
+    { label: 'GPUs planned', value: String(compute.gpus), note: `${compute.vramPerGpu} each, separate memories`, tone: 'signal', count: true },
+    { label: 'Estimated IT load', value: compute.load, note: 'Estimated, not measured', tone: 'gold' },
   ]}
 >
   <section aria-labelledby="fleet" data-reveal>
@@ -30,50 +30,41 @@ const perSystemKw = loadKw / systems;
     <div class="split">
       <div>
         <p>
-          Phase 1A is deliberately small and deliberately real: {compute.systems},
-          installed in Building 1, cooled by {compute.cooling.toLowerCase()}, targeting
-          {' '}{compute.target}. It is one building out of {site.buildings.length} and
-          {' '}{power.phase1aUtilisation} of one transformer.
+          The first deployment is deliberately small: {compute.systems}, on a
+          {' '}{compute.target}. It is planned rather than purchased —
+          {' '}{compute.status.toLowerCase()} — and which of Buildings A, B and C takes it
+          has not been confirmed.
         </p>
         <p>
           The point of publishing a fleet this size is that every number on this page is
-          checkable against the site record. A larger announced number would be a
-          forecast; this is a purchase and a fit-out.
+          checkable. A larger announced number would be a forecast; this is a planned
+          purchase and a fit-out, and neither has happened yet.
         </p>
         <p>
-          {heldBack > 0 ? (
-            <>
-              {compute.rentable} of the {compute.gpus} GPUs are offered to tenants.
-              The remaining {heldBack} are not:
-              {' '}<span class="todo">[PLACEHOLDER: disposition of the {heldBack} non-rentable GPUs — spares, burn-in, internal use]</span>.
-            </>
-          ) : (
-            <>
-              All {compute.gpus} GPUs are offered to tenants. Nothing is held back for
-              spares or internal use, which is worth saying plainly: at this size a
-              reserve would be a quarter of the deployment.
-            </>
-          )}
+          All {compute.gpus} GPUs are planned for customer workloads. Nothing is
+          designated as held back, which at this size is worth saying plainly: a spares
+          reserve would be a quarter of the deployment, and how that is handled is
+          {' '}<span class="todo">[PLACEHOLDER: spares, burn-in and internal-use policy once the servers are ordered]</span>.
         </p>
       </div>
 
       <dl class="figures">
         <div>
-          <dt>Rentable GPUs</dt>
-          <dd class="is-signal"><span data-count>{compute.rentable}</span><span class="sub">of {compute.gpus} across {systems} systems</span></dd>
+          <dt>GPUs planned</dt>
+          <dd class="is-signal"><span data-count>{compute.gpus}</span><span class="sub">across {systems} planned servers</span></dd>
         </div>
         <div>
-          <dt>Held back</dt>
+          <dt>Memory per GPU</dt>
           <dd>
-            <span data-count>{heldBack}</span>
-            <span class="sub">{heldBack > 0 ? 'Disposition not yet published' : 'Every card is rentable'}</span>
+            {compute.vramPerGpu}
+            <span class="sub">Separate memories — this part has no NVLink</span>
           </dd>
         </div>
       </dl>
     </div>
 
     <blockquote class="pull">
-      <p>One building out of {site.buildings.length}. {power.phase1aUtilisation} of one transformer.</p>
+      <p>One deployment, into a building not yet assigned, behind a shared service whose usable IT allocation follows an engineering review.</p>
       <p>
         A larger announced number would be a forecast. This one is a purchase and a
         fit-out, and every figure on the page is checkable against the site record.
@@ -107,7 +98,7 @@ const perSystemKw = loadKw / systems;
           <tr><th scope="row">Total IT load</th><td class="num">{compute.load}</td><td>Published Phase 1A draw</td></tr>
           <tr><th scope="row">Load per system</th><td class="num">≈ {perSystemKw.toFixed(1)} kW</td><td>Total load ÷ system count</td></tr>
           <tr><th scope="row">Rack density</th><td class="num"><span class="todo">[PLACEHOLDER: systems per rack, and the resulting kW per rack]</span></td><td>Depends on the final rack layout, which is not fixed</td></tr>
-          <tr><th scope="row">Service utilisation</th><td class="num">{power.phase1aUtilisation}</td><td>Against the {power.transformer} service on site</td></tr>
+          <tr><th scope="row">Memory per GPU</th><td class="num">{compute.vramPerGpu}</td><td>{compute.memoryNote}</td></tr>
         </tbody>
       </table>
     </div>
@@ -127,7 +118,8 @@ const perSystemKw = loadKw / systems;
     <div class="split">
       <div>
         <p>
-          {compute.cooling} means coolant is carried to a cold plate sitting on the
+          {compute.cooling} — NVIDIA documents both air and liquid options for this part,
+          and the selected server governs which applies. Liquid cooling means coolant is carried to a cold plate sitting on the
           package itself, so the majority of the heat leaves the rack as liquid rather
           than as hot air pushed into a containment aisle. It is what makes dense
           accelerator racks practical, and it is far easier to design into a fit-out than
@@ -195,7 +187,7 @@ const perSystemKw = loadKw / systems;
       <div class="card">
         <h3>External connectivity</h3>
         <p>
-          {network.speed} from {network.provider} serves the site.
+          {network.service} from {network.provider} is planned for the site. {network.status}.
           <span class="todo">[PLACEHOLDER: bandwidth allocated per tenant and any egress policy]</span>
         </p>
       </div>
@@ -208,7 +200,7 @@ const perSystemKw = loadKw / systems;
 
     <dl class="spec">
       <div><dt>Available from</dt><dd>{compute.target}</dd></div>
-      <div><dt>Rentable units</dt><dd>{compute.rentable} GPUs across {systems} systems</dd></div>
+      <div><dt>Planned units</dt><dd>{compute.gpus} GPUs across {systems} servers</dd></div>
       <div><dt>Minimum allocation</dt><dd><span class="todo">[PLACEHOLDER: minimum bookable unit — a GPU, a system, or a block of systems]</span></dd></div>
       <div><dt>Pricing</dt><dd><span class="todo">[PLACEHOLDER: $ per GPU-hour or per system-month, and any reserved-term discount]</span></dd></div>
       <div><dt>Term</dt><dd><span class="todo">[PLACEHOLDER: on-demand, reserved, or committed-term options]</span></dd></div>

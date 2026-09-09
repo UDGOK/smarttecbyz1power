@@ -14,7 +14,8 @@ Open **START-HERE.html** for a visual directory. Open **previews/approved-partic
 | Standalone S mark | `logos/svg/smarttec-symbol-offwhite-green.svg` |
 | Black or white print artwork | Matching `-black.svg` / `-white.svg` files |
 | Posters and stickers / scalable print artwork | Full-logo files in `logos/eps/` |
-| Polo and jacket PES, 3 and 3.25 inches wide | `embroidery-pes/` — test sew-out required; read its guide |
+| Refined satin wordmark PES, 3 and 3.25 inches wide | `embroidery-pes/refined-satin/` — test sew-out required |
+| S monogram PES, 2.5 inches wide | `embroidery-pes/refined-satin/` — staggered split satin; test sew-out required |
 | Embroidery shop source vectors | `embroidery-artwork/` |
 | Transparent raster logo | Matching files in `logos/png/` |
 | Browser favicon | `icons/favicon.svg` or `icons/favicon.ico` |

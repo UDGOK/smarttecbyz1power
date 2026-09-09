@@ -12,13 +12,18 @@ import { company, site, power, network, compute } from '../data/site';
 
 const year = new Date().getFullYear();
 
+/**
+ * The footer ledger repeats the site's headline figures, so it is exactly the
+ * place a corrected fact goes stale. Every value here is read from the record
+ * rather than retyped, and each one carries its own status word — a footer is
+ * where "planned" gets quietly dropped otherwise.
+ */
 const ledger = [
-  { label: 'Site', value: `${site.designation} · ${site.name}` },
-  { label: 'Land', value: `${site.acres} acres · ${site.ownership.toLowerCase()}` },
-  { label: 'Service', value: `${power.transformer} · ${power.voltage}` },
-  { label: 'Energy', value: power.rate },
-  { label: 'Network', value: `${network.speed.split(' ').slice(0, 2).join(' ')} · ${network.provider}` },
-  { label: 'Phase 1A', value: `${compute.gpus} GPUs · ${compute.load}` },
+  { label: 'Campus', value: `${site.acres} acres · three tracts` },
+  { label: 'Buildings', value: `A/B/C · ${site.buildingArea.toLocaleString()} sq ft existing` },
+  { label: 'Service', value: `${power.service} · shared` },
+  { label: 'Network', value: `${network.service} · planned` },
+  { label: 'First compute', value: `${compute.gpus} GPUs planned · ${site.powerOn}` },
 ] as const;
 
 const groups = [
@@ -51,7 +56,7 @@ const groups = [
     <div class="foot__lead">
       <p class="foot__kicker">
         <span class="foot__dot" aria-hidden="true"></span>
-        Power-on {site.powerOn} · Interconnection queue: {power.interconnectionQueue}
+        First compute: {site.powerOn} · Buildings A, B and C are not yet commissioned
       </p>
       <p class="foot__statement">{company.tagline}</p>
       <p class="foot__mark"><a href="/">{company.full}</a></p>

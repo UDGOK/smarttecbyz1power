@@ -7,14 +7,14 @@ import CtaBar from '../components/chrome/CtaBar.astro';
 import Loader from '../components/chrome/Loader.astro';
 import SiteMenu from '../components/chrome/SiteMenu.astro';
 import Configurator from '../components/Configurator.astro';
-import { company, site, stages } from '../data/site';
+import { company, site, compute, stages } from '../data/site';
 
 const grain =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E\")";
 ---
 <Base
   title={`${company.full} — AI data centers, Mead Oklahoma`}
-  description={`${site.acres} acres in ${site.county}, Oklahoma. Behind-the-meter power, no interconnection queue, ${site.powerOn} power-on. Colocation and GPU capacity from SmartTec by Z1Power.`}
+  description={`${site.acresRounded} in ${site.county}, Oklahoma, across three tracts. ${site.buildingArea.toLocaleString()} sq ft of existing buildings designated for data-center deployment, and ${compute.gpus} GPUs planned for the first phase. Colocation and dedicated compute from SmartTec by Z1Power.`}
   experience
 >
   <canvas id="experience-canvas" aria-hidden="true"></canvas>
@@ -89,9 +89,9 @@ const grain =
   <section class="static-path" id="static-path">
     <h2>Site 01 — {site.address}</h2>
     <dl>
-      <div><dt>Land</dt><dd>{site.acres} acres, {site.ownership.toLowerCase()}, {site.county}</dd></div>
-      <div><dt>Buildings</dt><dd>{site.buildings.length} × {site.buildings[0].sqft.toLocaleString()} sqft</dd></div>
-      <div><dt>Power-on</dt><dd>{site.powerOn}</dd></div>
+      <div><dt>Land</dt><dd>{site.acres} acres across three tracts, {site.county}</dd></div>
+      <div><dt>Existing buildings</dt><dd>A, B and C — {site.buildingArea.toLocaleString()} sq ft, not yet commissioned</dd></div>
+      <div><dt>First compute</dt><dd>{site.powerOn}</dd></div>
     </dl>
   </section>
 </Base>

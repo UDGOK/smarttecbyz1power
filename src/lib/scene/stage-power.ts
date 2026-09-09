@@ -1,8 +1,9 @@
 /**
  * Stage 3 — THE POWER.
  *
- * Behind-the-meter at Mead, Oklahoma. ~500 kW of on-site solar feeding Z1Power
- * LFP cabinets, feeding a 3 MVA transformer at 208V three-phase. Nobody applied
+ * The energy world at Mead, Oklahoma: planned solar feeding Z1Power LFP
+ * cabinets and a service at 208 V three-phase. All of it planned rather than
+ * installed — the scene is a diagram of an intention, not a survey. Nobody applied
  * for an interconnection, so the whole world is built out of things we already
  * own: a field of trackers, a bank of cabinets, one block of iron.
  *
@@ -54,7 +55,7 @@ const CAB_W = 1.55;
 const CAB_H = 3.0;
 const CAB_D = 1.9;
 
-const XFMR = new THREE.Vector3(8.2, 0, -9.0); // 3 MVA, foreground right
+const XFMR = new THREE.Vector3(8.2, 0, -9.0); // service, foreground right
 const XFMR_W = 5.0;
 const XFMR_H = 4.2;
 const XFMR_D = 3.2;

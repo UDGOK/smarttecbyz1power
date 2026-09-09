@@ -1,4 +1,6 @@
-# SmartTec PES — test sew-out files
+# SmartTec PES — earlier fill trials
+
+**Latest edition:** use [`refined-satin/START-HERE.html`](refined-satin/START-HERE.html) for the refined satin wordmarks at 3 and 3.25 inches and the S monogram at 2.5 inches. The files described below are retained as earlier basic-fill trials.
 
 For polos and jackets, supplied at **3 inches (76.2 mm)** and **3.25 inches (82.55 mm)** wide with proportional height. These are real PES version 6 stitch programs, digitally reopened and checked. **They have not been sewn on fabric and are draft digitizations for a test sew-out, not approved production masters.**
 

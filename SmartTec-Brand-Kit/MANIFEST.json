@@ -1,13 +1,18 @@
 [
   {
+    "path": ".DS_Store",
+    "bytes": 6148,
+    "sha256": "454d9fd9ed6173bdfd0ebef9d9ffd6fdf7dba3c9fb3c937c154f9746af38868e"
+  },
+  {
     "path": "README-DESIGNER.md",
-    "bytes": 7750,
-    "sha256": "585bec178d391f24919a02d0e7ee84da6ee1b7e3d709be60af516854c9cc460f"
+    "bytes": 7874,
+    "sha256": "38d003d6a5892ab4a4c2141ebbda1005cf0be876cb7a9e6dd33889d564cfc785"
   },
   {
     "path": "START-HERE.html",
-    "bytes": 8432,
-    "sha256": "d5e98c8e3adfe3138287c9be7409d5c3e32de7aca9eea8eaddc3a34ccd2376a3"
+    "bytes": 8905,
+    "sha256": "daffad2ec23513b5176643cb40e30487faa13a1df7e05ac3bcd991e256d3d743"
   },
   {
     "path": "animated/smarttec-energy-loop-1920x1080.mp4",
@@ -136,13 +141,123 @@
   },
   {
     "path": "embroidery-pes/READ-ME-FIRST.md",
-    "bytes": 3236,
-    "sha256": "e927b5e7cc7165114e4052296da9c981d4a9b66c90b2569ffc4a82e561ac0dc7"
+    "bytes": 3483,
+    "sha256": "00a30a710d357a102bc17c09f98c6661de2796934dfcf5cb00762b406b8b6327"
   },
   {
     "path": "embroidery-pes/geometry-validation.json",
     "bytes": 966,
     "sha256": "3e58764c2c9828c4f8a3f3b35bfe6dcc815e636d0a01aaa5f8c6ede990e71cc0"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/READ-ME-FIRST.md",
+    "bytes": 4209,
+    "sha256": "a749bfdd274b5b9487a753e52e2e8d2d75cf33a692c12b550d0dce36b17e6e55"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/START-HERE.html",
+    "bytes": 4247,
+    "sha256": "a539b1c1eb5f39f429722674ba53ff651b0cedd042d31158490d1229f15885c2"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/construction.json",
+    "bytes": 18767,
+    "sha256": "120115f348c99e4697b422727e47d62a7c5a72429d1163a90152ce86cf1d6fdb"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-monogram-2p5in-dark-fabric-SATIN-TEST-SEWOUT-stitch-preview.png",
+    "bytes": 607743,
+    "sha256": "61a1ae1d416bc278ac911e0480c24079086b50991500ea7460cc8feccd5a32b6"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-monogram-2p5in-dark-fabric-SATIN-TEST-SEWOUT-stitch-preview.svg",
+    "bytes": 143746,
+    "sha256": "ed7e476f168e37c271e08b387a150e5f7fa820c163800698d5ee8e2b3b62bdcf"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-monogram-2p5in-dark-fabric-SATIN-TEST-SEWOUT.pes",
+    "bytes": 35310,
+    "sha256": "b4d1bbc3ca61d1c80d21e701fa98c7e6f1901d8c8b821106316aeb146e3da2b3"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-monogram-2p5in-light-fabric-SATIN-TEST-SEWOUT-stitch-preview.png",
+    "bytes": 600287,
+    "sha256": "29163029822a0aad8695759552102a7062ef657dfe8662a62828a65169b582ad"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-monogram-2p5in-light-fabric-SATIN-TEST-SEWOUT-stitch-preview.svg",
+    "bytes": 143746,
+    "sha256": "eea6d56081475ab8cb205390edcc07943e3658dae9645bfa0b8b89f00d158a12"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-monogram-2p5in-light-fabric-SATIN-TEST-SEWOUT.pes",
+    "bytes": 35314,
+    "sha256": "8d46f575cb2a5d4fbfe34b333ae54dfdf553374bae950b3a46559a23d4f6013e"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3in-dark-fabric-SATIN-TEST-SEWOUT-stitch-preview.png",
+    "bytes": 139647,
+    "sha256": "9a03b553114c28b9912d00d2c65b1ccaf709e54bc7946729a2caa0bf3bc68a61"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3in-dark-fabric-SATIN-TEST-SEWOUT-stitch-preview.svg",
+    "bytes": 57971,
+    "sha256": "a092400bc9d52ee41a8b31740087c66a341b384a32ce338f19fae44ee6607cdb"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3in-dark-fabric-SATIN-TEST-SEWOUT.pes",
+    "bytes": 17112,
+    "sha256": "654c05e8cd51ae0b54fcfa023c89dd0c74f713f8644ff458162b69c5643bb33a"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3in-light-fabric-SATIN-TEST-SEWOUT-stitch-preview.png",
+    "bytes": 138277,
+    "sha256": "ed93ad6c041067f07cff4429b878c289d3a8443194e387fde90d837b99ef2f1f"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3in-light-fabric-SATIN-TEST-SEWOUT-stitch-preview.svg",
+    "bytes": 57971,
+    "sha256": "70cdc48672033d2314b594e4f8e931c85eb89682edb0e05c01e961238883632a"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3in-light-fabric-SATIN-TEST-SEWOUT.pes",
+    "bytes": 17116,
+    "sha256": "ba6c7c80ca3f7fe130d26321f5927b8287fcf92d71c078acd496d0ea7feb48bb"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3p25in-dark-fabric-SATIN-TEST-SEWOUT-stitch-preview.png",
+    "bytes": 144982,
+    "sha256": "8df3b6f542f0cb87dc63dfbf40e858852daa00a1bde02e60770307256ab3ba73"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3p25in-dark-fabric-SATIN-TEST-SEWOUT-stitch-preview.svg",
+    "bytes": 62021,
+    "sha256": "77cd99faf5d61bf6f05e1e0d0815140443bba50dd106c073f24e9a8835cf2827"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3p25in-dark-fabric-SATIN-TEST-SEWOUT.pes",
+    "bytes": 18063,
+    "sha256": "88fd80dde93cfde09bdcbbb671ef364337a70c04899fcbc8fbd82a63fb82a4f3"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3p25in-light-fabric-SATIN-TEST-SEWOUT-stitch-preview.png",
+    "bytes": 143243,
+    "sha256": "8d0a49e8bd879c60f585a1cb75499459322e8d2047fef368f2dca1fbdfdd1712"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3p25in-light-fabric-SATIN-TEST-SEWOUT-stitch-preview.svg",
+    "bytes": 62021,
+    "sha256": "b3aa60e09cb7c29927358d4c1df10e9e9faad217fbeeaa694140953843df7271"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/smarttec-wordmark-3p25in-light-fabric-SATIN-TEST-SEWOUT.pes",
+    "bytes": 18067,
+    "sha256": "3a453034ac151de69e928e8e136b656845d0dfa1b9cc11a45ad853dd47b09fc9"
+  },
+  {
+    "path": "embroidery-pes/refined-satin/stitch-validation.json",
+    "bytes": 3464,
+    "sha256": "91f11637cada77c644be658c4638a759f3d3571a7d94be2afaba28b043a246c3"
   },
   {
     "path": "embroidery-pes/smarttec-wordmark-3in-dark-fabric-TEST-SEWOUT-stitch-preview.png",
@@ -553,6 +668,11 @@
     "path": "source/export-media.mjs",
     "bytes": 4038,
     "sha256": "4742fb4d737d0326d96adf4c12c337146c69669b2a6ab953bb8f096cec34e865"
+  },
+  {
+    "path": "source/export-refined-satin.py",
+    "bytes": 12685,
+    "sha256": "676386634abdead0557535e7fc78ef10391324a20572db212b38f3b3149baa5e"
   },
   {
     "path": "source/logo-geometry.json",

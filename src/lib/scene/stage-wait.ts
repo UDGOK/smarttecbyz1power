@@ -2,7 +2,7 @@
  * Stage 2 — THE WAIT.
  *
  * The pressure beat. Everyone else who wants to build an AI data centre is
- * standing in an interconnection queue: 4–7 years for energised capacity, and
+ * standing in an interconnection queue waiting for energised capacity, and
  * the GPUs were never the constraint. This world is that queue — a file of
  * identical waiting forms receding to a vanishing point that never arrives,
  * under volumetric shafts that rake down and never move anything along.

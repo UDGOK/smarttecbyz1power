@@ -1,50 +1,56 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power, network } from '../data/site';
+import { company, site, power, network, solar, compute } from '../data/site';
 
+/* Calculated from the record, so the total can never drift from the parts. */
 const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
+const tractAcres = site.tracts.reduce((n, t) => n + t.acres, 0);
 ---
 
 <Content
   title={`${site.designation} — ${site.name} | ${company.full}`}
-  description={`${site.acres} acres in ${site.county}, Oklahoma, owned outright, with three ${site.buildings[0].sqft.toLocaleString()} sq ft buildings and an existing ${power.transformer} service already on the parcel. Power-on ${site.powerOn}.`}
+  description={`${site.acresRounded} in ${site.county}, Oklahoma, across three tracts. Buildings A, B and C total ${totalSqft.toLocaleString()} sq ft of existing building area; ${site.manufacturing.sqftTotal.toLocaleString()} sq ft of manufacturing is planned on Tract 1 and ${solar.tractAcres} acres are set aside for energy on Tract 3.`}
   kicker={`${site.designation} · ${site.county}, Oklahoma`}
-  heading="Forty acres that already have power on them."
-  lede={`${site.address}. ${site.acres} acres, ${site.ownership.toLowerCase()}, three buildings standing, and a ${power.transformer} service energised on the parcel. Nothing here is optioned, leased or subject to a land assembly.`}
+  heading="One campus, three tracts, three different stages."
+  lede={`${site.address}. ${site.acresRounded} organised as manufacturing land, the existing buildings, and land for planned solar and storage. The three are at genuinely different stages, and this page keeps them apart.`}
   meta={[
-    { label: 'Parcel', value: `${site.acres} acres`, note: `${site.ownership}, ${site.county}`, count: true },
-    { label: 'Buildings', value: `${totalSqft.toLocaleString()} sq ft`, note: `${site.buildings.length} × ${site.buildings[0].sqft.toLocaleString()} sq ft, standing`, count: true },
-    { label: 'Electrical service', value: power.transformer, note: `${power.voltage}, energised on site`, tone: 'gold' },
-    { label: 'Power-on target', value: site.powerOn, note: 'Phase 1A compute hall', tone: 'signal' },
+    { label: 'Campus', value: `${tractAcres.toFixed(2)} acres`, note: 'Three tracts, owner-reported', count: true },
+    { label: 'Existing buildings', value: `${totalSqft.toLocaleString()} sq ft`, note: 'A, B and C — gross, not white space', count: true },
+    { label: 'Shared service', value: power.service, note: power.serviceScope, tone: 'gold' },
+    { label: 'First compute', value: site.powerOn, note: 'Target, requires revalidation', tone: 'signal' },
   ]}
 >
   <section aria-labelledby="today" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">On the ground</span></p>
-    <h2 id="today">What exists today, not what is planned</h2>
+    <h2 id="today">What exists, and what does not</h2>
 
     <div class="split">
       <div>
         <p>
-          Most AI data center sites are sold on a rendering and a land option.
-          {' '}{company.name} owns the {site.acres} acres at {site.address} outright,
-          the three buildings are already up, the {power.transformer} transformer is
-          already set, and the fibre is a signed quote rather than a feasibility study.
+          Three buildings stand on Tract 2 — A, B and C, {totalSqft.toLocaleString()} sq ft
+          between them — behind a shared {power.service} distribution originating at
+          Building C. That is the part that exists. None of the three has an established
+          fit-out or commissioning status, and the gross floor area above is not certified
+          white space or sellable rack area.
         </p>
       </div>
       <div>
         <p>
-          That changes what a tenant is underwriting. You are not underwriting whether
-          the power will arrive, or whether the seller closes on the land. You are
-          underwriting a fit-out schedule inside a building that exists.
+          Tract 1 is empty land with {site.manufacturing.buildings} buildings planned on
+          it. Tract 3 is empty land set aside for energy. Neither is under construction.
+          What a tenant is underwriting is a fit-out inside buildings that exist, not a
+          finished facility and not a greenfield promise.
         </p>
       </div>
     </div>
 
     <blockquote class="pull">
-      <p>This one is sold on a deed.</p>
+      <p>{tractAcres.toFixed(2)} acres, from three tract sizes.</p>
       <p>
-        {site.acres} acres at {site.address}. {site.ownership} in {site.county} —
-        not optioned, not leased, not subject to a land assembly.
+        13.50 + 7.51 + 18.20. "Approximately 40 acres" is the rounded form of that sum
+        rather than a second measurement, and the 0.79-acre difference is unexplained
+        until the recorded survey settles it. We would rather show you the arithmetic than
+        the round number on its own.
       </p>
     </blockquote>
   </section>
@@ -57,8 +63,8 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
       <dl class="spec">
         <div><dt>Address</dt><dd>{site.address}</dd></div>
         <div><dt>County</dt><dd>{site.county}, Oklahoma</dd></div>
-        <div><dt>Acreage</dt><dd>{site.acres} acres</dd></div>
-        <div><dt>Tenure</dt><dd>{site.ownership}<span class="note">No ground lease, no option, no assembly risk.</span></dd></div>
+        <div><dt>Acreage</dt><dd>{tractAcres.toFixed(2)} acres<span class="note">{site.acresNote}</span></dd></div>
+        <div><dt>Tenure</dt><dd>{site.ownership}<span class="note">{site.ownershipNote}</span></dd></div>
         <div><dt>Frontage</dt><dd>US-70<span class="note">Highway frontage at the address above — the parcel is reached directly from the state highway, not from a county section road.</span></dd></div>
         <div><dt>Parcel ID</dt><dd><span class="todo">[PLACEHOLDER: Bryan County assessor parcel number and legal description]</span></dd></div>
         <div><dt>Zoning</dt><dd><span class="todo">[PLACEHOLDER: zoning classification and whether a data center is permitted by right]</span></dd></div>
@@ -76,23 +82,107 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
           <p class="photo__state">Photograph not taken yet</p>
         </div>
         <figcaption>
-          <b>[PHOTO NEEDED]</b> Aerial of the full {site.acres}-acre parcel with the three
-          buildings and the US-70 frontage visible, ideally flown in daylight with the
-          boundary legible. Company policy is a real photograph or an empty frame — no
-          stock, no render.
+          <b>[PHOTO NEEDED]</b> Aerial of the campus with the three tracts, Buildings A,
+          B and C and the US-70 frontage visible, ideally flown in daylight with the
+          boundary legible. A real photograph or an empty frame — and a render of the
+          planned factory or solar field would be labelled as a concept, never shown as
+          the site.
         </figcaption>
       </figure>
     </div>
   </section>
 
-  <section aria-labelledby="buildings" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">The buildings</span></p>
-    <h2 id="buildings">Three shells, phased</h2>
+  <section aria-labelledby="tracts" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">The three tracts</span></p>
+    <h2 id="tracts">One campus, organised in three parts</h2>
 
     <p>
-      The three buildings are identical {site.buildings[0].sqft.toLocaleString()} sq ft
-      shells. Phase 1A takes the first one. The other two stay as expansion shells so a
-      second and third deployment do not wait on new construction, only on fit-out.
+      The tract schedule below is the record every other figure on this site is
+      generated from. Two of the three tracts are undeveloped land with plans on them;
+      only Tract 2 has anything standing.
+    </p>
+
+    <div class="scroller" tabindex="0" role="region" aria-label="Tract schedule, scrollable">
+      <table>
+        <caption>Tract schedule, {site.designation}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Tract</th>
+            <th scope="col">Area</th>
+            <th scope="col">Intended use</th>
+            <th scope="col">State today</th>
+          </tr>
+        </thead>
+        <tbody>
+          {site.tracts.map((t) => (
+            <tr>
+              <th scope="row">{t.label}</th>
+              <td class="num">{t.acres.toFixed(2)} acres</td>
+              <td>{t.use}</td>
+              <td>{t.state}</td>
+            </tr>
+          ))}
+          <tr>
+            <th scope="row">Total</th>
+            <td class="num">{tractAcres.toFixed(2)} acres</td>
+            <td>Sum of the three owner-reported tract sizes</td>
+            <td>{site.acresNote}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 style="margin-top: var(--s-7);">Planned manufacturing, Tract 1</h3>
+    <p>
+      {site.manufacturing.buildings} buildings of
+      {' '}{site.manufacturing.sqftEach.toLocaleString()} sq ft each —
+      {' '}{site.manufacturing.sqftTotal.toLocaleString()} sq ft in total — are planned for
+      {' '}{site.manufacturing.scope.toLowerCase()}. Management targets a construction start
+      {' '}{site.manufacturing.startTarget}. {site.manufacturing.startTargetNote} Nothing is
+      under construction today, and this page will not say otherwise until work starts.
+      {' '}<span class="todo">{site.manufacturing.allocation}</span>
+    </p>
+
+    <h3 style="margin-top: var(--s-6);">Three timelines, deliberately separate</h3>
+    <div class="cards">
+      <div class="card">
+        <h3>Manufacturing</h3>
+        <p>
+          Two planned buildings on Tract 1; construction-start target
+          {' '}{site.manufacturing.startTarget}, subject to confirmation of a dated
+          schedule.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Data center</h3>
+        <p>
+          An {compute.gpus}-GPU initial deployment. Procurement, building assignment,
+          fit-out, network acceptance and first paid workload are separate milestones —
+          {' '}{site.powerOn} is an earlier target requiring revalidation, not a confirmed
+          launch.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Energy</h3>
+        <p>
+          Survey and layout, a load and dispatch study, the utility process, funding,
+          construction and commissioning. No completion date has been committed.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="buildings" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">The buildings</span></p>
+    <h2 id="buildings">Buildings A, B and C</h2>
+
+    <p>
+      Three existing buildings on Tract 2, of three different sizes, totalling
+      {' '}{totalSqft.toLocaleString()} sq ft. This is gross existing building area — not
+      certified white space, not sellable rack area, and not a commissioned data hall.
+      Which building takes the first compute installation has not been confirmed. The
+      house and office, {site.houseOffice.sqft.toLocaleString()} sq ft, are separately
+      identified and excluded from these figures entirely.
     </p>
 
     <div class="scroller" tabindex="0" role="region" aria-label="Building schedule, scrollable">
@@ -112,18 +202,20 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
               <th scope="row">Building {b.id}</th>
               <td class="num">{b.sqft.toLocaleString()} sq ft</td>
               <td>{b.role}</td>
-              <td>
-                {b.id === 1
-                  ? `Fit-out for ${site.powerOn} power-on`
-                  : 'Shell, available for fit-out'}
-              </td>
+              <td>{site.buildingStatus}</td>
             </tr>
           ))}
           <tr>
             <th scope="row">Total</th>
             <td class="num">{totalSqft.toLocaleString()} sq ft</td>
-            <td>Across {site.buildings.length} buildings</td>
+            <td>Gross existing building area across {site.buildings.length} buildings</td>
             <td><span class="todo">[PLACEHOLDER: clear height, slab loading, and roof structure per building]</span></td>
+          </tr>
+          <tr>
+            <th scope="row">House / office</th>
+            <td class="num">{site.houseOffice.sqft.toLocaleString()} sq ft</td>
+            <td>{site.houseOffice.note}</td>
+            <td>Separate {power.houseOfficeService} supply</td>
           </tr>
         </tbody>
       </table>
@@ -156,7 +248,7 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
   </section>
 
   <section aria-labelledby="why" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Location</span></p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Location</span></p>
     <h2 id="why">Why Mead</h2>
 
     <p>
@@ -168,38 +260,40 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
       <div class="card">
         <h3>The service was already there</h3>
         <p>
-          A {power.transformer} service at {power.voltage} is standing and energised on
-          the parcel. A new large-load request would put a site in an interconnection
-          queue that currently runs {power.industryQueue}. This one is not in that queue.
+          {power.service}, shared across Buildings A, B and C from Building C. A
+          greenfield build starts by asking a utility for load; this starts with
+          distribution already installed. What it can carry as IT load is a separate
+          question, and it follows an engineering review.
         </p>
       </div>
       <div class="card">
         <h3>The buildings were already there</h3>
         <p>
-          {site.buildings.length} × {site.buildings[0].sqft.toLocaleString()} sq ft of
-          existing shell removes ground-up construction from the critical path. Phase 1A
-          is a fit-out, not a build.
+          {totalSqft.toLocaleString()} sq ft of existing building across A, B and C
+          removes ground-up construction from the critical path. The first deployment is a
+          fit-out rather than a build — and a fit-out that has not started.
         </p>
       </div>
       <div class="card">
         <h3>The land is owned, not optioned</h3>
         <p>
-          {site.ownership} in {site.county}. There is no landowner to renegotiate with
-          and no option to exercise before a tenant can be given a term sheet.
+          {site.ownership} in {site.county}. Which entity holds it, and what liens sit
+          against it, is being documented before this page says more than that.
         </p>
       </div>
       <div class="card">
-        <h3>The fibre is quoted, not scoped</h3>
+        <h3>Connectivity is planned</h3>
         <p>
-          {network.speed} from {network.provider} on a {network.term.toLowerCase()}.
-          Rural Oklahoma is often written off on connectivity; this parcel is not.
+          {network.publicCopy} Rural Oklahoma is often written off on connectivity; this
+          parcel looks better than that, and a quote, an order and a live circuit are
+          three different stages.
         </p>
       </div>
     </div>
   </section>
 
   <section aria-labelledby="diligence" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Diligence</span></p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">06</span><span class="eyebrow__t">Diligence</span></p>
     <h2 id="diligence">What we have not published yet</h2>
 
     <p>
@@ -222,12 +316,13 @@ const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
   </section>
 
   <section class="is-end" aria-labelledby="next" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">06</span><span class="eyebrow__t">Next</span></p>
-    <h2 id="next">The power is the reason this site is worth reading about</h2>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">07</span><span class="eyebrow__t">Next</span></p>
+    <h2 id="next">The electrical position is the reason this site is worth reading about</h2>
     <p>
-      Thirty owned acres is a good starting position. It is the electrical position that
-      makes the schedule real: an existing service, {power.headroom}, and no
-      interconnection application to file.
+      {tractAcres.toFixed(2)} acres is a good starting position. What makes the schedule
+      worth examining is that distribution is already installed and three buildings are
+      already standing — so the question becomes what they can carry, which is a question
+      an engineer can answer rather than a queue.
     </p>
     <div class="actions">
       <a class="btn" href="/power">Read the power story</a>

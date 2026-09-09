@@ -2,7 +2,7 @@
  * Stage 4 — THE MACHINE.
  *
  * Phase 1A compute: 2 nodes of 4 × NVIDIA RTX 6000 Blackwell, ~7.5 kW of IT
- * load, drawing a fraction of a percent of the 3 MVA transformer already
+ * load, against the shared service already
  * standing on the site. The emotional beat is *controlled density* — cold,
  * quiet, immense — so the world is graphite and deep blue with cyan-white heat
  * as the only accent. No warmth anywhere except the coolant return.

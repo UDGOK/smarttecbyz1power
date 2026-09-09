@@ -3,7 +3,7 @@
  *
  * The payoff. Four worlds of dark ground open into daylight: an explorable
  * isometric model of Site 01 at 8460 US-70, Mead, Oklahoma — forty acres of
- * Bryan County with three buildings, a 3 MVA transformer, ~500 kW of solar,
+ * Bryan County with three buildings, the shared service, planned solar,
  * Z1Power LFP storage, and the open land that Phase 2 and 3 grow into.
  *
  * Everything here is generated: no glTF, no texture atlas, no downloads. The
@@ -29,7 +29,7 @@
  */
 
 import * as THREE from 'three';
-import { power, site } from '../../data/site';
+import { power, site, solar as solarPlan } from '../../data/site';
 import type { SceneContext, StageScene, TierSettings } from './types';
 
 /* ============================================================
@@ -419,33 +419,33 @@ export class CampusScene implements StageScene {
   /** Every named place on the campus, in the order the DOM should list them. */
   readonly hotspots: readonly CampusHotspot[] = [
     {
-      id: 'building-1',
-      label: `Building 1 · ${site.buildings[0].sqft.toLocaleString('en-US')} sqft · ${site.buildings[0].role}`,
+      id: 'building-a',
+      label: `Building A · ${site.buildings[0].sqft.toLocaleString('en-US')} sqft existing · ${site.buildingStatus.toLowerCase()}`,
       worldPosition: new THREE.Vector3(BUILDING_X[0], BUILDING_H + 3.4, BUILDING_Z),
     },
     {
-      id: 'building-2',
-      label: `Building 2 · ${site.buildings[1].sqft.toLocaleString('en-US')} sqft · ${site.buildings[1].role}`,
+      id: 'building-b',
+      label: `Building B · ${site.buildings[1].sqft.toLocaleString('en-US')} sqft existing · ${site.buildingStatus.toLowerCase()}`,
       worldPosition: new THREE.Vector3(BUILDING_X[1], BUILDING_H + 3.4, BUILDING_Z),
     },
     {
-      id: 'building-3',
-      label: `Building 3 · ${site.buildings[2].sqft.toLocaleString('en-US')} sqft · ${site.buildings[2].role}`,
+      id: 'building-c',
+      label: `Building C · ${site.buildings[2].sqft.toLocaleString('en-US')} sqft existing · ${site.buildingStatus.toLowerCase()}`,
       worldPosition: new THREE.Vector3(BUILDING_X[2], BUILDING_H + 3.4, BUILDING_Z),
     },
     {
       id: 'transformer',
-      label: `${power.transformer} transformer · ${power.voltage}`,
+      label: `Shared service · ${power.service} · from Building C`,
       worldPosition: new THREE.Vector3(TRANSFORMER_P.x, 6.4, TRANSFORMER_P.z),
     },
     {
       id: 'solar',
-      label: `Solar · ${power.solarPlanned}`,
+      label: `Tract 3 · ${solarPlan.tractAcres} acres · planned solar and storage`,
       worldPosition: new THREE.Vector3(SOLAR_P.x, 3.6, SOLAR_P.z),
     },
     {
       id: 'storage',
-      label: 'Storage · Z1Power LFP battery cabinets',
+      label: 'Storage · Z1Power LFP cabinets · candidate location, not installed',
       worldPosition: new THREE.Vector3(BATTERY_P.x, 4.4, BATTERY_P.z),
     },
     {
@@ -455,7 +455,7 @@ export class CampusScene implements StageScene {
     },
     {
       id: 'land',
-      label: `${site.acres} acres · ${site.ownership} · room for Phase 2 and 3`,
+      label: `${site.acres} acres · three tracts · conceptual diagram, not surveyed geometry`,
       worldPosition: new THREE.Vector3(46, 2.0, 28),
     },
   ];
@@ -1262,7 +1262,7 @@ export class CampusScene implements StageScene {
     pad.position.y = 0.2;
     g.add(pad);
 
-    // 3 MVA pad-mount: tank, radiator fins, three bushings on the HV side.
+    // Pad-mount transformer: tank, radiator fins, three bushings on the HV side.
     const tankGeo = this.geo(new THREE.BoxGeometry(6.4, 4.0, 4.6));
     const steel = this.mat(new THREE.MeshStandardMaterial({
       color: new THREE.Color('#8b9598'), roughness: 0.5, metalness: 0.45,
@@ -1346,7 +1346,7 @@ export class CampusScene implements StageScene {
   }
 
   /**
-   * ~500 kW of on-site solar, drawn as tilted rows. The panel count rides
+   * Planned solar, drawn as tilted rows. The panel count rides
    * `particleCount` so a low-tier device gets the same read at a fifth of the
    * instances rather than a different picture.
    */

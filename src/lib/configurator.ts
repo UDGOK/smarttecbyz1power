@@ -56,24 +56,43 @@ export interface SizingResult {
   complete: boolean;
   /** True until the GPU question is answered — the count is standing in. */
   provisional: boolean;
-  /** GPUs quoted, after floors and after clipping to the rentable pool. */
+  /** GPUs the request actually asks for. Never clipped: asking for more than
+   *  the planned fleet is a real answer, and it is an expansion inquiry. */
   gpus: number;
-  /** What the rules asked for before clipping. */
+  /** What the rules asked for before any floor was applied. */
   requestedGpus: number;
   /** Set when another answer lifted the GPU count above what was asked for. */
   lift: { from: number; to: number; reason: string } | null;
-  drawFactor: number;
-  itKw: number;
+
+  /**
+   * Peak IT load: servers, storage and network on one boundary, at rated
+   * draw. This is the allocation figure, and no workload assumption reduces
+   * it.
+   */
+  peakItKw: number;
+  /** Servers only, at peak. */
+  serverKw: number;
+  /** Storage, at peak. Zero here means "none selected", not "none needed". */
   storageKw: number;
-  ancillaryKw: number;
-  totalKw: number;
-  /** Percent of the transformer nameplate. */
-  transformerShare: number;
-  /** Percent of the Phase 1A load. */
-  phase1aShare: number;
+  /** Facility overhead, applied once as (PUE − 1) × peak IT. */
+  facilityKw: number;
+  /** Peak IT plus that overhead. */
+  peakTotalKw: number;
+  /** Assumed average share of peak. An energy assumption only. */
+  dutyCycle: number;
+  /** Peak IT × duty cycle. Explicitly an assumption about consumption. */
+  avgItKw: number;
+
+  /** True when an answer carries an unknown the form cannot resolve. */
+  needsReview: boolean;
+  /** Why, in the answers' own words. */
+  reviewReasons: string[];
+  /** True when the request runs past the planned fleet. */
+  beyondPlanned: boolean;
+
   fit: FitLevel;
   fitCopy: FitCopy;
-  energy: { hours: number; period: string; usd: number };
+  energy: { hours: number; period: string };
   notes: string[];
 }
 
@@ -90,11 +109,12 @@ export function computeSizing(answers: Answers): SizingResult {
   let range: { min: number; max: number } | null = null;
   let floor = 0;
   let floorReason = '';
-  let drawFactor: number | null = null;
+  let duty: number | null = null;
   let storageKw = 0;
-  let energyHours: number = rules.defaultEnergyHours;
-  let energyPeriod: string = rules.defaultEnergyPeriod;
+  let energyHours: number = rules.monthlyHoursConvention;
+  let energyPeriod = 'month';
   const notes: string[] = [];
+  const reviewReasons: string[] = [];
   let answered = 0;
 
   for (const question of questions) {
@@ -108,29 +128,52 @@ export function computeSizing(answers: Answers): SizingResult {
       floor = fx.gpuFloor;
       floorReason = fx.gpuFloorReason ?? '';
     }
-    if (fx.drawFactor !== undefined) drawFactor = (drawFactor ?? 1) * fx.drawFactor;
+    if (fx.dutyCycle !== undefined) duty = (duty ?? 1) * fx.dutyCycle;
     if (fx.addKw !== undefined) storageKw += fx.addKw;
     if (fx.energyHours !== undefined) energyHours = fx.energyHours;
     if (fx.energyPeriod) energyPeriod = fx.energyPeriod;
     if (fx.note) notes.push(fx.note);
+    if (fx.review) reviewReasons.push(fx.review);
   }
 
-  const factor = drawFactor ?? rules.defaultDrawFactor;
   const requestedGpus = Math.max(range ? range.max : 0, floor);
-  const gpus = Math.min(requestedGpus, envelope.rentableGpus);
+  /**
+   * Not clipped to the planned fleet. Clipping used to hide the fact that a
+   * request had exceeded it, then a separate flag tried to describe what had
+   * been hidden. Asking for more than eight is a legitimate answer and the
+   * honest response is that it is an expansion inquiry.
+   */
+  const gpus = requestedGpus;
 
-  const itKw = gpus * envelope.kwPerGpu * factor;
-  const ancillaryKw = gpus > 0 ? rules.ancillaryKw : 0;
-  const totalKw = itKw + storageKw + ancillaryKw;
+  /**
+   * One boundary: servers + storage (+ network IT, which is inside the
+   * per-GPU figure's host and supply allowance). At rated draw, always.
+   * The workload duty cycle does not appear here — it describes assumed
+   * average consumption, and using it to shrink an allocation is exactly the
+   * "arbitrary workload power reduction as a basis for fit" the handoff
+   * removes.
+   */
+  const serverKw = gpus * envelope.kwPerGpu;
+  const peakItKw = serverKw + storageKw;
 
-  const overGpus = requestedGpus > envelope.rentableGpus;
-  const overKw = totalKw > envelope.phase1aKw;
-  const gpuShare = gpus / envelope.rentableGpus;
-  const kwShare = envelope.phase1aKw > 0 ? totalKw / envelope.phase1aKw : 0;
+  /** Applied once, to the whole IT load, from a stated PUE. */
+  const facilityKw = peakItKw * (rules.assumedPue - 1);
+  const peakTotalKw = peakItKw + facilityKw;
 
-  let fit: FitLevel = 'phase-1a';
-  if (overGpus || overKw) fit = 'expansion';
-  else if (gpuShare >= rules.tightGpuShare || kwShare >= rules.tightKwShare) fit = 'phase-1a-tight';
+  const dutyCycle = duty ?? rules.defaultDutyCycle;
+  const avgItKw = peakItKw * dutyCycle;
+
+  const beyondPlanned = requestedGpus > envelope.plannedGpus;
+  const needsReview = reviewReasons.length > 0;
+
+  /**
+   * Review outranks everything: an unbenchmarked workload or unspecified
+   * customer equipment is not made resolvable by the request also being
+   * small. Expansion outranks a prepared request. Nothing resolves to "fits".
+   */
+  let fit: FitLevel = 'prepared';
+  if (needsReview) fit = 'review';
+  else if (beyondPlanned) fit = 'expansion';
 
   return {
     answered,
@@ -140,16 +183,19 @@ export function computeSizing(answers: Answers): SizingResult {
     gpus,
     requestedGpus,
     lift: range && floor > range.max ? { from: range.max, to: gpus, reason: floorReason } : null,
-    drawFactor: factor,
-    itKw,
+    serverKw,
     storageKw,
-    ancillaryKw,
-    totalKw,
-    transformerShare: (totalKw / envelope.transformerKva) * 100,
-    phase1aShare: kwShare * 100,
+    peakItKw,
+    facilityKw,
+    peakTotalKw,
+    dutyCycle,
+    avgItKw,
+    needsReview,
+    reviewReasons,
+    beyondPlanned,
     fit,
     fitCopy: fitLevels[fit],
-    energy: { hours: energyHours, period: energyPeriod, usd: totalKw * energyHours * envelope.energyRate },
+    energy: { hours: energyHours, period: energyPeriod },
     notes,
   };
 }
@@ -162,17 +208,22 @@ const fmt = {
   gpus: (n: number): string => int.format(Math.round(n)),
   kw: (n: number): string => n.toFixed(1),
   share: (n: number): string => (n < 10 ? n.toFixed(2) : n.toFixed(1)),
-  money: (n: number): string => (n < 100 ? `$${n.toFixed(2)}` : `$${int.format(Math.round(n))}`),
 };
 
-type FieldName = 'gpus' | 'kw' | 'share' | 'energy';
+/**
+ * The animated figures. `share` and `energy` are gone with the readouts they
+ * fed: a percentage of a transformer nameplate nobody has documented, and a
+ * dollar figure built on an energy rate that is now a placeholder — the
+ * handoff is explicit that a power-only number is not a rental quote.
+ */
+type FieldName = 'gpus' | 'kw' | 'facility' | 'average';
 
 /** Every animated figure, with the one formatter that owns it. */
 const FORMAT: Record<FieldName, (n: number) => string> = {
   gpus: fmt.gpus,
   kw: fmt.kw,
-  share: fmt.share,
-  energy: fmt.money,
+  facility: fmt.kw,
+  average: fmt.kw,
 };
 
 const FIELDS = Object.keys(FORMAT) as FieldName[];
@@ -251,9 +302,10 @@ export class Configurator {
     if (this.panels.length !== questions.length) return;
 
     root.dataset.enhanced = 'true';
-    // The gauge's "fills Phase 1A" mark is placed from the rule data, not from
-    // a percentage retyped into the stylesheet.
-    root.style.setProperty('--cfg-tight', `${rules.tightGpuShare * 100}%`);
+    // The gauge marks the planned fleet, which is the only real edge here.
+    // There is no "fills the phase" band any more: filling it was never a
+    // thing this form could establish.
+    root.style.setProperty('--cfg-tight', '100%');
     root.addEventListener('click', this.onClick);
     root.addEventListener('keydown', this.onKeyDown);
 
@@ -806,12 +858,13 @@ export class Configurator {
     this.last = r;
 
     this.number('gpus', r.gpus);
-    this.number('kw', r.totalKw);
-    this.number('share', r.transformerShare);
-    this.number('energy', r.energy.usd);
+    this.number('kw', r.peakItKw);
+    this.number('facility', r.peakTotalKw);
+    this.number('average', r.avgItKw);
 
-    this.text('energy-period', `per ${r.energy.period}`);
-    this.text('phase-share', `${fmt.share(r.phase1aShare)}% of the Phase 1A load`);
+    this.text('kw-note', r.storageKw > 0 ? 'servers + storage, at peak' : 'servers, at peak');
+    this.text('facility-note', `IT + facility at PUE ${rules.assumedPue}`);
+    this.text('average-note', `assumed ${Math.round(r.dutyCycle * 100)}% of peak`);
     this.text('fit', r.answered === 0 ? 'Not sized yet' : r.fitCopy.label);
     // "1 GPUS" read wrong next to a delta chip that already said "+1 GPU".
     this.text('gpu-word', r.gpus === 1 ? 'GPU' : 'GPUs');
@@ -824,9 +877,11 @@ export class Configurator {
         ? 'Pick a workload to start'
         : r.gpus === 0
           ? 'Scale it to size the deployment'
-          : r.provisional
-          ? `provisional · of ${envelope.rentableGpus} rentable`
-          : `of ${envelope.rentableGpus} rentable`,
+          : r.beyondPlanned
+            ? `past the ${envelope.plannedGpus} planned`
+            : r.provisional
+              ? `provisional · of ${envelope.plannedGpus} planned`
+              : `of ${envelope.plannedGpus} planned`,
     );
     this.text(
       'lift',
@@ -839,7 +894,7 @@ export class Configurator {
 
     const bar = this.root.querySelector<HTMLElement>('[data-bar]');
     if (bar) {
-      const share = Math.min(1, r.gpus / envelope.rentableGpus);
+      const share = Math.min(1, r.gpus / envelope.plannedGpus);
       if (this.reduced) gsap.set(bar, { scaleX: share });
       else gsap.to(bar, { scaleX: share, duration: 0.65, ease: 'power2.out' });
       bar.parentElement?.setAttribute('aria-valuenow', String(Math.round(share * 100)));
@@ -847,12 +902,16 @@ export class Configurator {
 
     const notes = this.root.querySelector<HTMLElement>('[data-notes]');
     if (notes) {
-      notes.replaceChildren(...r.notes.map((note) => {
+      const line = (text: string, review: boolean): HTMLLIElement => {
         const li = document.createElement('li');
-        li.className = 'cfg__note';
-        li.textContent = note;
+        li.className = review ? 'cfg__note cfg__note--review' : 'cfg__note';
+        li.textContent = text;
         return li;
-      }));
+      };
+      notes.replaceChildren(
+        ...r.reviewReasons.map((reason) => line(reason, true)),
+        ...r.notes.map((note) => line(note, false)),
+      );
     }
 
     // React only to a change the visitor can act on: a different GPU count, or
@@ -865,9 +924,9 @@ export class Configurator {
     if (announce && this.announceEl) {
       this.announceEl.textContent = r.answered === 0
         ? 'No answers yet.'
-        : `${r.answered} of ${r.total} answered. ${fmt.gpus(r.gpus)} ${r.gpus === 1 ? 'GPU' : 'GPUs'} of ${envelope.rentableGpus} rentable, `
-          + `${fmt.kw(r.totalKw)} kilowatts estimated, ${fmt.share(r.transformerShare)} percent of the `
-          + `${envelope.transformerLabel} transformer. ${r.fitCopy.label}.`;
+        : `${r.answered} of ${r.total} answered. ${fmt.gpus(r.gpus)} ${r.gpus === 1 ? 'GPU' : 'GPUs'} `
+          + `of ${envelope.plannedGpus} planned. ${fmt.kw(r.peakItKw)} kilowatts estimated peak IT load, `
+          + `${fmt.kw(r.peakTotalKw)} including facility overhead. ${r.fitCopy.label}.`;
     }
   }
 

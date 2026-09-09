@@ -1,18 +1,38 @@
 /**
  * Sizing rules for the deployment configurator.
  *
- * Every rule the recommendation is built from lives here as typed data, so it
- * can be tuned without opening `src/lib/configurator.ts`. Two kinds of number
- * appear below and they are kept strictly apart:
+ * Reworked against the 9 September 2026 handoff, which found this component's
+ * arithmetic — not just its wording — unsound. Four defects, all fixed here:
+ *
+ *   1. Inconsistent boundary. The 7.5 kW figure is the whole first-phase IT
+ *      load, host included. Storage and ancillary draw were then added on top
+ *      and the sum compared back against that same 7.5 kW, so eight GPUs plus
+ *      the smallest storage tier came to 11.1 kW, "exceeded" the envelope, and
+ *      advised another building. That was a boundary error reading as a
+ *      capacity finding. IT is now server + storage + network throughout, and
+ *      facility overhead is applied exactly once, through a stated PUE.
+ *   2. Workload reductions used as a safety argument. Holding a GPU at 55% of
+ *      rated draw is an assumption about average consumption; it is not a
+ *      smaller allocation. Peak and average are now separate figures and only
+ *      peak is ever compared with anything.
+ *   3. A transformer-nameplate denominator. There is no established nameplate,
+ *      and a kW-over-kVA ratio is not a service-utilisation calculation. The
+ *      share readout is gone.
+ *   4. An approval verdict. Nothing here can establish that a deployment
+ *      "fits": the cooling and electrical limits are undocumented and the GPUs
+ *      are planned rather than in inventory. Every outcome now resolves to a
+ *      review status.
+ *
+ * Two kinds of number appear below and are kept strictly apart:
  *
  *   - Derived — read out of `src/data/site.ts` at module load, so if the site
  *     record changes the configurator follows it. Nothing is retyped by hand.
  *   - Estimated — not in the site record. Every one carries `estimated: true`,
- *     is listed in `assumptions`, and is rendered in the UI under a visible
- *     "estimated" marker. Tune these; do not promote them to fact.
+ *     is listed in `assumptions`, and is rendered under a visible "estimated"
+ *     marker. Tune these; do not promote them to fact.
  */
 
-import { compute, power, site } from './site';
+import { compute, network, power, site } from './site';
 
 /** Pull the first number out of a site-record string ("~7.5 kW" -> 7.5). */
 function firstNumber(source: string, fallback: number): number {
@@ -22,51 +42,63 @@ function firstNumber(source: string, fallback: number): number {
 
 const nf = new Intl.NumberFormat('en-US');
 
-const PHASE_1A_KW = firstNumber(power.phase1aDraw, 7.5);         // '~7.5 kW (estimated)'
-const TRANSFORMER_KVA = firstNumber(power.transformer, 3) * 1000; // '3 MVA'
-const ENERGY_RATE = firstNumber(power.rate, 0.08);                // '$0.08 / kWh'
+/** The estimated first-phase IT load, from the site record. */
+const PHASE_1_KW = firstNumber(compute.load, 7.5);
 
-/** The fixed envelope of Phase 1A. Read-only; all of it comes from site.ts. */
+/**
+ * The planned fleet. Planned — not inventory.
+ *
+ * The old field was called `rentableGpus` and the copy said "all of them
+ * rentable", which described eight cards as bookable when none has been
+ * procured. A request can be prepared against this number; it cannot be
+ * allocated against it.
+ */
 export const envelope = {
   systems: compute.systems,
+  gpuModel: compute.gpuModel,
   totalGpus: compute.gpus,
-  rentableGpus: compute.rentable,
+  plannedGpus: compute.gpus,
+  gpusPerServer: compute.gpusPerServer,
+  servers: compute.servers,
+  vramPerGpu: compute.vramPerGpu,
   cooling: compute.cooling,
-  transformerLabel: power.transformer,
-  transformerKva: TRANSFORMER_KVA,
   voltage: power.voltage,
-  phase1aKw: PHASE_1A_KW,
-  phase1aUtilisation: power.phase1aUtilisation,
-  headroom: power.headroom,
-  energyRate: ENERGY_RATE,
-  energyRateLabel: power.rate,
-  /** Rated draw of one GPU: the Phase 1A load spread across the installed GPUs. */
-  kwPerGpu: PHASE_1A_KW / compute.gpus,
+  service: power.service,
+  phaseKw: PHASE_1_KW,
+  /**
+   * Rated draw of one GPU including its share of host and supply: the
+   * estimated phase IT load spread across the installed GPUs. Peak, not
+   * average.
+   */
+  kwPerGpu: PHASE_1_KW / compute.gpus,
   powerOn: site.powerOn,
-  hall: site.buildings[0],
-  expansion: [site.buildings[1], site.buildings[2]],
 } as const;
 
 /**
- * Tunable coefficients. These are the dials a non-engineer should reach for
- * first; none of them are in the site record, so all of them read as estimates
- * in the UI.
+ * Tunable coefficients. None of them are in the site record, so all of them
+ * read as estimates in the UI.
  */
 export const rules = {
-  /** Cooling loop, switching and control draw on top of the GPUs. ESTIMATE. */
-  ancillaryKw: 3,
-  /** Applied when the workload question is unanswered. */
-  defaultDrawFactor: 1,
-  /** Hours in the quoted energy period when the term question is unanswered. */
-  defaultEnergyHours: 730,
-  defaultEnergyPeriod: 'month',
-  /** Above this share of the rentable GPUs the fit reads as "fills Phase 1A". */
-  tightGpuShare: 0.75,
-  /** Above this share of the Phase 1A load the fit reads as "fills Phase 1A". */
-  tightKwShare: 0.9,
+  /**
+   * Facility overhead, applied once to the whole IT load.
+   *
+   * An assumed PUE, not a measured one — there is no operating history to
+   * measure. It replaces the old flat "ancillary kW", which was added
+   * alongside a load figure that already included host overhead and then
+   * compared against that same figure.
+   */
+  assumedPue: 1.4,
+  /**
+   * Assumed average draw as a share of peak, when the workload is known.
+   * An assumption about consumption for an energy estimate — never a reason
+   * to allocate less capacity.
+   */
+  defaultDutyCycle: 1,
+  /** 730 hours is a billing convention, not a calendar month. */
+  monthlyHoursConvention: 730,
 } as const;
 
-export type QuestionId = 'workload' | 'model' | 'gpus' | 'storage' | 'term';
+export type QuestionId = 'offer' | 'workload' | 'model' | 'gpus' | 'storage' | 'term';
 
 /** What one answer does to the sizing. Every field is optional and additive. */
 export interface OptionEffects {
@@ -76,8 +108,12 @@ export interface OptionEffects {
   gpuFloor?: number;
   /** Why that floor exists — shown verbatim when an answer lifts the count. */
   gpuFloorReason?: string;
-  /** Multiplier on rated per-GPU draw: how hard this keeps the silicon working. */
-  drawFactor?: number;
+  /**
+   * Assumed average draw as a share of peak. Feeds the average-consumption
+   * line only. It must never reduce the allocation figure — the handoff is
+   * explicit that a workload reduction is not a safety or fit argument.
+   */
+  dutyCycle?: number;
   /** Fixed kW added on top of the GPU draw. */
   addKw?: number;
   /** Hours the quoted energy line covers, and what to call that period. */
@@ -85,6 +121,11 @@ export interface OptionEffects {
   energyPeriod?: string;
   /** One line added to the recommendation's notes. */
   note?: string;
+  /**
+   * Why this answer cannot be resolved from the form. Any answer carrying one
+   * sends the whole request to review rather than to a fit verdict.
+   */
+  review?: string;
 }
 
 export interface ConfiguratorOption {
@@ -111,6 +152,42 @@ export interface ConfiguratorQuestion {
 
 export const questions: ConfiguratorQuestion[] = [
   {
+    id: 'offer',
+    kicker: 'What you need',
+    prompt: 'What are you looking for?',
+    help: 'Three different things, with three different conversations behind them.',
+    chipLabel: 'Request',
+    options: [
+      {
+        id: 'dedicated',
+        label: 'Dedicated compute',
+        detail: 'A dedicated allocation on the planned RTX PRO 6000 Blackwell nodes.',
+        chip: 'Dedicated compute',
+        effects: { note: 'Dedicated allocation on the planned nodes, subject to procurement and commissioning.' },
+      },
+      {
+        id: 'hosting',
+        label: 'Host my hardware',
+        detail: 'Colocation for equipment you own, with reserved IT kW and rack allocation.',
+        chip: 'Colocation',
+        effects: {
+          note: 'Colocation for customer-owned equipment. Power, cooling and rack allocation follow your equipment schedule.',
+          review: 'Customer equipment specifications are needed before any power or rack allocation can be estimated.',
+        },
+      },
+      {
+        id: 'expansion',
+        label: 'A larger deployment',
+        detail: 'More than the first phase — built against a funded commitment.',
+        chip: 'Expansion',
+        effects: {
+          note: 'A deployment beyond the first phase is scoped and funded against a commitment, not allocated from planned capacity.',
+          review: 'Deployments beyond the planned fleet are scoped individually.',
+        },
+      },
+    ],
+  },
+  {
     id: 'workload',
     kicker: 'Workload',
     prompt: 'What are you running?',
@@ -123,10 +200,9 @@ export const questions: ConfiguratorQuestion[] = [
         detail: 'Pre-training runs, days to weeks, all-reduce across every node.',
         chip: 'Training',
         effects: {
-          drawFactor: 1,
-          gpuFloor: 4,
-          gpuFloorReason: 'a training run wants a whole node',
-          note: 'Sustained training holds the GPUs near rated draw — sized at full load.',
+          dutyCycle: 1,
+          note: 'Sustained training holds the GPUs near rated draw, so peak and average are close.',
+          review: 'Training throughput on this part has not been benchmarked here. Model, precision, parallelism and interconnect all decide whether a run is practical.',
         },
       },
       {
@@ -135,7 +211,7 @@ export const questions: ConfiguratorQuestion[] = [
         detail: 'LoRA and full fine-tunes on top of an existing checkpoint.',
         chip: 'Fine-tuning',
         effects: {
-          drawFactor: 0.9,
+          dutyCycle: 0.9,
           gpuFloor: 2,
           gpuFloorReason: 'a fine-tune wants at least half a node',
           note: 'Fine-tuning runs hot but bursty — sized just under rated load.',
@@ -147,7 +223,7 @@ export const questions: ConfiguratorQuestion[] = [
         detail: 'Serving a model to production traffic, latency bound.',
         chip: 'Inference',
         effects: {
-          drawFactor: 0.72,
+          dutyCycle: 0.72,
           note: 'Serving traffic leaves headroom between bursts — sized below rated load.',
         },
       },
@@ -157,7 +233,7 @@ export const questions: ConfiguratorQuestion[] = [
         detail: 'Interactive experiments, notebooks, evaluation sweeps.',
         chip: 'Research',
         effects: {
-          drawFactor: 0.55,
+          dutyCycle: 0.55,
           note: 'Interactive work idles between sessions — sized at roughly half load.',
         },
       },
@@ -175,7 +251,7 @@ export const questions: ConfiguratorQuestion[] = [
         label: 'Under 10B',
         detail: 'Small language models, embeddings, classifiers, vision heads.',
         chip: '<10B',
-        effects: { gpuFloor: 1, note: 'Under 10B parameters fits comfortably on a single GPU.' },
+        effects: { gpuFloor: 1, note: `Models of this size commonly run on a single ${compute.vramPerGpu} GPU, depending on precision and context.` },
       },
       {
         id: 'mid',
@@ -184,8 +260,8 @@ export const questions: ConfiguratorQuestion[] = [
         chip: '10–70B',
         effects: {
           gpuFloor: 2,
-          gpuFloorReason: 'a 10–70B model wants at least two cards',
-          note: 'A 10–70B model wants two GPUs or more once cache is accounted for.',
+          gpuFloorReason: 'a model this size usually needs more than one card',
+          note: 'Weights, activations, KV cache and runtime overhead decide the real count; two cards is a starting point, not a sizing.',
         },
       },
       {
@@ -195,8 +271,9 @@ export const questions: ConfiguratorQuestion[] = [
         chip: '70–200B',
         effects: {
           gpuFloor: 4,
-          gpuFloorReason: 'a 70–200B model wants a whole node to hold weights and cache',
-          note: 'A 70–200B model is sharded across a whole node.',
+          gpuFloorReason: 'a model this size is normally sharded across a node',
+          note: `Sharding across four ${compute.vramPerGpu} GPUs. They remain four separate memories.`,
+          review: 'Models at this scale need a benchmark before any commitment: sharding across cards without a pooled memory domain is workload-dependent.',
         },
       },
       {
@@ -206,8 +283,9 @@ export const questions: ConfiguratorQuestion[] = [
         chip: '200B+',
         effects: {
           gpuFloor: 8,
-          gpuFloorReason: 'a 200B+ model wants both nodes',
-          note: 'A 200B+ model is sized across a full node so the NVLink domain stays intact.',
+          gpuFloorReason: 'a model this size would use the whole planned fleet',
+          note: `${compute.gpuModel} has no NVLink. Eight cards are eight separate ${compute.vramPerGpu} memories, not one pooled space.`,
+          review: 'A model at this scale across cards with no pooled memory domain has to be benchmarked before it can be quoted at all.',
         },
       },
     ],
@@ -216,7 +294,7 @@ export const questions: ConfiguratorQuestion[] = [
     id: 'gpus',
     kicker: 'Scale',
     prompt: 'How many GPUs do you want?',
-    help: `Phase 1A is ${compute.systems} — ${compute.gpus} GPUs, ${compute.rentable} of them rentable.`,
+    help: `The first phase is ${compute.systems} — ${compute.gpus} GPUs, planned.`,
     chipLabel: 'GPUs',
     options: [
       {
@@ -224,7 +302,7 @@ export const questions: ConfiguratorQuestion[] = [
         label: '1',
         detail: 'One card. Enough to serve a model or to prototype against.',
         chip: '1 GPU',
-        effects: { gpuRange: { min: 1, max: 1 }, note: 'A single RTX 6000 Blackwell, carved out of a shared node.' },
+        effects: { gpuRange: { min: 1, max: 1 }, note: `A single ${compute.gpuModel}, carved out of a shared node.` },
       },
       {
         id: 'pair',
@@ -242,12 +320,12 @@ export const questions: ConfiguratorQuestion[] = [
       },
       {
         id: 'hall',
-        label: `All ${compute.rentable}`,
-        detail: `Both nodes. ${compute.systems}.`,
-        chip: `${compute.rentable} GPUs`,
+        label: `All ${compute.gpus}`,
+        detail: `Both planned servers. ${compute.systems}.`,
+        chip: `${compute.gpus} GPUs`,
         effects: {
-          gpuRange: { min: compute.rentable, max: compute.rentable },
-          note: `All ${compute.rentable} rentable GPUs — the whole of Phase 1A.`,
+          gpuRange: { min: compute.gpus, max: compute.gpus },
+          note: `The whole planned first phase. None of it is in inventory yet.`,
         },
       },
     ],
@@ -256,7 +334,7 @@ export const questions: ConfiguratorQuestion[] = [
     id: 'storage',
     kicker: 'Storage',
     prompt: 'How much data sits next to it?',
-    help: 'Storage draws power in the same hall and comes off the same envelope.',
+    help: 'Storage is part of the IT load, counted on the same boundary as the servers.',
     chipLabel: 'Storage',
     options: [
       {
@@ -283,10 +361,14 @@ export const questions: ConfiguratorQuestion[] = [
       {
         id: 'byo',
         label: 'Bring your own',
-        detail: 'You rack your own array, and we allow for it separately.',
+        detail: 'You rack your own array, and we size against its actual schedule.',
         chip: 'BYO storage',
-        effects: { addKw: 0, note: 'Customer-supplied storage is excluded from this estimate — send us its nameplate draw.' },
+        effects: {
+          note: 'Customer-supplied storage draws real power. Until its schedule is supplied that figure is unknown, and unknown is not zero.',
+          review: 'Customer-owned storage has to be specified before it can be included in a load estimate.',
+        },
       },
+
     ],
   },
   {
@@ -299,36 +381,45 @@ export const questions: ConfiguratorQuestion[] = [
       {
         id: 'hourly',
         label: 'Hourly',
-        detail: 'On demand, off the shared pool, no commitment.',
+        detail: 'On demand, once there is a pool to draw on.',
         chip: 'Hourly',
-        effects: { energyHours: 1, energyPeriod: 'hour', note: 'Hourly capacity comes out of the shared pool and is not held for you.' },
+        effects: { energyHours: 1, energyPeriod: 'hour', note: 'Hourly capacity would come out of a shared pool and is not held for you.' },
       },
       {
         id: 'monthly',
         label: 'Monthly',
-        detail: 'Rolling month, hardware reserved while you hold it.',
+        detail: 'Rolling month, hardware held while you keep it.',
         chip: 'Monthly',
-        effects: { energyHours: 730, energyPeriod: 'month', note: 'A rolling month holds the same physical GPUs for as long as you keep it.' },
+        effects: { energyHours: rules.monthlyHoursConvention, energyPeriod: 'month', note: 'A rolling month. Energy figures use a 730-hour billing month, not a calendar month.' },
       },
       {
         id: 'y1',
         label: '12-month',
-        detail: 'A year of dedicated capacity from power-on.',
+        detail: 'A year of dedicated capacity from the power-on target.',
         chip: '12-month',
-        effects: { energyHours: 730, energyPeriod: 'month', note: `A 12-month term is dedicated from ${site.powerOn} power-on.` },
+        effects: { energyHours: rules.monthlyHoursConvention, energyPeriod: 'month', note: `A 12-month term would run from the ${site.powerOn} power-on, which is a target and not a confirmed date.` },
       },
       {
         id: 'y3',
         label: '36-month',
-        detail: 'Three years. The longest term Phase 1A is quoted on.',
+        detail: 'Three years, scoped commercially.',
         chip: '36-month',
-        effects: { energyHours: 730, energyPeriod: 'month', note: `A 36-month term reserves the footprint outright from ${site.powerOn}.` },
+        effects: { energyHours: rules.monthlyHoursConvention, energyPeriod: 'month', note: `A 36-month term against the ${site.powerOn}. Terms are agreed commercially, not reserved from this form.` },
       },
     ],
   },
 ];
 
-export type FitLevel = 'phase-1a' | 'phase-1a-tight' | 'expansion';
+/**
+ * Outcomes.
+ *
+ * None of these is an approval, and there is deliberately no "it fits". The
+ * facility's cooling and electrical limits are undocumented and the GPUs are
+ * planned rather than held, so nothing this form can compute establishes that
+ * a deployment can be taken. What it can do is tell you which conversation
+ * you are in.
+ */
+export type FitLevel = 'prepared' | 'review' | 'expansion';
 
 export interface FitCopy {
   /** Short verdict for the running readout. */
@@ -339,20 +430,20 @@ export interface FitCopy {
 }
 
 export const fitLevels: Record<FitLevel, FitCopy> = {
-  'phase-1a': {
-    label: 'Fits Phase 1A',
-    headline: 'It fits Phase 1A.',
-    detail: `Building ${envelope.hall.id} — ${nf.format(envelope.hall.sqft)} sqft, ${envelope.systems} — absorbs this inside the ${power.phase1aDraw} Phase 1A load, and the ${envelope.transformerLabel} transformer barely notices.`,
+  prepared: {
+    label: 'Request prepared',
+    headline: 'Deployment request prepared.',
+    detail: `We will confirm workload suitability, equipment availability, facility allocation and commercial terms before issuing an offer. The first phase is ${envelope.servers} planned servers, ${envelope.plannedGpus} GPUs in total; ${envelope.powerOn} is a target, and procurement and commissioning are not complete.`,
   },
-  'phase-1a-tight': {
-    label: 'Fills Phase 1A',
-    headline: 'This is most of Phase 1A.',
-    detail: `A deployment this size takes the bulk of the ${envelope.rentableGpus} rentable GPUs and the ${power.phase1aDraw} that go with them. Buildings ${envelope.expansion.map((b) => b.id).join(' and ')} — ${nf.format(envelope.expansion[0].sqft)} sqft each — are the next block, so reserve before Phase 1A fills.`,
+  review: {
+    label: 'Technical review required',
+    headline: 'This one needs a technical review.',
+    detail: 'Something in this request cannot be settled from a form — a workload that has not been benchmarked on this hardware, or equipment we have not seen a schedule for. We would rather tell you that than return a number that looks like an answer.',
   },
   expansion: {
-    label: 'Needs Buildings 2/3',
-    headline: 'This runs past Phase 1A.',
-    detail: `Beyond ${envelope.rentableGpus} rentable GPUs or the ${power.phase1aDraw} Phase 1A load, the deployment stages into Building ${envelope.expansion.map((b) => b.id).join(' or ')} — ${nf.format(envelope.expansion[0].sqft)} sqft shells already standing, behind the same ${envelope.transformerLabel} service with ${power.headroom.toLowerCase()}.`,
+    label: 'Expansion inquiry',
+    headline: 'This runs past the planned fleet.',
+    detail: `Beyond ${envelope.plannedGpus} GPUs this becomes an expansion inquiry, scoped and funded against a commitment. It is not an allocation to another building: Buildings A, B and C have no established fit-out, cooling or electrical allocation to give.`,
   },
 };
 
@@ -368,52 +459,59 @@ export interface Assumption {
 /** Rendered under the result as "how this was worked out". */
 export const assumptions: Assumption[] = [
   {
+    id: 'boundary',
+    label: 'IT boundary',
+    value: 'Servers + storage + network',
+    source: 'One boundary throughout. Facility overhead is added once, separately, and never inside this figure',
+    estimated: false,
+  },
+  {
     id: 'per-gpu',
-    label: 'Draw per GPU',
+    label: 'Peak draw per GPU',
     value: `${envelope.kwPerGpu.toFixed(2)} kW`,
-    source: `${power.phase1aDraw} Phase 1A load ÷ ${envelope.totalGpus} installed GPUs`,
+    source: `${compute.load} ÷ ${envelope.totalGpus} planned GPUs, host and supply included. Peak, not average`,
+    estimated: true,
+  },
+  {
+    id: 'fleet',
+    label: 'Planned fleet',
+    value: `${envelope.plannedGpus} GPUs · ${envelope.servers} servers`,
+    source: `${envelope.systems}. Planned — ${compute.status.toLowerCase()}`,
     estimated: false,
   },
   {
-    id: 'envelope',
-    label: 'Phase 1A envelope',
-    value: `${envelope.rentableGpus} GPUs · ${power.phase1aDraw}`,
-    source: `${envelope.systems}, ${envelope.rentableGpus} rentable, ${envelope.cooling.toLowerCase()}`,
-    estimated: false,
+    id: 'pue',
+    label: 'Facility overhead',
+    value: `PUE ${rules.assumedPue}`,
+    source: 'An assumed PUE. There is no operating history to measure one from, and it is applied once to the whole IT load',
+    estimated: true,
   },
   {
-    id: 'transformer',
-    label: 'Transformer',
-    value: `${envelope.transformerLabel} at ${envelope.voltage}`,
-    source: `Share is taken against ${nf.format(envelope.transformerKva)} kVA nameplate, the same basis as the site record's ${power.phase1aUtilisation}`,
-    estimated: false,
-  },
-  {
-    id: 'energy',
-    label: 'Energy rate',
-    value: envelope.energyRateLabel,
-    source: 'Site record. Power only — GPU rental, network and support are quoted separately',
-    estimated: false,
-  },
-  {
-    id: 'draw-factor',
-    label: 'Workload draw factors',
-    value: '55% – 100% of rated',
-    source: 'How hard each workload class holds the silicon. Not in the site record',
+    id: 'duty',
+    label: 'Assumed average draw',
+    value: '55% – 100% of peak',
+    source: 'How hard each workload class is assumed to hold the silicon on average. It informs energy, never allocation',
     estimated: true,
   },
   {
     id: 'storage',
     label: 'Storage draw',
-    value: '0 – 6 kW',
-    source: 'Array draw by capacity tier. Not in the site record',
+    value: '0.6 – 6 kW',
+    source: 'Array draw by capacity tier. Customer-owned storage is unknown until specified, which is not the same as zero',
     estimated: true,
   },
   {
-    id: 'ancillary',
-    label: 'Ancillary draw',
-    value: `${rules.ancillaryKw} kW`,
-    source: 'Cooling loop, switching and controls. Not in the site record',
-    estimated: true,
+    id: 'service',
+    label: 'Electrical service',
+    value: envelope.service,
+    source: `${power.serviceScope}. ${power.allocation}`,
+    estimated: false,
+  },
+  {
+    id: 'network',
+    label: 'Connectivity',
+    value: network.service,
+    source: `${network.status}. An internet circuit rate is not east-west cluster bandwidth`,
+    estimated: false,
   },
 ];

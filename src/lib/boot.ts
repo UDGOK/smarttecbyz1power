@@ -18,14 +18,19 @@ import { initConfigurator } from './configurator';
 import { revealLines, scramble } from './type-motion';
 import { ScrollManager, CameraRig, SCROLL_CONFIG, DELTA_SCALE } from './scroll';
 import { audio } from './audio';
-import { stages, ENTRY_MIX, power } from '../data/site';
+import { submitInquiry, failureMessage } from './inquiry';
+import { stages, ENTRY_MIX, compute } from '../data/site';
 
 /**
- * Read from the record rather than hard-coded — it moved from 114 kW to 7.5
- * when Phase 1A changed from eight HGX B200s to two RTX 6000 Blackwell nodes,
- * and a literal here would have silently kept counting to the old number.
+ * The estimated planned first-phase IT load, read from the record rather than
+ * hard-coded — it moved from 114 kW to 7.5 when the first phase changed from
+ * eight HGX B200s to two RTX nodes, and a literal here would have silently
+ * kept counting to the old number.
+ *
+ * What the badge does with it is an illustration of a planned load being
+ * assembled, not a measure of anything sold. See PowerBadge.astro.
  */
-const PHASE_1A_KW = Number.parseFloat(power.phase1aDraw.replace(/[^0-9.]/g, '')) || 7.5;
+const PLANNED_KW = Number.parseFloat(compute.load.replace(/[^0-9.]/g, '')) || 7.5;
 
 /**
  * Where in a stage's scroll track the next world starts bleeding in. Before
@@ -63,7 +68,7 @@ const RETREAT_LANDING = 0.74;
  */
 const STAGE_TRACK_SCALE = 2.6;
 
-/** kW committed by the time each stage has been reached. */
+/** Share of the planned load the badge has assembled at each stage. */
 const STAGE_KW = [0, 0.08, 0.35, 1, 1];
 
 const AMBIENT: Record<string, string> = {
@@ -417,10 +422,10 @@ function run(): void {
 
   function setPower(fraction: number): void {
     if (!powerValue) return;
-    const kw = PHASE_1A_KW * fraction;
+    const kw = PLANNED_KW * fraction;
     // At 7.5 kW a whole-number counter only has eight steps in it, so it reads
     // as stuttering rather than climbing. One decimal under 20 kW.
-    powerValue.textContent = PHASE_1A_KW < 20 ? kw.toFixed(1) : String(Math.round(kw));
+    powerValue.textContent = PLANNED_KW < 20 ? kw.toFixed(1) : String(Math.round(kw));
   }
 
   function flash(): void {
@@ -884,18 +889,48 @@ function run(): void {
   });
 
   // --- Capture form ------------------------------------------------------
+  /**
+   * The bar reported success on a timer and cleared the field. It had no
+   * endpoint, so every inquiry typed into it was discarded while the visitor
+   * was told it had been received.
+   *
+   * Now the only thing that produces a "sent" state is a server saying so,
+   * and every failure leaves the address exactly where it was typed.
+   */
   const form = document.querySelector<HTMLFormElement>('#reserve-form');
   const msg = document.querySelector<HTMLElement>('#reserve-msg');
+  let sending = false;
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = new FormData(form).get('email');
-    if (!email || !String(email).includes('@')) {
+    if (sending) return;
+    const email = String(new FormData(form).get('email') ?? '');
+    const setState = (state: 'submitting' | 'sent' | 'error' | 'idle'): void => {
+      form.classList.remove('is-submitting', 'is-sent', 'is-error');
+      if (state !== 'idle') form.classList.add(`is-${state}`);
+    };
+
+    if (!email.includes('@')) {
       if (msg) msg.textContent = 'Enter a valid work email';
+      setState('error');
       return;
     }
-    // [PLACEHOLDER] No endpoint wired yet — see README "Integration map".
-    if (msg) msg.textContent = 'Thanks — we will be in touch about Phase 1A.';
-    form.reset();
+
+    sending = true;
+    setState('submitting');
+    if (msg) msg.textContent = 'Sending…';
+
+    void submitInquiry({ email, source: 'capture-bar' }).then((result) => {
+      sending = false;
+      if (result.ok) {
+        setState('sent');
+        if (msg) msg.textContent = 'Received — we will be in touch.';
+        form.reset();
+        return;
+      }
+      setState('error');
+      if (msg) msg.textContent = failureMessage(result.reason);
+      // Deliberately no reset: the address stays in the field.
+    });
   });
 
   // Any first real interaction unlocks audio. It was previously wired only to

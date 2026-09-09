@@ -44,35 +44,22 @@
 </form>
 
 <script>
+  // boot.ts owns submit, validation, delivery and every state class on this
+  // form. The only thing left here is clearing a stale state when the visitor
+  // starts typing again.
+  //
+  // What used to be here was a 620 ms timer that added `is-sent` regardless of
+  // whether anything had been sent. It has no replacement: the "sent" state is
+  // now written by boot.ts, and only when a server has acknowledged the post.
   const bar = document.querySelector<HTMLFormElement>('#reserve-form');
   const input = document.querySelector<HTMLInputElement>('#reserve-email');
   const msg = document.querySelector<HTMLElement>('#reserve-msg');
 
   if (bar && input && msg) {
-    let clearTimer = 0;
-
-    bar.addEventListener('submit', () => {
-      // boot.ts validates and writes the message in its own handler; we only
-      // decide which visual state to wear, on the same rule.
-      const ok = input.value.includes('@');
-      bar.classList.remove('is-error', 'is-sent');
-      if (!ok) {
-        bar.classList.add('is-error');
-        return;
-      }
-      bar.classList.add('is-submitting');
-      window.clearTimeout(clearTimer);
-      // A minimum beat, so the state is legible rather than a flicker.
-      clearTimer = window.setTimeout(() => {
-        bar.classList.remove('is-submitting');
-        bar.classList.add('is-sent');
-      }, 620);
-    });
-
-    // Typing after a rejection clears the rejection.
     input.addEventListener('input', () => {
       if (bar.classList.contains('is-error') && input.value.includes('@')) {
         bar.classList.remove('is-error');
+        msg.textContent = '';
       }
       if (bar.classList.contains('is-sent')) {
         bar.classList.remove('is-sent');

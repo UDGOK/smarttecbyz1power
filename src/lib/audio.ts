@@ -56,7 +56,7 @@ const REGISTRY: Record<string, TrackOptions> = {
   'stage-land-ambient':    { type: 'ambient', loop: true, volume: 0.5, bed: 'land' },
   // The interconnection queue: pressure, a hard room, time not passing.
   'stage-wait-ambient':    { type: 'ambient', loop: true, volume: 0.5, bed: 'wait' },
-  // Behind the meter: array, bank, a 3 MVA transformer breathing at 120 Hz.
+  // The energy yard: array, bank, and a transformer breathing at 120 Hz.
   'stage-power-ambient':   { type: 'ambient', loop: true, volume: 0.5, bed: 'power' },
   // Phase 1A: eight RTX 6000 Blackwells, fan walls, coolant, packets on the fibre.
   'stage-machine-ambient': { type: 'ambient', loop: true, volume: 0.5, bed: 'machine' },
@@ -611,7 +611,7 @@ export function buildBed(ctx: BaseAudioContext, assets: AudioAssets, id: BedId, 
       };
     }
 
-    // -- power: the yard. A 3 MVA transformer is a 120 Hz body, not a hum —
+    // -- power: the yard. A transformer is a 120 Hz body, not a hum —
     //    two stacks a fraction of a hertz apart, panned wide, so it phases
     //    against itself the way a real core does.
     case 'power': {
@@ -766,7 +766,7 @@ export function buildFx(ctx: BaseAudioContext, assets: AudioAssets, id: FxId, at
       return { out: r.out, nodes: r.nodes, life: dur + 1.4 };
     }
 
-    // Power on: a breaker closing into a 3 MVA core. Armature, weight, and
+    // Power on: a breaker closing into a transformer core. Armature, weight, and
     // then the iron ringing at 120 Hz as it takes the load.
     case 'power-on': {
       const dur = 1.2 / rate;

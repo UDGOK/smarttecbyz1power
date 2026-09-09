@@ -1,6 +1,13 @@
 ---
-// The reference gamifies progress with an XP counter. Ours counts the thing a
-// colocation buyer actually cares about: how much of Phase 1A is committed.
+// The reference gamifies progress with an XP counter. Ours assembles the
+// planned first-phase IT load as the journey builds it up.
+//
+// It used to say "Phase 1A capacity committed", which was false in a way that
+// mattered: the number is scroll position multiplied by an estimate, and
+// presenting that as customer commitment invents a sales pipeline out of a
+// visitor scrolling. Same badge, same odometer, honest label — the figure is
+// an estimated planned load, and the word "planned" sits next to it rather
+// than in a footnote.
 //
 // boot.ts writes a plain integer into #power-value. That element stays the
 // single source of truth — the script below only watches it, and mirrors it
@@ -22,9 +29,10 @@
   <span class="power-badge__value" id="power-value" aria-hidden="true">0</span>
   <span class="power-badge__odo" aria-hidden="true"></span>
   <span class="power-badge__unit" aria-hidden="true">kW</span>
+  <span class="power-badge__qual" aria-hidden="true">planned</span>
 
   <span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"
-    >0 kilowatts of Phase 1A capacity committed</span
+    >0 kilowatts of estimated planned first-phase IT load</span
   >
 </div>
 
@@ -132,7 +140,7 @@
       window.clearTimeout(settle);
       settle = window.setTimeout(() => {
         liveEl.textContent =
-          `${Math.round(target)} kilowatts of Phase 1A capacity committed`;
+          `${Math.round(target)} kilowatts of estimated planned first-phase IT load`;
       }, 600);
     }
 

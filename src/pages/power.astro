@@ -1,74 +1,67 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power } from '../data/site';
+import { company, site, power, solar } from '../data/site';
 
-/* Derived from the published figures rather than retyped, so the arithmetic can
-   never drift from the site record. */
-const drawKw = Number(power.phase1aDraw.replace(/[^\d.]/g, ''));
-const rateUsd = Number(power.rate.replace(/[^\d.]/g, ''));
-const annualKwh = drawKw * 8760;
-const annualCost = Math.round(annualKwh * rateUsd);
-
-/* The two halves of the published queue position, so the headline figure and
-   its qualifier can be set at different sizes without retyping either. */
-const [queueAnswer = power.interconnectionQueue, queueBasis = ''] =
-  power.interconnectionQueue.split('—').map((s) => s.trim());
-const headroomFactor = power.headroom.split(' ')[0];
+/* Derived from the record rather than retyped, so the arithmetic can never
+   drift from it. Apparent power only: sqrt(3) x 208 V x 3,000 A. */
+const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
 ---
 
 <Content
-  title={`Power — behind the meter, no interconnection queue | ${company.full}`}
-  description={`The industry interconnection queue runs ${power.industryQueue}. ${site.designation} never joined it: a ${power.transformer} service already on site at ${power.rate}, ${power.headroom}, plus ${power.solarPlanned} of solar and ${company.parent} LFP storage behind the meter.`}
+  title={`Power — the service that is standing, and what it means | ${company.full}`}
+  description={`Buildings A, B and C at ${site.designation} share an owner-reported ${power.service} distribution originating at Building C. Usable IT capacity follows electrical, cooling and commissioning review. Tract 3 holds ${solar.tractAcres} acres for planned solar and storage.`}
   kicker="The power story"
-  heading="Everyone else is in a queue. We never joined it."
-  lede={`The average interconnection queue runs ${power.industryQueue}. GPUs stopped being the constraint some time ago; energised capacity is the constraint. ${site.designation} has a ${power.transformer} service standing on owned land, with ${power.headroom.toLowerCase()}.`}
+  heading="A service is standing. What it can carry is a separate question."
+  lede={`Buildings A, B and C share an owner-reported ${power.service} distribution originating at Building C. That is a real head start, and it is not the same thing as available capacity — this page keeps the two apart, because most of the industry's power claims do not.`}
   meta={[
-    { label: 'Installed service', value: power.transformer, note: `${power.voltage}, energised on site`, tone: 'gold' },
-    { label: 'Energy', value: power.rate, note: 'Published site rate' },
-    { label: 'Headroom', value: headroomFactor, note: power.headroom, tone: 'signal' },
-    { label: 'Interconnection queue', value: queueAnswer, note: power.interconnectionQueue },
+    { label: 'Shared service', value: power.service, note: power.serviceScope, tone: 'gold' },
+    { label: 'Apparent rating', value: power.serviceApparent, note: 'Arithmetic, not a nameplate' },
+    { label: 'Tenant allocation', value: 'On review', note: power.allocation, tone: 'signal' },
+    { label: 'Planned energy', value: `${solar.tractAcres} acres`, note: 'Tract 3, solar and storage' },
   ]}
 >
   <section aria-labelledby="queue" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">The problem</span></p>
-    <h2 id="queue">The queue is the whole industry's problem</h2>
+    <h2 id="queue">Four things that get called "power"</h2>
 
     <div class="split">
       <div>
         <p>
-          A greenfield AI data center has to ask a utility for load. That request becomes
-          a study: feasibility, system impact, facilities. Behind it sits a queue of
-          generation and load requests on the same transmission system, and the position
-          you take in that queue is the position you keep. The industry average runs
-          {' '}<strong>{power.industryQueue}</strong>.
+          <strong>Existing distribution</strong> is what is physically on the parcel:
+          {' '}{power.service}, one shared rating originating at Building C and serving
+          Buildings A, B and C. <strong>Planned generation</strong> is Tract 3, where
+          {' '}{solar.tractAcres} acres are set aside for solar and storage that does not
+          exist yet.
         </p>
       </div>
       <div>
         <p>
-          Nothing about that timeline is fixed by having capital, having GPUs, or having
-          a signed tenant. You can hold a purchase order for accelerators that ship in
-          months and still be four years from energising them. That is the gap the market
-          is currently paying a premium to close.
+          <strong>Storage design</strong> is a separate exercise again — a power rating is
+          not usable energy. And <strong>approved tenant allocation</strong> is the only
+          one of the four you can actually buy, and the only one this site will not put a
+          number on until an engineer has. Conflating them is how a service rating becomes
+          a capacity claim.
         </p>
       </div>
     </div>
 
     <div class="versus" data-reveal>
       <div class="versus__side">
-        <p class="versus__label">Industry interconnection queue</p>
-        <p class="versus__value">{power.industryQueue}</p>
+        <p class="versus__label">Apparent service rating</p>
+        <p class="versus__value">{serviceKva.toLocaleString()} kVA</p>
         <p class="versus__note">
-          Time from filing a request to energised service. This is the number every other
-          site on your shortlist is quietly working around.
+          √3 × 208 V × 3,000 A. Arithmetic from the stated service current — not a
+          transformer nameplate, not real power, and not something to multiply by a
+          convenient factor and call engineered capacity.
         </p>
       </div>
       <div class="versus__side is-answer">
-        <p class="versus__label">{site.designation} queue position</p>
-        <p class="versus__value">{queueAnswer}</p>
+        <p class="versus__label">Usable IT capacity</p>
+        <p class="versus__value">On review</p>
         <p class="versus__note">
-          {power.interconnectionQueue}. The {power.transformer} service is already
-          energised on land we own{queueBasis ? `, and generation stays ${queueBasis}` : ''},
-          so the application that would create a queue position was never required.
+          {power.allocation}. Continuous-load limits, utility allocation, feeder ratings,
+          cooling, existing loads and redundancy all sit between the figure on the left and
+          a number you could build against.
         </p>
       </div>
     </div>
@@ -76,46 +69,46 @@ const headroomFactor = power.headroom.split(' ')[0];
 
   <section aria-labelledby="btm" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Behind the meter</span></p>
-    <h2 id="btm">Why {site.designation} is not in it</h2>
+    <h2 id="btm">What is actually on the parcel</h2>
 
     <p>
-      Two separate things put a project in a queue, and this site avoids both.
+      Three things are established, and each one has a boundary worth stating.
     </p>
 
     <div class="cards">
       <div class="card">
-        <h3>No new load request</h3>
+        <h3>Shared distribution</h3>
         <p>
-          The {power.transformer} service at {power.voltage} is already on the parcel and
-          already energised. Phase 1A draws {power.phase1aDraw} against it —
-          {' '}{power.phase1aUtilisation}. There is no new large-load application to file,
-          so there is no study queue to enter.
+          {power.service}, {power.serviceOrigin.toLowerCase()}. {power.serviceScope}. The
+          house and office run on a separate {power.houseOfficeService} supply and are
+          excluded from data-center floor area and capacity.
         </p>
       </div>
       <div class="card">
-        <h3>No generator interconnection</h3>
+        <h3>Existing cooling</h3>
         <p>
-          The planned {power.solarPlanned} of solar and the {company.parent} storage sit
-          on our side of the utility meter and serve on-site load. Behind-the-meter
-          generation that does not export is not a generator interconnection request. It
-          is a load reduction.
+          {power.hvac} Nominal tonnage is not IT kilowatts, cooling in one building is not
+          automatically available in another, and two units are not automatically N+1.
         </p>
       </div>
       <div class="card">
-        <h3>Queue position</h3>
+        <h3>Planned energy</h3>
         <p>
-          {power.interconnectionQueue}. Not "expedited", not "advanced" — absent, because
-          the application that would create one was never required.
+          Tract 3 holds {solar.tractAcres} acres for planned solar and storage.
+          {' '}{power.storage} are reported at {power.storageRating}; that is a power
+          rating, and the usable energy behind it is not established.
         </p>
       </div>
     </div>
 
     <div class="callout" style="margin-top: var(--s-6);">
       <p>
-        <strong>The one sentence that matters.</strong> Every competing site is selling you
-        a date it has to be granted by somebody else. {site.designation} is selling you a
-        fit-out schedule inside a building that already has power on it, targeting
-        {' '}{site.powerOn}.
+        <strong>The one sentence that matters.</strong> A service standing on owned land
+        is a genuine head start on a greenfield build — and it is a head start on a
+        fit-out, not a finished one. {site.designation} is offering a
+        {' '}{site.powerOn} for first compute and an engineering review to establish what
+        the buildings can take, rather than a capacity number derived from a service
+        rating.
       </p>
     </div>
   </section>
@@ -125,22 +118,25 @@ const headroomFactor = power.headroom.split(' ')[0];
     <h2 id="service">What is standing on the parcel</h2>
 
     <dl class="spec">
-      <div><dt>Transformer</dt><dd>{power.transformer}<span class="note">On site, energised.</span></dd></div>
-      <div><dt>Distribution</dt><dd>{power.voltage}</dd></div>
-      <div><dt>Energy rate</dt><dd>{power.rate}<span class="note">The published rate for the site. Tenant pass-through terms are on the colocation page.</span></dd></div>
-      <div><dt>Phase 1A draw</dt><dd>{power.phase1aDraw} IT load</dd></div>
-      <div><dt>Service utilisation at Phase 1A</dt><dd>{power.phase1aUtilisation}</dd></div>
-      <div><dt>Headroom</dt><dd>{power.headroom}</dd></div>
-      <div><dt>Interconnection queue</dt><dd>{power.interconnectionQueue}</dd></div>
+      <div><dt>Shared service</dt><dd>{power.service}<span class="note">{power.serviceScope}. {power.serviceOrigin}.</span></dd></div>
+      <div><dt>Apparent rating</dt><dd>{power.serviceApparent}<span class="note">{power.serviceApparentNote}</span></dd></div>
+      <div><dt>Transformer nameplate</dt><dd><span class="todo">{power.transformerNameplate}</span></dd></div>
+      <div><dt>House / office</dt><dd>{power.houseOfficeService}<span class="note">{power.houseOfficeNote}</span></dd></div>
+      <div><dt>Cooling</dt><dd>{power.hvac}<span class="note">{power.hvacUnresolved}</span></dd></div>
+      <div><dt>Tenant allocation</dt><dd>{power.allocation}</dd></div>
+      <div><dt>Energy rate</dt><dd><span class="todo">{power.rate}</span></dd></div>
+      <div><dt>Interconnection</dt><dd>{power.interconnection}<span class="note">{power.interconnectionNote}</span></dd></div>
       <div><dt>Utility of record</dt><dd><span class="todo">[PLACEHOLDER: serving utility / cooperative name and account status]</span></dd></div>
     </dl>
 
     <blockquote class="pull">
-      <p>{headroomFactor} headroom, already installed.</p>
+      <p>A service rating is not an allocation.</p>
       <p>
-        Phase 1A consumes roughly a twentieth of what is standing. A tenant growing from
-        a few racks to a few hundred kilowatts does not trigger a utility upgrade, a new
-        study, or a new date — it consumes capacity that is already sitting there.
+        The arithmetic above converts a stated service current into apparent power, and
+        that is all it does. Turning it into a kilowatt figure a tenant could build
+        against needs a single-line diagram, a transformer nameplate, feeder ratings, the
+        serving utility's allocation, the existing loads and a cooling review — none of
+        which this site has published, because it does not yet have them.
       </p>
     </blockquote>
 
@@ -155,7 +151,7 @@ const headroomFactor = power.headroom.split(' ')[0];
         <p class="photo__state">Photograph not taken yet</p>
       </div>
       <figcaption>
-        <b>[PHOTO NEEDED]</b> The {power.transformer} transformer on its pad, and the
+        <b>[PHOTO NEEDED]</b> The transformer on its pad, and the
         service entrance into Building 1. For a buyer evaluating this page, this is the
         single most load-bearing photograph on the whole site — it is the proof that the
         power claim is not a plan.
@@ -165,40 +161,45 @@ const headroomFactor = power.headroom.split(' ')[0];
 
   <section aria-labelledby="solar" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Generation and storage</span></p>
-    <h2 id="solar">Solar and storage, on our side of the meter</h2>
+    <h2 id="solar">Planned solar and storage</h2>
 
     <div class="split">
       <div>
         <p>
-          {power.solarPlanned} of solar is planned on the parcel — there is no shortage of
-          land for it on {site.acres} acres. Paired with it, {power.storage.toLowerCase()}.
+          {solar.publicCopy}
         </p>
         <p>
-          The storage is the part most operators cannot replicate cheaply. {company.parent}
-          builds LFP cabinets; {company.name} is the data center arm of the same company.
-          Storage lands on this site at manufacturer cost rather than at a system
-          integrator's margin, which changes what is economically sensible to install.
+          The range below is a screening extrapolation and nothing more. It applies
+          published array-area benchmarks — from a study whose sample is larger
+          utility-scale plants — to an assumed buildable fraction of an unsurveyed
+          parcel. These are alternative layouts, not capacities that add together, and
+          the illustrative AC outputs exceed the existing service rating, which is
+          precisely why a campus electrical and interconnection design has to come first.
         </p>
         <p>
-          Behind the meter, that combination does three jobs: it shaves what the site
-          draws through the utility service during the day, it holds energy for the hours
-          it is worth more, and it puts real stored energy behind the load without an
-          export arrangement or a queue position.
+          {company.parent} builds LFP cabinets and {company.name} is the data center arm of
+          the same company. What that is worth in installed cost is a real question and an
+          undocumented one:
+          {' '}<span class="todo">[PLACEHOLDER: documented related-party equipment cost, warranty and service obligations]</span>.
         </p>
       </div>
 
       <dl class="figures">
         <div>
-          <dt>Solar, planned</dt>
-          <dd class="is-gold">{power.solarPlanned}<span class="sub">On the parcel, behind the meter</span></dd>
+          <dt>Tract 3</dt>
+          <dd class="is-gold">{solar.tractAcres} acres<span class="sub">Set aside for planned solar and storage</span></dd>
+        </div>
+        <div>
+          <dt>Screening range</dt>
+          <dd>{solar.range}<span class="sub">{solar.status}. Not surveyed capacity and not utility-approved generation.</span></dd>
         </div>
         <div>
           <dt>Storage</dt>
-          <dd>LFP<span class="sub">{power.storage}</span></dd>
+          <dd>{power.storageRating}<span class="sub">{power.storageNote}</span></dd>
         </div>
         <div>
-          <dt>Export to grid</dt>
-          <dd>None<span class="sub">Serves on-site load, so no generator interconnection request</span></dd>
+          <dt>Interconnection</dt>
+          <dd>Unresolved<span class="sub">{power.interconnectionNote}</span></dd>
         </div>
       </dl>
     </div>
@@ -213,57 +214,28 @@ const headroomFactor = power.headroom.split(' ')[0];
 
   <section aria-labelledby="economics" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Economics</span></p>
-    <h2 id="economics">What the power actually costs</h2>
+    <h2 id="economics">What the power costs</h2>
 
     <p>
-      One published rate, {power.rate}, and one worked example so you can check our
-      arithmetic rather than take a "competitive rates" claim on trust.
+      There is no published rate here yet, so there is no worked example either. The
+      previous version of this page multiplied an estimated load by a rate and an
+      assumed 100% utilisation and presented the product as an annual energy cost. Every
+      input to that was an estimate, and the output read like a quote.
     </p>
 
-    <div class="scroller" tabindex="0" role="region" aria-label="Phase 1A energy arithmetic, scrollable">
-      <table>
-        <caption>Phase 1A energy, worked from published figures</caption>
-        <thead>
-          <tr>
-            <th scope="col">Line</th>
-            <th scope="col">Figure</th>
-            <th scope="col">Where it comes from</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">IT load</th>
-            <td class="num">{power.phase1aDraw}</td>
-            <td>Published Phase 1A draw</td>
-          </tr>
-          <tr>
-            <th scope="row">Hours in a year</th>
-            <td class="num">8,760</td>
-            <td>Continuous operation, 100% utilisation</td>
-          </tr>
-          <tr>
-            <th scope="row">Annual energy</th>
-            <td class="num">{annualKwh.toLocaleString()} kWh</td>
-            <td>Load × hours</td>
-          </tr>
-          <tr>
-            <th scope="row">Energy rate</th>
-            <td class="num">{power.rate}</td>
-            <td>Published site rate</td>
-          </tr>
-          <tr>
-            <th scope="row">Annual energy cost</th>
-            <td class="num">≈ ${annualCost.toLocaleString()}</td>
-            <td>Energy × rate. IT load only.</td>
-          </tr>
-          <tr>
-            <th scope="row">Cooling and facility overhead</th>
-            <td class="num"><span class="todo">[PLACEHOLDER: measured PUE]</span></td>
-            <td>Not modelled here. Direct-to-chip liquid cooling changes this materially; we will publish a measured number, not a design number.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <dl class="spec">
+      <div><dt>Energy rate</dt><dd><span class="todo">{power.rate}</span></dd></div>
+      <div><dt>Demand charges</dt><dd><span class="todo">[PLACEHOLDER: demand charge structure from the serving utility]</span></dd></div>
+      <div><dt>Facility overhead</dt><dd><span class="todo">[PLACEHOLDER: measured PUE — a design figure is not a measured one, and there is no operating history to measure yet]</span></dd></div>
+      <div><dt>Tenant billing</dt><dd><span class="todo">[PLACEHOLDER: whether energy is passed through at cost, blended into a per-kW rate, or metered]</span></dd></div>
+    </dl>
+
+    <p>
+      When those four exist, the arithmetic goes here in full so you can check it rather
+      than take a "competitive rates" claim on trust. Until then, an estimate dressed as a
+      figure would be worse than the gap.
+    </p>
+
 
     <p style="margin-top: var(--s-5);">
       This is arithmetic on two published numbers at full utilisation, for IT load only.

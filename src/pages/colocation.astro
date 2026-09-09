@@ -2,28 +2,29 @@
 import Content from '../layouts/Content.astro';
 import { company, site, power, network, compute } from '../data/site';
 
-/* Derived from the published network quote rather than retyped. */
+/* Derived from the record rather than retyped. The monthly figure is an
+   unverified commercial input, not a confirmed quote, and is labelled as one
+   wherever it appears. */
 const netMonthly = Number(network.cost.replace(/[^\d.]/g, ''));
-const netGbps = Number((network.speed.match(/[\d.]+/) ?? ['0'])[0]);
-const headroomFactor = power.headroom.split(' ')[0];
+const netGbps = Number((network.service.match(/[\d.]+/) ?? ['0'])[0]);
 const netAnnual = netMonthly * 12;
 const netPerGbps = netMonthly / netGbps;
-/* "100 Gbps" out of "100 Gbps symmetrical DIA", so the headline figure and its
+/* "100 Gbps" out of "100 Gbps asymmetrical", so the headline figure and its
    qualifier can be set at different sizes without retyping either. */
-const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
+const netHeadline = network.service.split(' ').slice(0, 2).join(' ');
 ---
 
 <Content
   title={`Colocation and GPU capacity at ${site.designation} | ${company.full}`}
-  description={`Liquid-cooled colocation in ${site.name}. ${power.rate} energy behind the meter, ${power.headroom}, ${network.speed} from ${network.provider}, and no interconnection queue between you and ${site.powerOn}.`}
-  kicker="Colocation and GPU capacity"
-  heading="Rack space where the power already exists."
-  lede={`Take space and power in Building 1, or take GPU capacity on our hardware. Either way the constraint you are buying past is the same one: ${power.industryQueue} of interconnection queue that this site never entered.`}
+  description={`Colocation and dedicated compute in ${site.name}. Buildings A, B and C total ${site.buildingArea.toLocaleString()} sq ft of existing building area behind a shared ${power.service} service. First compute is a ${site.powerOn}.`}
+  kicker="Colocation and dedicated compute"
+  heading="Two ways to buy, both reviewed before they are offered."
+  lede={`Bring hardware you own, or take a dedicated allocation on the planned nodes. Either way what you get first is an engineering review: ${site.buildingArea.toLocaleString()} sq ft of existing building area is a starting point, not a commissioned data hall.`}
   meta={[
-    { label: 'Energy', value: power.rate, note: 'Site rate, behind the meter' },
-    { label: 'Headroom', value: headroomFactor, note: power.headroom, tone: 'signal' },
-    { label: 'Network', value: netHeadline, note: `${network.provider}, ${network.term.toLowerCase()}` },
-    { label: 'Power-on target', value: site.powerOn, note: 'Phase 1A compute hall', tone: 'gold' },
+    { label: 'Existing building area', value: `${site.buildingArea.toLocaleString()} sq ft`, note: 'Buildings A, B and C, gross' },
+    { label: 'Shared service', value: power.service, note: 'From Building C', tone: 'gold' },
+    { label: 'Network', value: netHeadline, note: `${network.provider}, planned` },
+    { label: 'First compute', value: site.powerOn, note: 'Target, not a confirmed date', tone: 'signal' },
   ]}
 >
   <section aria-labelledby="two-ways" data-reveal>
@@ -35,10 +36,11 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
         <p class="card__tag mono-label">Option A</p>
         <h3>Colocation</h3>
         <p>
-          You bring the hardware. We provide the space in Building 1, the power from the
-          existing {power.transformer} service, cooling, network,
-          and hands on site. You keep ownership of your accelerators and your software
-          stack; we keep the facility running.
+          You bring the hardware. We provide space in Buildings A, B or C, power from the
+          shared {power.service} service, cooling, network and hands on site. You keep
+          ownership of your accelerators and your software stack. Your equipment has to
+          fit documented rack dimensions and loading, feeder limits, cooling and access
+          constraints — which is what the review establishes.
         </p>
         <p>
           Sensible for anyone who has already bought GPUs, or who has a procurement
@@ -49,14 +51,14 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
         <p class="card__tag mono-label">Option B</p>
         <h3>GPU capacity</h3>
         <p>
-          You rent capacity on the Phase 1A fleet — {compute.systems},
-          {' '}{compute.rentable} of {compute.gpus} GPUs rentable. No capital outlay, no
-          hardware lead time, no depreciation schedule. Full specification is on the
+          You take a dedicated allocation on the planned fleet — {compute.systems},
+          {' '}{compute.gpus} GPUs in total. {compute.status}. No capital outlay and no
+          hardware lead time of your own. Full specification is on the
           {' '}<a href="/compute">compute page</a>.
         </p>
         <p>
-          Sensible for training and inference workloads that need Blackwell-class
-          hardware before their own order arrives.
+          Suited to inference, computer vision, rendering and workload-specific
+          fine-tuning. Training and larger models need a benchmark first.
         </p>
       </div>
     </div>
@@ -69,18 +71,19 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
     <div class="split">
       <div>
         <p>
-          Colocation is normally sold by the kilowatt, not by the square foot, because
-          power is what runs out first. At {site.designation} it runs out last. Phase 1A
-          takes {power.phase1aDraw} — {power.phase1aUtilisation} of the installed service —
-          leaving {power.headroom.toLowerCase()}.
+          Colocation is sold by the kilowatt, not by the square foot, because power is
+          what runs out first. What is standing at {site.designation} is a shared
+          {' '}{power.service} distribution originating at Building C and serving A, B and
+          C — one rating across the three, not three separate supplies.
         </p>
         <p>
-          For a tenant, that has a specific commercial meaning: growth inside the
-          installed service does not reopen the schedule. You are not asking a utility for
-          more; you are asking us for more of what is already there.
+          What that converts to in usable IT kilowatts is not something arithmetic can
+          settle. Continuous-load limits, utility allocation, feeder ratings, cooling,
+          existing loads and redundancy all sit between a service rating and an
+          allocation. {power.allocation}. Ask us for one and we will run it.
         </p>
         <p>
-          Energy is {power.rate} at the site. How that reaches a tenant invoice —
+          Energy is {power.rate}. How that reaches a tenant invoice —
           metered pass-through, an all-in rate per kW, or a blend — is
           {' '}<span class="todo">[PLACEHOLDER: tenant power billing model and whether energy is passed through at cost]</span>.
         </p>
@@ -88,12 +91,12 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
 
       <dl class="figures">
         <div>
-          <dt>Installed service</dt>
-          <dd class="is-gold">{power.transformer}<span class="sub">{power.voltage}, energised on site</span></dd>
+          <dt>Shared service</dt>
+          <dd class="is-gold">{power.service}<span class="sub">{power.serviceScope}</span></dd>
         </div>
         <div>
-          <dt>Committed at Phase 1A</dt>
-          <dd>{power.phase1aDraw}<span class="sub">{power.phase1aUtilisation}. The rest is unsold capacity that already exists.</span></dd>
+          <dt>Tenant allocation</dt>
+          <dd>On review<span class="sub">{power.allocation}. Request an engineering allocation and we will size it against the actual service.</span></dd>
         </div>
       </dl>
     </div>
@@ -110,8 +113,9 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
       thermal path does not.
     </p>
     <p>
-      Phase 1A is {compute.systems.toLowerCase()}, which is a modest thermal load for a
-      {site.buildings[0].sqft.toLocaleString()} sq ft hall. The cooling method has not been
+      The planned first phase is {compute.systems}, at {compute.load}. Existing HVAC
+      serves the data-center buildings; building-specific capacity and operating limits
+      are being documented. The cooling method has not been
       fixed yet, and we are not going to claim one before it is:
       {' '}<span class="todo">{compute.cooling}</span>. What the building will support at
       higher density is a separate question, answered below.
@@ -129,15 +133,15 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
 
   <section aria-labelledby="network" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Network</span></p>
-    <h2 id="network">{network.speed} into a field in Oklahoma</h2>
+    <h2 id="network">{network.service} into a field in Oklahoma</h2>
 
     <div class="split">
       <div>
         <p>
           Rural sites are usually dismissed on connectivity before anyone looks at the
           power. This one carries a signed quote from {network.provider} for
-          {' '}{network.speed} — dedicated internet access, symmetrical, not a shared
-          business broadband product — on a {network.term.toLowerCase()}.
+          {' '}{network.service} — planned, and asymmetrical rather than a shared
+          business broadband product. {network.status}.
         </p>
         <p>
           At {network.cost}, that is roughly ${netPerGbps.toFixed(2)} per Gbps per month
@@ -154,7 +158,7 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
 
       <dl class="spec">
         <div><dt>Provider</dt><dd>{network.provider}</dd></div>
-        <div><dt>Service</dt><dd>{network.speed}</dd></div>
+        <div><dt>Service</dt><dd>{network.service}<span class="note">{network.status}</span></dd></div>
         <div><dt>Cost</dt><dd>{network.cost}</dd></div>
         <div><dt>Term</dt><dd>{network.term}</dd></div>
         <div><dt>Diversity</dt><dd><span class="todo">[PLACEHOLDER: is there a second physical path]</span></dd></div>
@@ -188,7 +192,7 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
           <tr><th scope="row">Service availability</th><td>{site.powerOn} power-on target</td></tr>
           <tr><th scope="row">Energy</th><td>{power.rate} at the site</td></tr>
           <tr><th scope="row">Cooling</th><td>{compute.cooling}</td></tr>
-          <tr><th scope="row">Network</th><td>{network.speed}, {network.provider}</td></tr>
+          <tr><th scope="row">Network</th><td>{network.service}, {network.provider} — planned</td></tr>
           <tr><th scope="row">Minimum commitment</th><td><span class="todo">[PLACEHOLDER: minimum kW or rack count per contract]</span></td></tr>
           <tr><th scope="row">Contract length</th><td><span class="todo">[PLACEHOLDER: standard and minimum term lengths]</span></td></tr>
           <tr><th scope="row">Pricing</th><td><span class="todo">[PLACEHOLDER: $ per kW per month, and whether space is billed separately]</span></td></tr>
@@ -241,7 +245,7 @@ const netHeadline = network.speed.split(' ').slice(0, 2).join(' ');
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">07</span><span class="eyebrow__t">Next</span></p>
     <h2 id="reserve">Reserve before Phase 1A fills</h2>
     <p>
-      Phase 1A is one building and {compute.rentable} rentable GPUs. Tell us the load in
+      The planned first phase is {compute.gpus} GPUs across {compute.servers} servers. Tell us the load in
       kilowatts, the shape of the workload, and the date you need it live, and we will
       come back with a term sheet against real capacity rather than a waiting list.
     </p>

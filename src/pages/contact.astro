@@ -4,30 +4,31 @@ import { company, site, power, compute } from '../data/site';
 
 /* Split so the headline figure and its qualifier can be set at different sizes
    without either being retyped away from the site record. */
-const [queueAnswer = power.interconnectionQueue] =
-  power.interconnectionQueue.split('—').map((s) => s.trim());
-const headroomFactor = power.headroom.split(' ')[0];
+
 ---
 
 <Content
   title={`Reserve capacity at ${site.designation} | ${company.full}`}
-  description={`Talk to ${company.full} about colocation or GPU capacity at ${site.name}. ${power.headroom} behind the meter, ${site.powerOn} power-on, and no interconnection queue in front of you.`}
+  description={`Talk to ${company.full} about dedicated compute or customer-owned hosting at ${site.name}. A submission is an inquiry — it starts a deployment review, and does not reserve capacity.`}
   kicker="Contact"
   heading="Reserve capacity before Phase 1A fills."
-  lede={`Phase 1A is one building and ${compute.rentable} rentable GPUs. Tell us the load in kilowatts and the date you need it live, and you will get an answer about real capacity rather than a place on a waiting list.`}
+  lede={`The planned first phase is ${compute.servers} servers and ${compute.gpus} GPUs. Tell us the workload and the date you need it, and you will get a review of what the facility can actually take — not a reservation, and not a number we cannot stand behind.`}
   meta={[
-    { label: 'Rentable at Phase 1A', value: String(compute.rentable), note: `of ${compute.gpus} GPUs, ${compute.systems}`, tone: 'signal', count: true },
+    { label: 'Planned GPUs', value: String(compute.gpus), note: compute.systems, tone: 'signal', count: true },
     { label: 'Power-on target', value: site.powerOn, note: 'Phase 1A compute hall' },
-    { label: 'Headroom', value: headroomFactor, note: power.headroom, tone: 'gold' },
-    { label: 'Interconnection queue', value: queueAnswer, note: power.interconnectionQueue },
+    { label: 'Shared service', value: power.service, note: 'Buildings A, B and C', tone: 'gold' },
+    { label: 'Allocation', value: 'On review', note: power.allocation },
   ]}
 >
   <section aria-labelledby="form-heading" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">Tell us what you need</span></p>
-    <h2 id="form-heading">Capacity enquiry</h2>
+    <h2 id="form-heading">Request a deployment review</h2>
 
     <p class="form-note">
-      <span class="todo">[PLACEHOLDER: form endpoint — this form posts to /api/reserve, which is not implemented yet. Wire it to the CRM or mail relay before launch.]</span>
+      This is an inquiry. Sending it does not reserve inventory, commit capacity or
+      fix a price — it starts a conversation in which we confirm workload
+      suitability, equipment availability, facility allocation and commercial terms.
+      <span class="todo">[PLACEHOLDER: inquiry destination — set PUBLIC_RESERVE_ENDPOINT to the CRM or mail relay before launch. Until it is set this form will tell visitors it cannot deliver rather than pretend it has.]</span>
     </p>
 
     <form class="form" id="reserve-enquiry" method="post" action="/api/reserve">
@@ -75,15 +76,15 @@ const headroomFactor = power.headroom.split(' ')[0];
             <label class="field__label" for="offering">What you are looking for <span class="field__req" aria-hidden="true">*</span></label>
             <select class="field__input" id="offering" name="offering" required>
               <option value="">Choose one</option>
-              <option value="colocation">Colocation — I bring the hardware</option>
-              <option value="gpu-capacity">GPU capacity — I rent yours</option>
-              <option value="whole-building">A whole building</option>
+              <option value="dedicated">Dedicated compute — I use your GPUs</option>
+              <option value="hosting">Customer-owned hosting — I bring the hardware</option>
+              <option value="expansion">A larger future deployment</option>
               <option value="unsure">Not sure yet</option>
             </select>
           </p>
 
           <p class="field">
-            <label class="field__label" for="load">Load required, in kW <span class="field__req" aria-hidden="true">*</span></label>
+            <label class="field__label" for="load">Load required, in kW</label>
             <input
               class="field__input"
               id="load"
@@ -93,11 +94,12 @@ const headroomFactor = power.headroom.split(' ')[0];
               step="1"
               inputmode="numeric"
               aria-describedby="load-hint"
-              required
+              placeholder="Leave blank if not yet known"
             />
             <span class="field__hint" id="load-hint">
-              IT load, not floor area. Phase 1A itself is {compute.load}. If you only know
-              a GPU count, put the count in the notes instead.
+              IT load, not floor area. The planned first phase is {compute.load}. Leave it
+              blank if you do not know yet — a technical input you have not measured is
+              better left empty than guessed.
             </span>
           </p>
 
@@ -138,12 +140,13 @@ const headroomFactor = power.headroom.split(' ')[0];
       <div class="form__actions">
         <p class="form__status" data-form-status role="status" tabindex="-1" hidden></p>
         <button class="btn form__submit" type="submit">
-          Send enquiry
+          Request a deployment review
           <span class="form__submit-arrow" aria-hidden="true">→</span>
         </button>
         <span class="form__req-note">
-          Fields marked <span class="field__req" aria-hidden="true">*</span> are required.
-          A person reads this, not a sequence.
+          Fields marked <span class="field__req" aria-hidden="true">*</span> are required;
+          leave any technical input blank if it is not yet known. A person reads this,
+          not a sequence.
         </span>
       </div>
     </form>
@@ -176,10 +179,10 @@ const headroomFactor = power.headroom.split(' ')[0];
         <div class="callout">
           <p>
             <strong>The short version, if you are comparing sites.</strong> The industry
-            interconnection queue runs {power.industryQueue}. {site.designation} never
-            entered it, because the {power.transformer} service is already energised on
+            grid interconnection timelines gate most new capacity. {site.designation} never
+            entered it, because the {power.service} service is already standing on
             land we own and the generation sits behind the meter. Phase 1A uses
-            {' '}{power.phase1aUtilisation} of it.
+            {' '}the site. What it can carry as IT load follows an engineering review.
           </p>
         </div>
 
@@ -213,20 +216,61 @@ const headroomFactor = power.headroom.split(' ')[0];
 </style>
 
 <script>
-  /* The endpoint is not built yet. Until it is, intercept rather than let a
-     valid submission navigate to a 404 and take every typed field with it. */
+  /*
+   * Delivery, not the appearance of it.
+   *
+   * This handler used to intercept a valid submission and display a thank-you
+   * that acknowledged, in its own words, that nothing had been sent. That was
+   * at least honest — the capture bar on the homepage was not — but neither
+   * delivered anything.
+   *
+   * It now posts through the shared inquiry module, which reports success only
+   * on a server acknowledgment. Every failure path keeps the form exactly as
+   * the visitor typed it: the fields are never cleared unless the inquiry
+   * actually left.
+   */
+  import { submitInquiry, failureMessage } from '../lib/inquiry';
+
   const form = document.querySelector<HTMLFormElement>('#reserve-enquiry, form[action="/api/reserve"]');
   const status = document.querySelector<HTMLElement>('[data-form-status]');
+  const submit = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+  let sending = false;
+
+  const say = (text: string): void => {
+    if (!status) return;
+    status.textContent = text;
+    status.hidden = false;
+    status.focus();
+  };
+
   form?.addEventListener('submit', (e) => {
     if (!form.checkValidity()) return;
     e.preventDefault();
-    if (status) {
-      status.textContent =
-        'Thank you — your details are captured here but not yet delivered: the enquiry endpoint is not connected. '
-        + 'Please email us in the meantime, and nothing you typed has been lost.';
-      status.hidden = false;
-      status.focus();
+    if (sending) return;
+
+    sending = true;
+    if (submit) submit.disabled = true;
+    form.dataset.state = 'sending';
+    if (status) { status.textContent = 'Sending…'; status.hidden = false; }
+
+    const payload: Record<string, unknown> = { source: 'contact-page' };
+    for (const [key, value] of new FormData(form).entries()) {
+      if (typeof value === 'string' && value.trim() !== '') payload[key] = value.trim();
     }
+
+    void submitInquiry(payload).then((result) => {
+      sending = false;
+      if (submit) submit.disabled = false;
+      if (result.ok) {
+        form.dataset.state = 'sent';
+        say('Received. We will confirm workload suitability, equipment availability, facility allocation and commercial terms before issuing an offer.');
+        form.reset();
+        return;
+      }
+      form.dataset.state = 'error';
+      say(failureMessage(result.reason));
+      // No reset. Everything typed stays where it is.
+    });
   });
 </script>
 

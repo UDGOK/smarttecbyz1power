@@ -31,9 +31,10 @@ const pad = (n: number): string => String(n).padStart(2, '0');
       <span class="cfg__line"><span class="cfg__line-inner">deployment.</span></span>
     </h2>
     <p class="cfg__lede">
-      {questions.length} questions against the real envelope: {compute.systems}, {compute.gpus} GPUs
-      with {compute.rentable} rentable, {power.phase1aDraw} behind a {power.transformer} transformer
-      we already own. Power-on {site.powerOn}.
+      {questions.length} questions against the planned fleet: {compute.systems},
+      {compute.gpus} GPUs, {compute.load}. First compute is a {site.powerOn}, and
+      {compute.status.toLowerCase()} — so this prepares a request, it does not reserve
+      anything.
     </p>
   </header>
 
@@ -101,7 +102,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
             </div>
 
             <h3 class="cfg__result-title" id={`${id}-result-title`} tabindex="-1" data-result-focus>
-              <span class="cfg__line"><span class="cfg__line-inner" data-field="fit-headline">It fits Phase 1A.</span></span>
+              <span class="cfg__line"><span class="cfg__line-inner" data-field="fit-headline">Deployment request prepared.</span></span>
             </h3>
             <p class="cfg__result-detail">
               <span class="cfg__line"><span class="cfg__line-inner" data-field="fit-detail"></span></span>
@@ -110,23 +111,23 @@ const pad = (n: number): string => String(n).padStart(2, '0');
             <dl class="cfg__result-grid">
               <div class="cfg__result-cell">
                 <span class="cfg__rule" data-rule aria-hidden="true"></span>
-                <dt class="mono-label">GPU allocation</dt>
-                <dd><strong class="cfg__figure" data-field="gpus" data-tally>—</strong> <span class="cfg__unit" data-field="gpu-note">of {compute.rentable} rentable</span></dd>
+                <dt class="mono-label">GPUs requested</dt>
+                <dd><strong class="cfg__figure" data-field="gpus" data-tally>—</strong> <span class="cfg__unit" data-field="gpu-note">of {compute.gpus} planned</span></dd>
               </div>
               <div class="cfg__result-cell">
                 <span class="cfg__rule" data-rule aria-hidden="true"></span>
-                <dt class="mono-label">Estimated draw</dt>
-                <dd><strong class="cfg__figure" data-field="kw" data-tally>—</strong> <span class="cfg__unit">kW · <span data-field="phase-share"></span></span></dd>
+                <dt class="mono-label">Peak IT load</dt>
+                <dd><strong class="cfg__figure" data-field="kw" data-tally>—</strong> <span class="cfg__unit">kW · <span data-field="kw-note">servers, at peak</span></span></dd>
               </div>
               <div class="cfg__result-cell">
                 <span class="cfg__rule" data-rule aria-hidden="true"></span>
-                <dt class="mono-label">Transformer</dt>
-                <dd><strong class="cfg__figure" data-field="share" data-tally>—</strong> <span class="cfg__unit">% of {power.transformer}</span></dd>
+                <dt class="mono-label">With facility overhead</dt>
+                <dd><strong class="cfg__figure" data-field="facility" data-tally>—</strong> <span class="cfg__unit">kW · <span data-field="facility-note"></span></span></dd>
               </div>
               <div class="cfg__result-cell">
                 <span class="cfg__rule" data-rule aria-hidden="true"></span>
-                <dt class="mono-label">Energy at {power.rate}</dt>
-                <dd><strong class="cfg__figure" data-field="energy" data-tally>—</strong> <span class="cfg__unit" data-field="energy-period"></span></dd>
+                <dt class="mono-label">Assumed average</dt>
+                <dd><strong class="cfg__figure" data-field="average" data-tally>—</strong> <span class="cfg__unit">kW · <span data-field="average-note"></span></span></dd>
               </div>
             </dl>
 
@@ -134,7 +135,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
             <ul class="cfg__notes" data-notes></ul>
 
             <div class="cfg__cta" data-reveal>
-              <a class="cfg__reserve" href={ctaHref} data-cursor="action">Reserve capacity</a>
+              <a class="cfg__reserve" href={ctaHref} data-cursor="action">Request a deployment review</a>
               <button type="button" class="cfg__ghost-btn cfg__ghost-btn--slab" data-restart data-cursor="action">Start over</button>
             </div>
           </div>
@@ -170,28 +171,28 @@ const pad = (n: number): string => String(n).padStart(2, '0');
       </div>
 
       <div class="cfg__gauge">
-        <div class="cfg__meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Share of the rentable Phase 1A GPUs">
+        <div class="cfg__meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Share of the planned GPUs requested">
           <span class="cfg__meter-ticks" aria-hidden="true"></span>
           <span class="cfg__meter-fill" data-bar></span>
           <span class="cfg__meter-mark" aria-hidden="true"></span>
         </div>
         <p class="cfg__scale mono-label" aria-hidden="true">
-          <span>0</span><span>{compute.rentable} rentable</span>
+          <span>0</span><span>{compute.gpus} planned</span>
         </p>
       </div>
 
       <dl class="cfg__stats">
         <div>
-          <dt class="mono-label">Draw</dt>
+          <dt class="mono-label">Peak IT</dt>
           <dd><span class="cfg__figure" data-field="kw" data-pop>—</span> <span class="cfg__unit">kW</span></dd>
         </div>
         <div>
-          <dt class="mono-label">{power.transformer}</dt>
-          <dd><span class="cfg__figure" data-field="share" data-pop>—</span> <span class="cfg__unit">%</span></dd>
+          <dt class="mono-label">+ facility</dt>
+          <dd><span class="cfg__figure" data-field="facility" data-pop>—</span> <span class="cfg__unit">kW</span></dd>
         </div>
         <div>
-          <dt class="mono-label">Energy</dt>
-          <dd><span class="cfg__figure" data-field="energy" data-pop>—</span> <span class="cfg__unit" data-field="energy-period">per month</span></dd>
+          <dt class="mono-label">Assumed avg</dt>
+          <dd><span class="cfg__figure" data-field="average" data-pop>—</span> <span class="cfg__unit">kW</span></dd>
         </div>
       </dl>
 
@@ -216,19 +217,19 @@ const pad = (n: number): string => String(n).padStart(2, '0');
       ))}
     </dl>
     <p class="cfg__smallprint">
-      Figures marked estimated are not in the site record and are tuning values, not commitments.
-      Everything else is derived from {envelope.systems} at {site.address}.
+      Figures marked estimated are not in the site record and are tuning values, not
+      commitments. Nothing here is an offer: workload suitability, equipment availability,
+      facility allocation and commercial terms are all confirmed before one is issued.
     </p>
   </details>
 
   <div class="cfg__static">
     <p class="cfg__smallprint">
-      The interactive sizing needs JavaScript. The envelope it sizes against does not:
-      {compute.systems}, {compute.gpus} GPUs with {compute.rentable} rentable, {power.phase1aDraw} of
-      IT load, {compute.cooling.toLowerCase()}, behind a {power.transformer} transformer at
-      {power.voltage} — {power.phase1aUtilisation}, {power.headroom.toLowerCase()}.
-      Buildings {envelope.expansion.map((b) => b.id).join(' and ')} are {envelope.expansion[0].sqft.toLocaleString('en-US')} sqft
-      shells for anything larger. <a href={ctaHref}>Reserve capacity</a> and we will size it with you.
+      The interactive sizing needs JavaScript. What it sizes against does not:
+      {compute.systems}, {compute.gpus} GPUs, {compute.load}, behind a shared
+      {power.service} service originating at Building C. {compute.status}, and
+      {power.allocation.toLowerCase()}.
+      <a href={ctaHref}>Request a deployment review</a> and we will work it through with you.
     </p>
   </div>
 </section>
