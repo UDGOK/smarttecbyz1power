@@ -922,7 +922,13 @@
    ::after hit area the fixed chrome uses — and it needs one: at the resting
    padding it measured 37 x 24 on a phone, which is not a thumb target. */
 .nav .menu-toggle {
-  position: static;
+  /* `relative`, not `static`. The coarse-pointer rules give .menu-toggle a
+     44px ::after hit area that resolves against the nearest positioned
+     ancestor — and with this static, that ancestor was .nav, which put an
+     invisible menu trigger in the middle of the bar. Relative is safe here in
+     a way it is not on the cinematic route: there is no fixed inset to be
+     reinterpreted, because in the flow there is no inset at all. */
+  position: relative;
   margin-left: auto;
   flex: 0 0 auto;
   min-height: 44px;
@@ -1089,14 +1095,22 @@ html.menu-open .nav { z-index: calc(var(--z-overlay) + 1); }
 .menu__stage-name { opacity: 0.65; }
 
 @media (max-width: 640px) {
-  /* On narrow screens the top-right corner belongs to the badge and the
-     centre to the ruler; the toggle overlapped the ruler's right edge, which
-     on touch is where its jump targets live. Park it beside the brandmark. */
+  /* The toggle takes the top-right corner, and the badge steps inboard of it.
+     
+     It used to sit beside the brandmark on the left, because the corner
+     belonged to the badge. That put the same control on opposite sides of the
+     screen depending on which page you were on — the reading pages carry it at
+     the right-hand end of their bar. The primary control gets the corner and
+     the readout moves over: a thumb reaches the bottom-right and the top-right
+     far more easily than it reaches across, and one position everywhere beats
+     a tidy corner. The badge is a readout with nothing to tap. */
   .menu-toggle {
-    right: auto;
-    left: calc(var(--chrome-inset) + 46px);
+    left: auto;
+    right: var(--chrome-inset);
     padding: 9px 12px;
   }
+  /* Clear of the toggle: its ~37px box plus the inset again as a gap. */
+  .power-badge { right: calc(var(--chrome-inset) * 2 + 37px); }
   .menu-toggle__label { display: none; }
   .menu__note { display: none; }
   .menu__link { grid-template-columns: 2.4rem 1fr; }
