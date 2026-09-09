@@ -10,6 +10,11 @@
  * handoff is explicit that each would need its own OEM design, benchmark and
  * funded customer order. They are not interchangeable upgrades inside the RTX
  * nodes.
+ *
+ * Two of them do not fit the "a rack of cards" shape at all and are marked so:
+ * the GB300 NVL72 is a whole liquid-cooled rack presented as one memory
+ * domain, and the Cerebras CS-3 does not hold weights in device memory. Both
+ * are facility decisions before they are hardware decisions.
  */
 
 export type AcceleratorStatus = 'planned' | 'evaluation';
@@ -29,6 +34,13 @@ export interface Accelerator {
   interconnect: string;
   status: AcceleratorStatus;
   statusNote: string;
+  /**
+   * Set where the purchasable unit is a whole rack rather than a card. The
+   * arithmetic still counts GPUs, because that is what holds the weights — but
+   * a count of one means one GPU inside a rack you buy whole, and the planner
+   * has to say so rather than implying you can take a seventy-second of it.
+   */
+  rackOf?: number;
   /**
    * Set when the device does not follow the "weights resident in device
    * memory" model the arithmetic assumes, so the planner declines to compute
@@ -99,6 +111,65 @@ export const accelerators: Accelerator[] = [
     status: 'evaluation',
     statusNote: 'Future platform evaluation. A different software stack as well as different hardware.',
     source: 'https://www.amd.com/en/products/accelerators/instinct/mi350.html',
+  },
+  {
+    id: 'gb300-nvl72',
+    vendor: 'NVIDIA',
+    name: 'GB300 NVL72 — rack scale',
+    short: 'GB300 NVL72',
+    // 72 Blackwell Ultra GPUs in one liquid-cooled rack, presented to software
+    // as a single coherent memory domain.
+    memoryGb: 288,
+    memoryType: 'HBM3e per GPU, 72 GPUs in one coherent domain',
+    tdpW: 1400,
+    domainSize: 72,
+    interconnect: 'NVLink — 72-GPU coherent domain, one rack',
+    rackOf: 72,
+    status: 'evaluation',
+    statusNote: 'Future platform evaluation. A liquid-cooled rack drawing on the order of 100 kW+, which is a facility design before it is a hardware choice.',
+    source: 'https://www.nvidia.com/en-us/data-center/gb300-nvl72/',
+  },
+  {
+    id: 'h200',
+    vendor: 'NVIDIA',
+    name: 'HGX H200',
+    short: 'H200',
+    memoryGb: 141,
+    memoryType: 'HBM3e',
+    tdpW: 700,
+    domainSize: 8,
+    interconnect: 'NVLink — 8-GPU coherent domain',
+    status: 'evaluation',
+    statusNote: 'Future platform evaluation. The previous generation, and still the most widely deployed HBM part.',
+    source: 'https://www.nvidia.com/en-us/data-center/h200/',
+  },
+  {
+    id: 'mi325x',
+    vendor: 'AMD',
+    name: 'Instinct MI325X',
+    short: 'MI325X',
+    memoryGb: 256,
+    memoryType: 'HBM3e',
+    tdpW: 1000,
+    domainSize: 8,
+    interconnect: 'Infinity Fabric — 8-GPU node',
+    status: 'evaluation',
+    statusNote: 'Future platform evaluation. The generation before the MI355X, and a different software stack from either NVIDIA part.',
+    source: 'https://www.amd.com/en/products/accelerators/instinct/mi300/mi325x.html',
+  },
+  {
+    id: 'gaudi3',
+    vendor: 'Intel',
+    name: 'Gaudi 3',
+    short: 'Gaudi 3',
+    memoryGb: 128,
+    memoryType: 'HBM2e',
+    tdpW: 900,
+    domainSize: 8,
+    interconnect: 'Ethernet — 8-accelerator node, RoCE scale-out',
+    status: 'evaluation',
+    statusNote: 'Future platform evaluation. Scale-out over standard Ethernet rather than a proprietary fabric, which changes the network design as much as the compute.',
+    source: 'https://www.intel.com/content/www/us/en/products/details/processors/ai-accelerators/gaudi3.html',
   },
   {
     id: 'cerebras-cs3',

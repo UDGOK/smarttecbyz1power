@@ -34,7 +34,7 @@ const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference
   meta={[
     { label: 'Models', value: String(models.length), note: 'Self-hostable, from OpenRouter', count: true },
     { label: 'Largest', value: largest.params >= 1e12 ? `${(largest.params / 1e12).toFixed(1)}T` : `${(largest.params / 1e9).toFixed(0)}B`, note: largest.name },
-    { label: 'Accelerators', value: String(accelerators.length), note: 'One planned here, four evaluations', count: true },
+    { label: 'Accelerators', value: String(accelerators.length), note: `One planned here, ${accelerators.length - 1} evaluations`, count: true },
     { label: 'Catalogue', value: catalogue.fetched, note: 'Refreshed live where available', tone: 'signal' },
   ]}
 >
@@ -141,10 +141,12 @@ const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference
     <h2 id="hardware">What that lands on</h2>
 
     <p>
-      One of these is planned for this site. The other four are platform evaluations —
-      each would need its own OEM design, its own benchmark and a funded order, and none
-      is a drop-in upgrade inside the RTX nodes. They are here because the arithmetic is
-      worth seeing across the field, not because they are on offer.
+      One of these is planned for this site. The rest are platform evaluations — each
+      would need its own OEM design, its own benchmark and a funded order, and none is a
+      drop-in upgrade inside the RTX nodes. They are here because the arithmetic is worth
+      seeing across the field, not because they are on offer. Two of them are facility
+      decisions before they are hardware ones: the GB300 NVL72 is a whole liquid-cooled
+      rack, and the Cerebras CS-3 does not hold weights in device memory at all.
     </p>
 
     <div class="mp__cards" data-out-fits>

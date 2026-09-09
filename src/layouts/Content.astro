@@ -19,6 +19,7 @@
  */
 import Base from './Base.astro';
 import SiteNav from '../components/SiteNav.astro';
+import SiteMenu from '../components/chrome/SiteMenu.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
 /** A hero figure. `value` is always a string taken from src/data/site.ts. */
@@ -139,6 +140,9 @@ const { title, description, kicker, heading, lede, meta = [] } = Astro.props;
   </script>
 
   <SiteNav />
+  {/* Outside the header on purpose: the nav's backdrop-filter would
+      otherwise be this overlay's containing block. */}
+  <SiteMenu part="overlay" current={Astro.url.pathname.replace(/\/+$/, '') || '/'} />
 
   <main class="doc" id="main">
     <header class="doc__head">

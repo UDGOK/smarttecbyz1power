@@ -2,6 +2,12 @@
 /**
  * Primary navigation for the content routes.
  *
+ * The links used to sit here as a horizontal strip. At five it was tight, at
+ * six it overflowed and scrolled inside itself, and a strip that has to scroll
+ * is a strip nobody reads to the end of. They live in the full-screen menu now
+ * — the same one the cinematic route opens — and what stays here is the brand,
+ * the live status line and the control that opens it.
+ *
  * The cinematic route has its own fixed chrome (Brandmark / ScrollRuler /
  * PowerBadge) and deliberately does not use this. These are reading pages, so
  * the nav is a real sticky <header> with a real <nav> landmark, and the current
@@ -12,20 +18,9 @@
  * that reports scroll position the way the stage ruler does. On the way down it
  * condenses to a single line of marks; on the way up it opens again. With no
  * JavaScript it simply stays open, which is the same nav minus the compression.
- *
- * Below ~760px the link strip scrolls inside itself rather than wrapping into a
- * second row or pushing the page wider than the viewport.
  */
 import { company, site, power } from '../data/site';
-
-const links = [
-  { href: '/site', label: 'Site 01' },
-  { href: '/power', label: 'Power' },
-  { href: '/colocation', label: 'Colocation' },
-  { href: '/compute', label: 'Compute' },
-  { href: '/model-planner', label: 'Planner' },
-  { href: '/about', label: 'About' },
-] as const;
+import SiteMenu from './chrome/SiteMenu.astro';
 
 /** Astro serves /site in dev and /site/ from the directory build. Normalise. */
 const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
@@ -58,26 +53,7 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
       <span class="nav__status-text">{power.voltage} · {site.powerOn}</span>
     </p>
 
-    <nav class="nav__nav" aria-label="Primary">
-      <ul class="nav__list">
-        {links.map((l) => (
-          <li>
-            <a
-              class="nav__link"
-              href={l.href}
-              aria-current={path === l.href ? 'page' : undefined}
-            >{l.label}</a>
-          </li>
-        ))}
-        <li>
-          <a
-            class="nav__link nav__link--cta"
-            href="/contact"
-            aria-current={path === '/contact' ? 'page' : undefined}
-          >Contact</a>
-        </li>
-      </ul>
-    </nav>
+    <SiteMenu part="toggle" />
   </div>
 
   <span class="nav__progress" data-nav-progress aria-hidden="true"></span>
@@ -184,88 +160,23 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-signal) 16%, transparent);
   }
 
-  .nav__nav {
-    flex: 1 1 auto;
-    min-width: 0;
-    /* The strip, not the page, takes the overflow. */
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
-  }
-  .nav__nav::-webkit-scrollbar { display: none; }
+  
+  
 
-  .nav__list {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: var(--s-2);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  /* Nothing may shrink below its text, or the labels wrap inside the strip
-     instead of overflowing it, and the scroller never engages. */
-  .nav__list > li { flex: 0 0 auto; }
+  
+  
 
-  .nav__link {
-    position: relative;
-    display: block;
-    padding: var(--s-2) var(--s-1);
-    color: var(--w-55);
-    font-family: var(--f-mono);
-    font-size: var(--t-label);
-    letter-spacing: var(--ls-mid);
-    text-transform: uppercase;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: color 0.3s var(--e-p2);
-  }
-  /* A hairline that grows out of the baseline rather than a pill. */
-  .nav__link::after {
-    content: '';
-    position: absolute;
-    left: var(--s-1);
-    right: var(--s-1);
-    bottom: 2px;
-    height: 1px;
-    background: currentColor;
-    transform: scaleX(0);
-    transform-origin: 0 50%;
-    transition: transform 0.45s var(--e-p2);
-  }
-  .nav__link:hover { color: var(--w-95); }
-  .nav__link:hover::after { transform: scaleX(1); }
-  .nav__link[aria-current='page'] { color: var(--c-signal); }
-  .nav__link[aria-current='page']::after { transform: scaleX(1); }
+  
+  
+  
+  
+  
+  
 
-  /* Contact is the conversion surface, so it is drawn as one. */
-  /* Contact is the conversion CTA and was scrolling off the end of the strip
-     on a phone — clipped at 390px, entirely gone at 360px, with no way to
-     reach it. It stays pinned to the right edge while the rest scrolls under
-     it. */
-  .nav__list > li:last-child {
-    position: sticky;
-    right: 0;
-    z-index: 1;
-    padding-left: var(--s-2);
-    background: linear-gradient(to right, transparent, var(--c-land) 22%);
-  }
-
-  .nav__link--cta {
-    margin-left: var(--s-3);
-    padding: var(--s-2) var(--s-4);
-    border: 1px solid var(--w-25);
-    border-radius: var(--r-pill);
-    color: var(--w-95);
-    transition: color 0.3s var(--e-p2), border-color 0.3s var(--e-p2), background 0.3s var(--e-p2);
-  }
-  .nav__link--cta::after { display: none; }
-  .nav__link--cta:hover { border-color: var(--c-signal); background: color-mix(in srgb, var(--c-signal) 12%, transparent); }
-  .nav__link--cta[aria-current='page'] {
-    border-color: var(--c-signal);
-    background: color-mix(in srgb, var(--c-signal) 14%, transparent);
-    color: var(--c-signal);
-  }
+  
+  
+  
+  
 
   /* Scroll position, drawn the way the stage ruler draws it. */
   .nav__progress {
@@ -281,12 +192,9 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
     .nav__status { display: flex; }
   }
 
+  /* One row at every width now that there is no strip to wrap. */
   @media (max-width: 760px) {
-    .nav__inner { flex-direction: column; align-items: stretch; gap: var(--s-3); }
-    .nav.is-condensed .nav__inner { gap: var(--s-2); }
-    .nav__list { justify-content: flex-start; }
-    /* Bleed the strip to the screen edges so it reads as scrollable. */
-    .nav__nav { margin: 0 calc(var(--s-4) * -1); padding: 0 var(--s-4) 2px; }
+    .nav__inner { gap: var(--s-3); }
   }
 
   @media (max-width: 400px) {
@@ -294,7 +202,6 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .nav__link::after { transition: none; }
     .nav__inner { transition: none; }
   }
 
@@ -302,7 +209,6 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
      earlier in this file sets the resting padding, and source order decides.
      Line box is 16.5px, so 14px each side is what actually clears 44px. */
   @media (pointer: coarse), (max-width: 760px) {
-    .nav__link { padding-block: 14px; }
     .nav__brand { padding-block: 9px; }
   }
 </style>

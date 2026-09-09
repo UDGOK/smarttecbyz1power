@@ -914,6 +914,21 @@
   transition: transform 0.3s var(--e-p2), background 0.3s var(--e-p2);
 }
 .menu-toggle:hover { transform: translateY(-1px); }
+/* On the reading pages the toggle rides inside the sticky bar rather than
+   floating over the scene, so it drops out of the fixed corner and takes its
+   place at the end of the row.
+
+   Being in the flow, it can take a real minimum size rather than the invisible
+   ::after hit area the fixed chrome uses — and it needs one: at the resting
+   padding it measured 37 x 24 on a phone, which is not a thumb target. */
+.nav .menu-toggle {
+  position: static;
+  margin-left: auto;
+  flex: 0 0 auto;
+  min-height: 44px;
+  min-width: 44px;
+  justify-content: center;
+}
 .menu-toggle__bars { display: grid; gap: 3px; width: 13px; }
 .menu-toggle__bars i {
   display: block;
@@ -932,7 +947,7 @@
   z-index: calc(var(--z-overlay) - 1);
   display: grid;
   place-items: center;
-  padding: var(--s-8) var(--s-5);
+  padding: clamp(var(--s-5), 4vh, var(--s-7)) var(--s-5);
   background: #05100af2;
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
@@ -947,9 +962,16 @@
 .menu[hidden] { display: none; }
 [data-chrome='dark'] .menu { background: #eef1eff2; }
 
-.menu__inner { width: min(880px, 100%); }
-.menu__eyebrow { color: var(--chrome-fg); margin: 0 0 var(--s-4); }
-.menu__eyebrow--second { margin-top: var(--s-8); }
+.menu__inner {
+  width: min(1100px, 100%);
+  /* A long index on a short screen scrolls inside the overlay rather than
+     being clipped by it. `contain` stops that scroll reaching the page. */
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.menu__eyebrow { color: var(--chrome-fg); margin: 0 0 var(--s-3); }
+.menu__eyebrow--second { margin-top: clamp(var(--s-4), 3vh, var(--s-6)); }
 
 .menu__list { list-style: none; margin: 0; padding: 0; }
 /* Container borders, not drawn rules — the reference separates the two by a
@@ -983,13 +1005,26 @@
 
 .menu__link {
   display: grid;
-  grid-template-columns: 3rem 1fr auto;
+  grid-template-columns: 3.4rem 1fr auto;
   align-items: baseline;
   gap: var(--s-4);
-  padding: clamp(10px, 1.6vw, 18px) 4px;
+  padding: clamp(8px, 1.1vh, 18px) 4px;
   text-decoration: none;
   color: var(--chrome-fg-loud);
   transition: color 0.3s var(--e-p2);
+}
+/* The page you are on is named, not just tinted. */
+.menu__link[aria-current='page'] .menu__label { color: var(--c-signal); }
+.menu__link[aria-current='page'] .menu__note::after {
+  content: ' · you are here';
+  color: var(--c-signal);
+}
+
+/* Below the wide breakpoint the note would set at four words a line beside a
+   5rem label, so it goes under it and the row becomes two lines. */
+@media (max-width: 720px) {
+  .menu__link { grid-template-columns: 2.6rem 1fr; }
+  .menu__note { grid-column: 2; text-align: left; }
 }
 /* The row used to animate its own padding, which is a layout property and the
    one thing in this file that made the browser re-lay-out mid-gesture. The
@@ -1005,7 +1040,14 @@
 .menu__label {
   font-family: var(--f-display);
   font-weight: var(--fw-display);
-  font-size: clamp(1.7rem, 1rem + 2.6vw, 3.2rem);
+  /* Display scale — the index is the page while it is open, so it is set like
+     one rather than like a dropdown that happens to fill the screen.
+     
+     Bounded by viewport HEIGHT as well as width. Sized on width alone, seven
+     rows plus the chapter list ran past the bottom of a laptop screen and put
+     Contact — the one row that exists to be clicked — below the fold. The vh
+     term is what keeps the whole index on one screen. */
+  font-size: clamp(1.8rem, min(1.1rem + 4.4vw, 6.4vh), 4.6rem);
   line-height: 1;
   letter-spacing: var(--ls-display);
 }

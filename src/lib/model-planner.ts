@@ -173,6 +173,16 @@ export function fitTo(
     );
   }
 
+  if (accelerator.rackOf) {
+    const rackKw = (accelerator.rackOf * accelerator.tdpW) / 1000;
+    notes.push(
+      `The unit here is a rack, not a card. ${count} of the ${accelerator.rackOf} GPUs in one `
+      + `${accelerator.short} carries this model — but the rack is what you buy and what you power, `
+      + `and it draws on the order of ${Math.round(rackKw)} kW of accelerator load before facility `
+      + 'overhead. That is a facility decision before it is a hardware one.',
+    );
+  }
+
   if (model.experts) {
     notes.push(
       `Mixture of experts: all ${model.experts} experts stay resident even though only some are active per `

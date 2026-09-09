@@ -19,6 +19,7 @@ import { revealLines, scramble } from './type-motion';
 import { ScrollManager, CameraRig, SCROLL_CONFIG, DELTA_SCALE } from './scroll';
 import { audio } from './audio';
 import { submitInquiry, failureMessage } from './inquiry';
+import { initMenu } from './menu';
 import { stages, ENTRY_MIX, compute } from '../data/site';
 
 /**
@@ -839,38 +840,18 @@ function run(): void {
   });
 
   // --- Site menu ---------------------------------------------------------
-  const menuToggle = document.querySelector<HTMLButtonElement>('#menu-toggle');
-  const menu = document.querySelector<HTMLElement>('#site-menu');
-
-  function setMenu(open: boolean): void {
-    if (!menu || !menuToggle) return;
-    menuToggle.setAttribute('aria-expanded', String(open));
-    if (open) {
-      menu.hidden = false;
-      requestAnimationFrame(() => menu.classList.add('is-open'));
-      menu.querySelector<HTMLElement>('a, button')?.focus();
-    } else {
-      menu.classList.remove('is-open');
-      window.setTimeout(() => { menu.hidden = true; }, 400);
-      menuToggle.focus();
-    }
-  }
-
-  menuToggle?.addEventListener('click', () => {
-    audio.unlock();
+  // Behaviour is shared with the reading pages; what belongs to this route is
+  // the sound and the chapter jumps below.
+  const siteMenu = initMenu((open) => {
+    if (open) audio.unlock();
     audio.play('click');
-    setMenu(menuToggle.getAttribute('aria-expanded') !== 'true');
   });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && menuToggle?.getAttribute('aria-expanded') === 'true') setMenu(false);
-  });
-
-  menu?.querySelectorAll<HTMLElement>('[data-menu-stage]').forEach((btn) => {
+  document.querySelectorAll<HTMLElement>('[data-menu-stage]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const i = Number(btn.dataset.menuStage);
       audio.play('click');
-      setMenu(false);
+      siteMenu?.close();
       void goToStage(i);
     });
   });

@@ -1,35 +1,75 @@
 ---
-// The cinematic route had no way out of itself — no path to the reading and
-// conversion pages. This is it: a quiet toggle that opens a full-bleed index.
+/**
+ * The site menu — one full-screen index for both routes.
+ *
+ * The cinematic route needs a way out of itself, and the reading pages needed
+ * a way to stop cramming links into a strip that ran out of room at six. Both
+ * now open this: display-scale rows you can read across a room, on the same
+ * veil the rest of the chrome uses.
+ *
+ * `stageJumps` is the homepage's extra — the chapter list that scrubs the
+ * scroll spine. It is off everywhere else, because there is no spine to jump.
+ */
 import { stages } from '../../data/site';
+
+interface Props {
+  /** Show the chapter list. Only meaningful on the cinematic route. */
+  stageJumps?: boolean;
+  /** Path of the current page, so it can be marked. */
+  current?: string;
+  /**
+   * Which half to render.
+   *
+   * The two are separable because they have to be. The reading pages' nav bar
+   * carries `backdrop-filter`, and a filtered element is a containing block for
+   * `position: fixed` descendants — so an overlay rendered inside the header
+   * was fixed to the header rather than to the viewport, and covered 128px of
+   * screen instead of all of it. The toggle sits in the bar; the overlay is
+   * rendered outside it.
+   */
+  part?: 'both' | 'toggle' | 'overlay';
+}
+const { stageJumps = false, current = '', part = 'both' } = Astro.props;
+const showToggle = part !== 'overlay';
+const showOverlay = part !== 'toggle';
 
 const links = [
   { href: '/site', label: 'Site 01', note: 'Mead, Oklahoma' },
-  { href: '/power', label: 'Power', note: 'Behind the meter' },
-  { href: '/colocation', label: 'Colocation', note: 'Capacity and terms' },
-  { href: '/compute', label: 'Compute', note: 'Phase 1A hardware' },
+  { href: '/power', label: 'Power', note: 'What is standing' },
+  { href: '/colocation', label: 'Colocation', note: 'Space and capacity' },
+  { href: '/compute', label: 'Compute', note: 'The planned hardware' },
+  { href: '/model-planner', label: 'Planner', note: 'Size a model' },
   { href: '/about', label: 'About', note: 'SmartTec by Z1Power' },
-  { href: '/contact', label: 'Contact', note: 'Reserve capacity' },
+  { href: '/contact', label: 'Contact', note: 'Request a review' },
 ];
----
-<button
-  type="button"
-  class="menu-toggle mono-label"
-  id="menu-toggle"
-  aria-expanded="false"
-  aria-controls="site-menu"
->
-  <span class="menu-toggle__bars" aria-hidden="true"><i></i><i></i></span>
-  <span class="menu-toggle__label">Menu</span>
-</button>
 
+const path = current.replace(/\/+$/, '') || current;
+---
+{showToggle && (
+  <button
+    type="button"
+    class="menu-toggle mono-label"
+    id="menu-toggle"
+    aria-expanded="false"
+    aria-controls="site-menu"
+  >
+    <span class="menu-toggle__bars" aria-hidden="true"><i></i><i></i></span>
+    <span class="menu-toggle__label">Menu</span>
+  </button>
+)}
+
+{showOverlay && (
 <div class="menu" id="site-menu" hidden>
   <nav class="menu__inner" aria-label="Site">
     <p class="menu__eyebrow mono-label">Pages</p>
     <ul class="menu__list">
       {links.map((l, i) => (
         <li class="menu__item">
-          <a class="menu__link" href={l.href}>
+          <a
+            class="menu__link"
+            href={l.href}
+            aria-current={path === l.href ? 'page' : undefined}
+          >
             <span class="menu__n mono-label">{String(i + 1).padStart(2, '0')}</span>
             <span class="menu__label">{l.label}</span>
             <span class="menu__note mono-label">{l.note}</span>
@@ -38,16 +78,31 @@ const links = [
       ))}
     </ul>
 
-    <p class="menu__eyebrow mono-label menu__eyebrow--second">Chapters</p>
-    <ul class="menu__stages">
-      {stages.map((s, i) => (
-        <li>
-          <button type="button" class="menu__stage mono-label" data-menu-stage={i}>
-            <span>{s.ruler}</span>
-            <span class="menu__stage-name">{s.kicker}</span>
-          </button>
-        </li>
-      ))}
-    </ul>
+    {stageJumps && (
+      <>
+        <p class="menu__eyebrow mono-label menu__eyebrow--second">Chapters</p>
+        <ul class="menu__stages">
+          {stages.map((s, i) => (
+            <li>
+              <button type="button" class="menu__stage mono-label" data-menu-stage={i}>
+                <span>{s.ruler}</span>
+                <span class="menu__stage-name">{s.kicker}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
   </nav>
 </div>
+)}
+
+{showOverlay && !stageJumps && (
+  <script>
+    /* The cinematic route wires this from boot.ts, which also owns the chapter
+       jumps and the sound. Everywhere else the menu is the only thing on the
+       page that needs wiring, so it does its own. */
+    import { initMenu } from '../../lib/menu';
+    initMenu();
+  </script>
+)}
