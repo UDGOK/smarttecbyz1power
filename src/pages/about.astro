@@ -1,5 +1,6 @@
 ---
 import Content from '../layouts/Content.astro';
+import BrandParticles from '../components/BrandParticles.astro';
 import { company, site, power, network, compute } from '../data/site';
 ---
 
@@ -95,6 +96,8 @@ import { company, site, power, network, compute } from '../data/site';
       {' '}and <span class="todo">[PLACEHOLDER: whether {company.name} is a subsidiary, a division, or a separate entity under common ownership]</span>.
     </p>
   </section>
+
+  <BrandParticles />
 
   <section aria-labelledby="how" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">How we publish</span></p>

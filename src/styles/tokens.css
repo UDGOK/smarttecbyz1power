@@ -50,6 +50,17 @@
 
   /* --- Brand --- */
   --c-signal:  #7be88a;  /* live / online / go — ref ::selection background */
+
+  /* ---- Brand palette ----
+     Verbatim from SmartTec-Brand-Kit/README-DESIGNER.md. Signal green is the
+     same value the scene layer already used, so the logo's core needs no
+     special case; the other three are new and belong to the mark, not to the
+     scene. Kept separate from the --w-* / --k-* ramps on purpose: those are
+     free to be retuned for a stage, these are not. */
+  --c-brand-forest:   #1c4839;
+  --c-brand-signal:   #7be88a;
+  --c-brand-offwhite: #eef1ef;
+  --c-brand-ink:      #141414;
   --c-moss:    #2d6a54;
   --c-moss-deep: #1a6e48; /* the reference's third green */  /* ref: the accent its chrome takes on light stages */
   --c-gold:    #ffc832;  /* stored energy, XP — ref xpStrokeGlow border */

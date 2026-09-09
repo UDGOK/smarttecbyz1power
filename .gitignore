@@ -5,3 +5,11 @@ dist/
 .env
 .env.production
 screenshots/
+
+# Designer drop. The canonical kit (SmartTec-Brand-Kit/) is versioned; the
+# duplicates that arrived with it are not — "SmartTec-Brand-Kit 2" is an older
+# subset of the same files, and the zip and loose export are the same bytes
+# again. Left on disk, kept out of the repo.
+SmartTec-Brand-Kit 2/
+SmartTec-Brand-Kit.zip
+Codex Image *.png

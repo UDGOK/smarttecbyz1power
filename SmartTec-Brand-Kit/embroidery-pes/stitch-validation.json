@@ -1,0 +1,66 @@
+[
+  {
+    "file": "smarttec-wordmark-3in-dark-fabric-TEST-SEWOUT.pes",
+    "width_mm": 76.2,
+    "height_mm": 12.8,
+    "width_inches": 3,
+    "stitches": 2439,
+    "trims_decoded": 21,
+    "color_changes": 1,
+    "max_stitch_mm": 2.508,
+    "threads": [
+      "#eef1ef",
+      "#7be88a"
+    ],
+    "pes_version": 6,
+    "physical_sew_out": false
+  },
+  {
+    "file": "smarttec-wordmark-3in-light-fabric-TEST-SEWOUT.pes",
+    "width_mm": 76.2,
+    "height_mm": 12.8,
+    "width_inches": 3,
+    "stitches": 2439,
+    "trims_decoded": 21,
+    "color_changes": 1,
+    "max_stitch_mm": 2.508,
+    "threads": [
+      "#1c4839",
+      "#7be88a"
+    ],
+    "pes_version": 6,
+    "physical_sew_out": false
+  },
+  {
+    "file": "smarttec-wordmark-3p25in-dark-fabric-TEST-SEWOUT.pes",
+    "width_mm": 82.6,
+    "height_mm": 13.8,
+    "width_inches": 3.25,
+    "stitches": 2669,
+    "trims_decoded": 21,
+    "color_changes": 1,
+    "max_stitch_mm": 2.508,
+    "threads": [
+      "#eef1ef",
+      "#7be88a"
+    ],
+    "pes_version": 6,
+    "physical_sew_out": false
+  },
+  {
+    "file": "smarttec-wordmark-3p25in-light-fabric-TEST-SEWOUT.pes",
+    "width_mm": 82.6,
+    "height_mm": 13.8,
+    "width_inches": 3.25,
+    "stitches": 2669,
+    "trims_decoded": 21,
+    "color_changes": 1,
+    "max_stitch_mm": 2.508,
+    "threads": [
+      "#1c4839",
+      "#7be88a"
+    ],
+    "pes_version": 6,
+    "physical_sew_out": false
+  }
+]

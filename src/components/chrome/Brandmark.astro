@@ -1,26 +1,28 @@
 ---
 import { company } from '../../data/site';
+import { SYMBOL_VIEWBOX, SYMBOL_LETTER, SYMBOL_CORE } from '../../data/logo';
 
 /**
- * Brandmark, top-left.
+ * Brandmark, top-left — the SmartTec symbol.
  *
- * Alive without being noisy: a dashed orbit turning once every 34 seconds
- * behind a static rim, and a signal pip on the rim that breathes — the site
- * is on. Hover speeds the orbit, tips the glyph and sends one ping outward.
- * All of it transform/opacity, all of it off under reduced motion.
+ * The dashed orbit and stroked glyph that used to live here were a stand-in
+ * drawn before there was a logo. There is one now, so the stand-in is gone
+ * rather than wrapped around the real mark: the kit is explicit that the
+ * letterforms stay flat and their proportions stay locked, and a rotating ring
+ * reads as part of the mark to anyone who has not seen the brand sheet.
  *
- * Styles live in src/styles/chrome.css.
+ * What survives is the hover ping — a ring that expands once and fades, drawn
+ * outside the mark's clear space, which is interaction feedback rather than
+ * decoration applied to the logo.
+ *
+ * The letterform rides currentColor so it inverts with the stage chrome; the
+ * core holds brand green in both. Styles live in src/styles/chrome.css.
  */
 ---
 <a class="brandmark" href="/" aria-label={`${company.full} — home`} data-cursor="action">
   <span class="brandmark__ping" aria-hidden="true"></span>
-  <svg class="brandmark__svg" viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
-    <circle class="brandmark__rim" cx="20" cy="20" r="19" />
-    <circle class="brandmark__orbit" cx="20" cy="20" r="19" />
-    <path
-      class="brandmark__glyph"
-      d="M12 14h16l-11 12h11"
-    />
-    <circle class="brandmark__pip" cx="33.4" cy="33.4" r="2" />
+  <svg class="brandmark__svg" viewBox={SYMBOL_VIEWBOX} width="25" height="26" aria-hidden="true" fill-rule="evenodd">
+    <path class="brandmark__letter" d={SYMBOL_LETTER} />
+    <path class="brandmark__core" d={SYMBOL_CORE} />
   </svg>
 </a>

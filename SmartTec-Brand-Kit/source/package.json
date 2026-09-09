@@ -1,0 +1,1 @@
+{"name":"smarttec-brand-exports","private":true,"type":"module","scripts":{"logos":"node export-assets.mjs","media":"node export-media.mjs"},"dependencies":{"@napi-rs/canvas":"0.1.100","sharp":"^0.34.0"}}

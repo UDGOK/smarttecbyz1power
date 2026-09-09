@@ -1,0 +1,367 @@
+[
+  {
+    "path": "README-DESIGNER.md",
+    "bytes": 7497,
+    "sha256": "0cfae6202959af2cc988eae9069fa8ea019ff714c7c0b535a39afdff757b83b0"
+  },
+  {
+    "path": "START-HERE.html",
+    "bytes": 6002,
+    "sha256": "0dcb09d648ba34d6e3472086ee6e7893775086d3148ff9dc92c9af20f9767466"
+  },
+  {
+    "path": "animated/smarttec-energy-loop-1920x1080.mp4",
+    "bytes": 968997,
+    "sha256": "5d3968938dabd69ddfa731d226dd5da48f41bdb267d6949b4eb9432a9219654f"
+  },
+  {
+    "path": "animated/smarttec-energy-loop-960x540.gif",
+    "bytes": 2350681,
+    "sha256": "87ae4661fa31006d3d8c9f3f4da9baaab619b3b2b788ac3ce038f606b2cae909"
+  },
+  {
+    "path": "animated/smarttec-energy-poster-1200x630.png",
+    "bytes": 132950,
+    "sha256": "0e6cc0f00713f46188a9523f0c4f0ee978ac88143e883c4c1b09d95ca856b494"
+  },
+  {
+    "path": "animated/smarttec-energy-poster-1920x1080.jpg",
+    "bytes": 99822,
+    "sha256": "bf447f796714dd8c214855ae4fa72b64663735f8b0f6e950438f016060bf1113"
+  },
+  {
+    "path": "animated/smarttec-energy-transparent-1200x630.webm",
+    "bytes": 914942,
+    "sha256": "d6b794f3d071eec7bcbcf658e7de78a6f07cd46a7af4b9ec7b7496aeb3a0790d"
+  },
+  {
+    "path": "animated/smarttec-particle-reveal-1920x1080.mp4",
+    "bytes": 2496487,
+    "sha256": "6d5554619cc6a6750bd30be1727067e4a2fde28d9279cbda8998ceb366ff014e"
+  },
+  {
+    "path": "icons/favicon.ico",
+    "bytes": 640,
+    "sha256": "06baa0667fedc170d6664ef4226ba6f6d6e3450945038d479457a2d3926aced6"
+  },
+  {
+    "path": "icons/favicon.svg",
+    "bytes": 14469,
+    "sha256": "d63bf060e81ae432eabfe89bb65e4490dabf97f29ff9cf6cea8dfbe253080f0e"
+  },
+  {
+    "path": "icons/smarttec-icon-180.png",
+    "bytes": 3617,
+    "sha256": "c5faa195948dbfbc692d0d6c9f8c8834cea25322cb3fd3cd20cc2af6adec8490"
+  },
+  {
+    "path": "icons/smarttec-icon-32.png",
+    "bytes": 618,
+    "sha256": "8d9bbdd97828862e9464f9623e4a2516d9d95a0ada367aa771698dbb993bd411"
+  },
+  {
+    "path": "icons/smarttec-icon-512.png",
+    "bytes": 14817,
+    "sha256": "c213c6a684538c2f24e327c6665acc615286597c5d15033b646d96758f2951ae"
+  },
+  {
+    "path": "icons/smarttec-icon-64.png",
+    "bytes": 1083,
+    "sha256": "4499aff019c82481b0cd2c8cd5568f033f3b9c5e7bf766a14bb8fac92b70b3de"
+  },
+  {
+    "path": "logos/png/smarttec-lockup-black-1200.png",
+    "bytes": 22049,
+    "sha256": "f5a57c2ec8fa95a6d4032cb1f461127d1809b6329cf0b4a9b0b66662742e9f6e"
+  },
+  {
+    "path": "logos/png/smarttec-lockup-black-2400.png",
+    "bytes": 56161,
+    "sha256": "fee80d943c1ff591c2b08891d7e4cffe02e36cad5ffd61a104ce6a3ed5cdcd91"
+  },
+  {
+    "path": "logos/png/smarttec-lockup-forest-green-1200.png",
+    "bytes": 23939,
+    "sha256": "bcf86d8b74071629f5282ed182ba41022b09b8b5ea887832a032868654699896"
+  },
+  {
+    "path": "logos/png/smarttec-lockup-forest-green-2400.png",
+    "bytes": 60561,
+    "sha256": "19d2f1529ff888919c48f9b1e4d40117fd93259af6f404ba89dbe2e0621fd322"
+  },
+  {
+    "path": "logos/png/smarttec-lockup-offwhite-green-1200.png",
+    "bytes": 23290,
+    "sha256": "ab81f0af6f44b39149e283ee782e0876d5baccad4e53b127010b0c9aff026d17"
+  },
+  {
+    "path": "logos/png/smarttec-lockup-offwhite-green-2400.png",
+    "bytes": 58876,
+    "sha256": "36422cb050ff2392ad6dc255580fe5aef6bdb009ae428ed618d934e8fa997caf"
+  },
+  {
+    "path": "logos/png/smarttec-lockup-white-1200.png",
+    "bytes": 18079,
+    "sha256": "96c7eee505994b357838a2d228881380e044facf9678c80102f305e8c135b014"
+  },
+  {
+    "path": "logos/png/smarttec-lockup-white-2400.png",
+    "bytes": 42851,
+    "sha256": "6a1bb4ddc202eee5caa1b282cb0c2e121a897136b8010a120b585b33f0d20096"
+  },
+  {
+    "path": "logos/png/smarttec-symbol-black-1024.png",
+    "bytes": 30310,
+    "sha256": "926b241ab6f2c663c60652fa7575c1397d52d8500a35c327e921562730bd3df4"
+  },
+  {
+    "path": "logos/png/smarttec-symbol-black-256.png",
+    "bytes": 4135,
+    "sha256": "0b76b6912ec1ed97853a601eee1ba47ee7637f0b47e50bace4b8e0abc6b9e2e6"
+  },
+  {
+    "path": "logos/png/smarttec-symbol-forest-green-1024.png",
+    "bytes": 32078,
+    "sha256": "ec23f7ebca5876289b2dc94e152caca9a9c79faaf85bcd7471b69d2b7bba7b1c"
+  },
+  {
+    "path": "logos/png/smarttec-symbol-forest-green-256.png",
+    "bytes": 4501,
+    "sha256": "c3d5048feb80332252c853fce05c0d5f95077caf87b7aec9ebd2852df700af0b"
+  },
+  {
+    "path": "logos/png/smarttec-symbol-offwhite-green-1024.png",
+    "bytes": 31505,
+    "sha256": "75a90b392a9818141373ce72f726ac83ccf2c20c524b2302326ae2f285510805"
+  },
+  {
+    "path": "logos/png/smarttec-symbol-offwhite-green-256.png",
+    "bytes": 4368,
+    "sha256": "18c2477fb057a76c4c9b0833f37b407accbfd60780c245eaec3d8bab6cf6a412"
+  },
+  {
+    "path": "logos/png/smarttec-symbol-white-1024.png",
+    "bytes": 16370,
+    "sha256": "21b243408e594d03fee42421432d7bb6e2d7f51ce8f15968900782f7c68c6a94"
+  },
+  {
+    "path": "logos/png/smarttec-symbol-white-256.png",
+    "bytes": 3041,
+    "sha256": "cb72423c9003b51f2160274cf425f95fcc06e7bd3f6662b1fef73bccfb94369a"
+  },
+  {
+    "path": "logos/png/smarttec-wordmark-black-1200.png",
+    "bytes": 17019,
+    "sha256": "1a6dd8afae8374e65f7f623cb313991c32f6f43381ff2e403c8ac6384717755f"
+  },
+  {
+    "path": "logos/png/smarttec-wordmark-black-2400.png",
+    "bytes": 45044,
+    "sha256": "16b538dcad9545a617348a294cfd0bf1187a3714317a77c693e0b68050b32458"
+  },
+  {
+    "path": "logos/png/smarttec-wordmark-forest-green-1200.png",
+    "bytes": 18381,
+    "sha256": "464450974c44b98af20d169961a78fe66242c4994f8d9d3c38692b6ba1f7cf34"
+  },
+  {
+    "path": "logos/png/smarttec-wordmark-forest-green-2400.png",
+    "bytes": 48539,
+    "sha256": "44c33b71ecc02f00e65f441b732f179fe9e46b35316ecbe04cbb42cf98a5094c"
+  },
+  {
+    "path": "logos/png/smarttec-wordmark-offwhite-green-1200.png",
+    "bytes": 17882,
+    "sha256": "a3d6282d977ff22202dfcf0219c99c5af8209d18f94e1f9bbff1813b2051d034"
+  },
+  {
+    "path": "logos/png/smarttec-wordmark-offwhite-green-2400.png",
+    "bytes": 47218,
+    "sha256": "543f44b490c3398499ccc8724a382952f328a62017ddfee5865169b6e27da695"
+  },
+  {
+    "path": "logos/png/smarttec-wordmark-white-1200.png",
+    "bytes": 13637,
+    "sha256": "e135f6ca3fabf8b6898ddf7f12334dba4fde7db62ec8170e7921e27a848e7e54"
+  },
+  {
+    "path": "logos/png/smarttec-wordmark-white-2400.png",
+    "bytes": 33366,
+    "sha256": "42fd98cb4847127fc78c6bbc5e40a27a735335782302fe8e43643530c5520d30"
+  },
+  {
+    "path": "logos/svg/smarttec-lockup-black.svg",
+    "bytes": 14449,
+    "sha256": "2fbae55095756c7201a930f10fa8c6d5d1bcba10c9812df1e3c7d5b43ad7695b"
+  },
+  {
+    "path": "logos/svg/smarttec-lockup-forest-green.svg",
+    "bytes": 14449,
+    "sha256": "76dcea138f83fccdb4639d59b4f60ae5d219e497913a65502441f89db23ba431"
+  },
+  {
+    "path": "logos/svg/smarttec-lockup-offwhite-green.svg",
+    "bytes": 14449,
+    "sha256": "baa140d92bd78f58e185f1f68e259fe12e67e50a16d9ad943ebfa9cc7266fb07"
+  },
+  {
+    "path": "logos/svg/smarttec-lockup-white.svg",
+    "bytes": 14449,
+    "sha256": "8b416ef37edbb9101f4e749114143cc1b2c5abe29d465a6f7df323222087a1fe"
+  },
+  {
+    "path": "logos/svg/smarttec-symbol-black.svg",
+    "bytes": 14446,
+    "sha256": "31a025b6c35dfbe39fc76347c0e340e292a251c74ea0794a489b0dde4ce14949"
+  },
+  {
+    "path": "logos/svg/smarttec-symbol-forest-green.svg",
+    "bytes": 14446,
+    "sha256": "a48f15d3834892c54f766d2373bb5a8b59f8c7b4feda98d50a7e00dc603f0d82"
+  },
+  {
+    "path": "logos/svg/smarttec-symbol-offwhite-green.svg",
+    "bytes": 14446,
+    "sha256": "0912aeeeaac8fa837053322e9d5f1937a637bb18dffabdd1d32f8d7c260a7896"
+  },
+  {
+    "path": "logos/svg/smarttec-symbol-white.svg",
+    "bytes": 14446,
+    "sha256": "9b5ac653116e063c0b4eb31d998bbc33aef192293430c1f770cae9a42c80b590"
+  },
+  {
+    "path": "logos/svg/smarttec-wordmark-black.svg",
+    "bytes": 14449,
+    "sha256": "58eb8a686540af4002f9b70439f328898c91e09e2eb61792f3744d474277f0c7"
+  },
+  {
+    "path": "logos/svg/smarttec-wordmark-forest-green.svg",
+    "bytes": 14449,
+    "sha256": "b7094254ac5e83e42534562bdedd0913513d2bffa5ce472487edb77debcd2d21"
+  },
+  {
+    "path": "logos/svg/smarttec-wordmark-offwhite-green.svg",
+    "bytes": 14449,
+    "sha256": "49f2a81c28de5ad0a2316851dea3eeea6a625a9747c90ac6c37bc83b6c2db982"
+  },
+  {
+    "path": "logos/svg/smarttec-wordmark-white.svg",
+    "bytes": 14449,
+    "sha256": "be87b0cc0ae133b7dbda7af4e1f36e6810c8e2f9bed3012f8122c1895439c72e"
+  },
+  {
+    "path": "previews/approved-particle-preview.html",
+    "bytes": 979633,
+    "sha256": "96849f3164909491030e877b0a3b4b494d5f00db4896761a55f11716eec6ceb7"
+  },
+  {
+    "path": "social/smarttec-og-1200x630.jpg",
+    "bytes": 66529,
+    "sha256": "3b40b40038487bdcb4f02e02cdb3abb82b1ea464bfaea66b38cfc08a71714812"
+  },
+  {
+    "path": "social/smarttec-og-1200x630.png",
+    "bytes": 145388,
+    "sha256": "740e80e58c2612dcf75a15713493ad44fa236e3e4dc9abd5e1b494ac1594eb75"
+  },
+  {
+    "path": "social/smarttec-social-loop-1080x1080.mp4",
+    "bytes": 826587,
+    "sha256": "75f56dcf272e1d8a823607c2e217baaab05971b0666cb8dbee7ecf9797d960f2"
+  },
+  {
+    "path": "social/smarttec-social-loop-640x640.gif",
+    "bytes": 2591034,
+    "sha256": "24bb58df3fc32a66ae40263ea30ab40b3638c74ef3152c9ee74737c860acde89"
+  },
+  {
+    "path": "social/smarttec-square-1080.png",
+    "bytes": 193691,
+    "sha256": "fd75e60e1400b80e5d020e1db68f3064fb291b421ba9a4c8327c7e19cebf1374"
+  },
+  {
+    "path": "social/smarttec-story-1080x1920.png",
+    "bytes": 263502,
+    "sha256": "ace2000dde5c282619e2da6d3f35c2fa906e43a70a725c3c2366246cc0e65d8f"
+  },
+  {
+    "path": "social/smarttec-story-loop-1080x1920.mp4",
+    "bytes": 1005999,
+    "sha256": "ca8d075455d7483ee44dc5c3d6a6c1979f25366e02d099f42213f67670b0113a"
+  },
+  {
+    "path": "source/approved-concept.png",
+    "bytes": 1215451,
+    "sha256": "699932ebab161fb971c1126c591c621313a8d1f399dfeef4315061fd617f038c"
+  },
+  {
+    "path": "source/approved-logo-keyed.png",
+    "bytes": 71841,
+    "sha256": "0528de3cc74d11c959bbb86cbeefe92c024a11779a50b55f1fe2c0cef31486d1"
+  },
+  {
+    "path": "source/design-notes.md",
+    "bytes": 2600,
+    "sha256": "d740fb570d470e6bbd49273b0cdde16f66daf8fe5f61b1dff95ab0803e322eeb"
+  },
+  {
+    "path": "source/export-assets.mjs",
+    "bytes": 7842,
+    "sha256": "d6ee4104d8fb24d2cb15126709808ef60517d805dbbff80a7b6e26bbde6630b0"
+  },
+  {
+    "path": "source/export-media.mjs",
+    "bytes": 4038,
+    "sha256": "4742fb4d737d0326d96adf4c12c337146c69669b2a6ab953bb8f096cec34e865"
+  },
+  {
+    "path": "source/logo-geometry.json",
+    "bytes": 14546,
+    "sha256": "dad6cff802fd53264b4eef7fc4485660c6fbe536a012dc503cb3adb953766e4d"
+  },
+  {
+    "path": "source/media-validation.json",
+    "bytes": 986,
+    "sha256": "8efb97f8e096f74c427be181b1e9febd6a149826902629728db9686fcbf361dc"
+  },
+  {
+    "path": "source/package.json",
+    "bytes": 205,
+    "sha256": "ef356db8dc4906dde2b7e158c52fde7323e06ad7ce32e3c45e14579259cbbd56"
+  },
+  {
+    "path": "source/validation-summary.json",
+    "bytes": 586,
+    "sha256": "45f7efc2f5be85906222ac49d3e1ae08609a3faec4739bf5ae434aefd232abad"
+  },
+  {
+    "path": "source/verify-kit.mjs",
+    "bytes": 2958,
+    "sha256": "e5fe01e6fab12960295ae2cd3f62aa38607c21cad411e474dd686f95df6f9328"
+  },
+  {
+    "path": "website/energy-renderer.mjs",
+    "bytes": 6993,
+    "sha256": "eac72ce9f0c5c415160e279f714b0f2b2572531d28fb476e9658534c7a2021c0"
+  },
+  {
+    "path": "website/example.html",
+    "bytes": 1973,
+    "sha256": "fb9c911e852e0cd60503fb9712447ffe67b3ddd2dc142b19a3b1020dec6d1d70"
+  },
+  {
+    "path": "website/smarttec-logo.png",
+    "bytes": 23290,
+    "sha256": "ab81f0af6f44b39149e283ee782e0876d5baccad4e53b127010b0c9aff026d17"
+  },
+  {
+    "path": "website/smarttec-particles.css",
+    "bytes": 428,
+    "sha256": "29e4ab2782f158c02ae85656f705bc9e8f21c85162e0da79b5baad6449cf16b8"
+  },
+  {
+    "path": "website/smarttec-particles.mjs",
+    "bytes": 3181,
+    "sha256": "36e9685b357f25b5cd1f05422b777e8583efad13c0e2a68870ca722be232e83f"
+  }
+]

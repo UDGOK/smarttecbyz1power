@@ -1,0 +1,76 @@
+---
+/**
+ * The brand's particle animation, from the designer's kit.
+ *
+ * A dependency-free Canvas piece shipped in SmartTec-Brand-Kit/website/ and
+ * copied verbatim to public/assets/smarttec/. It is loaded, not reimplemented:
+ * the wrapper already caps DPR at 2, pauses when the page is hidden or the
+ * element scrolls out of view, and draws a single static frame under
+ * prefers-reduced-motion instead of nothing. If the renderer throws, its own
+ * <img> fallback stays visible, so the worst case is the flat logo.
+ *
+ * The kit asks for a visible pause control wherever the motion is persistent.
+ */
+interface Props {
+  /** 'website' is the calmer of the two the renderer ships. */
+  intensity?: 'website' | 'conference';
+  label?: string;
+}
+const { intensity = 'website', label = 'SmartTec by Z1Power' } = Astro.props;
+---
+<!-- Global rather than scoped: the canvas and fallback are created at runtime
+     by the module, so Astro's scoping attribute never reaches them. -->
+<link rel="stylesheet" href="/assets/smarttec/smarttec-particles.css" />
+
+<figure class="brand-band" data-reveal>
+  <div id="smarttec-logo" class="smarttec-particle-stage" data-particle-stage></div>
+  <figcaption class="brand-band__foot">
+    <span class="brand-band__label mono-label">{label}</span>
+    <button type="button" class="btn btn--ghost brand-band__pause" data-particle-pause aria-pressed="false">
+      Pause animation
+    </button>
+  </figcaption>
+</figure>
+
+<script is:inline define:vars={{ intensity }}>
+  (async function () {
+    var stage = document.querySelector('[data-particle-stage]');
+    var pause = document.querySelector('[data-particle-pause]');
+    if (!stage) return;
+    try {
+      var mod = await import('/assets/smarttec/smarttec-particles.mjs');
+      var animation = await mod.mountSmartTec(stage, { intensity: intensity, formation: true, speed: 1 });
+      var paused = false;
+      if (pause) {
+        pause.addEventListener('click', function () {
+          paused = !paused;
+          if (paused) animation.pause(); else animation.play();
+          pause.textContent = paused ? 'Play animation' : 'Pause animation';
+          pause.setAttribute('aria-pressed', String(paused));
+        });
+      }
+      window.addEventListener('pagehide', function () { animation.destroy(); }, { once: true });
+    } catch (e) {
+      // The module's own <img> fallback is already on screen; the control is
+      // the only thing left that would lie about what is happening.
+      if (pause) pause.hidden = true;
+      console.warn('[brand] particle animation unavailable', e);
+    }
+  })();
+</script>
+
+<style>
+  .brand-band { margin: var(--s-7) 0; }
+  .brand-band :global(.smarttec-particle-stage) { border-radius: var(--r-lg, 14px); }
+  .brand-band__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    flex-wrap: wrap;
+    margin-top: var(--s-3);
+  }
+  .brand-band__label { color: var(--w-45); }
+  /* Never wider than it needs to be, and always a real touch target. */
+  .brand-band__pause { flex: 0 0 auto; min-height: 44px; }
+</style>

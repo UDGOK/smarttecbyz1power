@@ -627,7 +627,8 @@
    4. Brandmark
    ------------------------------------------------------------
    Alive, not noisy: one very slow dashed orbit and a signal pip that
-   breathes. Hover tightens the orbit and sends a single ping out.
+   The symbol from the brand kit, flat and proportion-locked. Hover sends a
+   single ping out around it; nothing animates the letterforms.
    ============================================================ */
 
 .brandmark {
@@ -639,9 +640,15 @@
   place-items: center;
   width: 38px;
   height: 38px;
-  color: var(--chrome-fg-loud);
+  color: var(--c-brand-offwhite);
   transition: transform 0.45s var(--e-back), color 0.3s var(--e-p2);
 }
+/* --chrome-* names the colour the chrome is drawn in, not the ground it sits
+   on: the default is the light chrome that four of the five stages use, and
+   'dark' is the ink one the campus switches to over its pale ground. So the
+   mark reads off-white almost everywhere and forest on the campus, which is
+   exactly the pairing the kit's two variants are for. */
+[data-chrome='dark'] .brandmark { color: var(--c-brand-forest); }
 .brandmark:hover,
 .brandmark:focus-visible { transform: scale(1.06); }
 .brandmark:active { transform: scale(0.94); }
@@ -653,48 +660,15 @@
   overflow: visible;
 }
 
-.brandmark__rim {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.25;
-  opacity: 0.4;
-  transition: opacity 0.3s var(--e-p2);
-}
-.brandmark__orbit {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.25;
-  stroke-dasharray: 3 9;
-  stroke-linecap: round;
-  opacity: 0.5;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: brand-orbit 34s linear infinite;
-}
-.brandmark:hover .brandmark__orbit { animation-duration: 7s; opacity: 0.85; }
-.brandmark:hover .brandmark__rim { opacity: 0.7; }
+/* The two halves of the mark. The letterform takes the chrome's own colour so
+   it inverts stage to stage — which is what the kit's offwhite-green and
+   forest-green variants exist to do — while the core stays brand green in
+   both, exactly as those two variants differ. */
+.brandmark__letter { fill: currentColor; }
+.brandmark__core { fill: var(--c-brand-signal); }
 
-.brandmark__glyph {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: transform 0.45s var(--e-p2);
-}
-.brandmark:hover .brandmark__glyph { transform: rotate(-8deg) scale(1.05); }
-
-/* Signal pip: the site is live. */
-.brandmark__pip {
-  fill: var(--c-signal);
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: brand-pip 3.5s var(--e-p2-io) infinite;
-}
-
-/* A single ping on hover, drawn as a ring that expands and fades. */
+/* A single ping on hover, drawn as a ring that expands and fades. It sits
+   outside the mark's clear space and never touches the letterforms. */
 .brandmark__ping {
   grid-area: 1 / 1;
   width: 38px;
@@ -708,24 +682,13 @@
 .brandmark:hover .brandmark__ping,
 .brandmark:focus-visible .brandmark__ping { animation: brand-ping 1s var(--e-p2); }
 
-@keyframes brand-orbit {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
-@keyframes brand-pip {
-  0%, 100% { transform: scale(1);    opacity: 1; }
-  50%      { transform: scale(1.55); opacity: 0.45; }
-}
 @keyframes brand-ping {
   0%   { opacity: 0.5; transform: scale(0.72); }
   100% { opacity: 0;   transform: scale(1.5); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .brandmark__orbit,
-  .brandmark__pip,
   .brandmark__ping { animation: none !important; }
-  .brandmark:hover .brandmark__orbit { opacity: 0.85; }
 }
 
 /* ============================================================

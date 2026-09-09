@@ -1,0 +1,16 @@
+{
+  "verified_on": "2026-09-08",
+  "checks": {
+    "editable_svg_outlines": 12,
+    "transparent_png_logo_exports": 24,
+    "all_catalog_links_resolve": true,
+    "all_seven_video_and_gif_files_decode": true,
+    "media_duration_seconds": 12,
+    "transparent_webm_alpha_verified": true,
+    "continuous_renderer_frame_0_equals_frame_12_seconds": true,
+    "traced_vector_alpha_silhouette_overlap": 0.9945249503755462,
+    "production_browser_example_loaded_without_errors": true,
+    "production_play_pause_and_intensity_controls_checked": true,
+    "mobile_layout_checked": true
+  }
+}

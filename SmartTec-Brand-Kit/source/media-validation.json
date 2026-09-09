@@ -1,0 +1,44 @@
+[
+  {
+    "file": "animated/smarttec-energy-loop-1920x1080.mp4",
+    "duration": "00:00:12.00",
+    "bytes": 968997,
+    "decodes": true
+  },
+  {
+    "file": "animated/smarttec-energy-loop-960x540.gif",
+    "duration": "00:00:12.00",
+    "bytes": 2350681,
+    "decodes": true
+  },
+  {
+    "file": "animated/smarttec-energy-transparent-1200x630.webm",
+    "duration": "00:00:12.00",
+    "bytes": 914942,
+    "decodes": true
+  },
+  {
+    "file": "animated/smarttec-particle-reveal-1920x1080.mp4",
+    "duration": "00:00:12.00",
+    "bytes": 2496487,
+    "decodes": true
+  },
+  {
+    "file": "social/smarttec-social-loop-1080x1080.mp4",
+    "duration": "00:00:12.00",
+    "bytes": 826587,
+    "decodes": true
+  },
+  {
+    "file": "social/smarttec-social-loop-640x640.gif",
+    "duration": "00:00:12.00",
+    "bytes": 2591034,
+    "decodes": true
+  },
+  {
+    "file": "social/smarttec-story-loop-1080x1920.mp4",
+    "duration": "00:00:12.00",
+    "bytes": 1005999,
+    "decodes": true
+  }
+]
