@@ -1,0 +1,12 @@
+{
+  "status": "HYPOTHETICAL ILLUSTRATION; see illustration-provenance.json",
+  "initialFunding": 330000,
+  "totalBilled": 820800,
+  "collected": 788296.3200000004,
+  "projectROI": -0.6829874362062788,
+  "projectProfit": -225385.853948072,
+  "additionalFunding": 0,
+  "paybackMonth": null,
+  "irr": -0.2511660665939609,
+  "priceFor15PercentProjectNPV": 13373.611527414218
+}

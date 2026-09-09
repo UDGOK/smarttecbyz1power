@@ -17,3 +17,6 @@ Codex Image *.png
 # Staged from SmartTec-Brand-Kit/ at build time by tools/stage-brand-kit.mjs.
 # The repo keeps one copy of those 20MB, not two.
 public/brand-kit/
+
+# Vercel adapter build output.
+.vercel/

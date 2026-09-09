@@ -1,0 +1,465 @@
+{
+  "version": "1.1.0",
+  "address": "8460 US 70, Mead, OK 73449",
+  "registration": {
+    "northWest": [
+      -96.476327,
+      33.997973
+    ],
+    "northEast": [
+      -96.474144,
+      33.997973
+    ],
+    "southWest": [
+      -96.476327,
+      33.990895
+    ],
+    "widthFeet": 660.5,
+    "depthFeet": 2585,
+    "status": "unverified-address-anchor",
+    "basis": "Approximate Census address vicinity plus assumed north-frontage midpoint. NOT a surveyed corner or verified satellite registration."
+  },
+  "features": [
+    {
+      "id": "tract-1",
+      "name": "Tract 1 \u00b7 13.50 acres",
+      "group": "tracts",
+      "ringFeet": [
+        [
+          0,
+          0
+        ],
+        [
+          660.5,
+          0
+        ],
+        [
+          660.5,
+          890
+        ],
+        [
+          0,
+          890
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "displayHeightFeet": 0,
+      "color": "#7be88a",
+      "description": "Survey-labeled acreage. Simplified boundary visualization; source survey controls.",
+      "status": "survey-derived schematic"
+    },
+    {
+      "id": "tract-2",
+      "name": "Tract 2 \u00b7 7.51 acres",
+      "group": "tracts",
+      "ringFeet": [
+        [
+          0,
+          890
+        ],
+        [
+          660.5,
+          890
+        ],
+        [
+          660.5,
+          1385
+        ],
+        [
+          0,
+          1385
+        ],
+        [
+          0,
+          890
+        ]
+      ],
+      "displayHeightFeet": 0,
+      "color": "#91cbb7",
+      "description": "495-foot tract depth in legal description.",
+      "status": "survey-derived schematic"
+    },
+    {
+      "id": "tract-3",
+      "name": "Tract 3 \u00b7 18.20 acres",
+      "group": "tracts",
+      "ringFeet": [
+        [
+          0,
+          1385
+        ],
+        [
+          660.5,
+          1385
+        ],
+        [
+          660.5,
+          2585
+        ],
+        [
+          0,
+          2585
+        ],
+        [
+          0,
+          1385
+        ]
+      ],
+      "displayHeightFeet": 0,
+      "color": "#98a7d7",
+      "description": "1200-foot tract depth in legal description.",
+      "status": "survey-derived schematic"
+    },
+    {
+      "id": "inverter",
+      "name": "Inverter manufacturing \u00b7 30,000 sq ft",
+      "group": "planned",
+      "ringFeet": [
+        [
+          130,
+          130
+        ],
+        [
+          280,
+          130
+        ],
+        [
+          280,
+          330
+        ],
+        [
+          130,
+          330
+        ],
+        [
+          130,
+          130
+        ]
+      ],
+      "displayHeightFeet": 30,
+      "color": "#7be88a",
+      "description": "Owner marks 200 \u00d7 150 ft in northern Tract 1. Footprint has those dimensions; orientation and position approximate. 30 ft height is illustrative, not specified.",
+      "status": "owner-proposed"
+    },
+    {
+      "id": "battery",
+      "name": "Battery assembly \u00b7 30,000 sq ft",
+      "group": "planned",
+      "ringFeet": [
+        [
+          130,
+          640
+        ],
+        [
+          280,
+          640
+        ],
+        [
+          280,
+          840
+        ],
+        [
+          130,
+          840
+        ],
+        [
+          130,
+          640
+        ]
+      ],
+      "displayHeightFeet": 30,
+      "color": "#f2b705",
+      "description": "Owner marks 200 \u00d7 150 ft farther south in Tract 1. Orientation and position approximate; 30 ft display height is illustrative.",
+      "status": "owner-proposed"
+    },
+    {
+      "id": "dc-1",
+      "name": "Data center \u00b7 owner mark 1",
+      "group": "existing",
+      "ringFeet": [
+        [
+          605,
+          1188
+        ],
+        [
+          636,
+          1188
+        ],
+        [
+          636,
+          1237
+        ],
+        [
+          605,
+          1237
+        ],
+        [
+          605,
+          1188
+        ]
+      ],
+      "displayHeightFeet": 18,
+      "color": "#c5e6d8",
+      "description": "Easternmost of the three marked metal buildings. Approximate traced footprint. A/B/C correspondence and height unconfirmed.",
+      "status": "existing footprint; owner label"
+    },
+    {
+      "id": "dc-2",
+      "name": "Data center \u00b7 owner mark 2",
+      "group": "existing",
+      "ringFeet": [
+        [
+          525,
+          1183
+        ],
+        [
+          594,
+          1183
+        ],
+        [
+          594,
+          1223
+        ],
+        [
+          525,
+          1223
+        ],
+        [
+          525,
+          1183
+        ]
+      ],
+      "displayHeightFeet": 18,
+      "color": "#c5e6d8",
+      "description": "Middle marked metal building. Approximate traced footprint. A/B/C correspondence and height unconfirmed.",
+      "status": "existing footprint; owner label"
+    },
+    {
+      "id": "dc-3",
+      "name": "Data center \u00b7 owner mark 3",
+      "group": "existing",
+      "ringFeet": [
+        [
+          465,
+          1178
+        ],
+        [
+          526,
+          1178
+        ],
+        [
+          526,
+          1243
+        ],
+        [
+          465,
+          1243
+        ],
+        [
+          465,
+          1178
+        ]
+      ],
+      "displayHeightFeet": 18,
+      "color": "#c5e6d8",
+      "description": "Westernmost of the three marked metal buildings. Approximate traced footprint. A/B/C correspondence and height unconfirmed.",
+      "status": "existing footprint; owner label"
+    },
+    {
+      "id": "office",
+      "name": "House / office",
+      "group": "existing",
+      "ringFeet": [
+        [
+          440,
+          990
+        ],
+        [
+          530,
+          990
+        ],
+        [
+          530,
+          1070
+        ],
+        [
+          440,
+          1070
+        ],
+        [
+          440,
+          990
+        ]
+      ],
+      "displayHeightFeet": 24,
+      "color": "#d4dbd6",
+      "description": "Approximate outline around the surveyed two-story brick home. Not a measured rectangle or assigned gross floor area. 24 ft display height is illustrative.",
+      "status": "survey depiction; owner use"
+    },
+    {
+      "id": "bess",
+      "name": "Proposed BESS \u00b7 2,000 sq ft",
+      "group": "energy",
+      "ringFeet": [
+        [
+          440,
+          1300
+        ],
+        [
+          490,
+          1300
+        ],
+        [
+          490,
+          1340
+        ],
+        [
+          440,
+          1340
+        ],
+        [
+          440,
+          1300
+        ]
+      ],
+      "displayHeightFeet": 10,
+      "color": "#f2b705",
+      "description": "Owner marks a 2000 sq ft storage area south of the data-center buildings on Tract 2. 50 \u00d7 40 ft shape and 10 ft height are presentation assumptions. MW/MWh, clearances and equipment design unresolved.",
+      "status": "owner-proposed"
+    },
+    {
+      "id": "solar",
+      "name": "Proposed solar development",
+      "group": "energy",
+      "ringFeet": [
+        [
+          40,
+          1410
+        ],
+        [
+          620,
+          1410
+        ],
+        [
+          620,
+          2535
+        ],
+        [
+          40,
+          2535
+        ],
+        [
+          40,
+          1410
+        ]
+      ],
+      "displayHeightFeet": 1,
+      "color": "#657cba",
+      "description": "Owner designates Tract 3 for solar supporting BESS. This is a development zone, not panel count, electrical capacity or an engineered array. Former greenhouse omitted from this proposed layer per owner.",
+      "status": "owner-proposed"
+    },
+    {
+      "id": "easement-north",
+      "name": "Proposed 50 ft north easement",
+      "group": "easements",
+      "ringFeet": [
+        [
+          0,
+          0
+        ],
+        [
+          660.5,
+          0
+        ],
+        [
+          660.5,
+          50
+        ],
+        [
+          0,
+          50
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "displayHeightFeet": 0,
+      "color": "#eaa861",
+      "description": "Proposed corridor depicted in survey; title/recording and exact geometry require review.",
+      "status": "proposed on survey"
+    },
+    {
+      "id": "easement-east",
+      "name": "Proposed 50 ft east easement",
+      "group": "easements",
+      "ringFeet": [
+        [
+          610.5,
+          0
+        ],
+        [
+          660.5,
+          0
+        ],
+        [
+          660.5,
+          890
+        ],
+        [
+          610.5,
+          890
+        ],
+        [
+          610.5,
+          0
+        ]
+      ],
+      "displayHeightFeet": 0,
+      "color": "#eaa861",
+      "description": "Conceptual display of proposed east strip on Tract 1.",
+      "status": "proposed on survey"
+    },
+    {
+      "id": "easement-west",
+      "name": "Proposed 50 ft west easement",
+      "group": "easements",
+      "ringFeet": [
+        [
+          0,
+          0
+        ],
+        [
+          50,
+          0
+        ],
+        [
+          50,
+          1385
+        ],
+        [
+          0,
+          1385
+        ],
+        [
+          0,
+          0
+        ]
+      ],
+      "displayHeightFeet": 0,
+      "color": "#eaa861",
+      "description": "Conceptual display of proposed west strip through Tracts 1 and 2.",
+      "status": "proposed on survey"
+    }
+  ],
+  "notes": [
+    "Owner annotations identify data-center buildings 1, 2 and 3; A/B/C mapping is not assumed.",
+    "Annotated factory rectangles are not drawn to the written dimensions. This model honors 200 \u00d7 150 ft and uses approximate positions.",
+    "All heights are display assumptions. Site massing is not photogrammetry or architectural design.",
+    "11,000 sq ft former-greenhouse concrete pad is intentionally omitted from proposed layers per owner request. Original survey still shows its historical depiction.",
+    "No solar yield, panel count or BESS runtime is inferred."
+  ]
+}
