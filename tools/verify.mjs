@@ -276,7 +276,11 @@ const phone = { ...devices['iPhone 14'] };
 
   // Every action behind the gate, not just the front door — each of these
   // returns private material once a session exists.
-  for (const action of ['bootstrap', 'survey', 'survey-image', 'faq']) {
+  // The architectural model and its preview renders live in the server
+  // bundle and are served through the same authenticated handler. If any
+  // of them ever answers a stranger, the campus concept has leaked.
+  for (const action of ['bootstrap', 'survey', 'survey-image', 'faq',
+                        'architecture-model', 'architecture-manufacturing', 'architecture-overview']) {
     const res = await p.request.get(`${BASE}/api/investor/${action}`, { maxRedirects: 0 });
     check(`/api/investor/${action} is gated`, res.status() !== 200, String(res.status()));
   }

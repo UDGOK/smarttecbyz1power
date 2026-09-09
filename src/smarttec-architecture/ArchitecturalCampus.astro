@@ -1,0 +1,13 @@
+<section id="campus" class="sta-campus" aria-labelledby="sta-heading">
+ <p class="sta-eyebrow">SMARTTEC / ARCHITECTURAL CONCEPT</p>
+ <h2 id="sta-heading">Explore the campus in three dimensions.</h2>
+ <p>Two proposed manufacturing facilities. Existing compute locations. A future solar and storage zone.</p>
+ <div class="sta-stage"><img id="sta-poster" src="/api/investor/architecture-manufacturing" alt="Architectural concept of the two planned SmartTec manufacturing buildings"/><div id="sta-canvas" aria-label="Interactive architectural campus model"></div></div>
+ <div class="sta-controls"><button id="sta-launch">Launch / retry 3D</button><button data-sta-view="manufacturing">Manufacturing</button><button data-sta-view="compute">Data centers</button><button data-sta-view="energy">Solar and storage</button><button data-sta-view="overview">Full campus</button></div>
+ <p id="sta-status" role="status">Rendered preview. The interactive model loads as this section comes into view.</p>
+ <p class="sta-disclosure">Development concept based on the owner-marked layout. Facades, heights, roads, landscaping and equipment appearance are illustrative. This is not an as-built record or approved engineering design.</p>
+</section>
+<script>import {mountCampus} from './campus-viewer.mjs'; mountCampus();</script>
+<style>
+.sta-campus{padding:clamp(24px,5vw,80px);background:#edf1ed;color:#153b2c;font-family:inherit}.sta-campus h2{font-size:clamp(32px,4vw,64px);line-height:1.1;max-width:850px}.sta-eyebrow{font-size:12px;letter-spacing:.16em}.sta-stage{position:relative;aspect-ratio:16/10;background:#dce8e3;border-radius:16px;overflow:hidden;margin-top:28px}.sta-stage img{width:100%;height:100%;object-fit:contain}.sta-stage #sta-canvas{position:absolute;inset:0}.sta-stage :global(canvas){display:block;width:100%;height:100%;touch-action:none}.sta-controls{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}.sta-controls button{background:#174735;color:#fff;border:1px solid #174735;border-radius:7px;padding:12px 18px;font:inherit;cursor:pointer}.sta-controls button:focus-visible{outline:3px solid #a0dc76;outline-offset:3px}.sta-controls button[aria-pressed=true]{background:#b9efaa;color:#14392a}.sta-disclosure,#sta-status{font-size:13px;line-height:1.5}.sta-disclosure{max-width:900px}@media(max-width:640px){.sta-stage{aspect-ratio:1/1}.sta-controls button{padding:10px;font-size:13px}}@media print{#sta-canvas,.sta-controls{display:none!important}.sta-stage img{display:block!important}}
+</style>
