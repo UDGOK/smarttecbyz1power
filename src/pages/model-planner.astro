@@ -1,0 +1,411 @@
+---
+import Content from '../layouts/Content.astro';
+import { company, site, power, compute } from '../data/site';
+import { accelerators, precisions, workloads, ACCELERATORS_CHECKED } from '../data/accelerators';
+import catalogue from '../data/models.json';
+import {
+  OVERHEAD_FRACTION, HOST_RAM_RATIO, STORAGE_FACTOR, ASSUMED_PUE, HOST_KW_PER_NODE,
+} from '../lib/model-planner';
+
+/**
+ * The model planner.
+ *
+ * Pick the model you actually intend to run and get the hardware it needs, on
+ * arithmetic you can check. The catalogue is OpenRouter's, filtered to the
+ * models that can be self-hosted at all — a hosted-only model has no weights
+ * to rack, so sizing one for a colocation hall would be meaningless.
+ *
+ * The two dominant terms are exact rather than estimated: parameter counts come
+ * from each repository's safetensors metadata, and the KV-cache figure from its
+ * own config.json. Both formulas are printed on the page.
+ */
+const models = catalogue.models;
+const byParams = [...models].sort((a, b) => b.params - a.params);
+const largest = byParams[0];
+const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference', concurrency: 8 };
+---
+
+<Content
+  title={`Model planner — size the hardware for a specific model | ${company.full}`}
+  description={`Pick an open-weight model and see the accelerator memory, host RAM, storage and power it needs. Exact parameter counts and attention geometry from each model's own repository, with the arithmetic shown.`}
+  kicker="Model planner"
+  heading="Tell us the model. We will show you the hardware, and the arithmetic."
+  lede={`Choose from ${models.length} open-weight models on OpenRouter that can actually be self-hosted, and this sizes the accelerator memory, host RAM, storage and power a deployment needs. Parameter counts and attention geometry come from each model's own repository, so the two figures that dominate the answer are arithmetic rather than estimates.`}
+  meta={[
+    { label: 'Models', value: String(models.length), note: 'Self-hostable, from OpenRouter', count: true },
+    { label: 'Largest', value: largest.params >= 1e12 ? `${(largest.params / 1e12).toFixed(1)}T` : `${(largest.params / 1e9).toFixed(0)}B`, note: largest.name },
+    { label: 'Accelerators', value: String(accelerators.length), note: 'One planned here, four evaluations', count: true },
+    { label: 'Catalogue', value: catalogue.fetched, note: 'Refreshed live where available', tone: 'signal' },
+  ]}
+>
+  <section aria-labelledby="planner" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">The planner</span></p>
+    <h2 id="planner">Size a deployment</h2>
+
+    <p>
+      This is an engineering estimate, not an offer and not an availability check. What
+      {site.designation} can actually take is established by electrical, cooling and
+      commissioning review — the numbers below tell you what the model needs, which is
+      the other half of that conversation.
+    </p>
+
+    <form class="mp" id="mp" data-planner>
+      <div class="mp__controls">
+        <p class="field mp__field--wide">
+          <label class="field__label" for="mp-model">Model</label>
+          <span class="mp__search">
+            <input
+              class="field__input"
+              id="mp-search"
+              type="search"
+              placeholder="Filter by name…"
+              autocomplete="off"
+              aria-controls="mp-model"
+            />
+          </span>
+          <select class="field__input" id="mp-model" name="model" size="1">
+            {byParams.map((m) => (
+              <option value={m.id} selected={m.id === defaults.model}>
+                {m.name} — {m.params >= 1e12 ? `${(m.params / 1e12).toFixed(2)}T` : `${(m.params / 1e9).toFixed(1)}B`}
+              </option>
+            ))}
+          </select>
+          <span class="field__hint" id="mp-model-hint"></span>
+        </p>
+
+        <p class="field">
+          <label class="field__label" for="mp-precision">Weight precision</label>
+          <select class="field__input" id="mp-precision" name="precision">
+            {precisions.map((p) => (
+              <option value={p.id} selected={p.id === defaults.precision}>{p.label}</option>
+            ))}
+          </select>
+          <span class="field__hint" data-hint="precision"></span>
+        </p>
+
+        <p class="field">
+          <label class="field__label" for="mp-workload">What it is for</label>
+          <select class="field__input" id="mp-workload" name="workload">
+            {workloads.map((w) => (
+              <option value={w.id} selected={w.id === defaults.workload}>{w.label}</option>
+            ))}
+          </select>
+          <span class="field__hint" data-hint="workload"></span>
+        </p>
+
+        <p class="field">
+          <label class="field__label" for="mp-context">Context per request, tokens</label>
+          <input class="field__input" id="mp-context" name="context" type="number" min="512" step="512" value="8192" inputmode="numeric" />
+          <span class="field__hint" data-hint="context"></span>
+        </p>
+
+        <p class="field">
+          <label class="field__label" for="mp-concurrency">Concurrent requests</label>
+          <input class="field__input" id="mp-concurrency" name="concurrency" type="number" min="1" step="1" value={defaults.concurrency} inputmode="numeric" />
+          <span class="field__hint">Every one holds its own KV cache in memory at the same time.</span>
+        </p>
+      </div>
+
+      <output class="mp__out" for="mp-model mp-precision mp-workload mp-context mp-concurrency" data-out>
+        <div class="mp__headline">
+          <p class="mp__kicker mono-label">Resident accelerator memory</p>
+          <p class="mp__total"><span data-out-total>—</span></p>
+          <p class="mp__sub" data-out-model></p>
+        </div>
+
+        <dl class="mp__breakdown" data-out-breakdown>
+          <div><dt>Weights</dt><dd data-out-weights>—</dd></div>
+          <div><dt>KV cache</dt><dd data-out-kv>—</dd></div>
+          <div class="mp__row--training" data-out-training-row hidden><dt>Optimiser and gradients</dt><dd data-out-training>—</dd></div>
+          <div><dt>Runtime overhead</dt><dd data-out-overhead>—</dd></div>
+          <div class="mp__row--host"><dt>Host RAM</dt><dd data-out-ram>—</dd></div>
+          <div class="mp__row--host"><dt>Storage</dt><dd data-out-storage>—</dd></div>
+        </dl>
+
+        <p class="mp__formula mono-label" data-out-formula></p>
+      </output>
+    </form>
+
+    <noscript>
+      <p class="form-note">
+        The planner needs JavaScript. The arithmetic it runs is written out in full
+        under “How this is worked out” below, and the catalogue is
+        {' '}{models.length} open-weight models from OpenRouter — so it can be done by
+        hand, and we would rather you checked it than trusted it.
+      </p>
+    </noscript>
+  </section>
+
+  <section aria-labelledby="hardware" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">The hardware</span></p>
+    <h2 id="hardware">What that lands on</h2>
+
+    <p>
+      One of these is planned for this site. The other four are platform evaluations —
+      each would need its own OEM design, its own benchmark and a funded order, and none
+      is a drop-in upgrade inside the RTX nodes. They are here because the arithmetic is
+      worth seeing across the field, not because they are on offer.
+    </p>
+
+    <div class="mp__cards" data-out-fits>
+      {accelerators.map((a) => (
+        <article class="mp__card" data-accel={a.id}>
+          <header class="mp__card-head">
+            <p class="mp__card-vendor mono-label">{a.vendor}</p>
+            <h3 class="mp__card-name">{a.name}</h3>
+            <p class={`mp__status mp__status--${a.status}`}>
+              {a.status === 'planned' ? 'Planned here' : 'Platform evaluation'}
+            </p>
+          </header>
+
+          <p class="mp__count"><span data-accel-count>—</span> <span class="mp__count-unit" data-accel-unit>accelerators</span></p>
+
+          <dl class="mp__card-spec">
+            <div><dt>Memory each</dt><dd>{a.memoryGb} GB {a.memoryType}</dd></div>
+            <div><dt>Aggregate</dt><dd data-accel-mem>—</dd></div>
+            <div><dt>Interconnect</dt><dd>{a.interconnect}</dd></div>
+            <div><dt>Accelerator power</dt><dd data-accel-power>—</dd></div>
+            <div><dt>With facility overhead</dt><dd data-accel-facility>—</dd></div>
+          </dl>
+
+          <p class="mp__card-note" data-accel-note></p>
+          <p class="mp__card-status">{a.statusNote}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section aria-labelledby="method" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Method</span></p>
+    <h2 id="method">How this is worked out</h2>
+
+    <div class="split">
+      <div>
+        <p>
+          Two terms dominate, and both are exact. Weights are the parameter count times
+          the bytes each parameter occupies at the chosen precision, and the parameter
+          count comes from the safetensors metadata in each model's own repository rather
+          than from its name. KV cache is two — keys and values — times layers, times
+          key/value heads, times head dimension, times the tokens held resident; those
+          three architecture figures come from each model's own config.json.
+        </p>
+        <p>
+          The cache is held at BF16 in most serving stacks whatever precision the weights
+          are loaded at, so quantising weights does not shrink it. Assuming otherwise is a
+          common way to under-size a serving deployment by a wide margin.
+        </p>
+      </div>
+      <div>
+        <p>
+          What is not exact is listed below as an assumption. The runtime allowance covers
+          activations, memory fragmentation, the framework and the driver context. The
+          host RAM ratio and the storage factor are conventions. The optimiser multiplier
+          for a full fine-tune assumes an Adam-class optimiser holding master weights,
+          momentum and variance — before any sharding scheme reduces it.
+        </p>
+        <p>
+          None of it establishes what this facility can take. {power.allocation}.
+        </p>
+      </div>
+    </div>
+
+    <dl class="spec">
+      <div><dt>Weights</dt><dd>parameters × bytes per parameter<span class="note">Exact. Parameter count from safetensors metadata.</span></dd></div>
+      <div><dt>KV cache</dt><dd>2 × layers × kv_heads × head_dim × tokens × 2 bytes<span class="note">Exact. Architecture from the model's config.json. The leading 2 is keys and values; the trailing 2 is BF16.</span></dd></div>
+      <div><dt>Runtime overhead</dt><dd>{Math.round(OVERHEAD_FRACTION * 100)}% of the above<span class="note">Assumption. Activations, fragmentation, framework and driver context.</span></dd></div>
+      <div><dt>Host RAM</dt><dd>{HOST_RAM_RATIO}× resident accelerator memory<span class="note">Assumption. A convention for weight loading and paging, not a measured figure.</span></dd></div>
+      <div><dt>Storage</dt><dd>{STORAGE_FACTOR}× the weights at native precision<span class="note">Assumption. Weights on disk plus working space for checkpoints and a second version.</span></dd></div>
+      <div><dt>Host power</dt><dd>{HOST_KW_PER_NODE} kW per node<span class="note">Assumption. CPU, memory, storage and NICs alongside the accelerators.</span></dd></div>
+      <div><dt>Facility overhead</dt><dd>PUE {ASSUMED_PUE}<span class="note">Assumption. There is no operating history here to measure one from.</span></dd></div>
+      <div><dt>Accelerator specifications</dt><dd>Vendor-published, checked {ACCELERATORS_CHECKED}<span class="note">Reference figures for arithmetic. Not an inventory and not a price.</span></dd></div>
+    </dl>
+
+    <p class="form-note" style="margin-top: var(--s-6);">
+      The catalogue is {models.length} models from
+      {' '}<a href="https://openrouter.ai/models" rel="noopener">OpenRouter</a>{' '}
+      that carry a Hugging Face repository, which is the only honest test of whether a
+      model can be self-hosted at all. Hosted-only models are excluded: there are no
+      weights to rack, so there is nothing here to size. Snapshot taken
+      {' '}{catalogue.fetched}, and refreshed from OpenRouter in your browser when that
+      call succeeds.
+    </p>
+  </section>
+
+  <section class="is-end" aria-labelledby="next" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Next</span></p>
+    <h2 id="next">Bring the number to us</h2>
+    <p>
+      If the figure above is the deployment you have in mind, the next step is the part
+      this page cannot do: confirming that the facility can carry it. The planned first
+      phase here is {compute.systems} — {compute.gpus} GPUs — and
+      {' '}{compute.status.toLowerCase()}.
+    </p>
+    <div class="actions">
+      <a class="btn" href="/contact">Request a deployment review</a>
+      <a class="btn btn--ghost" href="/compute">See the planned hardware</a>
+    </div>
+  </section>
+</Content>
+
+<script>
+  import { initPlanner } from '../lib/model-planner-ui';
+  initPlanner();
+</script>
+
+<style>
+  /* The planner borrows the document's own field, spec and card treatments so
+     it reads as part of the page rather than a widget dropped into it. Only
+     the pieces with no existing equivalent are styled here. */
+  .mp {
+    display: grid;
+    gap: var(--s-6);
+    margin: var(--s-6) 0 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 940px) {
+    .mp { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; }
+  }
+
+  .mp__controls { display: grid; gap: var(--s-5); }
+  /* The document's .field is a <p>, so its label, control and hint set as one
+     run of inline text. Inside the planner each one is its own stack. */
+  .mp :global(.field) { display: grid; gap: var(--s-2); margin: 0; }
+  .mp :global(.field__label) { display: block; }
+  .mp :global(.field__input) { width: 100%; max-width: none; }
+  .mp :global(.field__hint) { display: block; margin: 0; }
+  .mp__field--wide { display: grid; gap: var(--s-2); }
+  .mp__search { display: block; }
+
+  /* The running total, set like the figures elsewhere on the site. */
+  .mp__out {
+    display: block;
+    padding: var(--s-5);
+    border: 1px solid var(--w-10);
+    border-radius: var(--r-lg, 14px);
+    background: color-mix(in srgb, var(--c-land-deep) 55%, transparent);
+    position: sticky;
+    top: calc(var(--s-8) + var(--s-4));
+  }
+  @media (max-width: 939px) { .mp__out { position: static; } }
+
+  .mp__kicker { color: var(--w-45); margin: 0; }
+  .mp__total {
+    margin: var(--s-2) 0 0;
+    font-family: var(--f-display);
+    font-weight: var(--fw-display);
+    font-size: clamp(2.6rem, 1.2rem + 4vw, 4.2rem);
+    line-height: 0.95;
+    letter-spacing: var(--ls-display);
+    color: var(--c-signal);
+  }
+  .mp__sub { margin: var(--s-2) 0 0; color: var(--w-55); font-size: var(--t-small, 0.92rem); }
+
+  .mp__breakdown { margin: var(--s-5) 0 0; display: grid; gap: 0; }
+  .mp__breakdown > div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--s-4);
+    padding: var(--s-2) 0;
+    border-top: 1px solid var(--w-10);
+  }
+  .mp__breakdown dt { color: var(--w-55); }
+  .mp__breakdown dd { margin: 0; font-family: var(--f-mono); color: var(--w-90); text-align: right; }
+  .mp__row--host dd { color: var(--w-55); }
+
+  .mp__formula {
+    margin: var(--s-4) 0 0;
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--w-10);
+    color: var(--w-45);
+    line-height: 1.6;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .mp__cards {
+    display: grid;
+    gap: var(--s-4);
+    margin-top: var(--s-6);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr));
+  }
+  .mp__card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--s-5);
+    border: 1px solid var(--w-10);
+    border-radius: var(--r-lg, 14px);
+  }
+  /* The one that is actually planned reads differently from the four that
+     are not. Never colour alone — the status line says it in words. */
+  .mp__card[data-accel='rtx-pro-6000'] { border-color: color-mix(in srgb, var(--c-signal) 45%, transparent); }
+
+  .mp__card-head { margin-bottom: var(--s-4); }
+  .mp__card-vendor { margin: 0; color: var(--w-45); }
+  .mp__card-name { margin: var(--s-1) 0 var(--s-2); font-size: var(--t-h3, 1.15rem); }
+  .mp__status {
+    margin: 0;
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+  }
+  .mp__status--planned { color: var(--c-signal); }
+  .mp__status--evaluation { color: var(--w-45); }
+
+  .mp__count {
+    margin: 0 0 var(--s-4);
+    font-family: var(--f-display);
+    font-weight: var(--fw-display);
+    font-size: clamp(2rem, 1rem + 2.4vw, 2.8rem);
+    line-height: 1;
+    letter-spacing: var(--ls-display);
+  }
+  .mp__count-unit {
+    font-family: var(--f-mono);
+    font-size: var(--t-micro);
+    font-weight: 400;
+    letter-spacing: var(--ls-wide);
+    text-transform: uppercase;
+    color: var(--w-45);
+  }
+
+  .mp__card-spec { margin: 0 0 var(--s-4); display: grid; gap: 0; }
+  .mp__card-spec > div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--s-3);
+    padding: 6px 0;
+    border-top: 1px solid var(--w-10);
+    font-size: var(--t-small, 0.92rem);
+  }
+  .mp__card-spec dt { color: var(--w-45); }
+  .mp__card-spec dd { margin: 0; text-align: right; font-family: var(--f-mono); }
+
+  .mp__card-note:empty { display: none; }
+  .mp__card-note {
+    margin: 0 0 var(--s-3);
+    padding: var(--s-3);
+    border-left: 2px solid var(--c-gold);
+    background: color-mix(in srgb, var(--c-gold) 7%, transparent);
+    font-size: var(--t-small, 0.92rem);
+    color: var(--w-90);
+  }
+  .mp__card-status {
+    margin: auto 0 0;
+    padding-top: var(--s-3);
+    border-top: 1px solid var(--w-10);
+    font-size: var(--t-micro);
+    color: var(--w-45);
+    line-height: 1.55;
+  }
+
+  /* The site holds to a 44px minimum touch target; a native select and a
+     number input do not reach it on their own. */
+  @media (pointer: coarse), (max-width: 760px) {
+    .mp :global(.field__input) { min-height: 44px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mp__out { position: static; }
+  }
+</style>
