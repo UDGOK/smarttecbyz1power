@@ -8,7 +8,8 @@
     "prebuild": "node tools/fetch-news.mjs || true",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check"
+    "check": "astro check",
+    "verify": "node tools/verify.mjs"
   },
   "dependencies": {
     "astro": "^5.14.1",
