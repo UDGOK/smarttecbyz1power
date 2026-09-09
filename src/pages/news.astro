@@ -1,0 +1,197 @@
+---
+import Content from '../layouts/Content.astro';
+import { company } from '../data/site';
+import snapshot from '../data/news.json';
+
+/**
+ * The news brief.
+ *
+ * Eight industry publications, aggregated from their own public RSS. This is
+ * not SmartTec's reporting and the page never lets it read as though it were:
+ * every item keeps its publication, links out to it, and carries its own date.
+ * Inclusion is not endorsement, and nothing here is edited.
+ *
+ * A build-time snapshot renders immediately; /api/news refreshes it in the
+ * browser. If that endpoint is slow or down, the snapshot is what you see —
+ * older, but never an empty page.
+ */
+const { items, sources, fetched } = snapshot;
+const topics = [...new Set(sources.map((s) => s.topic))].sort();
+---
+
+<Content
+  title={`AI infrastructure news | ${company.full}`}
+  description="A running brief on AI data centers, power, storage and compute — aggregated from eight industry publications and attributed to each."
+  kicker="News"
+  heading="What the industry is reporting."
+  lede="A running brief on the things this business depends on: data centers, grid power, storage, and the hardware underneath. Aggregated from eight industry publications, attributed to each, and linked back to the original. None of it is ours, and none of it is edited."
+  meta={[
+    { label: 'Publications', value: String(sources.length), note: 'Public RSS, no intermediary', count: true },
+    { label: 'Stories', value: String(items.length), note: 'Most recent first', count: true },
+    { label: 'Updated', value: 'Live', note: 'Refreshed every 15 minutes', tone: 'signal' },
+    { label: 'Snapshot', value: fetched.slice(0, 10), note: 'What ships with the page' },
+  ]}
+>
+  <section aria-labelledby="brief" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">The brief</span></p>
+    <h2 id="brief">Filed by other people</h2>
+
+    <p>
+      Every headline below belongs to the publication named beside it and links straight
+      back to it. We aggregate; we do not report, rewrite or rank by anything other than
+      time. A story appearing here is not an endorsement of it, and none of these
+      publications has any relationship with {company.name}.
+    </p>
+
+    <div class="news" data-news>
+      <div class="news__bar">
+        <p class="news__status mono-label" data-news-status>
+          Showing the snapshot that shipped with this page. Checking for newer…
+        </p>
+        <div class="news__filters" role="group" aria-label="Filter by topic">
+          <button type="button" class="news__filter mono-label is-on" data-topic="all" aria-pressed="true">All</button>
+          {topics.map((t) => (
+            <button type="button" class="news__filter mono-label" data-topic={t} aria-pressed="false">{t}</button>
+          ))}
+        </div>
+      </div>
+
+      <ol class="news__list" data-news-list>
+        {items.map((item) => (
+          <li class="news__item" data-topic={item.topic}>
+            <a class="news__link" href={item.link} target="_blank" rel="noopener nofollow">
+              <p class="news__meta mono-label">
+                <span class="news__source">{item.source}</span>
+                {item.published && (
+                  <>
+                    <span class="news__dot" aria-hidden="true">·</span>
+                    <time datetime={item.published}>{item.published.slice(0, 10)}</time>
+                  </>
+                )}
+                <span class="news__dot" aria-hidden="true">·</span>
+                <span class="news__topic">{item.topic}</span>
+              </p>
+              <h3 class="news__title">{item.title}</h3>
+              {item.summary && <p class="news__summary">{item.summary}</p>}
+            </a>
+          </li>
+        ))}
+      </ol>
+
+      <p class="news__empty mono-label" data-news-empty hidden>Nothing under that topic in the current brief.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="sources" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Where it comes from</span></p>
+    <h2 id="sources">The eight</h2>
+
+    <p>
+      Public RSS from each publication, fetched directly. There is no news API, no
+      vendor between us and the publisher, and no key that can expire — the trade is
+      that a publication being down means its stories are missing rather than wrong,
+      and the brief says which one when that happens.
+    </p>
+
+    <dl class="spec">
+      {sources.map((s) => (
+        <div><dt>{s.source}</dt><dd>{s.topic}</dd></div>
+      ))}
+    </dl>
+
+    <p class="form-note" style="margin-top: var(--s-6);">
+      Headlines and summaries are the publishers' own, shown for reference and linked
+      back in full. If you publish one of these and would rather not appear here, tell
+      us and we will remove the feed.
+    </p>
+  </section>
+</Content>
+
+<script>
+  import { initNews } from '../lib/news-ui';
+  initNews();
+</script>
+
+<style>
+  .news { margin-top: var(--s-6); }
+
+  .news__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-3) var(--s-4);
+    padding-bottom: var(--s-3);
+    border-bottom: 1px solid var(--w-10);
+  }
+  .news__status { margin: 0; color: var(--w-45); }
+  .news__status[data-state='live'] { color: var(--c-signal); }
+  .news__status[data-state='stale'] { color: var(--c-gold); }
+
+  .news__filters { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .news__filter {
+    padding: 7px 12px;
+    min-height: 34px;
+    border: 1px solid var(--w-10);
+    border-radius: var(--r-pill);
+    background: none;
+    color: var(--w-55);
+    cursor: pointer;
+    transition: color 0.3s var(--e-p2), border-color 0.3s var(--e-p2);
+  }
+  .news__filter:hover { color: var(--w-90); border-color: var(--w-25); }
+  .news__filter.is-on { color: var(--c-signal); border-color: color-mix(in srgb, var(--c-signal) 45%, transparent); }
+
+  .news__list { list-style: none; margin: 0; padding: 0; }
+  /* Ruled rows, the way the rest of the document separates things — no cards. */
+  .news__item { border-bottom: 1px solid var(--w-10); }
+  .news__item[hidden] { display: none; }
+
+  .news__link {
+    display: block;
+    padding: var(--s-4) 0;
+    text-decoration: none;
+    color: inherit;
+  }
+  .news__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--s-2);
+    margin: 0 0 var(--s-2);
+    color: var(--w-45);
+  }
+  .news__source { color: var(--c-signal); }
+  .news__dot { opacity: 0.5; }
+
+  .news__title {
+    margin: 0;
+    font-family: var(--f-display);
+    font-weight: var(--fw-display);
+    font-size: clamp(1.15rem, 0.95rem + 0.9vw, 1.6rem);
+    line-height: 1.18;
+    letter-spacing: var(--ls-display);
+    color: var(--w-95);
+    transition: color 0.3s var(--e-p2);
+  }
+  .news__link:hover .news__title { color: var(--c-signal); }
+
+  .news__summary {
+    margin: var(--s-2) 0 0;
+    max-width: 68ch;
+    color: var(--w-55);
+    font-size: var(--t-small, 0.92rem);
+    line-height: 1.55;
+    /* Two lines is a hint at the story, not a replacement for reading it. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .news__empty { margin: var(--s-6) 0; color: var(--w-45); }
+
+  @media (pointer: coarse), (max-width: 760px) {
+    .news__filter { min-height: 44px; }
+    .news__link { padding: var(--s-4) 0; }
+  }
+</style>
