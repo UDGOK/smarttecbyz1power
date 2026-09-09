@@ -1,12 +1,49 @@
 ---
 import { company } from '../../data/site';
+
+/**
+ * Entry card.
+ *
+ * The company's own logo, with the brand's electron flow running through it,
+ * over the live world. Every visitor sees this before anything else, which is
+ * the point — it is the one screen where the mark gets to be the subject
+ * rather than a 25px corner glyph.
+ *
+ * Three layers, in order of how certainly they appear:
+ *
+ *   1. The lockup as a vector <img>. Present at first paint, no script, no
+ *      raster decode. This is what a visitor sees if everything else fails.
+ *   2. The particle canvas, mounted on top and cross-faded in only once it is
+ *      actually running. It starts from the readable logo rather than
+ *      gathering into it — the card only dwells ~2.3s, and a half-formed
+ *      wordmark in that window reads as a broken image, not as an animation.
+ *   3. The line and rule underneath, unchanged.
+ *
+ * Transparent mode, which the kit documents for exactly this case: particles
+ * over an existing scene, with the container's own forest fill turned off so
+ * the world still reads through the card.
+ */
 ---
 <div class="intro" id="loader" role="status" aria-live="polite">
   <div class="intro__stage">
-    <p class="intro__line" id="loader-title">
-      <span class="intro__mask"><span class="intro__word silver">SmartTec</span></span>
-      <span class="intro__mask"><span class="intro__word intro__word--by">by {company.parent}</span></span>
-    </p>
+    <div class="intro__logo" id="loader-logo">
+      <img
+        class="intro__logo-flat"
+        src="/assets/brand/smarttec-lockup-offwhite-green.svg"
+        alt={company.full}
+        width="1231"
+        height="298"
+        fetchpriority="high"
+        decoding="async"
+      />
+      <div
+        class="intro__logo-live smarttec-particle-stage"
+        id="loader-particles"
+        data-transparent
+        aria-hidden="true"
+      ></div>
+    </div>
+
     <p class="intro__sub mono-label" id="loader-sub">
       <span class="intro__mask intro__mask--sub"><span class="intro__word">Neo compute and colocation</span></span>
     </p>
@@ -33,28 +70,40 @@ import { company } from '../../data/site';
 
   .intro__stage { display: grid; justify-items: center; gap: var(--s-4); padding: var(--s-5); }
 
-  .intro__line {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0 0.28em;
-    margin: 0;
-    font-family: var(--f-display);
-    font-weight: var(--fw-display);
-    font-size: clamp(2.4rem, 1rem + 6.2vw, 6.4rem);
-    line-height: 0.94;
-    letter-spacing: var(--ls-display);
-    color: var(--w-95);
-    text-align: center;
+  /* One box, two stacked layers. Sized by width with the aspect held open so
+     nothing reflows when the canvas arrives. The renderer fits the logo to 84%
+     of the box and centres it at 47% height, so the box is deliberately taller
+     than the artwork — that headroom is where the electrons travel. */
+  .intro__logo {
+    position: relative;
+    display: grid;
+    width: min(78vw, 720px);
+    aspect-ratio: 1231 / 430;
   }
-  .intro__word--by {
-    /* The parent name sits back so the product name carries the line. */
-    font-size: 0.42em;
-    align-self: end;
-    padding-bottom: 0.34em;
-    color: var(--w-45);
-    letter-spacing: 0.02em;
+  .intro__logo-flat,
+  .intro__logo-live {
+    grid-area: 1 / 1;
+    width: 100%;
+    height: 100%;
   }
+  .intro__logo-flat {
+    align-self: center;
+    height: auto;
+    /* The flat mark rises like the line it replaced. */
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.6s var(--e-p2), transform 0.75s var(--e-osmo);
+  }
+  .intro.is-in .intro__logo-flat { opacity: 1; transform: none; }
+
+  .intro__logo-live {
+    opacity: 0;
+    transition: opacity 0.7s var(--e-p2);
+  }
+  /* Set only when the renderer is genuinely running. Until then the flat mark
+     is the one on screen, and if mounting fails it stays that way. */
+  .intro__logo.is-live .intro__logo-live { opacity: 1; }
+  .intro__logo.is-live .intro__logo-flat { opacity: 0; }
 
   .intro__sub { color: var(--w-55); letter-spacing: 0.24em; }
 
@@ -71,7 +120,6 @@ import { company } from '../../data/site';
     opacity: 1;
     transition: transform 0.75s var(--e-osmo), opacity 0.5s var(--e-p2);
   }
-  .intro.is-in .intro__mask:nth-child(2) .intro__word { transition-delay: 0.09s; }
   .intro.is-in .intro__sub .intro__word { transition-delay: 0.24s; }
 
   .intro__rule {
@@ -104,6 +152,14 @@ import { company } from '../../data/site';
 
   @media (prefers-reduced-motion: reduce) {
     .intro__word { transform: none; opacity: 1; }
+    .intro__logo-flat { transform: none; }
     .intro__rule { width: min(46vw, 420px); transition: none; }
+    /* The vignette is transparent in the middle so the world reads through the
+       card. That only works because the stage copy behind it is still hidden —
+       and under reduced motion it deliberately never is, since nothing is
+       going to animate it back. So the first headline showed straight through
+       the entry card, one set of words on top of another. Opaque here, and
+       only here. */
+    .intro { background: var(--c-land-deep); }
   }
 </style>

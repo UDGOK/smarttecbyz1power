@@ -42,6 +42,23 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
  * production domain rather than being pinned to a deploy host.
  */
 const ogImage = new URL('/assets/smarttec/smarttec-og-1200x630.png', Astro.site);
+
+/**
+ * The kit's particle stylesheet, inlined at build time from the file the
+ * animation actually ships with rather than transcribed — so it cannot drift
+ * from public/assets/smarttec/. 428 bytes, used by the entry card, which is
+ * the very first paint: a separate render-blocking request for that would be
+ * worse than the bytes.
+ */
+let particleCss = '';
+try {
+  particleCss = fs
+    .readFileSync(path.join(process.cwd(), 'public/assets/smarttec/smarttec-particles.css'), 'utf8')
+    .trim();
+} catch {
+  particleCss = '';
+}
+
 const ogImageAlt = 'SmartTec by Z1Power — data centers and colocation';
 ---
 <!doctype html>
@@ -57,6 +74,7 @@ const ogImageAlt = 'SmartTec by Z1Power — data centers and colocation';
     <link rel="icon" sizes="32x32" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#1c4839" />
+    {particleCss && <style set:html={particleCss} />}
 
     {licensed.length > 0 && (
       <style set:html={licensed

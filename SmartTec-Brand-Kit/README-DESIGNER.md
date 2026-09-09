@@ -13,6 +13,9 @@ Open **START-HERE.html** for a visual directory. Open **previews/approved-partic
 | Compact navigation wordmark, no endorsement | `logos/svg/smarttec-wordmark-offwhite-green.svg` |
 | Standalone S mark | `logos/svg/smarttec-symbol-offwhite-green.svg` |
 | Black or white print artwork | Matching `-black.svg` / `-white.svg` files |
+| Posters and stickers / scalable print artwork | Full-logo files in `logos/eps/` |
+| Polo and jacket PES, 3 and 3.25 inches wide | `embroidery-pes/` — test sew-out required; read its guide |
+| Embroidery shop source vectors | `embroidery-artwork/` |
 | Transparent raster logo | Matching files in `logos/png/` |
 | Browser favicon | `icons/favicon.svg` or `icons/favicon.ico` |
 | Apple touch icon | `icons/smarttec-icon-180.png` |

@@ -18,10 +18,9 @@ interface Props {
 }
 const { intensity = 'website', label = 'SmartTec by Z1Power' } = Astro.props;
 ---
-<!-- Global rather than scoped: the canvas and fallback are created at runtime
-     by the module, so Astro's scoping attribute never reaches them. -->
-<link rel="stylesheet" href="/assets/smarttec/smarttec-particles.css" />
-
+<!-- The kit's stylesheet is inlined in the head by Base.astro: the canvas and
+     fallback are created at runtime by the module, so Astro's scoping
+     attribute never reaches them and the rules have to be global anyway. -->
 <figure class="brand-band" data-reveal>
   <div id="smarttec-logo" class="smarttec-particle-stage" data-particle-stage></div>
   <figcaption class="brand-band__foot">

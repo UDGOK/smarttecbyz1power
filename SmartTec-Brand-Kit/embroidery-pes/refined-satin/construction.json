@@ -1,0 +1,912 @@
+[
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "S-upper-leg",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -38.099999999999994,
+      -5.515138130590847,
+      -34.20914668988361,
+      -0.18989226141646132
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-0-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -37.299240947107116,
+      -6.315897183483729,
+      -26.47309269893355,
+      -2.4250438733673443
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "S-lower-leg",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -29.786136177194418,
+      0.3101897730380099,
+      -25.785479901558652,
+      5.576494012937069
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-1-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -38.099999999999994,
+      2.435538419469511,
+      -26.645180583726862,
+      6.311174186491661
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "m-left",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -24.84782608695652,
+      -2.7528126879956245,
+      -21.784823625922886,
+      6.311174186491661
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "m-middle",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -19.534454470877765,
+      -0.2524025157232703,
+      -16.471452009844132,
+      6.311174186491661
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "m-right",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -14.158572600492203,
+      -1.9724299869508801,
+      -11.033059885151761,
+      6.373684440798469
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-2-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -24.84782608695652,
+      -2.8153229423024335,
+      -11.875952840503313,
+      0.372700027344818
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "a-right",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -4.219442165709594,
+      -2.7528126879956245,
+      -1.0939294503691528,
+      6.378402264958712
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "a-bowl-left",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -10.345447087776865,
+      0.7477615531856712,
+      -7.21993437243642,
+      6.373684440798469
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-3-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -9.345283018867924,
+      -2.7528126879956245,
+      -4.219442165709594,
+      0.7477615531856712
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-3-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -7.21993437243642,
+      0.7477615531856712,
+      -4.219442165709594,
+      3.060640962537599
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-3-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -7.21993437243642,
+      3.6232332512988794,
+      -4.219442165709594,
+      6.357288308521273
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "r-stem",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -0.21878589007383198,
+      -2.7528126879956245,
+      2.8442165709598015,
+      6.373684440798469
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-4-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      2.8442165709598015,
+      0.8102718074924802,
+      2.8489375758120516,
+      6.311174186491661
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-4-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      2.8442165709598015,
+      -2.7528126879956245,
+      5.532157506152586,
+      0.8102718074924802
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "t-stem",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      6.279678027073899,
+      -4.753140825813508,
+      9.345283018867924,
+      6.326007128191581
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-5-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      9.345283018867924,
+      3.3731922340716434,
+      12.158244462674325,
+      6.373684440798469
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-5-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      9.345283018867924,
+      -2.7528126879956245,
+      12.158244462674325,
+      -0.18989226141646132
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-6-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      11.22059064807219,
+      -6.378407437790538,
+      21.409762100082034,
+      -2.5559554702499936
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-7-remainder",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      14.72096933708017,
+      -2.7528126879956245,
+      17.84667760459393,
+      6.375283836750048
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "e-left",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      19.909515996718625,
+      -2.7528126879956245,
+      23.035028712059066,
+      6.311174186491661
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "e-right",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      26.598113207547165,
+      -2.7528126879956245,
+      29.6611156685808,
+      0.8727820617992892
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-8-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      23.035028712059066,
+      3.1231512168444073,
+      29.098523379819518,
+      6.373684440798469
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-8-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      23.035028712059066,
+      0.8727820617992892,
+      29.6611156685808,
+      2.748089691003555
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-8-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      23.035028712059066,
+      -2.8153229423024335,
+      26.598113207547165,
+      0.5156951003008547
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "c-left",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      30.348728465955695,
+      -2.7143448391914333,
+      33.41173092698934,
+      6.294125935317075
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-9-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      33.41173092698934,
+      0.9978025704129072,
+      38.1,
+      6.373684440798469
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "body-9-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      33.41173092698934,
+      -2.8153229423024335,
+      38.1,
+      0.9978025704129072
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3,
+    "section": "green-core",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -34.349384741591464,
+      -1.1900563303254028,
+      -29.661115668580802,
+      1.2478435876401424
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "S-upper-leg",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -41.275,
+      -5.97473297480675,
+      -37.05990891404058,
+      -0.20571661653449969
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-0-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -40.40751102603271,
+      -6.84222194877404,
+      -28.679183757178013,
+      -2.6271308628146226
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "S-lower-leg",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -32.26831419196062,
+      0.3360389207911769,
+      -27.934269893355207,
+      6.04120184734849
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-1-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -41.275,
+      2.638499954425302,
+      -28.865612299037434,
+      6.837105368699297
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "m-left",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -26.918478260869563,
+      -2.9822137453285933,
+      -23.600225594749794,
+      6.837105368699297
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "m-middle",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -21.16232567678425,
+      -0.2734360587002094,
+      -17.84407301066448,
+      6.837105368699297
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "m-right",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -15.338453650533225,
+      -2.136799152530121,
+      -11.952481542247746,
+      6.904824810865008
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-2-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -26.918478260869563,
+      -3.049933187494303,
+      -12.865615577211926,
+      0.4037583629568866
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "a-right",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -4.5710623461854,
+      -2.9822137453285933,
+      -1.1850902378999209,
+      6.909935787038603
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "a-bowl-left",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -11.20756767842494,
+      0.810075015951143,
+      -7.821595570139458,
+      6.904824810865008
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-3-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -10.124056603773585,
+      -2.9822137453285933,
+      -4.5710623461854,
+      0.810075015951143
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-3-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -7.821595570139458,
+      0.810075015951143,
+      -4.5710623461854,
+      3.3156943760823987
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-3-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -7.821595570139458,
+      3.925169355573785,
+      -4.5710623461854,
+      6.887062334231378
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "r-stem",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -0.237018047579987,
+      -2.9822137453285933,
+      3.0812346185397814,
+      6.904824810865008
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-4-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      3.0812346185397814,
+      0.8777944581168535,
+      3.0863490404630483,
+      6.837105368699297
+    ],
+    "split_satin_spans": 2
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-4-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      3.0812346185397814,
+      -2.9822137453285933,
+      5.9931706316652935,
+      0.8777944581168535
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "t-stem",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      6.802984529330054,
+      -5.1492358946313,
+      10.124056603773582,
+      6.853174388874211
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-5-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      10.124056603773582,
+      3.6542915869109462,
+      13.171431501230515,
+      6.904824810865008
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-5-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      10.124056603773582,
+      -2.9822137453285933,
+      13.171431501230515,
+      -0.20571661653449969
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-6-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      12.15563986874487,
+      -6.90994139093975,
+      23.193908941755538,
+      -2.768951759437493
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-7-remainder",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      15.947716781836846,
+      -2.9822137453285933,
+      19.333900738310085,
+      6.906557489812552
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "e-left",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      21.5686423297785,
+      -2.9822137453285933,
+      24.954614438063984,
+      6.837105368699297
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "e-right",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      28.81462264150943,
+      -2.9822137453285933,
+      32.13287530762919,
+      0.9455139002825623
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-8-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      24.954614438063984,
+      3.3834138182481075,
+      31.52340032813781,
+      6.904824810865008
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-8-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      24.954614438063984,
+      0.9455139002825623,
+      32.13287530762919,
+      2.977097165253851
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-8-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      24.954614438063984,
+      -3.049933187494303,
+      28.81462264150943,
+      0.5586696919925922
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "c-left",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      32.87778917145201,
+      -2.940540242457387,
+      36.19604183757177,
+      6.818636429926831
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-9-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      36.19604183757177,
+      1.0809527846139817,
+      41.27499999999999,
+      6.904824810865008
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "body-9-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      36.19604183757177,
+      -3.049933187494303,
+      41.27499999999999,
+      1.0809527846139817
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "wordmark",
+    "width_inches": 3.25,
+    "section": "green-core",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -37.21183347005742,
+      -1.2892276911858538,
+      -32.132875307629206,
+      1.3518305532768204
+    ],
+    "split_satin_spans": 0
+  },
+  {
+    "design": "monogram",
+    "width_inches": 2.5,
+    "section": "S-upper-leg",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -31.75,
+      -28.41453510708387,
+      -11.686758946565678,
+      -0.954828192855544
+    ],
+    "split_satin_spans": 122
+  },
+  {
+    "design": "monogram",
+    "width_inches": 2.5,
+    "section": "body-0-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -27.620874426918682,
+      -32.54366068016519,
+      28.204314720812185,
+      -12.480419626730868
+    ],
+    "split_satin_spans": 263
+  },
+  {
+    "design": "monogram",
+    "width_inches": 2.5,
+    "section": "S-lower-leg",
+    "axis": "y",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      11.120558375634516,
+      1.5278906213997843,
+      31.750000000000007,
+      28.779625565338
+    ],
+    "split_satin_spans": 123
+  },
+  {
+    "design": "monogram",
+    "width_inches": 2.5,
+    "section": "body-1-remainder",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -31.75,
+      12.583242873134303,
+      27.316941067838215,
+      32.56801444673837
+    ],
+    "split_satin_spans": 279
+  },
+  {
+    "design": "monogram",
+    "width_inches": 2.5,
+    "section": "green-core",
+    "axis": "x",
+    "columns": 1,
+    "nominal_bounds_mm": [
+      -12.409898477157363,
+      -6.112188598946915,
+      11.779423638887138,
+      6.458877390900803
+    ],
+    "split_satin_spans": 122
+  }
+]

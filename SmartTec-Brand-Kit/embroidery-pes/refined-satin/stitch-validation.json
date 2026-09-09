@@ -1,0 +1,134 @@
+[
+  {
+    "file": "smarttec-wordmark-3in-dark-fabric-SATIN-TEST-SEWOUT.pes",
+    "design": "wordmark",
+    "nominal_width_inches": 3,
+    "nominal_height_mm": 12.76,
+    "stitch_width_mm": 76.2,
+    "stitch_height_mm": 13.0,
+    "stitches": 2367,
+    "trims_decoded": 59,
+    "color_changes": 1,
+    "threads": [
+      "#eef1ef",
+      "#7be88a"
+    ],
+    "max_stitch_mm": 5.604,
+    "columns": 30,
+    "split_satin_spans": 0,
+    "geometry_segments_checked": 2330,
+    "outside_compensated_artwork": 0,
+    "geometry_tolerance_mm": 0.24,
+    "physical_sew_out": false
+  },
+  {
+    "file": "smarttec-wordmark-3in-light-fabric-SATIN-TEST-SEWOUT.pes",
+    "design": "wordmark",
+    "nominal_width_inches": 3,
+    "nominal_height_mm": 12.76,
+    "stitch_width_mm": 76.2,
+    "stitch_height_mm": 13.0,
+    "stitches": 2367,
+    "trims_decoded": 59,
+    "color_changes": 1,
+    "threads": [
+      "#1c4839",
+      "#7be88a"
+    ],
+    "max_stitch_mm": 5.604,
+    "columns": 30,
+    "split_satin_spans": 0,
+    "geometry_segments_checked": 2330,
+    "outside_compensated_artwork": 0,
+    "geometry_tolerance_mm": 0.24,
+    "physical_sew_out": false
+  },
+  {
+    "file": "smarttec-wordmark-3p25in-dark-fabric-SATIN-TEST-SEWOUT.pes",
+    "design": "wordmark",
+    "nominal_width_inches": 3.25,
+    "nominal_height_mm": 13.82,
+    "stitch_width_mm": 82.6,
+    "stitch_height_mm": 14.0,
+    "stitches": 2525,
+    "trims_decoded": 59,
+    "color_changes": 1,
+    "threads": [
+      "#eef1ef",
+      "#7be88a"
+    ],
+    "max_stitch_mm": 6.003,
+    "columns": 30,
+    "split_satin_spans": 2,
+    "geometry_segments_checked": 2485,
+    "outside_compensated_artwork": 0,
+    "geometry_tolerance_mm": 0.24,
+    "physical_sew_out": false
+  },
+  {
+    "file": "smarttec-wordmark-3p25in-light-fabric-SATIN-TEST-SEWOUT.pes",
+    "design": "wordmark",
+    "nominal_width_inches": 3.25,
+    "nominal_height_mm": 13.82,
+    "stitch_width_mm": 82.6,
+    "stitch_height_mm": 14.0,
+    "stitches": 2525,
+    "trims_decoded": 59,
+    "color_changes": 1,
+    "threads": [
+      "#1c4839",
+      "#7be88a"
+    ],
+    "max_stitch_mm": 6.003,
+    "columns": 30,
+    "split_satin_spans": 2,
+    "geometry_segments_checked": 2485,
+    "outside_compensated_artwork": 0,
+    "geometry_tolerance_mm": 0.24,
+    "physical_sew_out": false
+  },
+  {
+    "file": "smarttec-monogram-2p5in-dark-fabric-SATIN-TEST-SEWOUT.pes",
+    "design": "monogram",
+    "nominal_width_inches": 2.5,
+    "nominal_height_mm": 65.14,
+    "stitch_width_mm": 63.6,
+    "stitch_height_mm": 65.4,
+    "stitches": 5533,
+    "trims_decoded": 9,
+    "color_changes": 1,
+    "threads": [
+      "#eef1ef",
+      "#7be88a"
+    ],
+    "max_stitch_mm": 6.003,
+    "columns": 5,
+    "split_satin_spans": 909,
+    "geometry_segments_checked": 5528,
+    "outside_compensated_artwork": 0,
+    "geometry_tolerance_mm": 0.24,
+    "physical_sew_out": false
+  },
+  {
+    "file": "smarttec-monogram-2p5in-light-fabric-SATIN-TEST-SEWOUT.pes",
+    "design": "monogram",
+    "nominal_width_inches": 2.5,
+    "nominal_height_mm": 65.14,
+    "stitch_width_mm": 63.6,
+    "stitch_height_mm": 65.4,
+    "stitches": 5533,
+    "trims_decoded": 9,
+    "color_changes": 1,
+    "threads": [
+      "#1c4839",
+      "#7be88a"
+    ],
+    "max_stitch_mm": 6.003,
+    "columns": 5,
+    "split_satin_spans": 909,
+    "geometry_segments_checked": 5528,
+    "outside_compensated_artwork": 0,
+    "geometry_tolerance_mm": 0.24,
+    "physical_sew_out": false
+  }
+]

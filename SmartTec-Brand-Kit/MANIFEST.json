@@ -1,13 +1,13 @@
 [
   {
     "path": "README-DESIGNER.md",
-    "bytes": 7497,
-    "sha256": "0cfae6202959af2cc988eae9069fa8ea019ff714c7c0b535a39afdff757b83b0"
+    "bytes": 7750,
+    "sha256": "585bec178d391f24919a02d0e7ee84da6ee1b7e3d709be60af516854c9cc460f"
   },
   {
     "path": "START-HERE.html",
-    "bytes": 6002,
-    "sha256": "0dcb09d648ba34d6e3472086ee6e7893775086d3148ff9dc92c9af20f9767466"
+    "bytes": 8432,
+    "sha256": "d5e98c8e3adfe3138287c9be7409d5c3e32de7aca9eea8eaddc3a34ccd2376a3"
   },
   {
     "path": "animated/smarttec-energy-loop-1920x1080.mp4",
@@ -40,6 +40,176 @@
     "sha256": "6d5554619cc6a6750bd30be1727067e4a2fde28d9279cbda8998ceb366ff014e"
   },
   {
+    "path": "embroidery-artwork/READ-ME-FIRST.md",
+    "bytes": 2417,
+    "sha256": "5dfb86a0a794846dc8e30bb57030ad817bd9549322519b416d72256753ea4f59"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-symbol-1color-preview.png",
+    "bytes": 10507,
+    "sha256": "3145a64a9352ee8fed96b92ac058f04290c80d019f648fa305f87b88310c4bb5"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-symbol-1color.eps",
+    "bytes": 19819,
+    "sha256": "f5f6a633ab6189fc9b2c3d61d012f20af5885ff835c5d6be4c1da7e51cb0cb61"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-symbol-1color.svg",
+    "bytes": 14446,
+    "sha256": "31a025b6c35dfbe39fc76347c0e340e292a251c74ea0794a489b0dde4ce14949"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-symbol-2color-dark-fabric-preview.png",
+    "bytes": 11305,
+    "sha256": "85385366f1248d0d4138fa8e8add6d19877e5701269b3a4d0f99e6e2ae2ea6d5"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-symbol-2color-dark-fabric.eps",
+    "bytes": 19831,
+    "sha256": "26b9c659b19d9c9469ebde0cea1a88da8b87a8b1547ed068dac8c644e6a22835"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-symbol-2color-dark-fabric.svg",
+    "bytes": 14446,
+    "sha256": "0912aeeeaac8fa837053322e9d5f1937a637bb18dffabdd1d32f8d7c260a7896"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-symbol-2color-light-fabric-preview.png",
+    "bytes": 11587,
+    "sha256": "c98fb4607d21b87b00341905f6d3afb54cecec285e8dbd3adeb0dd9bcea2bce1"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-symbol-2color-light-fabric.eps",
+    "bytes": 19832,
+    "sha256": "047bdd3a869e53f163e7babc36d4cb3381a32c3d2654e5bddd4f501a88db2e6b"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-symbol-2color-light-fabric.svg",
+    "bytes": 14446,
+    "sha256": "a48f15d3834892c54f766d2373bb5a8b59f8c7b4feda98d50a7e00dc603f0d82"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-wordmark-1color-preview.png",
+    "bytes": 17019,
+    "sha256": "1a6dd8afae8374e65f7f623cb313991c32f6f43381ff2e403c8ac6384717755f"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-wordmark-1color.eps",
+    "bytes": 19824,
+    "sha256": "6c08844e938d57384a37ab17c1ad7260381b5608124ebed9947ec0bfd2e3db43"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-wordmark-1color.svg",
+    "bytes": 14449,
+    "sha256": "58eb8a686540af4002f9b70439f328898c91e09e2eb61792f3744d474277f0c7"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-wordmark-2color-dark-fabric-preview.png",
+    "bytes": 17882,
+    "sha256": "a3d6282d977ff22202dfcf0219c99c5af8209d18f94e1f9bbff1813b2051d034"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-wordmark-2color-dark-fabric.eps",
+    "bytes": 19836,
+    "sha256": "f9af103077f4bffd77da727f074ff9d0d2354382084a0dc9bebf5f369b2e509d"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-wordmark-2color-dark-fabric.svg",
+    "bytes": 14449,
+    "sha256": "49f2a81c28de5ad0a2316851dea3eeea6a625a9747c90ac6c37bc83b6c2db982"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-wordmark-2color-light-fabric-preview.png",
+    "bytes": 18381,
+    "sha256": "464450974c44b98af20d169961a78fe66242c4994f8d9d3c38692b6ba1f7cf34"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-wordmark-2color-light-fabric.eps",
+    "bytes": 19837,
+    "sha256": "70545a63dc92c3f407bff14df0921e3cec57f6466f967f1b058f8cad93eadea6"
+  },
+  {
+    "path": "embroidery-artwork/smarttec-embroidery-wordmark-2color-light-fabric.svg",
+    "bytes": 14449,
+    "sha256": "b7094254ac5e83e42534562bdedd0913513d2bffa5ce472487edb77debcd2d21"
+  },
+  {
+    "path": "embroidery-pes/READ-ME-FIRST.md",
+    "bytes": 3236,
+    "sha256": "e927b5e7cc7165114e4052296da9c981d4a9b66c90b2569ffc4a82e561ac0dc7"
+  },
+  {
+    "path": "embroidery-pes/geometry-validation.json",
+    "bytes": 966,
+    "sha256": "3e58764c2c9828c4f8a3f3b35bfe6dcc815e636d0a01aaa5f8c6ede990e71cc0"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3in-dark-fabric-TEST-SEWOUT-stitch-preview.png",
+    "bytes": 47383,
+    "sha256": "1a609d635720e6cecdf9afeb4041f604b2be63abccdaf23ed3ceda8033c94d2d"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3in-dark-fabric-TEST-SEWOUT-stitch-preview.svg",
+    "bytes": 60225,
+    "sha256": "256e366f55671208b47b3215026d562dcda72cb4ba2e111d72b328396ba12c7a"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3in-dark-fabric-TEST-SEWOUT.pes",
+    "bytes": 16930,
+    "sha256": "f072f0e26bba2ad421b296080b4fcac0c5c89379909cf3b535aec9a22eb3de19"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3in-light-fabric-TEST-SEWOUT-stitch-preview.png",
+    "bytes": 47023,
+    "sha256": "2ac75d76cbaa8f4c256a8afc9228d362c1177e751767f96b561630965a5a0a15"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3in-light-fabric-TEST-SEWOUT-stitch-preview.svg",
+    "bytes": 60225,
+    "sha256": "edeed81465702a207ba81287190804151ac9aab1eda94bc909872a91af5af9de"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3in-light-fabric-TEST-SEWOUT.pes",
+    "bytes": 16934,
+    "sha256": "c544f000c1e2cdac43a725e35d5cfe4071f8505ca3d3912d59bbf68484d7796c"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3p25in-dark-fabric-TEST-SEWOUT-stitch-preview.png",
+    "bytes": 46763,
+    "sha256": "e0adbbe4f83e2618dc759f1d42b921081a22de76cb67a5c28a908bce682ed608"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3p25in-dark-fabric-TEST-SEWOUT-stitch-preview.svg",
+    "bytes": 65977,
+    "sha256": "a6e6522545942f37fc4c72e03a835ff5553dd9143d5c36aa6fcbc9e61f21ea92"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3p25in-dark-fabric-TEST-SEWOUT.pes",
+    "bytes": 18313,
+    "sha256": "bd4750f71e859da12e66b53b50dc0fe9044ec0480c2f19cb3481262ba6ad17fa"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3p25in-light-fabric-TEST-SEWOUT-stitch-preview.png",
+    "bytes": 46405,
+    "sha256": "ead77c27b4eea58e2815e93772997e55d55f24cb8110f30ec06061e5fa2dc26d"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3p25in-light-fabric-TEST-SEWOUT-stitch-preview.svg",
+    "bytes": 65977,
+    "sha256": "d122484ca661bc30b7053d53f7360f5d8e4218a75c06f6c52ee151d58011d9b8"
+  },
+  {
+    "path": "embroidery-pes/smarttec-wordmark-3p25in-light-fabric-TEST-SEWOUT.pes",
+    "bytes": 18317,
+    "sha256": "6016f425a9081689ab6c45517dc221e1855d45fabfcd633955dd504e2181c11a"
+  },
+  {
+    "path": "embroidery-pes/stitch-validation.json",
+    "bytes": 1417,
+    "sha256": "9c4fee4d68b546a9be65915955906f018a6b9f47eef52ff23bf6b35a2e6c3837"
+  },
+  {
     "path": "icons/favicon.ico",
     "bytes": 640,
     "sha256": "06baa0667fedc170d6664ef4226ba6f6d6e3450945038d479457a2d3926aced6"
@@ -68,6 +238,66 @@
     "path": "icons/smarttec-icon-64.png",
     "bytes": 1083,
     "sha256": "4499aff019c82481b0cd2c8cd5568f033f3b9c5e7bf766a14bb8fac92b70b3de"
+  },
+  {
+    "path": "logos/eps/smarttec-lockup-black.eps",
+    "bytes": 19777,
+    "sha256": "08a2951e4882a9e8da8a55cf8cef2372b578e10c79b5b62155a6380d95c40558"
+  },
+  {
+    "path": "logos/eps/smarttec-lockup-forest-green.eps",
+    "bytes": 19784,
+    "sha256": "0e7c3b239820b40c1ba7c7651cf3ae47fc50130579209674186bdfb5d2a26eb3"
+  },
+  {
+    "path": "logos/eps/smarttec-lockup-offwhite-green.eps",
+    "bytes": 19786,
+    "sha256": "e3995e0842d109a08cd94120abf46687a359103ff921cadef11592544af5a2f6"
+  },
+  {
+    "path": "logos/eps/smarttec-lockup-white.eps",
+    "bytes": 19735,
+    "sha256": "6f975e099552e74a9ceafa340595afa9742c0f79049e6f9ee0e984067a2c9697"
+  },
+  {
+    "path": "logos/eps/smarttec-symbol-black.eps",
+    "bytes": 19774,
+    "sha256": "ad5fb7b5a1ecca68b160da6e69a30876d511abda09b21788dd05f5299d05fba0"
+  },
+  {
+    "path": "logos/eps/smarttec-symbol-forest-green.eps",
+    "bytes": 19781,
+    "sha256": "2f67b0e0be5cbb6e25f132c20b9de77fd0f5dea97cb77055045e0b4ed81ec8a5"
+  },
+  {
+    "path": "logos/eps/smarttec-symbol-offwhite-green.eps",
+    "bytes": 19783,
+    "sha256": "8f94918a868c34a7f8ee6f18c9efb2236410b3d5b517f442b01ef48a3b94ff68"
+  },
+  {
+    "path": "logos/eps/smarttec-symbol-white.eps",
+    "bytes": 19732,
+    "sha256": "cb1b7b53d1d60ed1c53a07436b3fde0db6d189b70f87fb158ee1887a60d9754d"
+  },
+  {
+    "path": "logos/eps/smarttec-wordmark-black.eps",
+    "bytes": 19779,
+    "sha256": "e72469c4ff16ce0e291feb4fde22932c24e258c63f7153099b2e95c3e20cee97"
+  },
+  {
+    "path": "logos/eps/smarttec-wordmark-forest-green.eps",
+    "bytes": 19786,
+    "sha256": "b47b7cf26f0618ef3ca0afe0af914f7b3ea0bef76554645012ea9f01207962ef"
+  },
+  {
+    "path": "logos/eps/smarttec-wordmark-offwhite-green.eps",
+    "bytes": 19788,
+    "sha256": "a804245623d9c720361e1afa67609f1657b1bf6c297ff679c4c46e846175fa96"
+  },
+  {
+    "path": "logos/eps/smarttec-wordmark-white.eps",
+    "bytes": 19737,
+    "sha256": "f1f8acc3e81ae437fdb28d139ac8246236bb6e7989748d4ce02749596b8d758e"
   },
   {
     "path": "logos/png/smarttec-lockup-black-1200.png",
@@ -310,6 +540,16 @@
     "sha256": "d6ee4104d8fb24d2cb15126709808ef60517d805dbbff80a7b6e26bbde6630b0"
   },
   {
+    "path": "source/export-embroidery.py",
+    "bytes": 8214,
+    "sha256": "2848cabadfd15f67ebd68de99d2395a00f52d5e5dbc03b5c95cd963762312f7b"
+  },
+  {
+    "path": "source/export-eps.mjs",
+    "bytes": 3016,
+    "sha256": "800239946b94a95424365b5362b9db01672056f0fc5d5b674246238cf45c7db7"
+  },
+  {
     "path": "source/export-media.mjs",
     "bytes": 4038,
     "sha256": "4742fb4d737d0326d96adf4c12c337146c69669b2a6ab953bb8f096cec34e865"
@@ -328,6 +568,11 @@
     "path": "source/package.json",
     "bytes": 205,
     "sha256": "ef356db8dc4906dde2b7e158c52fde7323e06ad7ce32e3c45e14579259cbbd56"
+  },
+  {
+    "path": "source/requirements-embroidery.txt",
+    "bytes": 55,
+    "sha256": "6b8a8cf2ec9961bc005b5c9b4547d2d6987e6e0d443a696d49909c44ddcc589a"
   },
   {
     "path": "source/validation-summary.json",

@@ -1,6 +1,6 @@
 # Embroidery source artwork — digitizing required
 
-These EPS and SVG files are artwork for an embroidery shop. **They are not stitch programs. No DST, PES, EXP, JEF, or other machine stitch file is included.**
+These EPS and SVG files are artwork for an embroidery shop. **These artwork files are not stitch programs. Actual PES test sew-out programs are supplied separately in `../embroidery-pes/` at 3 and 3.25 inches wide. Read that folder’s guide before stitching.**
 
 ## Artwork choices
 
@@ -16,11 +16,11 @@ Each choice is supplied as an EPS, an SVG, and a transparent PNG preview. Use th
 
 | Item | Status |
 | --- | --- |
-| Garment or product | To confirm |
+| Garment or product | Polos and jackets; posters and stickers use print vectors |
 | Fabric and stretch | To confirm |
 | Placement | To confirm |
-| Finished width and height | To confirm |
-| Required machine format | To confirm with the embroidery shop |
+| Finished width and height | 3 inches or 3.25 inches wide; proportional height |
+| Required machine format | PES requested; version 6 supplied for test sew-out |
 | Thread manufacturer and color numbers | To select from physical thread swatches |
 
 ## Instructions for the digitizer

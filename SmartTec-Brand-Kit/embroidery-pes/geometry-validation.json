@@ -1,0 +1,38 @@
+[
+  {
+    "file": "smarttec-wordmark-3p25in-light-fabric-TEST-SEWOUT.pes",
+    "segments_checked": 2606,
+    "segments_outside_artwork_with_0p11mm_rounding_tolerance": 0,
+    "decoded_colors": [
+      "0xff1c4839",
+      "0xff7be88a"
+    ]
+  },
+  {
+    "file": "smarttec-wordmark-3p25in-dark-fabric-TEST-SEWOUT.pes",
+    "segments_checked": 2606,
+    "segments_outside_artwork_with_0p11mm_rounding_tolerance": 0,
+    "decoded_colors": [
+      "0xffeef1ef",
+      "0xff7be88a"
+    ]
+  },
+  {
+    "file": "smarttec-wordmark-3in-light-fabric-TEST-SEWOUT.pes",
+    "segments_checked": 2383,
+    "segments_outside_artwork_with_0p11mm_rounding_tolerance": 0,
+    "decoded_colors": [
+      "0xff1c4839",
+      "0xff7be88a"
+    ]
+  },
+  {
+    "file": "smarttec-wordmark-3in-dark-fabric-TEST-SEWOUT.pes",
+    "segments_checked": 2383,
+    "segments_outside_artwork_with_0p11mm_rounding_tolerance": 0,
+    "decoded_colors": [
+      "0xffeef1ef",
+      "0xff7be88a"
+    ]
+  }
+]
