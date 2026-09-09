@@ -4,7 +4,7 @@ import vercel from '@astrojs/vercel';
 import node from '@astrojs/node';
 
 export default defineConfig({
-  site: 'https://smarttec.z1power.com',
+  site: 'https://www.smarttec.dev',
   // Static by default — every public page still prerenders. The adapter exists
   // for the handful of routes that opt out with `prerender = false`: the news
   // brief and the private investor section.

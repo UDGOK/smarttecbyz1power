@@ -46,7 +46,7 @@ export const company = {
   parent: 'Z1Power',
   full: 'SmartTec by Z1Power',
   tagline: 'AI infrastructure, built in phases.',
-  domain: 'smarttec.z1power.com',
+  domain: 'smarttec.dev',
   /**
    * The handoff asks which entity owns the land, signs customer contracts and
    * would issue securities — and says not to publish "one company owns
