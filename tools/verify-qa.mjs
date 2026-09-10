@@ -22,6 +22,20 @@ for(const route of routes){
  if(route==='contact'||route===''){
    assert.equal(doc.querySelector('form[id^="reserve-"]').action,'https://formsubmit.co/yasir@futonix.com');checks++;
  }
+ if(route==='brand'){
+   const kit=JSON.parse(await readFile('src/data/brand-kit.json','utf8'));
+   const expected=kit.files.filter(f=>/\.(png|jpe?g|svg|gif|ico|mp4|webm)$/i.test(f.path));
+   const cards=[...doc.querySelectorAll('[data-brand-asset]')];
+   assert.equal(cards.length,expected.length);checks++;
+   assert.equal(doc.querySelectorAll('[data-file-row]').length,kit.files.length);checks++;
+   assert.deepEqual(cards.map(c=>c.querySelector('[data-open-preview]').getAttribute('href')).sort(),expected.map(f=>'/brand-kit/'+f.path).sort());checks++;
+   for(const img of doc.querySelectorAll('.brand-studio img')){
+     assert.ok(img.alt.trim(),'Brand artwork needs an accessible label');
+     await stat(join(root,img.getAttribute('src')));checks+=2;
+   }
+   assert.ok(doc.querySelector('#brand-viewer[aria-labelledby="brand-viewer-title"]'));checks++;
+   assert.equal(doc.querySelectorAll('video[autoplay]').length,0);checks++;
+ }
  dom.window.close();
 }
 for(const path of targets){

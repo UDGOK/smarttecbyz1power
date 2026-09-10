@@ -21,6 +21,8 @@ Both forms default to FormSubmit and the owner-provided recipient `yasir@futonix
 
 FormSubmit requires a one-time activation by the recipient. After deployment, submit a clearly marked test from `/contact`, then confirm the FormSubmit activation email in the recipient inbox. Submit again and verify receipt. An HTTP acknowledgment verifies service acceptance, not inbox arrival; activation and actual inbox receipt must be confirmed by the owner. Do not describe the form as fully verified until that step is complete.
 
+The owner subsequently confirmed activation and receipt of the post-activation QA inquiry at `yasir@futonix.com` on 10 September 2026. End-to-end delivery was verified for that test.
+
 An optional `PUBLIC_RESERVE_ENDPOINT` can replace the AJAX endpoint. It must accept JSON and return `{ "success": true }` only after accepting delivery. Change `FORM_ACTION` too when replacing the native form provider. Provider documentation: https://formsubmit.co/documentation.
 
 ## Repeatable checks
@@ -42,3 +44,11 @@ npm run verify:qa -- .vercel/output/static
 The HTTP test needs OpenSSL on PATH (included with Git for Windows). GitHub Actions runs these checks using Node 24. Public generated checks cover all ten public pages and 157 distinct internal page/download links. The regression suite covers stale calculator responses, planner validation/recovery and delivery acknowledgment/error handling.
 
 Interactive QA additionally checked public pages at 1440px and 390px, menu opening/closing, planner search and invalid input, and news row styling. This does not establish physical-device/Safari compatibility, sustained-load capacity, or real private account behavior.
+
+## Brand studio follow-up
+
+The brand page now displays all 90 browser-viewable assets in a responsive gallery, with combined search/category/format filters and an accessible full-screen viewer. All 146 originals remain downloadable through the searchable file index and complete ZIP. The logo selector pairs each of twelve mark/colour combinations with the matching SVG, PNG and EPS; embroidery previews link to their corresponding PES drafts and retain the test sew-out qualification.
+
+Motion starts only on explicit playback. Closing the viewer releases its media and restores keyboard focus; native downloads remain usable without JavaScript. Colour copying reports success or a manual-copy fallback. Existing artwork is reused without modifying the design files.
+
+Validation: 88 automated tests, 154 generated-page checks and 402 QA checks pass. Node and Vercel builds pass. Desktop and 390px browser review covered the logo selector, combined filters, full-height portrait previews, keyboard dismissal, focus return, and actual motion playback. Every visual, poster, matching logo download and related stitch file is checked against the original kit.
