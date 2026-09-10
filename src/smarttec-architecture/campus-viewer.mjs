@@ -12,8 +12,8 @@ export function mountCampus(){
   cleanup();mode='image';host.hidden=true;poster.style.visibility='visible';stage.dataset.mode='image';$('#sta-reset').hidden=true;
   $('#sta-launch').disabled=false;$('#sta-launch').setAttribute('aria-pressed','false');$('#sta-image').setAttribute('aria-pressed','true');
   $('#sta-image-disclosure').textContent=imageDisclosure(current);
-  badge(preserveFailure?'3D UNAVAILABLE · IMAGE VIEW':current==='overview'?'MODEL PREVIEW':'CONCEPT IMAGE');
-  status.textContent=preserveFailure?'3D could not load. Image view remains available. Retry 3D, or sign in again if your session has expired.':current==='overview'?chapters[current].modelNote:'AI architectural concept, not a site photo. The interactive model is a separate simplified spatial study.';
+  badge(preserveFailure?'3D UNAVAILABLE · IMAGE VIEW':['overview','cooling'].includes(current)?'MODEL PREVIEW':'CONCEPT IMAGE');
+  status.textContent=preserveFailure?'3D could not load. Image view remains available. Retry 3D, or sign in again if your session has expired.':['overview','cooling'].includes(current)?chapters[current].modelNote:'AI architectural concept, not a site photo. The interactive model is a separate simplified spatial study.';
  }
  function select(key){
   if(!chapters[key])return;current=key;const c=chapters[key];
@@ -44,6 +44,16 @@ export function mountCampus(){
    model=(await new GLTFLoader().parseAsync(await response.arrayBuffer(),'')).scene;
    if(disposed||ended||token!==generation){freeModel(model);return;}
    model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});scene.add(model);
+   if(current==='cooling'){
+    const raycaster=new THREE.Raycaster(),pointer=new THREE.Vector2();let last=0;
+    renderer.domElement.addEventListener('pointermove',event=>{
+     if(disposed||event.buttons||performance.now()-last<100)return;last=performance.now();
+     const rect=renderer.domElement.getBoundingClientRect();if(!rect.width||!rect.height)return;
+     pointer.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);
+     raycaster.setFromCamera(pointer,camera);const hit=raycaster.intersectObject(model,true)[0];
+     status.textContent=hit?.object.userData.category?hit.object.userData.category+' — illustrative equipment category; location and capacity are not established.':c.modelNote;
+    });
+   }
    const resize=()=>{const w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();};
    observer=new ResizeObserver(resize);observer.observe(host);resize();
    renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();if(!disposed){failed=true;imageMode(true);}},{once:true});

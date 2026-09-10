@@ -20,3 +20,6 @@ public/brand-kit/
 
 # Vercel adapter build output.
 .vercel/
+
+# Local Python model-generator cache.
+__pycache__/
