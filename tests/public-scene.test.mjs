@@ -48,9 +48,9 @@ function fixture({coarse=false,reduced=false,compact=false,saveData=false,load}=
   };
 }
 
-test('desktop loads on visibility, pauses offscreen and releases on close',async()=>{
+test('desktop waits for explicit launch, pauses offscreen and releases on close',async()=>{
   const f=fixture();try{
-    f.mount();assert.equal(f.loads,0);f.visible(true);await settle();
+    f.mount();assert.equal(f.loads,0);f.visible(true);await settle();assert.equal(f.loads,0);f.nodes.launch.click();await settle();
     assert.equal(f.loads,1);assert.equal(f.nodes.controls.hidden,false);
     f.visible(false);assert.equal(f.scenes[0].visibility.at(-1),false);
     f.actions.close.click();assert.equal(f.scenes[0].disposed,1);assert.equal(f.nodes.launch.focused,true);
@@ -69,7 +69,7 @@ for(const mode of ['coarse','reduced','compact','saveData'])test(`${mode} requir
 
 test('controls forward intended actions and motion stops when preferences change',async()=>{
   const f=fixture();try{
-    f.mount();f.visible(true);await settle();const scene=f.scenes[0];
+    f.mount();f.visible(true);f.nodes.launch.click();await settle();const scene=f.scenes[0];
     for(const action of ['left','right','in','out','interact','play'])f.actions[action].click();
     f.focus.click();f.nodes.position.value='65';f.nodes.position.dispatchEvent(new Event('input'));
     assert.deepEqual(scene.calls,[['orbit',-65,0],['orbit',65,0],['zoom',1],['zoom',-1],['setInteractive',true],['setPlaying',true],['focus','solar'],['setPosition',.65]]);
@@ -81,7 +81,7 @@ test('controls forward intended actions and motion stops when preferences change
 
 test('failed imports show a retry and cannot cause an automatic retry loop',async()=>{
   const f=fixture({load:async()=>{throw new Error('offline');}});try{
-    f.mount();f.visible(true);await settle();assert.equal(f.nodes.launch.textContent,'Retry 3D ↗');
+    f.mount();f.visible(true);f.nodes.launch.click();await settle();assert.equal(f.nodes.launch.textContent,'Retry 3D ↗');
     assert.equal(f.nodes.fallback.hidden,false);assert.equal(f.nodes.controls.hidden,true);
     f.visible(false);f.visible(true);await settle();assert.equal(f.loads,1);
     f.nodes.launch.click();await settle();assert.equal(f.loads,2);
@@ -91,7 +91,7 @@ test('failed imports show a retry and cannot cause an automatic retry loop',asyn
 test('an import completing after navigation never creates a stale scene',async()=>{
   let resolve,created=0;const pending=new Promise(r=>resolve=r);
   const f=fixture({load:()=>pending});try{
-    f.mount();f.visible(true);f.lifecycle.dispatchEvent(new Event('pagehide'));
+    f.mount();f.visible(true);f.nodes.launch.click();f.lifecycle.dispatchEvent(new Event('pagehide'));
     resolve({createPublicScene:async()=>{created++;}});await settle();
     assert.equal(created,0);assert.equal(f.nodes.controls.hidden,true);
   }finally{f.restore();}
@@ -99,11 +99,11 @@ test('an import completing after navigation never creates a stale scene',async()
 
 test('context failure releases graphics; back-forward restoration can reopen once',async()=>{
   const f=fixture();try{
-    f.mount();f.visible(true);await settle();f.scenes[0].onError();
+    f.mount();f.visible(true);f.nodes.launch.click();await settle();f.scenes[0].onError();
     assert.equal(f.scenes[0].signal.aborted,true);assert.equal(f.nodes.controls.hidden,true);
     f.nodes.launch.click();await settle();f.lifecycle.dispatchEvent(new Event('pagehide'));
     assert.equal(f.scenes[1].disposed,1);f.lifecycle.dispatchEvent(new Event('pageshow'));
-    f.visible(true);await settle();assert.equal(f.loads,3);
+    f.visible(true);await settle();assert.equal(f.loads,2);f.nodes.launch.click();await settle();assert.equal(f.loads,3);
     mountPageScene(f.root,()=>{throw new Error('mounted twice');});
   }finally{f.restore();}
 });
@@ -111,7 +111,7 @@ test('context failure releases graphics; back-forward restoration can reopen onc
 test('a scene created after navigation is immediately disposed',async()=>{
   let resolve,disposed=0;const pending=new Promise(r=>resolve=r);
   const f=fixture({load:async()=>({createPublicScene:()=>pending})});try{
-    f.mount();f.visible(true);await settle();
+    f.mount();f.visible(true);f.nodes.launch.click();await settle();
     f.lifecycle.dispatchEvent(new Event('pagehide'));
     resolve({dispose(){disposed++;}});await settle();
     assert.equal(disposed,1);assert.equal(f.nodes.controls.hidden,true);
@@ -120,7 +120,7 @@ test('a scene created after navigation is immediately disposed',async()=>{
 
 test('collapsing scene tools releases drag and closing 3D resets the panel',async()=>{
  const f=fixture();try{
-  f.mount();f.visible(true);await settle();f.nodes.panel.open=true;f.actions.interact.click();
+  f.mount();f.visible(true);f.nodes.launch.click();await settle();f.nodes.panel.open=true;f.actions.interact.click();
   f.nodes.panel.open=false;f.nodes.panel.dispatchEvent(new Event('toggle'));
   assert.deepEqual(f.scenes[0].calls.at(-1),['setInteractive',false]);assert.equal(f.actions.interact.attributes['aria-pressed'],'false');
   f.nodes.panel.open=true;f.actions.close.click();assert.equal(f.nodes.panel.open,false);
@@ -128,8 +128,15 @@ test('collapsing scene tools releases drag and closing 3D resets the panel',asyn
 });
 test('the shared menu pauses visible 3D and restores it after closing',async()=>{
  const f=fixture();try{
-  f.mount();f.visible(true);await settle();
+  f.mount();f.visible(true);f.nodes.launch.click();await settle();
   f.lifecycle.dispatchEvent(new CustomEvent('smarttec:menu-change',{detail:{open:true}}));assert.equal(f.scenes[0].visibility.at(-1),false);
   f.lifecycle.dispatchEvent(new CustomEvent('smarttec:menu-change',{detail:{open:false}}));assert.equal(f.scenes[0].visibility.at(-1),true);
+ }finally{f.restore();}
+});
+test('3D activation keeps keyboard focus on available controls without stealing it',async()=>{
+ const f=fixture();try{
+  const original=f.root.querySelector,summary=new Element();f.root.querySelector=s=>s==='.page-scene__tools summary'?summary:original(s);
+  f.mount();f.visible(true);document.activeElement=f.nodes.launch;f.nodes.launch.click();await settle();assert.equal(summary.focused,true);
+  f.actions.close.click();summary.focused=false;document.activeElement=f.nodes.launch;f.nodes.launch.click();document.activeElement=f.nodes.position;await settle();assert.equal(summary.focused,false);
  }finally{f.restore();}
 });

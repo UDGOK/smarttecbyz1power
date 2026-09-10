@@ -1,11 +1,13 @@
 ---
 import Layout from '../../smarttec-investor/components/Layout.astro';
 import SiteHeader from '../../components/SiteHeader.astro';
+import CinematicArt from '../../components/CinematicArt.astro';
+import '../../styles/cinematic-investor.css';
 import {privateHeaders} from '../../smarttec-investor/server/auth.mjs';
 Object.entries(privateHeaders).forEach(([k,v])=>Astro.response.headers.set(k,v));
 export const prerender=false;
 ---
-<Layout title="SmartTec Investor Room"><SiteHeader mode="login" /><main class="inv-login"><p class="inv-eyebrow">A closer look</p><h1>The next chapter<br/><em>starts here.</em></h1><p>Explore the campus, the first deployment and the assumptions behind the numbers.</p><form id="inv-login" method="post"><label for="password">Private access password</label><div class="inv-login-row"><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="256"/><button class="inv-button" type="submit">Enter investor room</button></div><p id="login-status" role="status" aria-live="polite"></p></form><a href="/">Return to SmartTec</a></main></Layout>
+<Layout title="SmartTec Investor Room"><SiteHeader mode="login" /><main class="inv-login"><CinematicArt path="/investors" controls={false} instance="login" /><div class="inv-login-copy"><p class="inv-eyebrow">A closer look</p><h1>The next chapter<br/><em>starts here.</em></h1><p>Explore the campus, the first deployment and the assumptions behind the numbers.</p><form id="inv-login" method="post"><label for="password">Private access password</label><div class="inv-login-row"><input id="password" name="password" type="password" autocomplete="current-password" required maxlength="256"/><button class="inv-button" type="submit">Enter investor room</button></div><p id="login-status" role="status" aria-live="polite"></p></form><a href="/">Return to SmartTec</a><p class="inv-login-concept">AI concept illustration · Not a surveyed site plan.</p></div></main></Layout>
 <script>
 import '../../smarttec-investor/client/login.mjs';
 </script>

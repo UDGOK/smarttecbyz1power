@@ -1,7 +1,7 @@
 # SmartTec public page experience
 
-Updated by **Publisher 1.4**. Read `docs/shared-experience-correction.md` first for
-the shared homepage header and current navigation/scene controls.
+Updated by the cinematic release. Read `docs/cinematic-release.md` for the current artwork,
+entry behavior and page-specific interaction map. The shared header remains unchanged.
 
 The public service pages now extend the homepage's visual language: approved
 SmartTec logo, shared typefaces, forest and signal-green colors, spatial scenes,
@@ -12,25 +12,25 @@ existing Astro project. Keep the current stack and deployment configuration.
 
 | Page | Interactive scene | Opening behavior |
 | --- | --- | --- |
-| `/site` | Homepage campus concept | Desktop opens on visibility; phone opens on request |
-| `/power` | Homepage solar/storage concept | Desktop opens on visibility; phone opens on request |
-| `/colocation` | Homepage compute hall | Desktop opens on visibility; phone opens on request |
-| `/compute` | Homepage compute hall | Desktop opens on visibility; phone opens on request |
-| `/about` | Homepage campus concept | Desktop opens on visibility; phone opens on request |
+| `/site` | Homepage campus concept | Artwork first; 3D opens on request on every device |
+| `/power` | Homepage solar/storage concept | Artwork first; 3D opens on request on every device |
+| `/colocation` | Homepage compute hall | Artwork first; 3D opens on request on every device |
+| `/compute` | Homepage compute hall | Artwork first; 3D opens on request on every device |
+| `/about` | Homepage campus concept | Artwork first; 3D opens on request on every device |
 | `/model-planner` | Compute hall | Collapsed optional panel; planner remains accessible |
 | `/news` | Energy concept | Collapsed optional panel; articles remain accessible |
 | `/contact` | Campus concept | Collapsed optional panel; inquiry form remains accessible |
 
-The homepage retains its existing experience. The brand-kit page keeps its asset
+The homepage retains its cinematic journey behind a manual logo-and-Enter screen. The brand-kit page keeps its asset
 gallery and inherits the shared navigation/footer. Investor login and private
-assets retain their existing protection. These public scenes use the procedural
-geometry already used on the public homepage; no private survey, image or model
-was copied into public assets.
+assets retain their existing protection. Public 3D uses the procedural
+geometry already used on the public homepage. The default artwork is newly generated
+and labeled as illustrative; no private survey, image or model was copied into public assets.
 
 ## Experience and controls
 
-- Service-page openings place centered type over a wide spatial scene, following
-  the homepage composition. Working pages use a compact introduction.
+- Service-page openings use left-aligned type beside cinematic artwork, with
+  topic controls and a separate 3D model option. Working pages keep a compact introduction.
 - A direct link takes visitors to the page's primary content. The bottom chapter
   links lead naturally to the next service. The existing full-screen site menu
   remains available.
@@ -39,7 +39,7 @@ was copied into public assets.
   by default. Keyboard arrow/zoom keys and labeled buttons provide alternatives.
 - Energy and compute scenes use a labeled position slider. Motion is paused by
   default; Play/Pause is optional. Every scene has Close and Retry controls.
-- Reduced-motion, data-saver and touch-device visitors opt in. Reduced-motion
+- Every visitor opts in to WebGL. Reduced-motion
   hides the animation control. Without JavaScript or WebGL the text, links and
   primary tools remain available.
 
@@ -80,8 +80,8 @@ commercial or facility statement on the site.
 
 ## Completed verification
 
-- 65 automated tests covering navigation and scene lifecycle/interaction.
-- 118 generated HTML/dependency checks across all eight routes: headings, links, logo/fonts,
+- 72 automated tests covering navigation and scene lifecycle/interaction.
+- 154 generated HTML/dependency checks across all eight routes: headings, links, logo/fonts,
   scene configuration, optional working-page panels and public/private separation.
 - The public controller's static dependency path excludes the 3D renderer/scenes.
 - Targeted TypeScript checking for the new renderer/configuration.
@@ -117,4 +117,5 @@ for them. Before merging PR #3:
 No additional environment variables, API keys, packages or asset downloads are
 required for these public-page scenes. Existing investor environment settings
 still apply. The publishing helper updates the review branch and PR; merging and
-production release remain a separate decision after preview review.
+production configuration follow the existing Vercel project. The owner has authorized
+publishing this cinematic release.

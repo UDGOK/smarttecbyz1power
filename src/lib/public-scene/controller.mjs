@@ -23,7 +23,9 @@ export function mountPageScene(root,load=()=>import('./renderer')){
       const made=await module.createPublicScene(host,root.dataset.sceneKind,{signal,onError:fail});
       if(signal.aborted||current!==token||ended){made?.dispose();return;}
       if(!made)throw new Error('Scene unavailable');
+      const returnFocus=document.activeElement===launch;
       renderer=made;renderer.setVisible(visible&&!menuOpen);loading=false;launch.hidden=true;launch.disabled=false;fallback.hidden=true;controls.hidden=false;badge.textContent='INTERACTIVE CONCEPT';
+      if(returnFocus)$('.page-scene__tools summary')?.focus({preventScroll:true});
       status.textContent=root.dataset.sceneKind==='campus'?'Choose a viewpoint or enable drag. Turn drag off to continue scrolling over the scene.':'Move the slider to explore the scene. Motion is optional.';
     }catch{if(!signal.aborted&&current===token&&!ended)fail();}
   }
@@ -49,9 +51,8 @@ export function mountPageScene(root,load=()=>import('./renderer')){
   });
   const observer=typeof IntersectionObserver==='function'?new IntersectionObserver(entries=>{
     visible=entries.some(entry=>entry.isIntersecting);renderer?.setVisible(visible&&!menuOpen);
-    const saveData=navigator.connection?.saveData;
-    // Working pages, touch devices and reduced-motion/save-data users opt in.
-    if(visible&&!closed&&!ended&&root.dataset.sceneCompact!=='true'&&!reduced.matches&&!saveData&&!matchMedia('(pointer: coarse)').matches)void start();
+    // Keep the cinematic art on screen. Real WebGL is an explicit choice on
+    // every device; visibility alone must not load or replace the artwork.
   },{threshold:.05}):null;
   if(observer)observer.observe(root);else visible=true;
   const onMotion=()=>{button('play').hidden=reduced.matches;if(reduced.matches&&playing){playing=false;renderer?.setPlaying(false);button('play').textContent='Play motion';button('play').setAttribute('aria-pressed','false');}};

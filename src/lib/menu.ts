@@ -50,7 +50,7 @@ export function initMenu(onToggle?:(open:boolean)=>void):MenuHandle|null {
     event.stopPropagation();
     if(event.key==='Escape'){event.preventDefault();finish();return;}
     if(event.key!=='Tab'||!open)return;
-    const controls=[...menu.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),[tabindex="0"]')].filter(el=>!el.hidden);
+    const controls=[...menu.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),[tabindex="0"]')].filter(el=>!el.hidden&&!el.closest?.('[hidden],[inert]')&&(!el.getClientRects||el.getClientRects().length>0));
     const first=controls[0],last=controls.at(-1);
     if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}
     else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}

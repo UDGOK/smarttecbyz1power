@@ -12,7 +12,9 @@ const routes=[
   ['about','campus','what',false],['contact','campus','form-heading',true],
 ];
 let checks=0,entry;
-const homeHeader=headerSignature(await readFile(join(root,'index.html'),'utf8'));checks++;
+const home=await readFile(join(root,'index.html'),'utf8');
+const homeHeader=headerSignature(home);checks++;
+assert.match(home,/<body[^>]*data-entry-pending/);assert.match(home,/<main[^>]*inert/);assert.match(home,/<a[^>]*id="loader-skip"[^>]*href="\/site"/);assert.ok(!home.includes('loader-particles'));checks+=4;
 for(const[route,kind,anchor,compact]of routes){
   const html=await readFile(join(root,route,'index.html'),'utf8');
   assert.deepEqual(headerSignature(html),homeHeader,`${route}: same logo and menu as home`);checks++;
@@ -26,6 +28,7 @@ for(const[route,kind,anchor,compact]of routes){
   assert.ok(html.includes('smarttec-lockup-offwhite-green.svg'));checks++;
   assert.ok(html.includes('/investor-assets/fonts.css'));checks++;
   assert.ok(html.includes('class="page-trail"'));checks++;
+  assert.ok(html.includes('data-cinematic'));assert.ok(html.includes('/assets/cinematic/'));assert.ok(html.includes('data-menu-preview'));assert.ok(!/<body[^>]*data-entry-pending/.test(html));checks+=4;
   assert.ok(!html.includes('/api/investor/'),`${route}: private API reference`);checks++;
   assert.ok(!html.includes('id="gate"'),`${route}: unexpected entry gate`);checks++;
   const sceneScript=[...html.matchAll(/<script[^>]*\bsrc="([^"]+)"/g)].map(match=>match[1]).find(src=>src.includes('PageScene.'));

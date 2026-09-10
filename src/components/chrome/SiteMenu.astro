@@ -13,6 +13,8 @@
 import { stages } from '../../data/site';
 import {journey} from '../../smarttec-investor/data/journey.mjs';
 import Brandmark from './Brandmark.astro';
+import {visualStory,artSource} from '../../data/cinematic';
+import '../../styles/menu-preview.css';
 
 interface Props {
   /** Show the chapter list. Only meaningful on the cinematic route. */
@@ -69,13 +71,16 @@ const path = current.replace(/\/+$/, '') || current;
   <Brandmark />
   <button type="button" class="menu-toggle mono-label" id="site-menu-close" aria-label="Close menu" aria-expanded="true"><span class="menu-toggle__bars" aria-hidden="true"><i></i><i></i></span><span class="menu-toggle__label">Close</span></button>
   <nav class="menu__inner" aria-label="Site">
-    <p class="menu__eyebrow mono-label">Pages</p>
+    <p class="menu__eyebrow mono-label">Explore SmartTec</p>
     <ul class="menu__list">
       {links.map((l, i) => (
         <li class="menu__item">
           <a
             class="menu__link"
             href={l.href}
+            data-preview-art={artSource(visualStory(l.href).art)}
+            data-preview-title={l.label}
+            data-preview-note={visualStory(l.href).label}
             aria-current={path === l.href ? 'page' : undefined}
           >
             <span class="menu__n mono-label">{String(i + 1).padStart(2, '0')}</span>
@@ -103,6 +108,12 @@ const path = current.replace(/\/+$/, '') || current;
     )}
     {investor && <><p class="menu__eyebrow mono-label menu__eyebrow--second">Investor chapters</p><ul class="menu__stages">{journey.map(chapter=><li><a class="menu__stage mono-label" href={'#'+chapter.id} data-inv-chapter={chapter.id}>{chapter.label}</a></li>)}</ul><button id="inv-logout" type="button" class="menu__signout">Sign out of investor room</button></>}
   </nav>
+  <aside class="menu__preview" data-menu-preview aria-label="Page preview">
+    <img data-preview-image alt="" width="1586" height="992" decoding="async" hidden />
+    <div class="menu__preview-shade" aria-hidden="true"></div>
+    <div class="menu__preview-copy"><p class="mono-label" data-preview-caption>The campus concept</p><p class="menu__preview-title" data-preview-heading>Site 01</p><a href="/site" data-preview-link>Explore this page <span aria-hidden="true">↗</span></a><small>AI concept illustration · Not installed facilities</small></div>
+    <p class="menu__preview-hint">Hover or focus a page to explore its world.</p>
+  </aside>
 </dialog>
 )}
 
@@ -110,6 +121,8 @@ const path = current.replace(/\/+$/, '') || current;
   <script>
     /* Idempotent: homepage boot adds its sound callback to this same instance. */
     import { initMenu } from '../../lib/menu';
+    import { mountMenuPreview } from '../../lib/menu-preview.mjs';
     initMenu();
+    mountMenuPreview();
   </script>
 )}

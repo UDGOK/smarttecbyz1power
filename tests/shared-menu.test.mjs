@@ -64,3 +64,11 @@ test('menu gestures stay inside the dialog while native scrolling is preserved',
   assert.equal(f.key('Tab',true).defaultPrevented,true);assert.equal(document.activeElement,f.chapter);
  }finally{f.restore();}
 });
+test('reverse tab skips a CSS-hidden mobile scene-preview link',()=>{
+ const f=fixture();try{
+  const original=f.menu.querySelectorAll;
+  const hiddenPreview={hidden:false,getClientRects:()=>[],focus(){throw new Error('hidden preview received focus');}};
+  f.menu.querySelectorAll=selector=>selector==='a[href]'?original(selector):[...original(selector),hiddenPreview];
+  const handle=initMenu();handle.open();f.brand.focus();assert.equal(f.key('Tab',true).defaultPrevented,true);assert.equal(document.activeElement,f.chapter);
+ }finally{f.restore();}
+});

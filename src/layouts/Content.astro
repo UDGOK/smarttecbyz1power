@@ -20,6 +20,8 @@
 import Base from './Base.astro';
 import PageScene from '../components/PageScene.astro';
 import PageTrail from '../components/PageTrail.astro';
+import CinematicArt from '../components/CinematicArt.astro';
+import {visualStory} from '../data/cinematic';
 import {pageExperience} from '../data/page-experiences';
 import '../styles/page-experience.css';
 import SiteHeader from '../components/SiteHeader.astro';
@@ -53,6 +55,8 @@ interface Props {
 
 const { title, description, kicker, heading, lede, meta = [], noindex = false } = Astro.props;
 const experience=pageExperience(Astro.url.pathname);
+const visualPath=Astro.url.pathname.replace(/\/+$/,'');
+const brandPage=visualPath==='/brand';
 const anchors:Record<string,string>={'/site':'today','/power':'service','/colocation':'two-ways','/compute':'fleet','/about':'what','/contact':'form-heading','/news':'brief','/model-planner':'planner'};
 const contentAnchor=anchors[experience?.path||'']||'';
 const actionLabel=experience?.path==='/contact'?'Start your inquiry':experience?.path==='/model-planner'?'Use the planner':experience?.path==='/news'?'Read the brief':'Explore the details';
@@ -152,7 +156,7 @@ const actionLabel=experience?.path==='/contact'?'Start your inquiry':experience?
   {/* Outside the header on purpose: the nav's backdrop-filter would
       otherwise be this overlay's containing block. */}
 
-  <main class:list={["doc",experience && "doc--immersive",experience?.compact && "doc--compact"]} id="main" data-page-kind={experience?.kind}>
+  <main class:list={["doc",(experience||brandPage) && "doc--immersive",(experience?.compact||brandPage) && "doc--compact"]} id="main" data-page-kind={experience?.kind}>
     <header class="doc__head">
       <div class="doc__opening"><div class="doc__opening-copy">
       <p class="doc__kicker">
@@ -168,7 +172,9 @@ const actionLabel=experience?.path==='/contact'?'Start your inquiry':experience?
       {experience && <div class="doc__opening-actions"><a class="btn" href={'#'+contentAnchor}>{actionLabel}<span aria-hidden="true">↓</span></a><a class="doc__home-link" href="/">The full SmartTec experience <span aria-hidden="true">↗</span></a></div>}
       </div>
       {experience && !experience.compact && <PageScene experience={experience} immersive />}
+      {(experience?.compact||brandPage) && <CinematicArt path={visualPath} controls={false} instance="intro" />}
       </div>
+      {(experience?.compact||brandPage) && <p class="doc__art-note">{visualStory(visualPath).note}</p>}
       <div class="doc__rule" data-hero-rule aria-hidden="true"></div>
 
       {meta.length > 0 && (

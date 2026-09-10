@@ -36,6 +36,8 @@ export default defineConfig({
             // the private room's same-origin-only script policy.
             if (id.includes('smarttec-investor/client/journey')) return 'investor-journey';
             if (id.endsWith('/src/lib/menu.ts')) return 'site-menu';
+            if (id.endsWith('/src/lib/cinematic.mjs')) return 'cinematic-art';
+            if (id.endsWith('/src/lib/menu-preview.mjs')) return 'menu-preview';
           },
         },
       },

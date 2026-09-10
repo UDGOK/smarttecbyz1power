@@ -1,4 +1,8 @@
-# One SmartTec experience — Publisher 1.4
+# One SmartTec experience — shared header
+
+For the current cinematic page treatment and manual entrance, see
+[`cinematic-release.md`](cinematic-release.md). The original header correction below
+records the shared structure that remains in place.
 
 The prior update shared fonts and assets but retained three different header
 designs. The owner correctly identified that the homepage, public service pages
