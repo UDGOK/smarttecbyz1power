@@ -19,6 +19,7 @@ import { ScrollManager, CameraRig, SCROLL_CONFIG, DELTA_SCALE } from './scroll';
 import { audio } from './audio';
 import { submitInquiry, failureMessage } from './inquiry';
 import { initMenu } from './menu';
+import { initJourneyCue } from './journey-cue';
 import { stages, ENTRY_MIX, compute } from '../data/site';
 
 /**
@@ -148,6 +149,12 @@ function run(): void {
   let crossing = false;
   let contextLost = false;
   let restoreTried = false;
+  const journeyCue = initJourneyCue(stages.map(stage=>stage.kicker),index=>{
+    if(!armed||swapping)return;
+    void goToStage(index).then(()=>{
+      if(index===stages.length-1){const heading=panels[index]?.querySelector<HTMLElement>('h2');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}}
+    }).catch(()=>degradeToDocument());
+  });
 
   // The reference does not use native scroll: it damps its own position, which
   // is most of why its motion reads smooth. Same model here.
@@ -436,6 +443,7 @@ function run(): void {
    * readable page than a scene-shaped hole.
    */
   function degradeToDocument(): void {
+    journeyCue.disable();
     delete document.body.dataset.booting;
     canvasEl.hidden = true;
     document.body.dataset.noWebgl = '';
@@ -486,6 +494,7 @@ function run(): void {
       degradeToDocument();
     }
     window.dispatchEvent(new Event('experience:ready'));
+    if(sceneState==='ready')journeyCue.enable();
   }
 
   // If the scene chunk never resolves at all, stop waiting on it.
@@ -497,6 +506,7 @@ function run(): void {
   function applyChrome(index: number): void {
     const stage = stages[index];
     if (!stage) return;
+    journeyCue.update(index,0);
     // Each world carries its own grade.
     host?.setPost(stage.post);
     document.documentElement.dataset.chrome = stage.chrome === 'dark' ? 'dark' : 'light';
@@ -606,6 +616,7 @@ function run(): void {
   function onProgress(p: number): void {
     const panel = panels[current];
     if (!panel || panel.hidden || swapping) return;
+    journeyCue.update(current,p);
 
     if (rulerTrack) rulerTrack.style.transform = `translateX(${-(current + p) * 62}px)`;
     host?.setScrollProgress(p);

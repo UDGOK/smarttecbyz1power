@@ -1,0 +1,29 @@
+.intro{position:fixed;inset:0;z-index:100;min-height:100svh;background:#061610;color:#eef1ef;overflow:hidden;isolation:isolate;transition:opacity .35s ease,visibility .35s}
+.intro.is-done{opacity:0;visibility:hidden;pointer-events:none}.intro[hidden]{display:none}
+.intro__world{position:absolute;inset:0;background:radial-gradient(ellipse at center,#184631,transparent 62%);overflow:hidden}
+.intro__stars{position:absolute;inset:0;opacity:.25;background-image:radial-gradient(#b9f4c3 1px,transparent 1px),radial-gradient(#80cbb9 1px,transparent 1px);background-size:77px 83px,137px 139px;background-position:10px 20px,40px 60px;mask-image:radial-gradient(ellipse,#000,transparent 75%)}
+.intro__facility{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:0;filter:saturate(.6);transform:scale(1.12)}
+.intro__facility-shade{position:absolute;inset:0;background:linear-gradient(0deg,#061610 2%,#06161015 45%,#061610a8),linear-gradient(90deg,#061610a6,transparent,#061610a6)}
+.intro__signal{position:absolute;inset:0;width:100%;height:100%;opacity:0}
+.intro__atom{transform-origin:500px 300px}.intro__atom>ellipse{stroke:#99e4b5;stroke-width:.7;opacity:.5}.intro__nucleus{filter:drop-shadow(0 0 18px #70f0ac80)}.intro__electron{fill:#c1ffdb;filter:drop-shadow(0 0 6px #7bffba)}
+.intro__fibers path{stroke:#9fffc1;stroke-width:1.2;stroke-linecap:round;stroke-dasharray:9 91;stroke-dashoffset:100;opacity:0;filter:drop-shadow(0 0 5px #6bfba2)}
+.intro__rack-lines{stroke:#87f3b0;stroke-width:.7;opacity:0;filter:drop-shadow(0 0 4px #78f7a5)}
+.intro__top{position:absolute;top:max(28px,env(safe-area-inset-top));left:5vw;right:5vw;display:flex;align-items:center;justify-content:space-between;gap:20px;font:10px/1.5 var(--f-mono);letter-spacing:.16em;color:#b5d2c0}
+.intro__skip{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:46px;padding:10px 18px;border:1px solid #b4ecc14d;border-radius:30px;background:#081c14b3;color:#eef1ef;font:12px/1.4 var(--f-mono);text-decoration:none;letter-spacing:0}.intro__skip:hover{background:#7be88a;color:#10251c}.intro__skip:focus-visible{outline:2px solid #eef1ef;outline-offset:5px}
+.intro__identity{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:110px 24px 130px;pointer-events:none;text-align:center;background:radial-gradient(ellipse at center,#06161066,transparent 65%)}
+.intro__logo-flat{width:min(72vw,600px);height:auto;filter:drop-shadow(0 3px 24px #04140ee6)}.intro__identity p{font:clamp(13px,1.2vw,17px)/1.7 var(--f-sans);letter-spacing:.06em;margin:30px 0 0;color:#d5e8db}
+.intro__story{position:absolute;left:0;right:0;bottom:24%;text-align:center;font:11px/1.6 var(--f-mono);text-transform:uppercase;letter-spacing:.24em;pointer-events:none}.intro__story span{position:absolute;inset:0;opacity:0}
+.intro__footer{position:absolute;bottom:max(28px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(380px,80vw);text-align:center}.intro__footer p{margin:0 0 15px;font:11px/1.5 var(--f-mono);color:#c7ddcf}.intro__auto{display:none}.intro__fallback a{color:#7be88a}.intro__timeline{height:2px;background:#c3efd32b;overflow:hidden}.intro__timeline span{display:block;height:100%;width:100%;background:#9dffb5;transform:scaleX(0);transform-origin:left}.intro__concept{display:block;margin-top:14px;font:9px/1.5 var(--f-mono);color:#8dac99}
+.intro[data-ready] .intro__auto{display:block}.intro[data-ready] .intro__fallback{display:none}
+.intro[data-playing] .intro__identity{animation:intro-identity 4.2s both}.intro[data-playing] .intro__signal{opacity:1}.intro[data-playing] .intro__atom{animation:intro-atom 2.4s both}.intro[data-playing] .intro__facility{animation:intro-facility 4.2s both}.intro[data-playing] .intro__fibers path{animation:intro-fiber 2.3s cubic-bezier(.2,.4,.2,1) both;animation-delay:calc(.65s + var(--lane)*.055s)}.intro[data-playing] .intro__rack-lines{animation:intro-racks 4.2s both}.intro[data-playing] .intro__timeline span{animation:intro-timeline 4.2s linear both}
+.intro[data-playing] .intro__story span{animation:intro-caption 1.35s both}.intro[data-playing] .intro__story span:nth-child(2){animation-delay:1.3s}.intro[data-playing] .intro__story span:nth-child(3){animation-delay:2.6s}
+.intro[data-quick] .intro__world,.intro[data-quick] .intro__story{display:none}
+@keyframes intro-atom{0%{opacity:0;transform:scale(.5) rotate(-20deg)}25%{opacity:1;transform:scale(1) rotate(0)}65%{opacity:1;transform:scale(1.15) rotate(35deg)}100%{opacity:0;transform:scale(3) rotate(65deg)}}
+@keyframes intro-fiber{0%{opacity:0;stroke-dashoffset:100}20%{opacity:.95}75%{opacity:.7}100%{opacity:0;stroke-dashoffset:-100}}
+@keyframes intro-facility{0%,28%{opacity:0;clip-path:circle(0% at 50% 50%);transform:scale(1.12)}62%{opacity:.85;clip-path:circle(75% at 50% 50%)}100%{opacity:.6;clip-path:circle(90% at 50% 50%);transform:scale(1)}}
+@keyframes intro-racks{0%,35%{opacity:0}55%{opacity:.65}85%,100%{opacity:0}}
+@keyframes intro-identity{0%,60%{opacity:0;transform:translateY(12px)}85%,100%{opacity:1;transform:translateY(0)}}
+@keyframes intro-caption{0%,100%{opacity:0;transform:translateY(8px)}20%,80%{opacity:1;transform:translateY(0)}}
+@keyframes intro-timeline{to{transform:scaleX(1)}}
+@media(max-width:700px){.intro__top{left:22px;right:22px;font-size:8px}.intro__skip{padding:9px 14px;font-size:11px;gap:14px}.intro__signal{width:160%;left:-30%}.intro__facility{object-position:58% center}.intro__story{bottom:27%;font-size:9px}.intro__identity p{margin-top:22px;font-size:13px}.intro__logo-flat{width:82vw}}
+@media(prefers-reduced-motion:reduce){.intro,.intro *{animation:none!important;transition:none!important}.intro__identity{opacity:1!important;transform:none!important}.intro__world,.intro__story{display:none}}

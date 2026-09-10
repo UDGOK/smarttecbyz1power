@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import SiteHeader from '../components/SiteHeader.astro';
 import CtaBar from '../components/chrome/CtaBar.astro';
 import Loader from '../components/chrome/Loader.astro';
+import JourneyCue from '../components/chrome/JourneyCue.astro';
 import Configurator from '../components/Configurator.astro';
 import { company, site, compute, stages } from '../data/site';
 
@@ -49,7 +50,6 @@ const grain =
 
           <p class="stage-panel__lede"><span class="line"><span class="line__inner">{stage.lede}</span></span></p>
 
-          {stage.hold && <p class="stage-panel__cue mono-label" data-scroll-cue aria-hidden="true">Scroll</p>}
         </div>
       </section>
     ))}
@@ -72,6 +72,7 @@ const grain =
     </div>
 
     <CtaBar />
+    <JourneyCue />
   </main>
 
   <!-- Visible by default so it survives with JavaScript off; boot hides it and
@@ -93,12 +94,19 @@ const grain =
 <script>
   import { initLoader } from '../lib/loader';
   import { audio } from '../lib/audio';
+  // Download the engine during the bounded intro; instantiate it only at entry.
+  const preparedBoot = import('../lib/boot').then(module=>module,()=>null);
   initLoader(() => {
-    // Keep the entrance small. Graphics load only after the visitor enters.
     document.body.dataset.booting='';
-    void import('../lib/boot').then(module=>module.boot()).catch(()=>{
-      // The public reading route remains usable if the cinematic chunk fails.
-      window.location.assign('/site');
+    let settled=false;
+    const fallback=()=>{if(settled)return;settled=true;window.location.assign('/site');};
+    // The engine's own watchdog starts only after import. Bound that download too.
+    const deadline=window.setTimeout(fallback,5000);
+    void preparedBoot.then(module=>{
+      if(settled)return;
+      window.clearTimeout(deadline);
+      if(!module){fallback();return;}
+      settled=true;module.boot();
     });
   }, () => { audio.unlock(); audio.play('whoosh'); });
 </script>
@@ -141,7 +149,7 @@ const grain =
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: calc(var(--chrome-inset) * 6) var(--s-5) 150px;
+    padding: calc(var(--chrome-inset) * 6) var(--s-5) 215px;
     /* Wide enough that each authored line of the headline stays on one line
        at the new display size — otherwise the type sets itself and the
        intended line breaks are lost. */

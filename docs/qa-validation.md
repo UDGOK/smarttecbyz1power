@@ -52,3 +52,11 @@ The brand page now displays all 90 browser-viewable assets in a responsive galle
 Motion starts only on explicit playback. Closing the viewer releases its media and restores keyboard focus; native downloads remain usable without JavaScript. Colour copying reports success or a manual-copy fallback. Existing artwork is reused without modifying the design files.
 
 Validation: 88 automated tests, 154 generated-page checks and 402 QA checks pass. Node and Vercel builds pass. Desktop and 390px browser review covered the logo selector, combined filters, full-height portrait previews, keyboard dismissal, focus return, and actual motion playback. Every visual, poster, matching logo download and related stitch file is checked against the original kit.
+
+## Automatic entrance and scroll guidance
+
+The homepage now presents a 4.2-second SVG/CSS nucleus and fiber-signal sequence, reveals the existing campus concept artwork, and enters automatically after a 350ms fade. Skip intro remains immediately available. Reduced-motion and repeat-session visitors bypass the sequence in about 80ms; automatic entry does not unlock audio. The timer does not depend on graphics, image loading or animation events. A stalled engine import falls back to the reading route after five seconds; the existing renderer recovery remains in place.
+
+The persistent scroll guide shows the current chapter, actual progress from the desktop or native scroll engine, and an accessible next-chapter action. Its prompt changes after movement, the initial arrow nudge stops after two cycles, and it hides during the menu and at the campus. The final button transition moves keyboard focus to the campus heading. Motion preferences, tab visibility, browser history and interrupted fades have regression coverage.
+
+An independent review approved the implementation after checking timing, failure recovery, focus and rendering costs. Browser review verified automatic and repeat-session entry, chapter progress responding to keyboard scrolling, all four next-chapter transitions, menu suppression, final campus focus, and 390px spacing above the inquiry form. The artwork's early and final frames were also inspected using a temporary paused-animation preview, removed before production builds. The full suite now contains 107 passing tests.

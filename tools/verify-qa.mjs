@@ -22,6 +22,11 @@ for(const route of routes){
  if(route==='contact'||route===''){
    assert.equal(doc.querySelector('form[id^="reserve-"]').action,'https://formsubmit.co/yasir@futonix.com');checks++;
  }
+ if(route===''){
+   for(const img of doc.querySelectorAll('#loader img')){await stat(join(root,img.getAttribute('src')));checks++;}
+   assert.ok(doc.querySelector('[data-journey-cue] [role="progressbar"][aria-label]'));checks++;
+   assert.match(doc.querySelector('#loader').textContent,/Entering automatically/);checks++;
+ }
  if(route==='brand'){
    const kit=JSON.parse(await readFile('src/data/brand-kit.json','utf8'));
    const expected=kit.files.filter(f=>/\.(png|jpe?g|svg|gif|ico|mp4|webm)$/i.test(f.path));

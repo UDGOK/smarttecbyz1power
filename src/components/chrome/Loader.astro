@@ -1,20 +1,27 @@
 ---
 import { company } from '../../data/site';
+import '../../styles/intro.css';
+const lanes=Array.from({length:12},(_,i)=>i);
+const particles=Array.from({length:19},(_,i)=>({x:500+Math.cos(i*2.4)*Math.sqrt(i)*9,y:300+Math.sin(i*2.4)*Math.sqrt(i)*9}));
 ---
 <section class="intro" id="loader" aria-label="Welcome to SmartTec">
-  <div class="intro__stage">
-    <img class="intro__logo-flat" src="/assets/brand/smarttec-lockup-offwhite-green.svg" alt={company.full} width="1231" height="298" fetchpriority="high" decoding="async" />
-    <a class="intro__skip" id="loader-skip" href="/site">Enter <span aria-hidden="true">↗</span></a>
+  <div class="intro__world" aria-hidden="true">
+    <div class="intro__stars"></div>
+    <img class="intro__facility" src="/assets/cinematic/campus-1586.webp" srcset="/assets/cinematic/campus-800.webp 800w, /assets/cinematic/campus-1586.webp 1586w" sizes="100vw" alt="" width="1586" height="992" decoding="async" />
+    <div class="intro__facility-shade"></div>
+    <svg class="intro__signal" viewBox="0 0 1000 600" fill="none" preserveAspectRatio="xMidYMid slice">
+      <defs><radialGradient id="intro-core"><stop stop-color="#f4ffed"/><stop offset=".45" stop-color="#98fba8"/><stop offset="1" stop-color="#2b926d"/></radialGradient></defs>
+      <g class="intro__atom">
+        <ellipse cx="500" cy="300" rx="148" ry="45"/><ellipse cx="500" cy="300" rx="148" ry="45" transform="rotate(60 500 300)"/><ellipse cx="500" cy="300" rx="148" ry="45" transform="rotate(-60 500 300)"/>
+        <g class="intro__nucleus">{particles.map((p,i)=><circle cx={p.x} cy={p.y} r={i%2?12:14} fill={i%2?'#d3e8db':'url(#intro-core)'} />)}</g>
+        <circle class="intro__electron" cx="352" cy="300" r="5"/><circle class="intro__electron" cx="574" cy="428" r="4"/>
+      </g>
+      <g class="intro__fibers">{lanes.map(i=><path style={`--lane:${i}`} pathLength="100" d={`M ${i%2?-80:1080} ${45+i*47} C ${i%2?220:780} ${20+i*49}, ${i%2?360:640} ${300+(i-6)*9}, 500 300`} />)}</g>
+      <g class="intro__rack-lines">{[-3,-2,-1,1,2,3].map((n,i)=><g style={`--lane:${i}`}><path d={`M ${500+n*64} 190 L ${500+n*64+36} 200 V 438 L ${500+n*64} 455 Z`} />{[0,1,2,3,4,5,6,7].map(j=><path d={`M ${504+n*64} ${216+j*27} h 24`} />)}</g>)}</g>
+    </svg>
   </div>
+  <div class="intro__top"><span>SMARTTEC / THE SIGNAL</span><a class="intro__skip" id="loader-skip" href="/site">Skip intro <span aria-hidden="true">↗</span></a></div>
+  <div class="intro__identity"><img class="intro__logo-flat" src="/assets/brand/smarttec-lockup-offwhite-green.svg" alt={company.full} width="1231" height="298" fetchpriority="high" decoding="async" /><p>From energy to intelligence.</p></div>
+  <div class="intro__story" aria-hidden="true"><span>01 / Energy</span><span>02 / Signal</span><span>03 / Intelligence</span></div>
+  <div class="intro__footer"><p class="intro__auto">Entering automatically</p><p class="intro__fallback">Follow the signal. <a href="/site">Enter site ↗</a></p><div class="intro__timeline" aria-hidden="true"><span></span></div><span class="intro__concept">An abstract infrastructure concept</span></div>
 </section>
-<style>
-  .intro{position:fixed;inset:0;z-index:100;display:grid;place-items:center;min-height:100svh;background:radial-gradient(ellipse at 50% 45%,#16392c 0%,#071410 65%);transition:opacity .35s ease,visibility .35s;overflow:auto}
-  .intro.is-done{opacity:0;visibility:hidden;pointer-events:none}
-  .intro[hidden]{display:none}
-  .intro__stage{width:100%;display:grid;justify-items:center;gap:clamp(36px,7vh,72px);padding:48px 24px}
-  .intro__logo-flat{display:block;width:min(76vw,640px);height:auto}
-  .intro__skip{display:inline-flex;align-items:center;justify-content:center;gap:28px;min-width:146px;min-height:48px;padding:13px 26px;border:1px solid #7be88a88;border-radius:999px;background:#7be88a;color:#10251c;font:14px/1.4 var(--f-mono);text-decoration:none;transition:background .2s,transform .2s}
-  .intro__skip:hover{background:#a1f3ac;transform:translateY(-2px)}
-  .intro__skip:focus-visible{outline:2px solid #eef1ef;outline-offset:7px}
-  @media(prefers-reduced-motion:reduce){.intro,.intro__skip{transition:none}.intro__skip:hover{transform:none}}
-</style>

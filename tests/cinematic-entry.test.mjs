@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {initLoader} from '../src/lib/loader.ts';
+import {initLoader,INTRO_DURATION_MS,REDUCED_INTRO_MS,FADE_MS} from '../src/lib/loader.ts';
 import {mountCinematic} from '../src/lib/cinematic.mjs';
 import {mountMenuPreview} from '../src/lib/menu-preview.mjs';
 
@@ -18,21 +18,49 @@ function environment(){
  const saved=Object.fromEntries(keys.map(k=>[k,Object.getOwnPropertyDescriptor(globalThis,k)]));
  const window=new EventTarget(),document=new Element(),motion=new Element(),pointer=new Element();motion.matches=false;pointer.matches=true;document.hidden=false;document.body={dataset:{}};
  const frames=new Map(),timers=new Map();let next=0;
- window.setTimeout=(fn,delay)=>{timers.set(++next,{fn,delay});return next;};
+  window.setTimeout=(fn,delay)=>{timers.set(++next,{fn,delay});return next;};
+ window.clearTimeout=id=>timers.delete(id);
+ const storage=new Map();window.sessionStorage={getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,String(value))};
  window.matchMedia=query=>query.includes('reduced-motion')?motion:pointer;
  const env={window,document,matchMedia:window.matchMedia,requestAnimationFrame:fn=>{frames.set(++next,fn);return next;},cancelAnimationFrame:id=>frames.delete(id)};
  for(const[k,v]of Object.entries(env))Object.defineProperty(globalThis,k,{value:v,writable:true,configurable:true});
- return{...env,motion,pointer,frames,timers,flush(){const f=[...frames.values()];frames.clear();f.forEach(fn=>fn());},restore(){for(const[k,v]of Object.entries(saved)){if(v)Object.defineProperty(globalThis,k,v);else delete globalThis[k];}}};
+ return{...env,motion,pointer,frames,timers,storage,fire(delay){const timer=[...timers].find(([,t])=>t.delay===delay);assert.ok(timer,`expected timer with delay ${delay}`);timers.delete(timer[0]);timer[1].fn();},flush(){const f=[...frames.values()];frames.clear();f.forEach(fn=>fn());},restore(){for(const[k,v]of Object.entries(saved)){if(v)Object.defineProperty(globalThis,k,v);else delete globalThis[k];}}};
 }
-function entrance(){const e=environment(),loader=new Element(),enter=new Element(),main=new Element();main.setAttribute('inert','');e.document.body.dataset.entryPending='';loader.querySelector=()=>enter;e.document.querySelector=s=>s==='#loader'?loader:main;e.document.querySelectorAll=()=>[main];return{...e,loader,enter,main};}
-test('entry can wait indefinitely; background gestures never enter',()=>{
- const e=entrance();try{let starts=0;initLoader(()=>starts++);assert.equal(e.timers.size,0);for(const type of ['wheel','pointerdown','touchstart','keydown'])e.window.dispatchEvent(new Event(type));assert.equal(starts,0);assert.equal(e.loader.hidden,false);assert.ok('entryPending' in e.document.body.dataset);assert.ok('inert' in e.main.attributes);}finally{e.restore();}
+function entrance(){const e=environment(),loader=new Element(),enter=new Element(),main=new Element();main.setAttribute('inert','');e.document.body.dataset.entryPending='';loader.querySelector=s=>s==='#loader-skip'?enter:null;e.document.querySelector=s=>s==='#loader'?loader:s==='#main'?main:null;e.document.querySelectorAll=()=>[main];return{...e,loader,enter,main};}
+function assertReleased(e){assert.ok(!('entryPending' in e.document.body.dataset));assert.ok(!('inert' in e.main.attributes));assert.equal(e.loader.hidden,true);assert.equal(e.loader.classList.contains('is-done'),true);}
+function pageShow(e,persisted=true){const event=new Event('pageshow');Object.assign(event,{persisted});e.window.dispatchEvent(event);}
+test('first visit enters automatically after the short reveal without audio or a gesture',()=>{
+ const e=entrance();try{let starts=0,gestures=0;assert.equal(INTRO_DURATION_MS,4200);initLoader(()=>starts++,()=>gestures++);for(const type of ['wheel','pointerdown','touchstart','keydown'])e.window.dispatchEvent(new Event(type));assert.equal(starts,0);assert.ok('inert' in e.main.attributes);e.fire(INTRO_DURATION_MS);assert.equal(starts,0);e.fire(FADE_MS);assert.equal(starts,1);assert.equal(gestures,0);assertReleased(e);assert.equal(e.document.activeElement,e.main);assert.ok(e.storage.get('smarttec:intro-seen'));assert.equal(e.timers.size,0);}finally{e.restore();}
 });
-test('explicit entry releases content, focuses main and starts exactly once',()=>{
- const e=entrance();try{let starts=0;initLoader(()=>starts++,()=>{throw new Error('audio unavailable');});assert.equal(e.enter.click().defaultPrevented,true);e.enter.click();assert.equal(starts,0);assert.ok('entryPending' in e.document.body.dataset);[...e.timers.values()][0].fn();assert.equal(starts,1);assert.ok(!('entryPending' in e.document.body.dataset));assert.ok(!('inert' in e.main.attributes));assert.equal(e.document.activeElement,e.main);assert.equal(e.loader.classList.contains('is-done'),true);assert.equal(e.timers.size,1);assert.equal(e.loader.hidden,true);}finally{e.restore();}
+test('Skip cancels automatic entry, tolerates unavailable audio and completes once',()=>{
+ const e=entrance();try{let starts=0,gestures=0;initLoader(()=>starts++,()=>{gestures++;throw new Error('audio unavailable');});const staleAuto=[...e.timers.values()][0].fn;assert.equal(e.enter.click().defaultPrevented,true);e.enter.click();staleAuto();assert.equal(starts,0);assert.equal(gestures,1);assert.equal(e.timers.size,1);e.fire(FADE_MS);assert.equal(starts,1);assertReleased(e);assert.equal(e.document.activeElement,e.main);assert.equal(e.timers.size,0);}finally{e.restore();}
 });
-test('modified entry clicks retain their real link; reduced motion still requires Enter',()=>{
- const e=entrance();try{e.motion.matches=true;let starts=0;initLoader(()=>starts++);for(const extra of [{ctrlKey:true},{metaKey:true},{button:1}])assert.equal(e.enter.click(extra).defaultPrevented,false);assert.equal(starts,0);assert.equal(e.timers.size,0);e.enter.click();assert.equal([...e.timers.values()][0].delay,0);[...e.timers.values()][0].fn();assert.equal(starts,1);}finally{e.restore();}
+test('automatic fade wins a simultaneous Skip without a second completion or audio',()=>{
+ const e=entrance();try{let starts=0,gestures=0;initLoader(()=>starts++,()=>gestures++);e.fire(INTRO_DURATION_MS);e.enter.click();e.fire(FADE_MS);e.enter.click();assert.equal(starts,1);assert.equal(gestures,0);assert.equal(e.timers.size,0);}finally{e.restore();}
+});
+test('modified Skip clicks preserve their native destination and do not enter early',()=>{
+ const e=entrance();try{let starts=0;initLoader(()=>starts++);for(const extra of [{ctrlKey:true},{metaKey:true},{altKey:true},{shiftKey:true},{button:1}])assert.equal(e.enter.click(extra).defaultPrevented,false);assert.equal(starts,0);assert.equal(e.timers.size,1);e.fire(INTRO_DURATION_MS);e.fire(FADE_MS);assert.equal(starts,1);}finally{e.restore();}
+});
+for(const quick of ['reduced motion','repeat visit','hidden startup'])test(`${quick} enters nearly immediately without the animated fade`,()=>{
+ const e=entrance();try{let starts=0,gestures=0;if(quick==='reduced motion')e.motion.matches=true;if(quick==='repeat visit')e.storage.set('smarttec:intro-seen','true');if(quick==='hidden startup')e.document.hidden=true;assert.equal(REDUCED_INTRO_MS,80);initLoader(()=>starts++,()=>gestures++);e.fire(REDUCED_INTRO_MS);e.fire(0);assert.equal(starts,1);assert.equal(gestures,0);assertReleased(e);assert.equal(e.timers.size,0);}finally{e.restore();}
+});
+for(const interruption of ['tab becomes hidden','reduced motion enabled'])test(`${interruption} completes silently without waiting for the reveal`,()=>{
+ const e=entrance();try{let starts=0,gestures=0;initLoader(()=>starts++,()=>gestures++);if(interruption==='tab becomes hidden'){e.document.hidden=true;e.document.dispatchEvent(new Event('visibilitychange'));}else{e.motion.matches=true;e.motion.dispatchEvent(new Event('change'));}e.fire(0);assert.equal(starts,1);assert.equal(gestures,0);assertReleased(e);assert.equal(e.timers.size,0);}finally{e.restore();}
+});
+for(const interruption of ['tab becomes hidden','reduced motion enabled'])test(`${interruption} also releases an entrance already fading`,()=>{
+ const e=entrance();try{let starts=0;initLoader(()=>starts++);e.fire(INTRO_DURATION_MS);if(interruption==='tab becomes hidden'){e.document.hidden=true;e.document.dispatchEvent(new Event('visibilitychange'));}else{e.motion.matches=true;e.motion.dispatchEvent(new Event('change'));}assert.equal(e.timers.size,1);e.fire(0);assert.equal(starts,1);assertReleased(e);assert.equal(e.timers.size,0);}finally{e.restore();}
+});
+for(const duringFade of [false,true])test(`pagehide ${duringFade?'during the fade':'during the reveal'} releases content and starts once on persisted return`,()=>{
+ const e=entrance();try{let starts=0;initLoader(()=>starts++);if(duringFade)e.fire(INTRO_DURATION_MS);e.window.dispatchEvent(new Event('pagehide'));assert.equal(starts,0);assert.equal(e.timers.size,0);assertReleased(e);pageShow(e,false);assert.equal(starts,0);pageShow(e);assert.equal(starts,1);pageShow(e);assert.equal(starts,1);}finally{e.restore();}
+});
+test('returning from browser history after completed entry does not reboot the experience',()=>{
+ const e=entrance();try{let starts=0;initLoader(()=>starts++);e.fire(INTRO_DURATION_MS);e.fire(FADE_MS);e.window.dispatchEvent(new Event('pagehide'));pageShow(e);assert.equal(starts,1);assert.equal(e.timers.size,0);}finally{e.restore();}
+});
+test('mounting the entrance twice does not duplicate timers or completion',()=>{
+ const e=entrance();try{let starts=0;initLoader(()=>starts++);initLoader(()=>starts++);assert.equal(e.timers.size,1);e.fire(INTRO_DURATION_MS);e.fire(FADE_MS);assert.equal(starts,1);}finally{e.restore();}
+});
+test('unavailable session storage never blocks first-visit entry',()=>{
+ const e=entrance();try{let starts=0;e.window.sessionStorage={getItem(){throw new Error('storage blocked');},setItem(){throw new Error('storage blocked');}};initLoader(()=>starts++);e.fire(INTRO_DURATION_MS);e.fire(FADE_MS);assert.equal(starts,1);assertReleased(e);}finally{e.restore();}
 });
 test('cinematic controls expose matching detail and preserve pause across tab/menu lifecycle',()=>{
  const e=environment();try{
