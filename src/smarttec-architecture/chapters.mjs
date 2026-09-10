@@ -1,0 +1,38 @@
+// Public UI metadata; assets are served only after authentication.
+export const chapters = {
+  manufacturing: {
+    label:'Manufacturing', number:'01', title:'Built around power.',
+    text:'Two planned manufacturing buildings. This close-up studies one hall; it does not depict completed construction.',
+    fact:'2 × 30,000 sq ft · planned', status:'PROPOSED DEVELOPMENT',
+    image:'concept-manufacturing', alt:'AI architectural concept of a proposed manufacturing hall with forest-green accents; not a site photograph',
+    model:'module-factory', target:[0,4,0], camera:[70,29,-83], distance:[18,180],
+    modelNote:'Single-hall 3D study. Proposed 150 × 200 ft footprint; appearance and height are illustrative.'
+  },
+  compute: {
+    label:'First compute', number:'02', title:'Start with one rack.',
+    text:'Eight planned RTX PRO 6000 Blackwell Server Edition GPUs across two supported servers. Purchase and commissioning remain separate gates.',
+    fact:'2 servers · 8 GPUs planned', status:'PLANNED FIT-OUT',
+    image:'concept-compute', alt:'AI concept of a small equipment room with one rack and two GPU server chassis; not installed equipment',
+    model:'module-rack', target:[0,1.15,0], camera:[2.9,2.2,-4.0], distance:[1.7,12],
+    modelNote:'Generic rack study with two illustrative chassis. Not an OEM specification or a surveyed room.'
+  },
+  energy: {
+    label:'Energy', number:'03', title:'Room for the next phase.',
+    text:'Tract 3 is reserved for proposed solar and storage. A separate storage location may use space on Tract 2, subject to design and approval.',
+    fact:'18.20-acre Tract 3 · proposed', status:'CONCEPT / NOT SIZED',
+    image:'concept-energy', alt:'AI concept of two battery enclosures beside illustrative solar rows; no installed capacity is asserted',
+    model:'module-energy', target:[0,1,2], camera:[31,15,-34], distance:[8,100],
+    modelNote:'Generic storage and solar assembly. Equipment count does not establish MW, MWh, capacity or setbacks.'
+  },
+  overview: {
+    label:'Campus layout', number:'04', title:'One property. Three roles.',
+    text:'8460 US 70, Mead, Oklahoma. The supplied survey totals 39.21 acres across three tracts. This overview follows the earlier owner-marked concept.',
+    fact:'39.21 surveyed acres', status:'OWNER-MARKED CONCEPT',
+    image:'architecture-overview', alt:'Geometry-rendered overview of the owner-marked campus concept, showing manufacturing, existing structures and an illustrative solar zone',
+    model:'architecture-model', target:[100,0,360], camera:[700,770,-320], distance:[50,1800],
+    modelNote:'Approximate campus geometry, not a georeferenced satellite overlay or approved site plan.'
+  }
+};
+export const imageDisclosure = key => key === 'overview'
+  ? 'MODEL PREVIEW · APPROXIMATE GEOMETRY'
+  : 'AI ARCHITECTURAL CONCEPT · NOT A SITE PHOTO';
