@@ -1,11 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
-import ScrollRuler from '../components/chrome/ScrollRuler.astro';
-import PowerBadge from '../components/chrome/PowerBadge.astro';
-import Brandmark from '../components/chrome/Brandmark.astro';
+import SiteHeader from '../components/SiteHeader.astro';
 import CtaBar from '../components/chrome/CtaBar.astro';
 import Loader from '../components/chrome/Loader.astro';
-import SiteMenu from '../components/chrome/SiteMenu.astro';
 import Configurator from '../components/Configurator.astro';
 import { company, site, compute, stages } from '../data/site';
 
@@ -24,11 +21,8 @@ const grain =
 
   <Loader />
 
-  <main id="main" data-stage-root>
-    <Brandmark />
-    <ScrollRuler />
-    <PowerBadge />
-    <SiteMenu stageJumps />
+  <main id="main" data-stage-root inert data-entry-content>
+    <SiteHeader mode="home" />
 
     {stages.map((stage, i) => (
       <section
@@ -82,11 +76,11 @@ const grain =
 
   <!-- Visible by default so it survives with JavaScript off; boot hides it and
        releases it again once the campus is reached. -->
-  <section class="after" id="after">
+  <section class="after" id="after" inert data-entry-content>
     <Configurator />
   </section>
 
-  <section class="static-path" id="static-path">
+  <section class="static-path" id="static-path" inert data-entry-content>
     <h2>Site 01 — {site.address}</h2>
     <dl>
       <div><dt>Land</dt><dd>{site.acres} acres across three tracts, {site.county}</dd></div>
@@ -97,8 +91,16 @@ const grain =
 </Base>
 
 <script>
-  import { boot } from '../lib/boot';
-  boot();
+  import { initLoader } from '../lib/loader';
+  import { audio } from '../lib/audio';
+  initLoader(() => {
+    // Keep the entrance small. Graphics load only after the visitor enters.
+    document.body.dataset.booting='';
+    void import('../lib/boot').then(module=>module.boot()).catch(()=>{
+      // The public reading route remains usable if the cinematic chunk fails.
+      window.location.assign('/site');
+    });
+  }, () => { audio.unlock(); audio.play('whoosh'); });
 </script>
 
 <style>

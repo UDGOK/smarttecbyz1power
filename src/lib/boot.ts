@@ -12,7 +12,6 @@ import { SceneHost } from './scene/host';
 import { loadScene, warmScene } from './scene/registry';
 import type { CampusScene } from './scene/stage-campus';
 import { prefersReducedMotion } from './hold-button';
-import { initLoader } from './loader';
 import { initCursor } from './cursor';
 import { initConfigurator } from './configurator';
 import { revealLines, scramble } from './type-motion';
@@ -138,8 +137,7 @@ function run(): void {
   let host: SceneHost | null = null;
   /**
    * The experience is armed only when the gate has cleared AND the scene is
-   * up. They finish in either order — the gate runs on a timer, the scene
-   * waits on a 127KB chunk — so whichever lands second does the arming.
+   * up. run() itself starts only after an explicit Enter activation.
    */
   let armed = false;
   let gateCleared = false;
@@ -169,7 +167,7 @@ function run(): void {
   // construction regardless of whether it is ever enabled. Built with touch
   // bound, it silently ate every finger drag on the page.
   const scroller = new ScrollManager({ reducedMotion: reduced, touch: !nativeScroll });
-  if (nativeScroll) scroller.disable();
+  scroller.disable();
   const rig = new CameraRig({ reducedMotion: reduced });
   // Deliberately NOT armed here. `data-virtual-scroll` sets overflow: hidden,
   // so arming it before the scroller is actually running means any later
@@ -1038,9 +1036,7 @@ function run(): void {
     gsap.set(rootEl.querySelectorAll('.line__inner'), { yPercent: 115, opacity: 0 });
   }
 
-  // The gate is transparent and the world renders behind it, so the scene is
-  // the first screen — not something deferred until after it. Three.js is
-  // still its own chunk; we simply stop waiting for idle to ask for it.
+  // No scene, cursor or scroll manager runs while the welcome screen waits.
   void initScene();
   scroller.onScrub(onProgress);
   if (!nativeScroll) {
@@ -1048,13 +1044,10 @@ function run(): void {
     window.addEventListener('resize', () => armStage(current));
   }
 
-  initLoader(() => {
-    reveal(0);
-    audio.play('stage-land-ambient', { fadeIn: 1.2, volume: 0.35 });
-    gateCleared = true;
-    maybeArm();
-    window.dispatchEvent(new Event('experience:ready'));
-  });
+  reveal(0);
+  audio.play('stage-land-ambient', { fadeIn: 1.2, volume: 0.35 });
+  gateCleared = true;
+  maybeArm();
 }
 
 
@@ -1093,18 +1086,5 @@ export function boot(): void {
     console.warn(`[boot] fell back to the plain document: ${why}`, err ?? '');
   };
 
-  // If the gate never clears, the visitor is staring at a title card forever.
-  const watchdog = window.setTimeout(() => {
-    const loader = document.querySelector<HTMLElement>('#loader');
-    if (loader && !loader.hidden) recover('the entry card never cleared');
-  }, 7000);
-
-  window.addEventListener('experience:ready', () => window.clearTimeout(watchdog), { once: true });
-
-  try {
-    run();
-  } catch (err) {
-    window.clearTimeout(watchdog);
-    recover('boot threw', err);
-  }
+  try { run(); } catch (err) { recover('boot threw after entry', err); }
 }

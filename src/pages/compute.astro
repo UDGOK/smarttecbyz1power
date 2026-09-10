@@ -14,7 +14,7 @@ const perSystemKw = loadKw / systems;
   title={`Compute — an eight-GPU first deployment | ${company.full}`}
   description={`${compute.systems} planned at ${site.designation}, ${site.name}. ${compute.gpus} GPUs, ${compute.vramPerGpu} each, ${compute.load}. ${compute.status}.`}
   kicker="Phase 1A hardware"
-  heading="Eight Blackwells, in two nodes."
+  heading="Built around your workload."
   lede={`Two planned servers, four ${compute.gpuModel} each, ${compute.vramPerGpu} per GPU. ${compute.status}, and the building it goes into is not yet assigned.`}
   meta={[
     { label: 'Systems', value: String(systems), note: compute.systems, count: true },
@@ -104,10 +104,9 @@ const perSystemKw = loadKw / systems;
     </div>
 
     <p style="margin-top: var(--s-5);">
-      Roughly {perSystemKw.toFixed(0)} kW per system is why this is a liquid-cooled hall
-      and not an air-cooled one. Once systems of that draw are racked together, the
-      per-rack figure lands far above what a conventional raised-floor hall can remove
-      with air, whatever its electrical capacity says.
+      The modeled load per system is a planning input. It does not determine the
+      cooling method on its own. The selected server, rack layout and site engineering
+      must establish the cooling design and the load that can be commissioned.
     </p>
   </section>
 
@@ -126,9 +125,9 @@ const perSystemKw = loadKw / systems;
           to retrofit into an operating hall.
         </p>
         <p>
-          Building 1 is being fitted out for it from empty. Buildings 2 and 3 are shells,
-          so the same is true for them — a second tenant is not inheriting somebody's
-          air-cooled legacy.
+          Building allocation and any cooling upgrades remain subject to the final
+          design. Existing HVAC does not establish readiness for the proposed IT load;
+          commissioning must verify the selected installation.
         </p>
       </div>
 

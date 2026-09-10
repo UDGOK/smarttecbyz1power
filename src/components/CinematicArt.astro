@@ -1,0 +1,24 @@
+---
+import {visualStory,artSource} from '../data/cinematic';
+import '../styles/cinematic.css';
+interface Props {path:string; controls?:boolean; instance?:string; eager?:boolean;}
+const {path,controls=true,instance='hero',eager=true}=Astro.props;
+const story=visualStory(path);
+const prefix=`cinema-${path.replace(/[^a-z0-9]/g,'')}-${instance}`;
+---
+<div class="cinema" data-cinematic data-art={story.art} data-light="dusk" data-flow="off" aria-label={story.label}>
+  <div class="cinema__media" aria-hidden="true"><img src={artSource(story.art)} srcset={`${artSource(story.art,800)} 800w, ${artSource(story.art)} 1586w`} sizes="100vw" width="1586" height="992" loading={eager?'eager':'lazy'} fetchpriority={eager?'high':'auto'} decoding="async" alt="" /></div>
+  <div class="cinema__shade" aria-hidden="true"></div>
+  {controls && story.topics.length>0 && <>
+    <div class="cinema__hotspots" role="group" aria-label="Explore the concept">
+      {story.topics.map((topic,i)=><button type="button" class={`cinema__hotspot cinema__hotspot--${i}`} data-cinema-select={i} aria-label={topic.label} aria-controls={`${prefix}-detail`} aria-pressed={i===0?'true':'false'}><span aria-hidden="true">{String(i+1).padStart(2,'0')}</span><span class="cinema__hotspot-label">{topic.label}</span></button>)}
+    </div>
+    {story.art!=='compute' && <svg class="cinema__flow" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true"><path d="M590 280 C610 305 650 295 710 325 S790 355 850 400"/><path d="M710 325 C705 375 630 405 590 460"/></svg>}
+    <div class="cinema__explorer">
+      <div class="cinema__topics" role="group" aria-label={story.label}>{story.topics.map((topic,i)=><button type="button" data-cinema-select={i} aria-controls={`${prefix}-detail`} aria-pressed={i===0?'true':'false'}><span>{String(i+1).padStart(2,'0')}</span>{topic.label}</button>)}</div>
+      <div class="cinema__detail" id={`${prefix}-detail`} aria-live="polite" aria-atomic="true">{story.topics.map((topic,i)=><p data-cinema-detail={i} hidden={i!==0}>{topic.text}</p>)}</div>
+      {story.art!=='compute' && <div class="cinema__settings" role="group" aria-label="Concept appearance"><button type="button" data-cinema-light aria-pressed="false">Brighter view</button><button type="button" data-cinema-flow aria-pressed="false">Energy paths</button><span>Illustrative overlay</span></div>}
+    </div>
+  </>}
+</div>
+<script>import {mountCinematicArt} from '../lib/cinematic.mjs'; mountCinematicArt();</script>

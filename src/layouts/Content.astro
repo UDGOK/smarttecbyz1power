@@ -3,8 +3,8 @@
  * The reading shell.
  *
  * Base.astro owns the document; this owns the page. Content routes never pass
- * `experience` — they scroll normally, render server-side, and carry no WebGL,
- * no audio and no loader.
+ * `experience` — they scroll normally and render server-side. Selected public pages offer
+ * a bounded, lazy 3D scene; there is no audio or entry loader.
  *
  * Typographically these pages answer to the cinematic route: one enormous
  * display statement per page, tiny wide-tracked mono labels, a persistent
@@ -18,8 +18,13 @@
  * from `.doc` so nothing leaks onto the cinematic route.
  */
 import Base from './Base.astro';
-import SiteNav from '../components/SiteNav.astro';
-import SiteMenu from '../components/chrome/SiteMenu.astro';
+import PageScene from '../components/PageScene.astro';
+import PageTrail from '../components/PageTrail.astro';
+import CinematicArt from '../components/CinematicArt.astro';
+import {visualStory} from '../data/cinematic';
+import {pageExperience} from '../data/page-experiences';
+import '../styles/page-experience.css';
+import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
 /** A hero figure. `value` is always a string taken from src/data/site.ts. */
@@ -49,6 +54,12 @@ interface Props {
 }
 
 const { title, description, kicker, heading, lede, meta = [], noindex = false } = Astro.props;
+const experience=pageExperience(Astro.url.pathname);
+const visualPath=Astro.url.pathname.replace(/\/+$/,'');
+const brandPage=visualPath==='/brand';
+const anchors:Record<string,string>={'/site':'today','/power':'service','/colocation':'two-ways','/compute':'fleet','/about':'what','/contact':'form-heading','/news':'brief','/model-planner':'planner'};
+const contentAnchor=anchors[experience?.path||'']||'';
+const actionLabel=experience?.path==='/contact'?'Start your inquiry':experience?.path==='/model-planner'?'Use the planner':experience?.path==='/news'?'Read the brief':'Explore the details';
 ---
 
 <Base title={title} description={description} noindex={noindex}>
@@ -141,13 +152,13 @@ const { title, description, kicker, heading, lede, meta = [], noindex = false } 
     })();
   </script>
 
-  <SiteNav />
+  <SiteHeader />
   {/* Outside the header on purpose: the nav's backdrop-filter would
       otherwise be this overlay's containing block. */}
-  <SiteMenu part="overlay" current={Astro.url.pathname.replace(/\/+$/, '') || '/'} />
 
-  <main class="doc" id="main">
+  <main class:list={["doc",(experience||brandPage) && "doc--immersive",(experience?.compact||brandPage) && "doc--compact"]} id="main" data-page-kind={experience?.kind}>
     <header class="doc__head">
+      <div class="doc__opening"><div class="doc__opening-copy">
       <p class="doc__kicker">
         <span class="doc__kicker-rule" aria-hidden="true"></span>{kicker}
       </p>
@@ -158,6 +169,12 @@ const { title, description, kicker, heading, lede, meta = [], noindex = false } 
         <p class="doc__lede">{lede}</p>
       </div>
 
+      {experience && <div class="doc__opening-actions"><a class="btn" href={'#'+contentAnchor}>{actionLabel}<span aria-hidden="true">↓</span></a><a class="doc__home-link" href="/">The full SmartTec experience <span aria-hidden="true">↗</span></a></div>}
+      </div>
+      {experience && !experience.compact && <PageScene experience={experience} immersive />}
+      {(experience?.compact||brandPage) && <CinematicArt path={visualPath} controls={false} instance="intro" />}
+      </div>
+      {(experience?.compact||brandPage) && <p class="doc__art-note">{visualStory(visualPath).note}</p>}
       <div class="doc__rule" data-hero-rule aria-hidden="true"></div>
 
       {meta.length > 0 && (
@@ -175,9 +192,11 @@ const { title, description, kicker, heading, lede, meta = [], noindex = false } 
           ))}
         </dl>
       )}
+      {experience?.compact && <details class="page-scene-fold"><summary>Explore the {experience.kind==='campus'?'campus':experience.kind==='power'?'energy':'compute'} concept in 3D <span aria-hidden="true">↗</span></summary><PageScene experience={experience}/></details>}
     </header>
 
     <slot />
+    {experience && <PageTrail experience={experience} />}
   </main>
 
   <SiteFooter />
@@ -898,4 +917,3 @@ const { title, description, kicker, heading, lede, meta = [], noindex = false } 
     .reveal-on .doc > section::before { transform: none; }
   }
 </style>
-

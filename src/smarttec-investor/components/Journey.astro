@@ -1,0 +1,12 @@
+---
+import SiteHeader from '../../components/SiteHeader.astro';
+import {journey} from '../data/journey.mjs';
+---
+<script>import {mountJourney} from '../client/journey.mjs'; mountJourney();</script>
+<SiteHeader mode="investor" />
+<noscript><nav class="inv-no-script" aria-label="Investor chapters">{journey.map(chapter=><a href={'#'+chapter.id}>{chapter.label}</a>)}</nav></noscript>
+<nav class="inv-journey-dock" aria-label="Continue the investor journey" hidden>
+  <a id="inv-journey-prev" href="#opportunity" aria-label="Back to the beginning"><span aria-hidden="true">←</span><span class="inv-dock-direction">Back</span></a>
+  <span class="inv-dock-current"><span id="inv-journey-count">01 / 07</span><strong id="inv-journey-title">The opportunity</strong></span>
+  <a id="inv-journey-next" href="#campus" aria-label="Next chapter: Explore the campus"><span class="inv-dock-direction">Next</span><span aria-hidden="true">→</span></a>
+</nav>

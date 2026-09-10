@@ -1,0 +1,34 @@
+---
+import type {PageExperience} from '../data/page-experiences';
+import CinematicArt from './CinematicArt.astro';
+import {visualStory} from '../data/cinematic';
+interface Props { experience:PageExperience; immersive?:boolean; }
+const {experience:e,immersive=false}=Astro.props;
+const id='page-scene-'+e.kind;
+const story=visualStory(e.path);
+---
+<figure class:list={["page-scene",immersive&&"page-scene--backdrop"]} data-page-scene data-scene-kind={e.kind} data-scene-compact={String(e.compact)} aria-labelledby={id+'-title'}>
+  <div class="page-scene__top"><span>SMARTTEC / SPATIAL CONCEPT</span><span class="page-scene__badge" data-scene-badge>3D EXPLORER</span></div>
+  <div class="page-scene__viewport">
+    <div class="page-scene__fallback" data-scene-fallback><CinematicArt path={e.path} instance="scene" eager={!e.compact} /></div>
+    <div class="page-scene__canvas" data-scene-host></div>
+    <div class="page-scene__entry"><button type="button" data-scene-launch>Explore in 3D <span aria-hidden="true">↗</span></button></div>
+  </div>
+  <figcaption class="page-scene__caption">
+    <h2 id={id+'-title'}>{e.sceneTitle}</h2>
+    <p class="page-scene__art-note">{story.note}</p>
+    <p data-scene-status role="status">Choose a topic, or open the 3D model.</p>
+    <div class="page-scene__controls" data-scene-controls hidden>
+      <details class="page-scene__tools"><summary>Scene controls</summary><div class="page-scene__tools-content">
+      {e.kind==='campus'?<>
+        <div class="page-scene__buttons" role="group" aria-label="Campus viewpoints"><button type="button" data-scene-focus="land">Campus</button><button type="button" data-scene-focus="building-a">Buildings</button><button type="button" data-scene-focus="solar">Energy area</button></div>
+        <div class="page-scene__buttons" role="group" aria-label="Move the campus view"><button type="button" data-scene-action="left" aria-label="Rotate campus left">←</button><button type="button" data-scene-action="right" aria-label="Rotate campus right">→</button><button type="button" data-scene-action="in" aria-label="Zoom in">+</button><button type="button" data-scene-action="out" aria-label="Zoom out">−</button><button type="button" data-scene-action="interact" aria-pressed="false">Enable drag</button></div>
+      </>:<label class="page-scene__range"><span>{e.viewLabel}</span><input type="range" min="0" max="100" value="28" step="1" data-scene-position aria-label={e.viewLabel}/></label>}
+      <div class="page-scene__buttons"><button type="button" data-scene-action="reset">Reset view</button><button type="button" data-scene-action="play" aria-pressed="false">Play motion</button><button type="button" data-scene-action="close">Close 3D</button></div>
+      </div></details>
+    </div>
+    <p class="page-scene__disclosure">{e.sceneNote}</p>
+  </figcaption>
+  <noscript><p>Interactive 3D needs JavaScript. All project information is available below.</p></noscript>
+</figure>
+<script>import {mountPageScenes} from '../lib/public-scene/controller.mjs'; mountPageScenes();</script>

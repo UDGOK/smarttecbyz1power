@@ -21,6 +21,10 @@ html, body {
 /* `clip` rather than `hidden`: it suppresses horizontal overflow without
    turning <body> into a scroll container. */
 body[data-experience] { overflow-x: clip; }
+/* Initial HTML exposes one logo and one working Enter link, even without JS. */
+body[data-entry-pending] > :not(#loader):not(script):not(style){visibility:hidden;pointer-events:none}
+body[data-entry-pending] .stage-scroll{height:100svh}
+body[data-entry-pending] #after,body[data-entry-pending] #static-path{display:none}
 
 img, video, canvas { display: block; max-width: 100%; }
 
@@ -427,4 +431,3 @@ body[data-virtual-scroll] .stage-scroll { height: 100svh; }
 @media (pointer: coarse) {
   body[data-experience] { overflow-x: clip; overflow-y: visible; }
 }
-

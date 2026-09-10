@@ -1,0 +1,13 @@
+---
+import {pageExperiences,type PageExperience} from '../data/page-experiences';
+interface Props {experience:PageExperience;}
+const {experience}=Astro.props;
+const index=pageExperiences.findIndex(page=>page.path===experience.path);
+const next=pageExperiences[(index+1)%pageExperiences.length];
+const previous=pageExperiences[(index+pageExperiences.length-1)%pageExperiences.length];
+---
+<nav class="page-trail" aria-label="Continue exploring SmartTec">
+  <a class="page-trail__previous" href={previous.path}><span aria-hidden="true">←</span><span><small>PREVIOUS</small>{previous.label}</span></a>
+  <span class="page-trail__index">{String(index+1).padStart(2,'0')} / {String(pageExperiences.length).padStart(2,'0')}</span>
+  <a class="page-trail__next" href={next.path}><span><small>NEXT CHAPTER</small>{experience.next}</span><span aria-hidden="true">↗</span></a>
+</nav>

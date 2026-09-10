@@ -1,5 +1,22 @@
 ---
+import '../../styles/tokens.css';
+import '../../styles/chrome.css';
 import '../styles/investor.css';
+import '../styles/journey.css';
+import SiteFonts from '../../components/SiteFonts.astro';
 const {title='SmartTec Investor Room'}=Astro.props;
 ---
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="robots" content="noindex,nofollow"/><meta name="referrer" content="same-origin"/><title>{title}</title><link rel="stylesheet" href="/investor-assets/fonts.css"/></head><body class="smarttec-investor"><slot/></body></html>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="robots" content="noindex,nofollow"/>
+    <meta name="referrer" content="same-origin"/>
+    <meta name="theme-color" content="#1c4839"/>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <title>{title}</title>
+    <SiteFonts />
+  </head>
+  <body class="smarttec-investor"><slot/></body>
+</html>

@@ -29,7 +29,7 @@ const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference
   title={`Model planner — size the hardware for a specific model | ${company.full}`}
   description={`Pick an open-weight model and see the accelerator memory, host RAM, storage and power it needs. Exact parameter counts and attention geometry from each model's own repository, with the arithmetic shown.`}
   kicker="Model planner"
-  heading="Tell us the model. We will show you the hardware, and the arithmetic."
+  heading="Size your next workload."
   lede={`Choose from ${models.length} open-weight models on OpenRouter that can actually be self-hosted, and this sizes the accelerator memory, host RAM, storage and power a deployment needs. Parameter counts and attention geometry come from each model's own repository, so the two figures that dominate the answer are arithmetic rather than estimates.`}
   meta={[
     { label: 'Models', value: String(models.length), note: 'Self-hostable, from OpenRouter', count: true },

@@ -1,0 +1,163 @@
+/* Investor experience. Palette, fonts, easing and radii inherit the homepage
+   tokens. Keep page scrolling native: forms and spatial controls own gestures. */
+html:has(.smarttec-investor){scroll-behavior:smooth;scroll-padding-block:110px 120px}
+.smarttec-investor{overflow-wrap:break-word}
+.smarttec-investor ::selection{background:var(--c-signal);color:var(--c-ink)}
+.smarttec-investor h1,.smarttec-investor h2,.smarttec-investor h3{font-family:var(--f-display);letter-spacing:var(--ls-display)}
+.smarttec-investor h1,.smarttec-investor h2{font-weight:var(--fw-display)}
+.smarttec-investor h2{font-size:clamp(2.4rem,4.7vw,5rem);line-height:1.04;text-wrap:balance}
+.smarttec-investor .inv-button,.smarttec-investor .inv-outline{border-radius:var(--r-pill);padding:.9rem 1.5rem;font-weight:500;transition:background var(--d-fast) var(--e-out),border-color var(--d-fast) var(--e-out),transform var(--d-fast) var(--e-out)}
+.smarttec-investor .inv-button:hover{background:#a1f3ac;transform:translateY(-2px)}
+.smarttec-investor .inv-outline:hover{border-color:currentColor;background:#ffffff0c}
+.smarttec-investor input:not([type=checkbox]),.smarttec-investor select{border-radius:var(--r-sm)}
+.smarttec-investor :is(input,select,button,a){scroll-margin-block:110px 120px}
+.smarttec-investor .inv-section{padding-block:8rem;scroll-margin-top:80px}
+.smarttec-investor .inv-equipment-row{border-radius:var(--r-card)}
+.smarttec-investor .inv-section-heading{gap:5vw}
+.smarttec-investor .inv-section-heading>p{max-width:42ch;color:inherit;opacity:.85}
+.smarttec-investor .inv-stat-row strong{font-weight:var(--fw-display)}
+.smarttec-investor .inv-footer{padding-bottom:9rem}
+.smarttec-investor .inv-eyebrow{font-size:11px;line-height:1.7;letter-spacing:.14em}
+
+/* A quiet frame over the scene, echoing the homepage's floating controls. */
+.inv-chrome{position:fixed;z-index:40;inset:20px 28px auto;display:flex;align-items:flex-start;justify-content:space-between;gap:24px;pointer-events:none}
+.inv-chrome>*{pointer-events:auto}
+.inv-chrome-brand{display:grid;gap:4px;padding:12px 18px;border-radius:var(--r-card);background:#0e241fd9;border:1px solid #ffffff18;backdrop-filter:blur(14px)}
+.inv-chrome-brand>span{font:9px var(--f-mono);letter-spacing:.16em;color:#d2dcd6}
+.inv-chrome-brand .brand-lockup{width:164px}
+.inv-chrome-actions{display:flex;align-items:center;gap:8px;padding-top:4px}
+.inv-chrome-actions>a,.inv-chrome-actions>button,.inv-menu-top>button{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-height:48px;border:1px solid #ffffff24;border-radius:var(--r-pill);background:#0e241fe8;color:var(--c-campus);padding:12px 18px;text-decoration:none;backdrop-filter:blur(14px);font:11px var(--f-mono)}
+.inv-chrome-actions>a:hover,.inv-chrome-actions>button:hover{background:#245741}
+.inv-menu-bars{display:grid;gap:4px;width:14px}
+.inv-menu-bars i{display:block;height:1px;width:14px;background:currentColor}
+.inv-ruler{position:absolute;left:50%;transform:translateX(-50%);display:grid;justify-items:center;gap:8px;padding:0 8px 10px;background:#0e241fcf;border:1px solid #ffffff12;border-radius:var(--r-card);backdrop-filter:blur(14px)}
+.inv-ruler-ticks{display:flex}
+.inv-ruler-ticks a{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;gap:5px;text-decoration:none}
+.inv-ruler-ticks i{width:1px;height:7px;background:#ffffff45;transition:height var(--d-fast) var(--e-out),background var(--d-fast) var(--e-out)}
+.inv-ruler-ticks i:first-child{height:15px;background:#ffffff85}
+.inv-ruler-ticks a[aria-current] i{background:var(--c-signal)}
+.inv-ruler-ticks a[aria-current] i:first-child{height:24px}
+.inv-ruler-ticks a:hover i{background:white;height:18px}
+#inv-ruler-label{font:9px var(--f-mono);letter-spacing:.1em;color:#e1e9e5}
+.inv-journey-dock{position:fixed;z-index:35;bottom:max(20px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(560px,calc(100% - 32px));display:grid;grid-template-columns:88px 1fr 88px;align-items:center;border:1px solid #ffffff28;border-radius:var(--r-pill);background:#0a201bec;backdrop-filter:blur(20px);color:var(--c-campus);box-shadow:0 8px 40px #00100c30;padding:6px}
+.inv-journey-dock>a{display:flex;gap:10px;align-items:center;justify-content:center;min-height:50px;border-radius:var(--r-pill);text-decoration:none;font:11px var(--f-mono)}
+.inv-journey-dock>a:hover{background:#ffffff14}
+.inv-journey-dock>a:last-child{background:var(--c-signal);color:#10251c}
+.inv-journey-dock>a:last-child:hover{background:#a1f3ac}
+.inv-dock-current{display:grid;gap:3px;text-align:center;line-height:1.2;padding:2px 6px;min-width:0}
+.inv-dock-current>span{font:9px var(--f-mono);letter-spacing:.12em;color:#afc9ba}
+.inv-dock-current strong{font-weight:500;font-size:13px}
+.inv-no-script{display:flex;gap:1rem;flex-wrap:wrap;padding:130px 5vw 1rem}
+
+/* Full-screen chapter index: same scale and forest/green identity as home. */
+.inv-journey-menu{position:fixed;inset:0;width:100%;max-width:none;height:100%;height:100dvh;max-height:none;margin:0;padding:30px 5vw;border:0;background:radial-gradient(ellipse at 5% 95%,#326f52 0%,#1c4839 40%,#112d24 100%);color:var(--c-campus);overflow-y:auto;overscroll-behavior:contain}
+.inv-journey-menu::backdrop{background:#0a211b}
+.inv-menu-top{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.inv-menu-top>button{background:#ffffff0d;min-width:100px}
+.inv-menu-top>button span{font:24px var(--f-sans);line-height:1}
+.inv-menu-layout{display:grid;grid-template-columns:.9fr 1.2fr;gap:7vw;align-items:center;max-width:1500px;margin:6vh auto}
+.inv-journey-menu[open]:not(.inv-menu-fallback) .inv-menu-layout{animation:inv-menu-arrive var(--d-base) var(--e-osmo) both}
+@keyframes inv-menu-arrive{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.inv-menu-intro h2{font-size:clamp(2.5rem,4.8vw,5.5rem);margin-bottom:2rem}
+.inv-menu-intro>p:not(.inv-eyebrow){color:#c9dacf;line-height:1.9}
+.inv-menu-intro>a{display:inline-block;margin-top:2rem;font:11px var(--f-mono);padding:14px 0;text-underline-offset:6px;line-height:1.8}
+.inv-menu-chapters>a{display:grid;grid-template-columns:30px 1fr 25px;align-items:center;gap:20px;min-height:76px;border-top:1px solid #ffffff26;padding:14px 8px;text-decoration:none;transition:background var(--d-fast) var(--e-out),color var(--d-fast) var(--e-out)}
+.inv-menu-chapters>a:last-child{border-bottom:1px solid #ffffff26}
+.inv-menu-chapters>a:hover,.inv-menu-chapters>a[aria-current]{background:#ffffff06;color:var(--c-signal)}
+.inv-menu-number{font:10px var(--f-mono);color:#aec8b8}
+.inv-menu-chapters strong{display:block;font-size:clamp(1.2rem,2.2vw,2rem);font-weight:500;letter-spacing:-.03em;line-height:1.2}
+.inv-menu-chapters small{display:block;color:#c6d6cc;font:10px var(--f-mono);margin-top:6px;line-height:1.6}
+.inv-menu-arrow{font:22px var(--f-sans);transition:transform var(--d-fast) var(--e-out)}
+.inv-menu-chapters>a:hover .inv-menu-arrow{transform:translate(3px,-3px)}
+.inv-menu-bottom{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:22px 0 10px;border-top:1px solid #ffffff26;font:10px var(--f-mono);color:#c6d6cc}
+.inv-menu-bottom button{min-height:44px;padding:12px 0;text-decoration:underline;text-underline-offset:5px}
+.inv-menu-fallback{position:relative;height:auto;margin-top:120px}
+
+/* The opening scene stays readable with JavaScript, WebGL or motion off. */
+.smarttec-investor .inv-hero{min-height:100svh;padding:clamp(10rem,20vh,14rem) 6vw 9rem;background:#123027}
+.inv-hero-backdrop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;z-index:-3;opacity:.5}
+.inv-hero:before{content:'';position:absolute;inset:0;z-index:-2;background:linear-gradient(180deg,#10271fe8 0%,#12302799 38%,#14392bbb 68%,#123027 100%)}
+.smarttec-investor .inv-hero canvas{z-index:-1;opacity:.4;pointer-events:none}
+.inv-hero-copy{width:100%;max-width:1280px;margin:auto;text-align:center}
+.inv-hero-copy .inv-eyebrow{justify-content:center}
+.inv-hero-copy .inv-eyebrow:before{width:6px;height:6px;border-radius:50%;box-shadow:0 0 15px #7be88a70}
+.smarttec-investor .inv-hero h1{font-size:clamp(3rem,6.4vw,6.75rem);font-weight:var(--fw-display);line-height:1.02;letter-spacing:var(--ls-display);max-width:none;text-wrap:balance;margin-bottom:2rem;text-shadow:0 2px 24px #0c231c40}
+.inv-hero h1 em{color:#a7efb3}
+.smarttec-investor .inv-lead{margin:0 auto;max-width:52ch;font-size:clamp(1.05rem,1.5vw,1.3rem);line-height:1.7;color:#d5e1d9}
+.inv-hero-copy .inv-actions{justify-content:center;margin:2rem auto}
+.smarttec-investor .inv-hero-bottom{margin-top:4rem;align-items:flex-end;color:#cfdbd3;line-height:1.8}
+.inv-hero-bottom>span:last-child{text-align:right}
+.inv-hero-bottom small{display:inline-block;margin-top:8px;font-size:9px;letter-spacing:.07em;color:#b7ccbd}
+.smarttec-investor .sta-campus{background:var(--c-land-shadow);padding-top:7rem;scroll-margin-top:75px}
+.smarttec-investor .sta-intro h2{font-family:var(--f-display);font-weight:var(--fw-display);letter-spacing:var(--ls-display)}
+.smarttec-investor .sta-story h3{font-family:var(--f-display);font-weight:var(--fw-display);letter-spacing:var(--ls-display)}
+.smarttec-investor .sta-eyebrow{font-size:11px;letter-spacing:.14em}
+.smarttec-investor .sta-chapters button{transition:color var(--d-fast) var(--e-out),border-color var(--d-fast) var(--e-out)}
+.smarttec-investor .sta-chapters button:hover{color:var(--c-signal)}
+.smarttec-investor .sta-bottom{padding-bottom:2rem}
+.smarttec-investor .sta-status{margin-top:2rem}
+.smarttec-investor .sta-reference{scroll-margin-top:100px}
+
+/* Private entrance carries the same mark, geometry and type as the room. */
+.smarttec-investor .inv-login{max-width:none;min-height:100svh;padding:6rem max(6vw,calc((100vw - 1240px)/2));background:radial-gradient(ellipse at 95% 85%,#326f52,transparent 60%),var(--c-land-shadow)}
+.inv-login-brand{display:grid;gap:12px;margin-bottom:4rem}
+.inv-login-brand>span{font:10px var(--f-mono);letter-spacing:.14em;color:#bcd4c4}
+.smarttec-investor .inv-login h1{font-size:clamp(3rem,6.5vw,6.75rem);font-weight:var(--fw-display);margin-top:0}
+.smarttec-investor .inv-login form{width:100%;max-width:760px}
+.inv-login label{display:block;font:11px var(--f-mono);margin-bottom:12px}
+.inv-login form button{flex-shrink:0}
+.inv-login>a:last-child{font:11px var(--f-mono);text-underline-offset:6px;padding:12px 0}
+
+@media(max-width:1150px){.inv-ruler{display:none}.inv-menu-layout{gap:5vw}.inv-menu-intro h2{font-size:3.3rem}}
+@media(max-width:800px){
+  .inv-chrome{inset:12px 16px auto;gap:12px}
+  .inv-chrome-brand{padding:10px 12px}
+  .inv-chrome-brand .brand-lockup{width:140px}
+  .inv-chrome-brand>span{font-size:8px}
+  .inv-chrome-actions .inv-chrome-return{display:none}
+  .inv-chrome-actions>a,.inv-chrome-actions>button{padding:12px 16px}
+  .smarttec-investor .inv-section{padding-block:5rem}
+  .smarttec-investor .inv-hero{padding:10rem 5vw 8rem;min-height:100svh}
+  .smarttec-investor .inv-hero h1{font-size:clamp(2.65rem,7vw,4.5rem)}
+  .smarttec-investor .inv-hero-bottom{margin-top:3rem;font-size:10px;align-items:flex-start}
+  .inv-hero-bottom>span:last-child{text-align:left}
+  .inv-hero-copy .inv-eyebrow{font-size:9px;letter-spacing:.09em;gap:10px}
+  .inv-menu-layout{grid-template-columns:1fr;margin:3rem 0;gap:2rem}
+  .inv-menu-intro h2{font-size:2.4rem;margin-bottom:0}
+  .inv-menu-intro>p:not(.inv-eyebrow),.inv-menu-intro>a{display:none}
+  .inv-menu-intro h2 br{display:none}
+  .inv-menu-intro .inv-eyebrow{margin-bottom:1rem}
+  .inv-menu-chapters>a{min-height:74px;gap:10px}
+  .inv-menu-chapters strong{font-size:1.35rem}
+  .inv-menu-chapters small{font-size:9px}
+  .inv-menu-bottom{flex-wrap:wrap;gap:8px}
+  .inv-journey-menu{padding:20px 5vw}
+  .inv-menu-top .brand-lockup{width:160px}
+  .inv-journey-dock{bottom:max(12px,env(safe-area-inset-bottom));grid-template-columns:62px 1fr 62px}
+  .inv-journey-dock>a{gap:6px;min-height:48px;font-size:10px}
+  .inv-dock-current strong{font-size:12px}
+  .smarttec-investor .inv-footer{padding-bottom:8rem}
+  .smarttec-investor .inv-login{padding:3rem 6vw}
+  .inv-login-brand{margin-bottom:3rem}
+}
+@media(max-width:380px){.inv-chrome-brand .brand-lockup{width:120px}.inv-chrome{inset-inline:12px}.inv-menu-top .brand-lockup{width:140px}.inv-dock-direction{display:none}.inv-journey-dock{grid-template-columns:44px 1fr 44px}.inv-menu-chapters>a{grid-template-columns:22px 1fr 20px}}
+@media(prefers-reduced-motion:reduce){html:has(.smarttec-investor){scroll-behavior:auto}.smarttec-investor .inv-button:hover{transform:none}}
+@media print{
+  .inv-chrome,.inv-journey-menu,.inv-journey-dock,.inv-hero-backdrop,.inv-hero:before{display:none!important}
+  .smarttec-investor .inv-hero,.smarttec-investor .inv-section{padding:20pt 0;min-height:0}
+  .smarttec-investor .inv-hero h1{font-size:30pt;text-shadow:none}
+  .smarttec-investor .inv-hero-bottom,.smarttec-investor .inv-lead,.inv-hero h1 em{color:black}
+  .inv-hero-bottom small{display:none}
+  .smarttec-investor .inv-footer{padding-bottom:20pt}
+}
+
+/* Same root type scale and floating homepage header on both private routes. */
+html:has(body.smarttec-investor){font-size:15px}
+.smarttec-investor .inv-login{padding-top:130px;padding-bottom:90px;text-align:center;align-items:center}
+.smarttec-investor .inv-login .inv-eyebrow{justify-content:center}
+.smarttec-investor .inv-login h1{line-height:1.02;letter-spacing:var(--ls-display)}
+.smarttec-investor .inv-login form{text-align:left;max-width:660px}
+.smarttec-investor .inv-login label{font-size:14px}
+.smarttec-investor .inv-login>a:last-child{font-size:14px}
+.smarttec-investor .inv-hero h1{max-width:20ch;margin-inline:auto}
+@media(max-width:800px){.smarttec-investor .inv-login{padding:120px 24px 60px}}
