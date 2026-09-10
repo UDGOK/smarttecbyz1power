@@ -112,7 +112,7 @@ const topics = [...new Set(sources.map((s) => s.topic))].sort();
   initNews();
 </script>
 
-<style>
+<style is:global>
   .news { margin-top: var(--s-6); }
 
   .news__bar {

@@ -85,7 +85,7 @@ const netHeadline = network.service.split(' ').slice(0, 2).join(' ');
         <p>
           Energy is {power.rate}. How that reaches a tenant invoice —
           metered pass-through, an all-in rate per kW, or a blend — is
-          {' '}<span class="todo">[PLACEHOLDER: tenant power billing model and whether energy is passed through at cost]</span>.
+          {' '}<span class="todo">Power metering and billing will be specified before a contract</span>.
         </p>
       </div>
 
@@ -123,11 +123,11 @@ const netHeadline = network.service.split(' ').slice(0, 2).join(' ');
 
     <dl class="spec">
       <div><dt>Cooling method</dt><dd>{compute.cooling}</dd></div>
-      <div><dt>Design density</dt><dd><span class="todo">[PLACEHOLDER: supported kW per rack, and the rack count at that density]</span><span class="note">We will publish a measured figure once the loop is commissioned, not a design maximum from a datasheet.</span></dd></div>
-      <div><dt>Heat rejection</dt><dd><span class="todo">[PLACEHOLDER: heat rejection method — dry coolers, adiabatic, or chilled water — and whether it consumes water]</span></dd></div>
-      <div><dt>Coolant loop</dt><dd><span class="todo">[PLACEHOLDER: CDU vendor and model, loop redundancy, supply temperature]</span></dd></div>
-      <div><dt>Air-cooled space</dt><dd><span class="todo">[PLACEHOLDER: whether any air-cooled racks are offered for storage, networking and head nodes]</span></dd></div>
-      <div><dt>Efficiency</dt><dd><span class="todo">[PLACEHOLDER: measured PUE once Phase 1A is live]</span></dd></div>
+      <div><dt>Design density</dt><dd><span class="todo">Supported rack density and rack count await engineering verification.</span><span class="note">Cooling design and commissioning must establish the supported deployment limits.</span></dd></div>
+      <div><dt>Heat rejection</dt><dd><span class="todo">Heat rejection and any water demand will follow the selected cooling design.</span></dd></div>
+      <div><dt>Coolant loop</dt><dd><span class="todo">Any CDU, loop redundancy and supply-temperature specification depends on the selected design.</span></dd></div>
+      <div><dt>Air-cooled space</dt><dd><span class="todo">Air-cooled rack allocation for supporting equipment will be reviewed with the deployment.</span></dd></div>
+      <div><dt>Efficiency</dt><dd><span class="todo">Measured PUE will be available only after commissioning and operation.</span></dd></div>
     </dl>
   </section>
 
@@ -152,7 +152,7 @@ const netHeadline = network.service.split(' ').slice(0, 2).join(' ');
           What that circuit does not yet include is a second one. Carrier diversity,
           transit and peering arrangements, and whether cross-connects are available to
           other tenants are all open:
-          {' '}<span class="todo">[PLACEHOLDER: second carrier / diverse path, IP transit arrangements, cross-connect availability and pricing]</span>.
+          {' '}<span class="todo">A second carrier or physical path, transit and cross-connect terms remain unconfirmed</span>.
         </p>
       </div>
 
@@ -161,8 +161,8 @@ const netHeadline = network.service.split(' ').slice(0, 2).join(' ');
         <div><dt>Service</dt><dd>{network.service}<span class="note">{network.status}</span></dd></div>
         <div><dt>Cost</dt><dd>{network.cost}</dd></div>
         <div><dt>Term</dt><dd>{network.term}</dd></div>
-        <div><dt>Diversity</dt><dd><span class="todo">[PLACEHOLDER: is there a second physical path]</span></dd></div>
-        <div><dt>Tenant allocation</dt><dd><span class="todo">[PLACEHOLDER: how bandwidth is allocated or resold to tenants]</span></dd></div>
+        <div><dt>Diversity</dt><dd><span class="todo">A second physical path is not yet verified.</span></dd></div>
+        <div><dt>Tenant allocation</dt><dd><span class="todo">Bandwidth allocation and tenant terms will be confirmed with the carrier.</span></dd></div>
       </dl>
     </div>
   </section>
@@ -193,17 +193,17 @@ const netHeadline = network.service.split(' ').slice(0, 2).join(' ');
           <tr><th scope="row">Energy</th><td>{power.rate} at the site</td></tr>
           <tr><th scope="row">Cooling</th><td>{compute.cooling}</td></tr>
           <tr><th scope="row">Network</th><td>{network.service}, {network.provider} — planned</td></tr>
-          <tr><th scope="row">Minimum commitment</th><td><span class="todo">[PLACEHOLDER: minimum kW or rack count per contract]</span></td></tr>
-          <tr><th scope="row">Contract length</th><td><span class="todo">[PLACEHOLDER: standard and minimum term lengths]</span></td></tr>
-          <tr><th scope="row">Pricing</th><td><span class="todo">[PLACEHOLDER: $ per kW per month, and whether space is billed separately]</span></td></tr>
-          <tr><th scope="row">Escalator</th><td><span class="todo">[PLACEHOLDER: annual escalator, if any]</span></td></tr>
-          <tr><th scope="row">Deposit</th><td><span class="todo">[PLACEHOLDER: security deposit or letter of credit requirement]</span></td></tr>
-          <tr><th scope="row">Uptime SLA</th><td><span class="todo">[PLACEHOLDER: uptime commitment and service credits]</span></td></tr>
-          <tr><th scope="row">Remote hands</th><td>Offered. <span class="todo">[PLACEHOLDER: included hours per month, hourly rate beyond that, response time, and 24×7 vs business-hours coverage]</span></td></tr>
-          <tr><th scope="row">Site access</th><td><span class="todo">[PLACEHOLDER: escorted vs unescorted access, hours, and the access request process]</span></td></tr>
-          <tr><th scope="row">Physical security</th><td><span class="todo">[PLACEHOLDER: perimeter, access control, CCTV retention, and whether the site is manned]</span></td></tr>
-          <tr><th scope="row">Compliance</th><td><span class="todo">[PLACEHOLDER: audits or attestations planned, if any. None are claimed today.]</span></td></tr>
-          <tr><th scope="row">Shipping and receiving</th><td><span class="todo">[PLACEHOLDER: receiving hours, dock or lift-gate access, and staging space for tenant deliveries]</span></td></tr>
+          <tr><th scope="row">Minimum commitment</th><td><span class="todo">Minimum kW and rack allocation will be agreed after review.</span></td></tr>
+          <tr><th scope="row">Contract length</th><td><span class="todo">Contract duration will be specified in the offer.</span></td></tr>
+          <tr><th scope="row">Pricing</th><td><span class="todo">Space, power and energy charges will be itemized in the offer.</span></td></tr>
+          <tr><th scope="row">Escalator</th><td><span class="todo">Any annual escalator will be stated in the contract.</span></td></tr>
+          <tr><th scope="row">Deposit</th><td><span class="todo">Deposit or credit-support requirements will be stated in the offer.</span></td></tr>
+          <tr><th scope="row">Uptime SLA</th><td><span class="todo">Uptime commitments and credits are not yet established.</span></td></tr>
+          <tr><th scope="row">Remote hands</th><td>Subject to agreement. <span class="todo">Remote-hands scope, rates, response time and coverage hours require agreement.</span></td></tr>
+          <tr><th scope="row">Site access</th><td><span class="todo">Access arrangements and hours will be agreed before equipment delivery.</span></td></tr>
+          <tr><th scope="row">Physical security</th><td><span class="todo">Physical security and staffing arrangements await documentation.</span></td></tr>
+          <tr><th scope="row">Compliance</th><td><span class="todo">No compliance audit or attestation is claimed today.</span></td></tr>
+          <tr><th scope="row">Shipping and receiving</th><td><span class="todo">Receiving hours, unloading and staging requirements will be coordinated per deployment.</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -220,38 +220,22 @@ const netHeadline = network.service.split(' ').slice(0, 2).join(' ');
 
   <section aria-labelledby="hall" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">06</span><span class="eyebrow__t">The hall</span></p>
-    <h2 id="hall">Building 1, before fit-out</h2>
+    <h2 id="hall">Building A, before fit-out</h2>
 
-    <figure class="photo">
-      <div class="photo__frame">
-        <svg class="photo__icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-          <rect x="2.5" y="6" width="19" height="14" rx="2" />
-          <circle cx="12" cy="13" r="3.5" />
-          <path d="M8.5 6l1.4-2.2h4.2L15.5 6" />
-          <path d="M3 3l18 18" />
-        </svg>
-        <p class="photo__state">Photograph not taken yet</p>
-      </div>
-      <figcaption>
-        <b>[PHOTO NEEDED]</b> Interior of Building 1 as it stands, plus the electrical
-        room. There is no photograph of a populated hall because the hall is not populated
-        yet — power-on is {site.powerOn}. We will not borrow someone else's data center
-        interior to fill this frame.
-      </figcaption>
-    </figure>
+    <p class="form-note">Current site photography is not yet published. Arrange a site visit to review the existing buildings; illustrations on this page show concepts only.</p>
   </section>
 
   <section class="is-end" aria-labelledby="reserve" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">07</span><span class="eyebrow__t">Next</span></p>
-    <h2 id="reserve">Reserve before Phase 1A fills</h2>
+    <h2 id="reserve">Review your deployment</h2>
     <p>
       The planned first phase is {compute.gpus} GPUs across {compute.servers} servers. Tell us the load in
       kilowatts, the shape of the workload, and the date you need it live, and we will
-      come back with a term sheet against real capacity rather than a waiting list.
+      review equipment availability, facility allocation and commercial terms before an offer.
     </p>
     <div class="actions">
-      <a class="btn" href="/contact">Reserve capacity</a>
-      <a class="btn btn--ghost" href="/power">Why there is no queue</a>
+      <a class="btn" href="/contact">Request a deployment review</a>
+      <a class="btn btn--ghost" href="/power">Review the power position</a>
     </div>
   </section>
 </Content>

@@ -1,0 +1,91 @@
+# Site facts awaiting owner or engineering verification
+
+These are internal diligence items, not publication-ready claims. The public pages retain clear pending-status wording. Recorded during the 10 September 2026 QA correction.
+
+- src/data/site.ts: legal contracting entity, and whether SmartTec is a division, subsidiary or separately owned entity associated with Z1Power
+- src/data/site.ts: owning entity, liens, and which assets are included in the reported value
+- src/data/site.ts: which of the two buildings takes inverter assembly and which takes battery assembly
+- src/data/site.ts: voltage, phase, metering and upstream arrangement for the house/office service
+- src/data/site.ts: transformer nameplate rating, single-line diagram, feeder ratings, serving utility identity and allocation
+- src/data/site.ts: contracted energy rate and demand charges
+- src/data/site.ts: whether the third stated 10-ton unit is a second Building C unit or a mistaken label, and what serves Building A
+- src/data/site.ts: the event the provisioning estimate runs from
+- src/data/site.ts: committed downstream and upstream rates, circuit type, order status, delivery conditions, term, IP/BGP arrangements, egress terms and service levels
+- src/data/site.ts: which building takes the first installation
+- src/data/site.ts: selected OEM server, CPU, RAM, local storage and networking
+- src/data/site.ts: cooling method, which follows the selected OEM configuration and facility review — NVIDIA documents both air and liquid options for this part
+- src/pages/about.astro: registered entity name, state of incorporation, and formation date
+- src/pages/about.astro: corporate office address, if different from the site
+- src/pages/about.astro: documented related-party equipment cost, warranty and service obligations before any manufacturer-cost or savings claim is published
+- src/pages/about.astro: {company.parent} founding date, ownership structure, manufacturing locations, and product range
+- src/pages/about.astro: whether {company.name} is a subsidiary, a division, or a separate entity under common ownership — and which entity owns the land, leases the equipment, signs customer contracts and would issue any securities
+- src/pages/about.astro: leadership — names, roles, and relevant operating background, for {company.name} and for {company.parent}
+- src/pages/about.astro: who is on site at {site.name}, and whether the site is staffed during construction and after power-on
+- src/pages/colocation.astro: tenant power billing model and whether energy is passed through at cost
+- src/pages/colocation.astro: supported kW per rack, and the rack count at that density
+- src/pages/colocation.astro: heat rejection method — dry coolers, adiabatic, or chilled water — and whether it consumes water
+- src/pages/colocation.astro: CDU vendor and model, loop redundancy, supply temperature
+- src/pages/colocation.astro: whether any air-cooled racks are offered for storage, networking and head nodes
+- src/pages/colocation.astro: measured PUE once Phase 1A is live
+- src/pages/colocation.astro: second carrier / diverse path, IP transit arrangements, cross-connect availability and pricing
+- src/pages/colocation.astro: is there a second physical path
+- src/pages/colocation.astro: how bandwidth is allocated or resold to tenants
+- src/pages/colocation.astro: minimum kW or rack count per contract
+- src/pages/colocation.astro: standard and minimum term lengths
+- src/pages/colocation.astro: $ per kW per month, and whether space is billed separately
+- src/pages/colocation.astro: annual escalator, if any
+- src/pages/colocation.astro: security deposit or letter of credit requirement
+- src/pages/colocation.astro: uptime commitment and service credits
+- src/pages/colocation.astro: included hours per month, hourly rate beyond that, response time, and 24×7 vs business-hours coverage
+- src/pages/colocation.astro: escorted vs unescorted access, hours, and the access request process
+- src/pages/colocation.astro: perimeter, access control, CCTV retention, and whether the site is manned
+- src/pages/colocation.astro: audits or attestations planned, if any. None are claimed today.
+- src/pages/colocation.astro: receiving hours, dock or lift-gate access, and staging space for tenant deliveries
+- src/pages/compute.astro: spares, burn-in and internal-use policy once the servers are ordered
+- src/pages/compute.astro: systems per rack, and the resulting kW per rack
+- src/pages/compute.astro: coolant distribution unit vendor, model, capacity and redundancy
+- src/pages/compute.astro: facility water supply temperature and delta-T
+- src/pages/compute.astro: dry cooler / adiabatic / chilled water, and water consumption if any
+- src/pages/compute.astro: share of heat still removed by air, and the air-cooling capacity provided for it
+- src/pages/compute.astro: leak detection and isolation approach in the hall
+- src/pages/compute.astro: east-west fabric — InfiniBand or Ethernet, speed per GPU, topology, and whether all {systems} systems sit in one non-blocking domain
+- src/pages/compute.astro: parallel filesystem or object store, usable capacity, and read throughput available to a full-fleet training run
+- src/pages/compute.astro: CPU model and core count, system memory, and local NVMe per system
+- src/pages/compute.astro: operating system, driver and CUDA baseline, container runtime, and scheduler — bare metal, Slurm, or Kubernetes
+- src/pages/compute.astro: whether GPUs are let bare-metal by the system, by the GPU, or virtualised, and the isolation guarantee between tenants
+- src/pages/compute.astro: bandwidth allocated per tenant and any egress policy
+- src/pages/compute.astro: minimum bookable unit — a GPU, a system, or a block of systems
+- src/pages/compute.astro: $ per GPU-hour or per system-month, and any reserved-term discount
+- src/pages/compute.astro: on-demand, reserved, or committed-term options
+- src/pages/compute.astro: hardware replacement SLA and who is on the end of the phone at 3am
+- src/pages/contact.astro: phone number and hours it is answered
+- src/pages/contact.astro: notice required for a site visit, and who escorts
+- src/pages/contact.astro: committed response time for enquiries
+- src/pages/power.astro: serving utility / cooperative name and account status
+- src/pages/power.astro: documented related-party equipment cost, warranty and service obligations
+- src/pages/power.astro: battery cabinet count, usable kWh, C-rate and expected daily cycles
+- src/pages/power.astro: solar array configuration, tilt, expected annual yield in MWh
+- src/pages/power.astro: construction and commissioning dates for the solar array and the battery plant
+- src/pages/power.astro: demand charge structure from the serving utility
+- src/pages/power.astro: measured PUE — a design figure is not a measured one, and there is no operating history to measure yet
+- src/pages/power.astro: whether energy is passed through at cost, blended into a per-kW rate, or metered
+- src/pages/power.astro: UPS topology and ride-through duration for the IT load
+- src/pages/power.astro: standby generation — whether any is installed, fuel type, run time
+- src/pages/power.astro: electrical redundancy — N, N+1, or 2N, at the distribution and UPS levels
+- src/pages/power.astro: whether the site targets a formal resilience classification, and which
+- src/pages/power.astro: switchgear arrangement and single points of failure between the transformer and the racks
+- src/pages/power.astro: uptime SLA offered to tenants, and the service credit schedule behind it
+- src/pages/power.astro: maintenance windows and how they are notified
+- src/pages/site.astro: Bryan County assessor parcel number and legal description
+- src/pages/site.astro: zoning classification and whether a data center is permitted by right
+- src/pages/site.astro: water source, sanitary/septic, and natural gas availability
+- src/pages/site.astro: clear height, slab loading, and roof structure per building
+- src/pages/site.astro: as-built drawings and structural report for Buildings 1–3
+- src/pages/site.astro: ALTA survey and title commitment
+- src/pages/site.astro: FEMA flood zone determination for the parcel
+- src/pages/site.astro: Phase I environmental site assessment
+- src/pages/site.astro: geotechnical report — bearing capacity for equipment pads and the solar array
+- src/pages/site.astro: seismic and wind design criteria used for Buildings 1–3
+- src/pages/site.astro: water availability and volume, and whether any cooling loop needs it
+- src/pages/site.astro: Bryan County and Oklahoma tax treatment applicable to the site
+- src/pages/site.astro: nearest commercial airport and drive time for hands-on site visits

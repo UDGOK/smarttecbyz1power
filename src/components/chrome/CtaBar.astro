@@ -1,6 +1,6 @@
 ---
 // Floating capture bar, pinned bottom-centre like the reference's beta bar.
-// Posts to a form endpoint — see README for wiring. [PLACEHOLDER: endpoint]
+import { FORM_ACTION } from '../../data/contact';
 //
 // This is the only always-light element on a site whose scene is usually dark,
 // so it rests at 0.9 behind a wide soft shadow and comes to full strength the
@@ -12,7 +12,9 @@
 //
 // Styles live in src/styles/chrome.css.
 ---
-<form class="cta-bar" id="reserve-form" method="post" action="/api/reserve" novalidate>
+<form class="cta-bar" id="reserve-form" method="post" action={FORM_ACTION}>
+  <input type="hidden" name="_subject" value="SmartTec deployment inquiry" />
+  <input type="hidden" name="source" value="capture-bar" />
   <button type="button" class="cta-bar__back" aria-label="Previous stage" data-back data-cursor="action">
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M19 12H5M12 19l-7-7 7-7" />
@@ -36,7 +38,7 @@
   </span>
 
   <button type="submit" class="cta-bar__submit" data-cursor="action">
-    <span class="cta-bar__submit-label">Reserve capacity</span>
+    <span class="cta-bar__submit-label">Get in touch</span>
     <span class="cta-bar__spinner" aria-hidden="true"></span>
   </button>
 

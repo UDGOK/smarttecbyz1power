@@ -18,7 +18,7 @@
  *      unresolved are different things, and the label is part of the value
  *      rather than a footnote somewhere else on the page.
  *
- * Anything still unconfirmed is marked `[PLACEHOLDER: …]` and renders with a
+ * Anything still unconfirmed is qualified as pending and renders with a
  * visible marker. Do not resolve one by inventing a figure.
  */
 
@@ -52,7 +52,7 @@ export const company = {
    * would issue securities — and says not to publish "one company owns
    * everything" until that is documented.
    */
-  entity: '[PLACEHOLDER: legal contracting entity, and whether SmartTec is a division, subsidiary or separately owned entity associated with Z1Power]',
+  entity: 'Contracting entity and relationship to Z1Power are being documented',
 } as const;
 
 /**
@@ -77,7 +77,7 @@ export const site = {
   acresEvidence: 'calculated' as Evidence,
 
   ownership: 'Owner-reported as purchased',
-  ownershipNote: '[PLACEHOLDER: owning entity, liens, and which assets are included in the reported value]',
+  ownershipNote: 'Owning entity, title, liens and valuation scope remain subject to diligence',
 
   tracts: [
     {
@@ -150,7 +150,7 @@ export const site = {
     scope: 'Inverter assembly and manufacturing, battery module and pack assembly, testing and service',
     startTarget: 'approximately 23 September 2026',
     startTargetNote: 'Management target. Permit, financing and contractor readiness not independently verified.',
-    allocation: '[PLACEHOLDER: which of the two buildings takes inverter assembly and which takes battery assembly]',
+    allocation: 'The allocation of inverter and battery assembly between the two buildings is not yet confirmed',
     evidence: 'planned' as Evidence,
   },
 
@@ -191,14 +191,14 @@ export const power = {
   serviceApparentEvidence: 'calculated' as Evidence,
 
   houseOfficeService: '200 A, separate',
-  houseOfficeNote: '[PLACEHOLDER: voltage, phase, metering and upstream arrangement for the house/office service]',
+  houseOfficeNote: 'Voltage, phase, metering and upstream supply are not yet verified',
 
   /** The approved wording for what capacity is actually on offer. */
   allocation: 'Usable IT capacity will be allocated following electrical, cooling and commissioning review',
 
-  transformerNameplate: '[PLACEHOLDER: transformer nameplate rating, single-line diagram, feeder ratings, serving utility identity and allocation]',
+  transformerNameplate: 'Transformer and feeder ratings, utility allocation and the single-line diagram await engineering verification',
 
-  rate: '[PLACEHOLDER: contracted energy rate and demand charges]',
+  rate: 'a contracted rate and demand-charge schedule to be agreed before an offer',
 
   /**
    * Cooling. The owner's statement lists 15 tons at C, 10 at B and a further
@@ -206,7 +206,7 @@ export const power = {
    * Building A unassigned. That contradiction is not silently corrected here.
    */
   hvac: 'Existing HVAC serves the data-center buildings. Building-specific cooling capacity and operating limits are being documented for the planned deployments.',
-  hvacUnresolved: '[PLACEHOLDER: whether the third stated 10-ton unit is a second Building C unit or a mistaken label, and what serves Building A]',
+  hvacUnresolved: 'Building-specific HVAC ratings and the equipment serving Building A await verification',
   hvacEvidence: 'unresolved' as Evidence,
 
   /** Storage. A power rating; the usable energy and status are not known. */
@@ -264,7 +264,7 @@ export const network = {
   provider: 'Dobson Telephone Company',
   service: '100 Gbps asymmetrical',
   leadTime: 'approximately 30 days',
-  leadTimeNote: '[PLACEHOLDER: the event the provisioning estimate runs from]',
+  leadTimeNote: 'The carrier must confirm when the provisioning period starts',
   secondCircuit: 'A second 100 Gbps circuit can be evaluated',
   diversityNote: 'Two circuits from one carrier do not establish route diversity, independent upstream failure domains or an aggregate rate to a single customer.',
   status: 'Planned — subject to carrier confirmation',
@@ -278,7 +278,7 @@ export const network = {
   costFullTerm: '$484,500',
   costEvidence: 'calculated' as Evidence,
 
-  profile: '[PLACEHOLDER: committed downstream and upstream rates, circuit type, order status, delivery conditions, term, IP/BGP arrangements, egress terms and service levels]',
+  profile: 'Committed bandwidth, circuit type, order status, delivery terms, IP arrangements, egress and service levels await carrier confirmation',
 
   /** The approved interim wording, verbatim. */
   publicCopy: 'High-capacity Dobson connectivity is planned. Management reports a 100 Gbps service option with an approximately 30-day provisioning estimate and the option to evaluate a second 100 Gbps circuit. Final bandwidth profiles, delivery terms and resilience design are subject to carrier confirmation.',
@@ -308,8 +308,8 @@ export const compute = {
   workloads: 'Inference, computer vision, rendering and workload-specific fine-tuning',
   workloadNote: 'Training and larger models require benchmarking before any commitment.',
 
-  building: '[PLACEHOLDER: which building takes the first installation]',
-  platform: '[PLACEHOLDER: selected OEM server, CPU, RAM, local storage and networking]',
+  building: 'Building assignment is not yet confirmed',
+  platform: 'The supported OEM configuration, CPU, memory, local storage and network specification are not yet selected',
 
   /**
    * An estimate, and labelled as one everywhere it appears. It is not a
@@ -323,7 +323,7 @@ export const compute = {
    * The handoff removes the claim that a roughly 4 kW server necessarily
    * requires liquid cooling. NVIDIA documents both air and liquid options.
    */
-  cooling: '[PLACEHOLDER: cooling method, which follows the selected OEM configuration and facility review — NVIDIA documents both air and liquid options for this part]',
+  cooling: 'Cooling will follow the selected OEM configuration and facility review; the GPU supports air or liquid options',
 
   target: 'Q4 2026 target',
 

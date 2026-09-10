@@ -174,12 +174,12 @@ export function fitTo(
   }
 
   if (accelerator.rackOf) {
-    const rackKw = (accelerator.rackOf * accelerator.tdpW) / 1000;
+    const racks = Math.ceil(count / accelerator.rackOf);
+    const rackKw = (racks * accelerator.rackOf * accelerator.tdpW) / 1000;
     notes.push(
-      `The unit here is a rack, not a card. ${count} of the ${accelerator.rackOf} GPUs in one `
-      + `${accelerator.short} carries this model — but the rack is what you buy and what you power, `
-      + `and it draws on the order of ${Math.round(rackKw)} kW of accelerator load before facility `
-      + 'overhead. That is a facility decision before it is a hardware one.',
+      `${count} GPUs require ${racks} complete ${accelerator.short} ${racks === 1 ? 'rack' : 'racks'} `
+      + `of ${accelerator.rackOf} GPUs each. Full-rack GPU power is approximately ${Math.round(rackKw)} kW, `
+      + 'before CPUs, networking, cooling and other facility overhead. Confirm the complete rack specification with the vendor.',
     );
   }
 

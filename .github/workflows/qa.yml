@@ -1,0 +1,25 @@
+name: Site QA
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      ASTRO_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run build:node
+      - run: npm run verify:pages
+      - run: npm run verify:qa
+      - run: node tools/test-investor-http.mjs
+      - run: npm run build
+      - run: npm run verify:pages -- .vercel/output/static
+      - run: npm run verify:qa -- .vercel/output/static

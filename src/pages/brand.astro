@@ -321,8 +321,8 @@ const social = [
 
     <dl class="spec" style="margin-top: var(--s-6);">
       <div><dt>Thread order</dt><dd>Body first, then the green core<span class="note">Dark fabric: off-white #EEF1EF then #7BE88A. Light fabric: forest #1C4839 then #7BE88A. These are appearance targets, not thread manufacturer numbers — match physical swatches.</span></dd></div>
-      <div><dt>Shop artwork</dt><dd><a href={`${B}/embroidery-artwork/`}>embroidery-artwork/</a><span class="note">Simplified EPS and SVG in one- and two-colour versions, if the shop would rather digitise from vector themselves.</span></dd></div>
-      <div><dt>Earlier trials</dt><dd><a href={`${B}/embroidery-pes/`}>embroidery-pes/</a><span class="note">Basic horizontal-fill drafts, superseded by the satin edition above. Kept for reference.</span></dd></div>
+      <div><dt>Shop artwork</dt><dd><details><summary>Browse embroidery-artwork files</summary><ul>{kit.files.filter(f => f.path.startsWith("embroidery-artwork/")).map(f => <li><a href={`${B}/${f.path}`} download>{f.path.slice("embroidery-artwork/".length)}</a></li>)}</ul></details><span class="note">Simplified EPS and SVG in one- and two-colour versions, if the shop would rather digitise from vector themselves.</span></dd></div>
+      <div><dt>Earlier trials</dt><dd><details><summary>Browse embroidery-pes files</summary><ul>{kit.files.filter(f => f.path.startsWith("embroidery-pes/")).map(f => <li><a href={`${B}/${f.path}`} download>{f.path.slice("embroidery-pes/".length)}</a></li>)}</ul></details><span class="note">Basic horizontal-fill drafts, superseded by the satin edition above. Kept for reference.</span></dd></div>
       <div><dt>Stickers and posters</dt><dd>Use the EPS artwork, not PES<span class="note">No cut contour is supplied — the printer sets the sticker shape and print specification.</span></dd></div>
       <div><dt>What to check on the sample</dt><dd>Coverage, letter openings, the green core gap, puckering, thread breaks<span class="note">Plus fabric and stabiliser, needle and thread weight, tension, hoop clearance, and PES v6 support on the machine.</span></dd></div>
     </dl>
@@ -339,10 +339,10 @@ const social = [
       motion is persistent.
     </p>
     <dl class="spec">
-      <div><dt>Files</dt><dd><a href={`${B}/website/`}>website/</a><span class="note">Copy the folder to <code>/assets/smarttec/</code> and import <code>mountSmartTec</code> from <code>smarttec-particles.mjs</code>.</span></dd></div>
+      <div><dt>Files</dt><dd><details><summary>Browse website files</summary><ul>{kit.files.filter(f => f.path.startsWith("website/")).map(f => <li><a href={`${B}/${f.path}`} download>{f.path.slice("website/".length)}</a></li>)}</ul></details><span class="note">Copy the folder to <code>/assets/smarttec/</code> and import <code>mountSmartTec</code> from <code>smarttec-particles.mjs</code>.</span></dd></div>
       <div><dt>Example</dt><dd><a href={`${B}/website/example.html`}>example.html</a><span class="note">Serve it over HTTP — it uses modules.</span></dd></div>
       <div><dt>Preview</dt><dd><a href={`${B}/previews/approved-particle-preview.html`}>approved-particle-preview.html</a><span class="note">Self-contained; opens straight from disk.</span></dd></div>
-      <div><dt>Source and reproduction</dt><dd><a href={`${B}/source/`}>source/</a><span class="note">Traced geometry, the approved concept image, and the scripts that regenerate every variant.</span></dd></div>
+      <div><dt>Source and reproduction</dt><dd><details><summary>Browse source files</summary><ul>{kit.files.filter(f => f.path.startsWith("source/")).map(f => <li><a href={`${B}/${f.path}`} download>{f.path.slice("source/".length)}</a></li>)}</ul></details><span class="note">Traced geometry, the approved concept image, and the scripts that regenerate every variant.</span></dd></div>
     </dl>
   </section>
 

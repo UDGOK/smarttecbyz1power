@@ -1,6 +1,7 @@
 ---
 import Content from '../layouts/Content.astro';
 import { company, site, power, compute } from '../data/site';
+import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
 
 /* Split so the headline figure and its qualifier can be set at different sizes
    without either being retyped away from the site record. */
@@ -8,7 +9,7 @@ import { company, site, power, compute } from '../data/site';
 ---
 
 <Content
-  title={`Reserve capacity at ${site.designation} | ${company.full}`}
+  title={`Discuss a deployment at ${site.designation} | ${company.full}`}
   description={`Talk to ${company.full} about dedicated compute or customer-owned hosting at ${site.name}. A submission is an inquiry — it starts a deployment review, and does not reserve capacity.`}
   kicker="Contact"
   heading="Let’s plan your workload."
@@ -28,10 +29,12 @@ import { company, site, power, compute } from '../data/site';
       This is an inquiry. Sending it does not reserve inventory, commit capacity or
       fix a price — it starts a conversation in which we confirm workload
       suitability, equipment availability, facility allocation and commercial terms.
-      <span class="todo">[PLACEHOLDER: inquiry destination — set PUBLIC_RESERVE_ENDPOINT to the CRM or mail relay before launch. Until it is set this form will tell visitors it cannot deliver rather than pretend it has.]</span>
+      Inquiries go to <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> through FormSubmit. You can also email us directly. Please do not include confidential information in this form.
     </p>
 
-    <form class="form" id="reserve-enquiry" method="post" action="/api/reserve">
+    <form class="form" id="reserve-enquiry" method="post" action={FORM_ACTION}>
+      <input type="hidden" name="_subject" value="SmartTec deployment inquiry" />
+      <input type="hidden" name="_template" value="table" />
       <fieldset class="form__set">
         <legend class="form__legend"><span class="form__legend-n">01</span>You</legend>
 
@@ -158,8 +161,8 @@ import { company, site, power, compute } from '../data/site';
 
     <div class="split">
       <dl class="spec">
-        <div><dt>Email</dt><dd><span class="todo">[PLACEHOLDER: sales email address]</span></dd></div>
-        <div><dt>Phone</dt><dd><span class="todo">[PLACEHOLDER: phone number and hours it is answered]</span></dd></div>
+        <div><dt>Email</dt><dd><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></dd></div>
+        <div><dt>Phone</dt><dd><span class="todo">Please email us to arrange a call.</span></dd></div>
         <div>
           <dt>Site address</dt>
           <dd>
@@ -171,32 +174,31 @@ import { company, site, power, compute } from '../data/site';
             </address>
           </dd>
         </div>
-        <div><dt>Site visits</dt><dd>Arranged individually. <span class="todo">[PLACEHOLDER: notice required for a site visit, and who escorts]</span></dd></div>
-        <div><dt>Response time</dt><dd><span class="todo">[PLACEHOLDER: committed response time for enquiries]</span></dd></div>
+        <div><dt>Site visits</dt><dd>Arranged individually. <span class="todo">Please arrange notice and an escort by email before visiting.</span></dd></div>
+        <div><dt>Response time</dt><dd><span class="todo">We review inquiries individually; no guaranteed response time is currently offered.</span></dd></div>
       </dl>
 
       <div class="stack">
         <div class="callout">
           <p>
-            <strong>The short version, if you are comparing sites.</strong> The industry
-            grid interconnection timelines gate most new capacity. {site.designation} never
-            entered it, because the {power.service} service is already standing on
-            land we own and the generation sits behind the meter. Phase 1A uses
-            {' '}the site. What it can carry as IT load follows an engineering review.
+            <strong>The short version, if you are comparing sites.</strong> Industry
+            grid interconnection timelines can constrain new capacity. {site.designation} has
+            owner-reported {power.service} distribution already standing. Planned generation
+            and storage require their own design and utility review. Usable IT capacity
+            follows electrical, cooling and commissioning review.
           </p>
         </div>
 
         <div>
           <h3>What happens after you send this</h3>
           <ol class="bullets">
-            <li>We read it. A person, usually the same day the enquiry lands.</li>
+            <li>A person reviews your inquiry.</li>
             <li>We tell you what is genuinely available at {site.designation} for your load and your date — including if the answer is no.</li>
             <li>We answer the open items on these pages that are gates for you, in writing.</li>
             <li>Site visit at {site.name}, if the numbers survive step two.</li>
           </ol>
           <p class="fineprint">
-            Step 1 timing above is our intent, not a contractual commitment — see the
-            response-time placeholder opposite.
+            Response timing depends on the inquiry; no contractual response time is offered.
           </p>
         </div>
       </div>
@@ -231,7 +233,7 @@ import { company, site, power, compute } from '../data/site';
    */
   import { submitInquiry, failureMessage } from '../lib/inquiry';
 
-  const form = document.querySelector<HTMLFormElement>('#reserve-enquiry, form[action="/api/reserve"]');
+  const form = document.querySelector<HTMLFormElement>('#reserve-enquiry');
   const status = document.querySelector<HTMLElement>('[data-form-status]');
   const submit = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
   let sending = false;
@@ -257,13 +259,16 @@ import { company, site, power, compute } from '../data/site';
     for (const [key, value] of new FormData(form).entries()) {
       if (typeof value === 'string' && value.trim() !== '') payload[key] = value.trim();
     }
+    const fields = Array.from(form.querySelectorAll<HTMLFieldSetElement>('fieldset'));
+    fields.forEach(field => { field.disabled = true; });
 
     void submitInquiry(payload).then((result) => {
       sending = false;
+      fields.forEach(field => { field.disabled = false; });
       if (submit) submit.disabled = false;
       if (result.ok) {
         form.dataset.state = 'sent';
-        say('Received. We will confirm workload suitability, equipment availability, facility allocation and commercial terms before issuing an offer.');
+        say('The delivery service accepted your inquiry. We will review workload suitability, equipment availability, facility allocation and commercial terms before issuing an offer.');
         form.reset();
         return;
       }

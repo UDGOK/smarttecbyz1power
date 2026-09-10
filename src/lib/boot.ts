@@ -986,7 +986,7 @@ function run(): void {
       if (state !== 'idle') form.classList.add(`is-${state}`);
     };
 
-    if (!email.includes('@')) {
+    if (!form.reportValidity()) {
       if (msg) msg.textContent = 'Enter a valid work email';
       setState('error');
       return;
@@ -994,13 +994,16 @@ function run(): void {
 
     sending = true;
     setState('submitting');
+    const fields = Array.from(form.querySelectorAll<HTMLInputElement | HTMLButtonElement>('input, button[type="submit"]'));
+    fields.forEach(field => { field.disabled = true; });
     if (msg) msg.textContent = 'Sending…';
 
     void submitInquiry({ email, source: 'capture-bar' }).then((result) => {
       sending = false;
+      fields.forEach(field => { field.disabled = false; });
       if (result.ok) {
         setState('sent');
-        if (msg) msg.textContent = 'Received — we will be in touch.';
+        if (msg) msg.textContent = 'Inquiry accepted by the delivery service.';
         form.reset();
         return;
       }

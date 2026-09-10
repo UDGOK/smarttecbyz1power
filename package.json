@@ -2,30 +2,38 @@
   "name": "smarttec-by-z1power",
   "version": "0.1.0",
   "private": true,
+  "engines": { "node": "24.x" },
+  "overrides": { "@vercel/routing-utils": { "path-to-regexp": "6.3.0" } },
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "stage": "node tools/stage-brand-kit.mjs && (node tools/fetch-news.mjs || true)",
+    "stage": "node tools/stage.mjs",
     "prebuild": "npm run stage",
     "build": "astro build",
     "prebuild:node": "npm run stage",
-    "build:node": "SMARTTEC_BUILD_TARGET=node astro build",
+    "build:node": "node tools/build-node.mjs",
     "preview": "npm run build:node && node dist/server/entry.mjs",
-    "check": "astro check",
-    "verify": "node tools/verify.mjs"
+    "check": "tsc --noEmit",
+    "test": "node --test tests/*.test.mjs",
+    "verify": "node tools/verify.mjs",
+    "verify:qa": "node tools/verify-qa.mjs",
+    "verify:pages": "node tools/test-public-pages.mjs"
   },
   "dependencies": {
-    "@astrojs/vercel": "^9.0.5",
-    "astro": "^5.14.1",
+    "@astrojs/vercel": "^11.0.10",
+    "astro": "^7.3.2",
     "gsap": "^3.13.0",
     "howler": "^2.2.4",
     "maplibre-gl": "^6.9.0",
     "three": "^0.180.0"
   },
   "devDependencies": {
-    "@astrojs/node": "^9.5.5",
+    "@astrojs/node": "^11.1.5",
     "@types/howler": "^2.2.12",
+    "@types/node": "^24.13.4",
     "@types/three": "^0.180.0",
+    "jsdom": "^30.0.1",
+    "playwright": "^1.63.0",
     "typescript": "^5.9.2"
   }
 }

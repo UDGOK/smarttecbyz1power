@@ -66,29 +66,12 @@ const tractAcres = site.tracts.reduce((n, t) => n + t.acres, 0);
         <div><dt>Acreage</dt><dd>{tractAcres.toFixed(2)} acres<span class="note">{site.acresNote}</span></dd></div>
         <div><dt>Tenure</dt><dd>{site.ownership}<span class="note">{site.ownershipNote}</span></dd></div>
         <div><dt>Frontage</dt><dd>US-70<span class="note">Highway frontage at the address above — the parcel is reached directly from the state highway, not from a county section road.</span></dd></div>
-        <div><dt>Parcel ID</dt><dd><span class="todo">[PLACEHOLDER: Bryan County assessor parcel number and legal description]</span></dd></div>
-        <div><dt>Zoning</dt><dd><span class="todo">[PLACEHOLDER: zoning classification and whether a data center is permitted by right]</span></dd></div>
-        <div><dt>Utilities on parcel</dt><dd>Electrical service and fibre confirmed. <span class="todo">[PLACEHOLDER: water source, sanitary/septic, and natural gas availability]</span></dd></div>
+        <div><dt>Parcel ID</dt><dd><span class="todo">Parcel identifiers and the legal description will be confirmed against the recorded survey and title documents.</span></dd></div>
+        <div><dt>Zoning</dt><dd><span class="todo">Zoning and permitted data-center use await verification.</span></dd></div>
+        <div><dt>Utilities on parcel</dt><dd>Electrical distribution is owner-reported; fibre service is planned and subject to carrier confirmation. <span class="todo">Water, sanitary or septic service, and gas availability are not yet verified.</span></dd></div>
       </dl>
 
-      <figure class="photo">
-        <div class="photo__frame">
-          <svg class="photo__icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-            <rect x="2.5" y="6" width="19" height="14" rx="2" />
-            <circle cx="12" cy="13" r="3.5" />
-            <path d="M8.5 6l1.4-2.2h4.2L15.5 6" />
-            <path d="M3 3l18 18" />
-          </svg>
-          <p class="photo__state">Photograph not taken yet</p>
-        </div>
-        <figcaption>
-          <b>[PHOTO NEEDED]</b> Aerial of the campus with the three tracts, Buildings A,
-          B and C and the US-70 frontage visible, ideally flown in daylight with the
-          boundary legible. A real photograph or an empty frame — and a render of the
-          planned factory or solar field would be labelled as a concept, never shown as
-          the site.
-        </figcaption>
-      </figure>
+      <p class="form-note">Current site photography is not yet published. Arrange a site visit to review the existing buildings; illustrations on this page show concepts only.</p>
     </div>
   </section>
 
@@ -209,7 +192,7 @@ const tractAcres = site.tracts.reduce((n, t) => n + t.acres, 0);
             <th scope="row">Total</th>
             <td class="num">{totalSqft.toLocaleString()} sq ft</td>
             <td>Gross existing building area across {site.buildings.length} buildings</td>
-            <td><span class="todo">[PLACEHOLDER: clear height, slab loading, and roof structure per building]</span></td>
+            <td><span class="todo">Clear height, floor loading and roof structure await building-specific verification.</span></td>
           </tr>
           <tr>
             <th scope="row">House / office</th>
@@ -225,26 +208,11 @@ const tractAcres = site.tracts.reduce((n, t) => n + t.acres, 0);
       Structural and mechanical detail a tenant will ask for before signing —
       clear height, floor loading in lbs/sq ft, door and equipment access,
       and the route for liquid cooling pipework — is
-      {' '}<span class="todo">[PLACEHOLDER: as-built drawings and structural report for Buildings 1–3]</span>.
+      {' '}<span class="todo">not yet verified against as-built drawings and structural reports for Buildings A, B and C</span>.
       We would rather show you nothing than a number we have not measured.
     </p>
 
-    <figure class="photo" style="margin-top: var(--s-6);">
-      <div class="photo__frame">
-        <svg class="photo__icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-          <rect x="2.5" y="6" width="19" height="14" rx="2" />
-          <circle cx="12" cy="13" r="3.5" />
-          <path d="M8.5 6l1.4-2.2h4.2L15.5 6" />
-          <path d="M3 3l18 18" />
-        </svg>
-        <p class="photo__state">Photograph not taken yet</p>
-      </div>
-      <figcaption>
-        <b>[PHOTO NEEDED]</b> Ground-level exterior of Building 1 and, separately, the
-        empty interior of Building 1 before fit-out. The empty interior is the more
-        persuasive image: it is the thing a tenant is buying.
-      </figcaption>
-    </figure>
+    <p class="form-note">Site and equipment photography will be published when available. Arrange a site visit to verify current conditions; the visual concepts on this page are illustrative.</p>
   </section>
 
   <section aria-labelledby="why" data-reveal>
@@ -304,14 +272,14 @@ const tractAcres = site.tracts.reduce((n, t) => n + t.acres, 0);
     </p>
 
     <ul class="bullets">
-      <li><span class="todo">[PLACEHOLDER: ALTA survey and title commitment]</span></li>
-      <li><span class="todo">[PLACEHOLDER: FEMA flood zone determination for the parcel]</span></li>
-      <li><span class="todo">[PLACEHOLDER: Phase I environmental site assessment]</span></li>
-      <li><span class="todo">[PLACEHOLDER: geotechnical report — bearing capacity for equipment pads and the solar array]</span></li>
-      <li><span class="todo">[PLACEHOLDER: seismic and wind design criteria used for Buildings 1–3]</span></li>
-      <li><span class="todo">[PLACEHOLDER: water availability and volume, and whether any cooling loop needs it]</span></li>
-      <li><span class="todo">[PLACEHOLDER: Bryan County and Oklahoma tax treatment applicable to the site]</span></li>
-      <li><span class="todo">[PLACEHOLDER: nearest commercial airport and drive time for hands-on site visits]</span></li>
+      <li><span class="todo">ALTA survey scope and title commitment: diligence pending.</span></li>
+      <li><span class="todo">Parcel flood-zone determination: diligence pending.</span></li>
+      <li><span class="todo">Phase I environmental assessment: diligence pending.</span></li>
+      <li><span class="todo">Geotechnical bearing capacity for equipment pads and solar foundations: not yet verified.</span></li>
+      <li><span class="todo">Seismic and wind design criteria for Buildings A, B and C: not yet verified.</span></li>
+      <li><span class="todo">Water availability and cooling-loop demand: not yet established.</span></li>
+      <li><span class="todo">Applicable local and state tax treatment: diligence pending.</span></li>
+      <li><span class="todo">Travel and access arrangements are coordinated individually before a site visit.</span></li>
     </ul>
   </section>
 

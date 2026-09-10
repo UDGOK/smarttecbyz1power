@@ -61,9 +61,10 @@ const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference
               placeholder="Filter by name…"
               autocomplete="off"
               aria-controls="mp-model"
+              aria-label="Filter models by name"
             />
           </span>
-          <select class="field__input" id="mp-model" name="model" size="1">
+          <select class="field__input" id="mp-model" name="model" size="1" aria-describedby="mp-model-hint">
             {byParams.map((m) => (
               <option value={m.id} selected={m.id === defaults.model}>
                 {m.name} — {m.params >= 1e12 ? `${(m.params / 1e12).toFixed(2)}T` : `${(m.params / 1e9).toFixed(1)}B`}
@@ -95,13 +96,13 @@ const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference
 
         <p class="field">
           <label class="field__label" for="mp-context">Context per request, tokens</label>
-          <input class="field__input" id="mp-context" name="context" type="number" min="512" step="512" value="8192" inputmode="numeric" />
+          <input class="field__input" id="mp-context" name="context" type="number" min="512" step="1" value="8192" inputmode="numeric" required aria-describedby="mp-input-feedback" />
           <span class="field__hint" data-hint="context"></span>
         </p>
 
         <p class="field">
           <label class="field__label" for="mp-concurrency">Concurrent requests</label>
-          <input class="field__input" id="mp-concurrency" name="concurrency" type="number" min="1" step="1" value={defaults.concurrency} inputmode="numeric" />
+          <input class="field__input" id="mp-concurrency" name="concurrency" type="number" min="1" step="1" value={defaults.concurrency} inputmode="numeric" required aria-describedby="mp-input-feedback" />
           <span class="field__hint">Every one holds its own KV cache in memory at the same time.</span>
         </p>
       </div>
@@ -110,7 +111,7 @@ const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference
         <div class="mp__headline">
           <p class="mp__kicker mono-label">Resident accelerator memory</p>
           <p class="mp__total"><span data-out-total>—</span></p>
-          <p class="mp__sub" data-out-model></p>
+          <p class="mp__sub" id="mp-input-feedback" data-out-model></p>
         </div>
 
         <dl class="mp__breakdown" data-out-breakdown>
@@ -166,8 +167,9 @@ const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference
             <div><dt>Memory each</dt><dd>{a.memoryGb} GB {a.memoryType}</dd></div>
             <div><dt>Aggregate</dt><dd data-accel-mem>—</dd></div>
             <div><dt>Interconnect</dt><dd>{a.interconnect}</dd></div>
-            <div><dt>Accelerator power</dt><dd data-accel-power>—</dd></div>
+            <div><dt>Estimated IT power, including host</dt><dd data-accel-power>—</dd></div>
             <div><dt>With facility overhead</dt><dd data-accel-facility>—</dd></div>
+            {a.rackOf && <div><dt>Whole-rack purchase requirement</dt><dd data-accel-rack-power>—</dd></div>}
           </dl>
 
           <p class="mp__card-note" data-accel-note></p>

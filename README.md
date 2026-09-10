@@ -10,15 +10,16 @@ original — nothing is lifted from the reference.
 
 ## Status
 
-All five stage worlds, the campus explorer, the configurator and the six
-content pages are built. What remains is real assets and real endpoints.
+The site is live at https://www.smarttec.dev with public content, a model planner,
+brand downloads and a protected investor room. See [QA validation](docs/qa-validation.md)
+for current checks and the one-time inquiry email activation step. Use Node 24.
 
 | Built | Outstanding |
 |---|---|
 | Design tokens, chrome layer, stage machine, scene host | Real audio files (every track is a WebAudio synth) |
-| Entry gate, custom cursor, film grain, flash ripple | Photography — the site ships no invented imagery |
-| Hold-to-advance scrubbing world, audio, chrome and veil | Form endpoint, analytics, hosting |
-| Five procedural WebGL worlds, each its own chunk | 73 marked `[PLACEHOLDER]` facts across the content pages |
+| Entry gate, custom cursor, film grain, flash ripple | Current site photography; concept illustrations are labeled |
+| Hold-to-advance scrubbing world, audio, chrome and veil | Recipient activation for inquiry email; optional analytics |
+| Five procedural WebGL worlds, each its own chunk | Owner/engineering diligence recorded in `docs/qa-open-items.md` |
 | Explorable campus with clamped orbit, pinch zoom, hotspots | Licensed display fonts, if pixel-exact type is wanted |
 | Deployment configurator, keyboard-operable, no-JS fallback | |
 | Six content pages, every figure imported from the record | |
@@ -113,22 +114,21 @@ screen paints. Quality tiers downgrade above 22 ms/frame and upgrade below
 
 | Integration | Status |
 |---|---|
-| Lead capture endpoint | **[PLACEHOLDER]** `POST /api/reserve` not wired |
+| Lead capture endpoint | FormSubmit to `yasir@futonix.com`; one-time recipient activation required |
 | Analytics | **[PLACEHOLDER]** not installed |
 | CMS | Not required yet — content model is typed in `src/data/site.ts` |
-| Hosting | **[OPEN]** Vercel or Cloudflare Pages, static output |
+| Hosting | Vercel; public pages prerendered, news and investor routes served on demand |
 
 ## Open items
 
 1. **Audio assets.** Every track is a WebAudio synth placeholder. Drop real
    files into `public/assets/audio` and set `src` in `src/lib/audio.ts`.
-2. **Photography.** The existing SmartTec policy is "real photographs or
-   nothing" — site, building and Z1Power cabinet photos are needed for the
-   content pages.
-3. **Form endpoint and analytics** destinations.
+2. **Photography.** Site, building and Z1Power cabinet photos remain pending.
+   Existing illustrations are labeled as concepts and do not establish site conditions.
+3. **Email activation and receipt verification**, plus optional analytics.
 4. **Domain** — `www.smarttec.dev`, set in `astro.config.mjs`. The apex
    redirects to it; canonical tags, OG URLs and robots.txt all use the www form.
-5. **Logo** — the brandmark is a placeholder wordless glyph pending real assets.
+5. **Diligence** — unverified engineering and commercial facts remain qualified in public copy.
 
 ## Content sources
 

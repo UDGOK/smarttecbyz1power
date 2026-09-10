@@ -24,7 +24,7 @@ import { company, site, power, network, compute } from '../data/site';
     <div class="split">
       <div>
         <p>
-          {company.name} develops and operates AI data center capacity. The company has
+          {company.name} is developing AI data center capacity. The venture has
           one site: {site.designation}, {site.acres} acres at {site.address} in
           {' '}{site.county}, Oklahoma. The first compute phase is
           {' '}{compute.systems}, on a {site.powerOn}. Which building takes the first
@@ -43,19 +43,19 @@ import { company, site, power, network, compute } from '../data/site';
 
       <dl class="spec">
         <div><dt>Company</dt><dd>{company.full}</dd></div>
-        <div><dt>Parent</dt><dd>{company.parent}</dd></div>
+        <div><dt>Associated brand</dt><dd>{company.parent}</dd></div>
         <div><dt>Sites</dt><dd>{site.designation} — {site.name}</dd></div>
         <div><dt>Land</dt><dd>{site.acres} acres across three tracts</dd></div>
         <div><dt>First capacity</dt><dd>{site.powerOn}</dd></div>
-        <div><dt>Legal entity</dt><dd><span class="todo">[PLACEHOLDER: registered entity name, state of incorporation, and formation date]</span></dd></div>
-        <div><dt>Headquarters</dt><dd><span class="todo">[PLACEHOLDER: corporate office address, if different from the site]</span></dd></div>
+        <div><dt>Legal entity</dt><dd><span class="todo">{company.entity}. Registration and formation details require verification.</span></dd></div>
+        <div><dt>Headquarters</dt><dd><span class="todo">Use the Mead site address for location inquiries; correspondence arrangements are confirmed by email.</span></dd></div>
       </dl>
     </div>
   </section>
 
   <section aria-labelledby="parentage" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">{company.parent}</span></p>
-    <h2 id="parentage">Why the parentage changes the economics</h2>
+    <h2 id="parentage">How energy and compute fit together</h2>
 
     <p>
       {company.parent} builds LFP battery cabinets. {company.name} is its data center
@@ -68,7 +68,7 @@ import { company, site, power, network, compute } from '../data/site';
       storage reaches a site closer to what it costs to build, more of it makes economic
       sense there. We have not evidenced that advantage yet, and it is not a claim this
       page will make until it can be:
-      {' '}<span class="todo">[PLACEHOLDER: documented related-party equipment cost, warranty and service obligations before any manufacturer-cost or savings claim is published]</span>.
+      {' '}<span class="todo">Equipment pricing, warranty and service obligations require documentation before any cost-saving claim is made</span>.
       The planned scope uses purchased cells and components; it is not lithium-ion cell
       fabrication and not a commissioned production line.
     </p>
@@ -94,8 +94,8 @@ import { company, site, power, network, compute } from '../data/site';
 
     <p style="margin-top: var(--s-6);">
       Detail on the parent company that a counterparty will reasonably ask for —
-      {' '}<span class="todo">[PLACEHOLDER: {company.parent} founding date, ownership structure, manufacturing locations, and product range]</span>
-      {' '}and <span class="todo">[PLACEHOLDER: whether {company.name} is a subsidiary, a division, or a separate entity under common ownership — and which entity owns the land, leases the equipment, signs customer contracts and would issue any securities]</span>.
+      {' '}<span class="todo">Z1Power corporate history, ownership, manufacturing locations and product scope await a verified company profile</span>
+      {' '}and <span class="todo">the entities responsible for land, equipment, customer contracts and any investment terms are being documented</span>.
     </p>
   </section>
 
@@ -107,22 +107,17 @@ import { company, site, power, network, compute } from '../data/site';
 
     <div class="cards">
       <div class="card">
-        <h3>Real photographs or nothing</h3>
+        <h3>Illustrations are clearly labeled</h3>
         <p>
-          Every image on this site is a photograph of this site. Where a photograph has
-          not been taken yet, you get an empty frame that says so and describes what
-          belongs there. No stock library, no rendered hall, no borrowed data center
-          interior. It costs us some polish and it saves you a site visit that turns into
-          a disappointment.
+          Concept illustrations and interactive models show the planned direction. They are labeled as illustrations and do not establish current conditions, equipment installation or surveyed boundaries. Current site photography is not yet published; site visits can be arranged individually.
         </p>
       </div>
       <div class="card">
         <h3>No invented numbers</h3>
         <p>
-          Every figure on these pages comes from the owner-confirmed site record, or is
-          arithmetic on figures from it with the working shown. Anything we do not know —
-          a rack density, a PUE, a price, an SLA — is printed as a visible placeholder
-          instead of a plausible number. There are a lot of them, and that is the point.
+          Project figures identify owner-reported information and planned capacity. Calculators show their methods and assumptions; equipment specifications require vendor confirmation. Anything we do not know —
+          a rack density, a PUE, a price, an SLA — is identified as pending verification. Engineering limits and commercial terms
+          must be confirmed before a commitment.
         </p>
       </div>
     </div>
@@ -141,28 +136,13 @@ import { company, site, power, network, compute } from '../data/site';
     <h2 id="people">Who you would be dealing with</h2>
 
     <p>
-      <span class="todo">[PLACEHOLDER: leadership — names, roles, and relevant operating background, for {company.name} and for {company.parent}]</span>
+      <span class="todo">Email our project contact to discuss the workload and arrange an introduction. A verified leadership profile will be published when available.</span>
     </p>
     <p>
-      <span class="todo">[PLACEHOLDER: who is on site at {site.name}, and whether the site is staffed during construction and after power-on]</span>
+      <span class="todo">Site staffing, access and operating coverage will be confirmed before a visit or service commitment.</span>
     </p>
 
-    <figure class="photo">
-      <div class="photo__frame">
-        <svg class="photo__icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-          <rect x="2.5" y="6" width="19" height="14" rx="2" />
-          <circle cx="12" cy="13" r="3.5" />
-          <path d="M8.5 6l1.4-2.2h4.2L15.5 6" />
-          <path d="M3 3l18 18" />
-        </svg>
-        <p class="photo__state">Photograph not taken yet</p>
-      </div>
-      <figcaption>
-        <b>[PHOTO NEEDED]</b> The team on the parcel, and the {company.parent}
-        manufacturing floor where the LFP cabinets are built. Both are real places that
-        can be photographed; neither has been photographed for this site yet.
-      </figcaption>
-    </figure>
+    <p>Contact the project team to arrange a site visit and discuss the people responsible for your deployment.</p>
   </section>
 
   <section class="is-end" aria-labelledby="talk" data-reveal>

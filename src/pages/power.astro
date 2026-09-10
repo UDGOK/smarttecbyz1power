@@ -126,7 +126,7 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
       <div><dt>Tenant allocation</dt><dd>{power.allocation}</dd></div>
       <div><dt>Energy rate</dt><dd><span class="todo">{power.rate}</span></dd></div>
       <div><dt>Interconnection</dt><dd>{power.interconnection}<span class="note">{power.interconnectionNote}</span></dd></div>
-      <div><dt>Utility of record</dt><dd><span class="todo">[PLACEHOLDER: serving utility / cooperative name and account status]</span></dd></div>
+      <div><dt>Utility of record</dt><dd><span class="todo">Serving utility and account allocation await documentation.</span></dd></div>
     </dl>
 
     <blockquote class="pull">
@@ -140,23 +140,7 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
       </p>
     </blockquote>
 
-    <figure class="photo" style="margin-top: var(--s-6);">
-      <div class="photo__frame">
-        <svg class="photo__icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
-          <rect x="2.5" y="6" width="19" height="14" rx="2" />
-          <circle cx="12" cy="13" r="3.5" />
-          <path d="M8.5 6l1.4-2.2h4.2L15.5 6" />
-          <path d="M3 3l18 18" />
-        </svg>
-        <p class="photo__state">Photograph not taken yet</p>
-      </div>
-      <figcaption>
-        <b>[PHOTO NEEDED]</b> The transformer on its pad, and the
-        service entrance into Building 1. For a buyer evaluating this page, this is the
-        single most load-bearing photograph on the whole site — it is the proof that the
-        power claim is not a plan.
-      </figcaption>
-    </figure>
+    <p class="form-note">Site and equipment photography will be published when available. Arrange a site visit to verify current conditions; the visual concepts on this page are illustrative.</p>
   </section>
 
   <section aria-labelledby="solar" data-reveal>
@@ -177,10 +161,10 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
           precisely why a campus electrical and interconnection design has to come first.
         </p>
         <p>
-          {company.parent} builds LFP cabinets and {company.name} is the data center arm of
-          the same company. What that is worth in installed cost is a real question and an
-          undocumented one:
-          {' '}<span class="todo">[PLACEHOLDER: documented related-party equipment cost, warranty and service obligations]</span>.
+          {company.name} is developing data-center services alongside the {company.parent}
+          energy business. The legal relationship is being documented. Any installed-cost
+          advantage requires documented equipment pricing, warranty and service obligations
+          before a commercial commitment.
         </p>
       </div>
 
@@ -206,9 +190,9 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
 
     <p style="margin-top: var(--s-6);">
       Sizing detail a buyer will want before modelling anything —
-      {' '}<span class="todo">[PLACEHOLDER: battery cabinet count, usable kWh, C-rate and expected daily cycles]</span>,
-      {' '}<span class="todo">[PLACEHOLDER: solar array configuration, tilt, expected annual yield in MWh]</span>,
-      and <span class="todo">[PLACEHOLDER: construction and commissioning dates for the solar array and the battery plant]</span>.
+      {' '}<span class="todo">battery quantity, usable energy, C-rate and daily cycling remain to be designed</span>,
+      {' '}<span class="todo">solar configuration, tilt and annual energy yield remain to be designed</span>,
+      and <span class="todo">solar and storage construction and commissioning dates are not committed</span>.
     </p>
   </section>
 
@@ -225,9 +209,9 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
 
     <dl class="spec">
       <div><dt>Energy rate</dt><dd><span class="todo">{power.rate}</span></dd></div>
-      <div><dt>Demand charges</dt><dd><span class="todo">[PLACEHOLDER: demand charge structure from the serving utility]</span></dd></div>
-      <div><dt>Facility overhead</dt><dd><span class="todo">[PLACEHOLDER: measured PUE — a design figure is not a measured one, and there is no operating history to measure yet]</span></dd></div>
-      <div><dt>Tenant billing</dt><dd><span class="todo">[PLACEHOLDER: whether energy is passed through at cost, blended into a per-kW rate, or metered]</span></dd></div>
+      <div><dt>Demand charges</dt><dd><span class="todo">The demand-charge schedule will be confirmed with the serving utility.</span></dd></div>
+      <div><dt>Facility overhead</dt><dd><span class="todo">No measured PUE is available before commissioning and operation.</span></dd></div>
+      <div><dt>Tenant billing</dt><dd><span class="todo">Energy metering and billing terms will be specified in the commercial offer.</span></dd></div>
     </dl>
 
     <p>
@@ -256,13 +240,13 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
     </p>
 
     <ul class="bullets">
-      <li><span class="todo">[PLACEHOLDER: UPS topology and ride-through duration for the IT load]</span></li>
-      <li><span class="todo">[PLACEHOLDER: standby generation — whether any is installed, fuel type, run time]</span></li>
-      <li><span class="todo">[PLACEHOLDER: electrical redundancy — N, N+1, or 2N, at the distribution and UPS levels]</span></li>
-      <li><span class="todo">[PLACEHOLDER: whether the site targets a formal resilience classification, and which]</span></li>
-      <li><span class="todo">[PLACEHOLDER: switchgear arrangement and single points of failure between the transformer and the racks]</span></li>
-      <li><span class="todo">[PLACEHOLDER: uptime SLA offered to tenants, and the service credit schedule behind it]</span></li>
-      <li><span class="todo">[PLACEHOLDER: maintenance windows and how they are notified]</span></li>
+      <li><span class="todo">UPS topology and ride-through duration: engineering review pending.</span></li>
+      <li><span class="todo">Standby generation, fuel and runtime: installation and design not verified.</span></li>
+      <li><span class="todo">Distribution and UPS redundancy: no N, N+1 or 2N commitment is made.</span></li>
+      <li><span class="todo">No formal resilience classification is claimed.</span></li>
+      <li><span class="todo">Switchgear and distribution failure points: engineering review pending.</span></li>
+      <li><span class="todo">Uptime commitments and service credits will be agreed before a contract.</span></li>
+      <li><span class="todo">Maintenance windows and notice procedures will be agreed before a contract.</span></li>
     </ul>
 
     <div class="actions">

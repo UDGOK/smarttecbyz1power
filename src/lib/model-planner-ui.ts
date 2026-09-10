@@ -47,19 +47,46 @@ export function initPlanner(): void {
     if (el) el.textContent = value;
   };
 
+  function clearResults(message: string): void {
+    for (const selector of ['total', 'weights', 'kv', 'overhead', 'ram', 'storage', 'training']) {
+      text(`[data-out-${selector}]`, '—');
+    }
+    text('[data-out-model]', message);
+    text('[data-out-formula]', '');
+    text('#mp-model-hint', models.get(modelSel!.value)?.name ?? 'No matching models. Clear or change the search.');
+    for (const card of document.querySelectorAll<HTMLElement>('[data-accel]')) {
+      for (const key of ['count', 'mem', 'power', 'facility', 'rack-power']) {
+        const el = card.querySelector(`[data-accel-${key}]`);
+        if (el) el.textContent = '—';
+      }
+      const unit = card.querySelector('[data-accel-unit]');
+      if (unit) unit.textContent = 'awaiting valid inputs';
+      const note = card.querySelector('[data-accel-note]');
+      if (note) note.textContent = '';
+    }
+  }
+
   function render(): void {
     const model = models.get(modelSel!.value);
-    if (!model) return;
+    if (!model) { clearResults('No matching models. Clear or change the search to calculate a deployment.'); return; }
     const precision = precisions.find((p) => p.id === precSel!.value) ?? precisions[0];
     const workload = workloads.find((w) => w.id === workSel!.value) ?? workloads[0];
 
     // A context longer than the model supports is not a sizing question, it is
     // a mistake — clamp it and say so rather than quietly sizing fiction.
     const maxCtx = model.ctx ?? 131072;
-    const askedCtx = Math.max(512, Number(ctxIn!.value) || 8192);
+    const askedCtx = Number(ctxIn!.value);
+    const concurrency = Number(concIn!.value);
+    const validContext = ctxIn!.value.trim() !== '' && Number.isSafeInteger(askedCtx) && askedCtx >= 512;
+    const validConcurrency = concIn!.value.trim() !== '' && Number.isSafeInteger(concurrency) && concurrency >= 1;
+    ctxIn!.setAttribute('aria-invalid', String(!validContext));
+    concIn!.setAttribute('aria-invalid', String(!validConcurrency));
+    if (!validContext || !validConcurrency) {
+      clearResults(!validContext ? 'Enter a whole-number context of at least 512 tokens.' : 'Enter at least 1 concurrent request, using a whole number.');
+      return;
+    }
     const contextTokens = Math.min(askedCtx, maxCtx);
     const clamped = askedCtx > maxCtx;
-    const concurrency = Math.max(1, Math.round(Number(concIn!.value) || 1));
 
     const result = plan({ model, precision, workload, contextTokens, concurrency });
 
@@ -126,6 +153,10 @@ export function initPlanner(): void {
         set('[data-accel-facility]', `${(fit.powerKw * ASSUMED_PUE).toFixed(1)} kW`);
       }
       set('[data-accel-note]', fit.notes.join(' '));
+      if (accel.rackOf && fit.count !== null) {
+        const racks = Math.ceil(fit.count / accel.rackOf);
+        set('[data-accel-rack-power]', `${racks} ${racks === 1 ? 'rack' : 'racks'} · ${(racks * accel.rackOf * accel.tdpW / 1000).toFixed(1)} kW GPU-only`);
+      }
     }
   }
 
@@ -142,7 +173,9 @@ export function initPlanner(): void {
       return opt;
     }));
     if (keep.some((o) => o.value === current)) modelSel!.value = current;
-    else if (keep.length) { modelSel!.value = keep[0].value; render(); }
+    else if (keep.length) modelSel!.value = keep[0].value;
+    modelSel!.disabled = keep.length === 0;
+    render();
   }
 
   form.addEventListener('input', (e) => {
