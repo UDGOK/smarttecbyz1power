@@ -22,8 +22,7 @@ import PageScene from '../components/PageScene.astro';
 import PageTrail from '../components/PageTrail.astro';
 import {pageExperience} from '../data/page-experiences';
 import '../styles/page-experience.css';
-import SiteNav from '../components/SiteNav.astro';
-import SiteMenu from '../components/chrome/SiteMenu.astro';
+import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 
 /** A hero figure. `value` is always a string taken from src/data/site.ts. */
@@ -149,10 +148,9 @@ const actionLabel=experience?.path==='/contact'?'Start your inquiry':experience?
     })();
   </script>
 
-  <SiteNav />
+  <SiteHeader />
   {/* Outside the header on purpose: the nav's backdrop-filter would
       otherwise be this overlay's containing block. */}
-  <SiteMenu part="overlay" current={Astro.url.pathname.replace(/\/+$/, '') || '/'} />
 
   <main class:list={["doc",experience && "doc--immersive",experience?.compact && "doc--compact"]} id="main" data-page-kind={experience?.kind}>
     <header class="doc__head">
@@ -169,7 +167,7 @@ const actionLabel=experience?.path==='/contact'?'Start your inquiry':experience?
 
       {experience && <div class="doc__opening-actions"><a class="btn" href={'#'+contentAnchor}>{actionLabel}<span aria-hidden="true">↓</span></a><a class="doc__home-link" href="/">The full SmartTec experience <span aria-hidden="true">↗</span></a></div>}
       </div>
-      {experience && !experience.compact && <PageScene experience={experience} />}
+      {experience && !experience.compact && <PageScene experience={experience} immersive />}
       </div>
       <div class="doc__rule" data-hero-rule aria-hidden="true"></div>
 
@@ -913,4 +911,3 @@ const actionLabel=experience?.path==='/contact'?'Start your inquiry':experience?
     .reveal-on .doc > section::before { transform: none; }
   }
 </style>
-

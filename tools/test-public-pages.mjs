@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import {readFile,readdir} from 'node:fs/promises';
 import {resolve,join,basename} from 'node:path';
+import {headerSignature} from './header-contract.mjs';
 
 const root=resolve(process.argv[2]||'dist/client');
 const routes=[
@@ -11,8 +12,10 @@ const routes=[
   ['about','campus','what',false],['contact','campus','form-heading',true],
 ];
 let checks=0,entry;
+const homeHeader=headerSignature(await readFile(join(root,'index.html'),'utf8'));checks++;
 for(const[route,kind,anchor,compact]of routes){
   const html=await readFile(join(root,route,'index.html'),'utf8');
+  assert.deepEqual(headerSignature(html),homeHeader,`${route}: same logo and menu as home`);checks++;
   const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(match=>match[1]);
   assert.equal(new Set(ids).size,ids.length,`${route}: duplicate IDs`);checks++;
   assert.equal((html.match(/<h1\b/g)||[]).length,1,`${route}: heading hierarchy`);checks++;
@@ -29,6 +32,7 @@ for(const[route,kind,anchor,compact]of routes){
   assert.ok(sceneScript,`${route}: missing scene controller`);checks++;
   if(entry)assert.equal(entry,sceneScript);else entry=sceneScript;
   if(compact){assert.match(html,/<details class="page-scene-fold">/);checks++;}
+  else{assert.ok(html.includes('page-scene--backdrop'));checks++;}
   if(route==='contact'){assert.match(html,/<form\b/);checks++;}
 }
 
@@ -48,4 +52,5 @@ const assets=await readdir(join(root,'_astro'));
 assert.ok(assets.some(name=>name.startsWith('renderer.')));checks++;
 const fonts=await readFile(join(root,'investor-assets/fonts.css'),'utf8');
 assert.ok(fonts.includes('GoogleSansCode-Regular.ttf'));checks++;
+assert.deepEqual(headerSignature(await readFile(join(root,'brand/index.html'),'utf8')),homeHeader);checks++;
 console.log(`PASS: ${checks} generated public-page checks across ${routes.length} routes. Browser appearance and WebGL behavior still require preview review.`);

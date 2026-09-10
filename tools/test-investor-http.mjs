@@ -7,6 +7,7 @@ import {join} from 'node:path';
 import {spawn,execFileSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 import {hashPassword} from '../src/smarttec-investor/server/auth.mjs';
+import {headerSignature} from './header-contract.mjs';
 const dir=await mkdtemp(join(tmpdir(),'smarttec-http-'));let app,redis;let checks=0;
 try{
 execFileSync('openssl',['req','-x509','-newkey','rsa:2048','-nodes','-keyout',join(dir,'key.pem'),'-out',join(dir,'cert.pem'),'-subj','/CN=localhost','-addext','subjectAltName=DNS:localhost,IP:127.0.0.1','-days','1'],{stdio:'ignore'});
@@ -27,11 +28,13 @@ r=await fetch(origin+'/investors',{headers:{Cookie:cookie}});const page=await r.
 for(const html of [login,page]){
  const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
  assert.ok(scripts.length>0);
- for(const [,attributes,body]of scripts){assert.match(attributes,/\bsrc=/);assert.equal(body.trim(),'');}
- assert.ok(html.includes('/assets/brand/smarttec-lockup-offwhite-green.svg'));
+ for(const [,attributes,body]of scripts){assert.match(attributes,/\bsrc=/,'Private inline script would violate CSP: '+body.slice(0,160));assert.equal(body.trim(),'');}
+ const homeHTML=await(await fetch(origin)).text();
+ assert.deepEqual(headerSignature(html),headerSignature(homeHTML),'private entrance and room use the homepage header');
  checks++;
 }
 assert.equal((page.match(/id="inv-logout"/g)||[]).length,1);
+assert.equal((login.match(/id="inv-logout"/g)||[]).length,0);
 assert.ok(page.includes('<dialog'));assert.ok(page.includes('aria-haspopup="dialog"'));
 for(const id of ['opportunity','campus','deployment','capital','returns','evidence','questions'])assert.equal((page.match(new RegExp('id="'+id+'"','g'))||[]).length,1);
 checks++;

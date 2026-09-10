@@ -150,3 +150,14 @@ html:has(.smarttec-investor){scroll-behavior:smooth;scroll-padding-block:110px 1
   .inv-hero-bottom small{display:none}
   .smarttec-investor .inv-footer{padding-bottom:20pt}
 }
+
+/* Same root type scale and floating homepage header on both private routes. */
+html:has(body.smarttec-investor){font-size:15px}
+.smarttec-investor .inv-login{padding-top:130px;padding-bottom:90px;text-align:center;align-items:center}
+.smarttec-investor .inv-login .inv-eyebrow{justify-content:center}
+.smarttec-investor .inv-login h1{line-height:1.02;letter-spacing:var(--ls-display)}
+.smarttec-investor .inv-login form{text-align:left;max-width:660px}
+.smarttec-investor .inv-login label{font-size:14px}
+.smarttec-investor .inv-login>a:last-child{font-size:14px}
+.smarttec-investor .inv-hero h1{max-width:20ch;margin-inline:auto}
+@media(max-width:800px){.smarttec-investor .inv-login{padding:120px 24px 60px}}

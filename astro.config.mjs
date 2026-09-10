@@ -35,6 +35,7 @@ export default defineConfig({
             // The small chapter controller must also remain external under
             // the private room's same-origin-only script policy.
             if (id.includes('smarttec-investor/client/journey')) return 'investor-journey';
+            if (id.endsWith('/src/lib/menu.ts')) return 'site-menu';
           },
         },
       },

@@ -11,6 +11,8 @@
  * scroll spine. It is off everywhere else, because there is no spine to jump.
  */
 import { stages } from '../../data/site';
+import {journey} from '../../smarttec-investor/data/journey.mjs';
+import Brandmark from './Brandmark.astro';
 
 interface Props {
   /** Show the chapter list. Only meaningful on the cinematic route. */
@@ -28,8 +30,9 @@ interface Props {
    * rendered outside it.
    */
   part?: 'both' | 'toggle' | 'overlay';
+  investor?: boolean;
 }
-const { stageJumps = false, current = '', part = 'both' } = Astro.props;
+const { stageJumps = false, current = '', part = 'both', investor=false } = Astro.props;
 const showToggle = part !== 'overlay';
 const showOverlay = part !== 'toggle';
 
@@ -54,6 +57,7 @@ const path = current.replace(/\/+$/, '') || current;
     id="menu-toggle"
     aria-expanded="false"
     aria-controls="site-menu"
+    aria-haspopup="dialog"
   >
     <span class="menu-toggle__bars" aria-hidden="true"><i></i><i></i></span>
     <span class="menu-toggle__label">Menu</span>
@@ -61,7 +65,9 @@ const path = current.replace(/\/+$/, '') || current;
 )}
 
 {showOverlay && (
-<div class="menu" id="site-menu" hidden>
+<dialog class="menu" id="site-menu" aria-label="Explore SmartTec" hidden>
+  <Brandmark />
+  <button type="button" class="menu-toggle mono-label" id="site-menu-close" aria-label="Close menu" aria-expanded="true"><span class="menu-toggle__bars" aria-hidden="true"><i></i><i></i></span><span class="menu-toggle__label">Close</span></button>
   <nav class="menu__inner" aria-label="Site">
     <p class="menu__eyebrow mono-label">Pages</p>
     <ul class="menu__list">
@@ -95,15 +101,14 @@ const path = current.replace(/\/+$/, '') || current;
         </ul>
       </>
     )}
+    {investor && <><p class="menu__eyebrow mono-label menu__eyebrow--second">Investor chapters</p><ul class="menu__stages">{journey.map(chapter=><li><a class="menu__stage mono-label" href={'#'+chapter.id} data-inv-chapter={chapter.id}>{chapter.label}</a></li>)}</ul><button id="inv-logout" type="button" class="menu__signout">Sign out of investor room</button></>}
   </nav>
-</div>
+</dialog>
 )}
 
-{showOverlay && !stageJumps && (
+{showOverlay && (
   <script>
-    /* The cinematic route wires this from boot.ts, which also owns the chapter
-       jumps and the sound. Everywhere else the menu is the only thing on the
-       page that needs wiring, so it does its own. */
+    /* Idempotent: homepage boot adds its sound callback to this same instance. */
     import { initMenu } from '../../lib/menu';
     initMenu();
   </script>

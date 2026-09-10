@@ -1,10 +1,10 @@
 ---
 import type {PageExperience} from '../data/page-experiences';
-interface Props { experience:PageExperience; }
-const {experience:e}=Astro.props;
+interface Props { experience:PageExperience; immersive?:boolean; }
+const {experience:e,immersive=false}=Astro.props;
 const id='page-scene-'+e.kind;
 ---
-<figure class="page-scene" data-page-scene data-scene-kind={e.kind} data-scene-compact={String(e.compact)} aria-labelledby={id+'-title'}>
+<figure class:list={["page-scene",immersive&&"page-scene--backdrop"]} data-page-scene data-scene-kind={e.kind} data-scene-compact={String(e.compact)} aria-labelledby={id+'-title'}>
   <div class="page-scene__top"><span>SMARTTEC / SPATIAL CONCEPT</span><span class="page-scene__badge" data-scene-badge>3D EXPLORER</span></div>
   <div class="page-scene__viewport">
     <div class="page-scene__fallback" data-scene-fallback><img src="/assets/brand/smarttec-symbol-offwhite-green.svg" width="204" height="215" alt="" aria-hidden="true"/><p>Land. Power. Compute.</p></div>
@@ -15,11 +15,13 @@ const id='page-scene-'+e.kind;
     <h2 id={id+'-title'}>{e.sceneTitle}</h2>
     <p data-scene-status role="status">Open the interactive concept. The page stays ready to read.</p>
     <div class="page-scene__controls" data-scene-controls hidden>
+      <details class="page-scene__tools"><summary>Scene controls</summary><div class="page-scene__tools-content">
       {e.kind==='campus'?<>
         <div class="page-scene__buttons" role="group" aria-label="Campus viewpoints"><button type="button" data-scene-focus="land">Campus</button><button type="button" data-scene-focus="building-a">Buildings</button><button type="button" data-scene-focus="solar">Energy area</button></div>
         <div class="page-scene__buttons" role="group" aria-label="Move the campus view"><button type="button" data-scene-action="left" aria-label="Rotate campus left">←</button><button type="button" data-scene-action="right" aria-label="Rotate campus right">→</button><button type="button" data-scene-action="in" aria-label="Zoom in">+</button><button type="button" data-scene-action="out" aria-label="Zoom out">−</button><button type="button" data-scene-action="interact" aria-pressed="false">Enable drag</button></div>
       </>:<label class="page-scene__range"><span>{e.viewLabel}</span><input type="range" min="0" max="100" value="28" step="1" data-scene-position aria-label={e.viewLabel}/></label>}
       <div class="page-scene__buttons"><button type="button" data-scene-action="reset">Reset view</button><button type="button" data-scene-action="play" aria-pressed="false">Play motion</button><button type="button" data-scene-action="close">Close 3D</button></div>
+      </div></details>
     </div>
     <p class="page-scene__disclosure">{e.sceneNote}</p>
   </figcaption>

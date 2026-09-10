@@ -1,11 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
-import ScrollRuler from '../components/chrome/ScrollRuler.astro';
-import PowerBadge from '../components/chrome/PowerBadge.astro';
-import Brandmark from '../components/chrome/Brandmark.astro';
+import SiteHeader from '../components/SiteHeader.astro';
 import CtaBar from '../components/chrome/CtaBar.astro';
 import Loader from '../components/chrome/Loader.astro';
-import SiteMenu from '../components/chrome/SiteMenu.astro';
 import Configurator from '../components/Configurator.astro';
 import { company, site, compute, stages } from '../data/site';
 
@@ -25,10 +22,7 @@ const grain =
   <Loader />
 
   <main id="main" data-stage-root>
-    <Brandmark />
-    <ScrollRuler />
-    <PowerBadge />
-    <SiteMenu stageJumps />
+    <SiteHeader mode="home" />
 
     {stages.map((stage, i) => (
       <section

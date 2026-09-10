@@ -1,0 +1,25 @@
+---
+import Brandmark from './chrome/Brandmark.astro';
+import ScrollRuler from './chrome/ScrollRuler.astro';
+import PowerBadge from './chrome/PowerBadge.astro';
+import SiteMenu from './chrome/SiteMenu.astro';
+import {pageExperience,pageExperiences} from '../data/page-experiences';
+import {journey} from '../smarttec-investor/data/journey.mjs';
+import '../styles/site-header.css';
+interface Props {mode?:'home'|'public'|'investor'|'login';}
+const {mode='public'}=Astro.props;
+const current=Astro.url.pathname.replace(/\/+$/,'')||'/';
+const page=pageExperience(current);
+const chapters=mode==='investor'?journey.map(ch=>({href:'#'+ch.id,label:ch.label,id:ch.id})):pageExperiences.map(ch=>({href:ch.path,label:ch.label,id:ch.path}));
+const active=mode==='investor'?chapters[0]:chapters.find(ch=>ch.href===current);
+---
+<header class="site-header" data-site-header data-header-version="2" data-header-mode={mode} aria-label="SmartTec navigation">
+  <Brandmark />
+  {mode==='home'?<ScrollRuler />:<nav class="site-header-ruler" aria-label={mode==='investor'?'Investor chapters':'Explore SmartTec'}>
+    <div class="site-header-ruler__ticks">{chapters.map(ch=><a href={ch.href} aria-label={ch.label} aria-current={ch===active?'location':undefined} data-inv-chapter={mode==='investor'?ch.id:undefined}><i></i><i></i><i></i><i></i></a>)}</div>
+    <span class="site-header-ruler__label" id={mode==='investor'?'inv-ruler-label':undefined}>{mode==='investor'?'01 / THE OPPORTUNITY':mode==='login'?'PRIVATE ACCESS':page?String(pageExperiences.indexOf(page)+1).padStart(2,'0')+' / '+page.label.toUpperCase():'SMARTTEC / BRAND'}</span>
+  </nav>}
+  {mode==='home'?<PowerBadge />:<a class="power-badge site-header-context" href={mode==='investor'?'#returns':mode==='login'?'/contact':'/investors'}>{mode==='investor'?'Returns':mode==='login'?'Contact SmartTec':'Investor access'}</a>}
+  <SiteMenu part="toggle" />
+</header>
+<SiteMenu part="overlay" current={current} stageJumps={mode==='home'} investor={mode==='investor'} />

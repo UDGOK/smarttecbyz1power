@@ -16,12 +16,13 @@ function fixture({coarse=false,reduced=false,compact=false,saveData=false,load}=
   const descriptors=keys.map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]);
   const install=(key,value)=>Object.defineProperty(globalThis,key,{configurable:true,writable:true,value});
   const root=new Element();root.dataset={sceneKind:'campus',sceneCompact:String(compact)};
-  const nodes=Object.fromEntries(['host','launch','fallback','controls','status','badge','position'].map(key=>[key,new Element()]));
+  const nodes=Object.fromEntries(['host','launch','fallback','controls','status','badge','position','panel'].map(key=>[key,new Element()]));
   const actions=Object.fromEntries(['close','reset','left','right','in','out','interact','play'].map(key=>{
     const el=new Element();el.dataset.sceneAction=key;return[key,el];
   }));
   const focus=new Element();focus.dataset.sceneFocus='solar';
   root.querySelector=selector=>{
+    if(selector==='.page-scene__tools')return nodes.panel;
     const action=selector.match(/^\[data-scene-action="([^"]+)"\]$/);if(action)return actions[action[1]];
     return nodes[selector.match(/^\[data-scene-([^\]]+)\]$/)?.[1]];
   };
@@ -115,4 +116,20 @@ test('a scene created after navigation is immediately disposed',async()=>{
     resolve({dispose(){disposed++;}});await settle();
     assert.equal(disposed,1);assert.equal(f.nodes.controls.hidden,true);
   }finally{f.restore();}
+});
+
+test('collapsing scene tools releases drag and closing 3D resets the panel',async()=>{
+ const f=fixture();try{
+  f.mount();f.visible(true);await settle();f.nodes.panel.open=true;f.actions.interact.click();
+  f.nodes.panel.open=false;f.nodes.panel.dispatchEvent(new Event('toggle'));
+  assert.deepEqual(f.scenes[0].calls.at(-1),['setInteractive',false]);assert.equal(f.actions.interact.attributes['aria-pressed'],'false');
+  f.nodes.panel.open=true;f.actions.close.click();assert.equal(f.nodes.panel.open,false);
+ }finally{f.restore();}
+});
+test('the shared menu pauses visible 3D and restores it after closing',async()=>{
+ const f=fixture();try{
+  f.mount();f.visible(true);await settle();
+  f.lifecycle.dispatchEvent(new CustomEvent('smarttec:menu-change',{detail:{open:true}}));assert.equal(f.scenes[0].visibility.at(-1),false);
+  f.lifecycle.dispatchEvent(new CustomEvent('smarttec:menu-change',{detail:{open:false}}));assert.equal(f.scenes[0].visibility.at(-1),true);
+ }finally{f.restore();}
 });

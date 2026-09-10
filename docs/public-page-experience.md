@@ -1,5 +1,8 @@
 # SmartTec public page experience
 
+Updated by **Publisher 1.4**. Read `docs/shared-experience-correction.md` first for
+the shared homepage header and current navigation/scene controls.
+
 The public service pages now extend the homepage's visual language: approved
 SmartTec logo, shared typefaces, forest and signal-green colors, spatial scenes,
 and a linked chapter sequence. The implementation is already integrated into the
@@ -26,8 +29,8 @@ was copied into public assets.
 
 ## Experience and controls
 
-- A split opening pairs the page introduction with a spatial window. It stacks
-  into one column on smaller screens. Working pages use a compact introduction.
+- Service-page openings place centered type over a wide spatial scene, following
+  the homepage composition. Working pages use a compact introduction.
 - A direct link takes visitors to the page's primary content. The bottom chapter
   links lead naturally to the next service. The existing full-screen site menu
   remains available.
@@ -66,7 +69,7 @@ The separate performance investigation draft is not part of this update.
 | `src/lib/public-scene/renderer.ts` | One scene, rendering budget and cleanup |
 | `src/styles/page-experience.css` | Responsive public-page styling |
 | `src/layouts/Content.astro` | Shared integration and direct content links |
-| `src/components/SiteNav.astro` | Current chapter label |
+| `src/components/SiteHeader.astro` | Shared homepage-based header and current chapter |
 | `src/components/SiteFooter.astro` | Approved logo lockup |
 
 Keep the scene captions. They explain that these views are illustrations, not a
@@ -77,8 +80,8 @@ commercial or facility statement on the site.
 
 ## Completed verification
 
-- 58 automated tests, including 10 new scene lifecycle/interaction checks.
-- 103 generated HTML/dependency checks across all eight routes: headings, links, logo/fonts,
+- 65 automated tests covering navigation and scene lifecycle/interaction.
+- 118 generated HTML/dependency checks across all eight routes: headings, links, logo/fonts,
   scene configuration, optional working-page panels and public/private separation.
 - The public controller's static dependency path excludes the 3D renderer/scenes.
 - Targeted TypeScript checking for the new renderer/configuration.

@@ -1,3 +1,7 @@
+> Header and menu implementation updated by Publisher 1.4. Follow
+> `docs/shared-experience-correction.md` for current navigation; older header
+> descriptions below are historical. Investor capabilities remain applicable.
+
 # SmartTec investor experience update
 
 Prepared 10 September 2026 for the existing Astro/Vercel website.

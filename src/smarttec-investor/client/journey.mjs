@@ -1,11 +1,9 @@
 import {journey} from '../data/journey.mjs';
 
 export function mountJourney(){
-  const menu=document.querySelector('#inv-journey-menu');
-  const opener=document.querySelector('#inv-menu-open');
   const dock=document.querySelector('.inv-journey-dock');
-  if(!menu||!opener||!dock||opener.dataset.mounted)return;
-  opener.dataset.mounted='true';
+  if(!dock||dock.dataset.mounted)return;
+  dock.dataset.mounted='true';
   const sections=journey.map(chapter=>document.getElementById(chapter.id));
   if(sections.some(section=>!section))return;
   const number=index=>String(index+1).padStart(2,'0');
@@ -14,22 +12,8 @@ export function mountJourney(){
   const next=document.querySelector('#inv-journey-next');
   let active=-1, frame=0;
 
-  // Native modal provides focus trapping, Escape and inert background content.
-  // There is no body scroll lock to strand forms after closing or browser Back.
-  if(typeof menu.showModal==='function'){
-    opener.hidden=false;
-    opener.addEventListener('click',()=>{
-      menu.showModal();opener.setAttribute('aria-expanded','true');
-      document.querySelector('#inv-menu-close').focus();
-    });
-    document.querySelector('#inv-menu-close').addEventListener('click',()=>menu.close());
-    menu.addEventListener('close',()=>opener.setAttribute('aria-expanded','false'));
-    menu.querySelectorAll('a[href]').forEach(link=>link.addEventListener('click',()=>menu.close()));
-  }else{
-    // Browsers without dialog support still get all chapter links.
-    menu.setAttribute('open','');menu.classList.add('inv-menu-fallback');
-    document.querySelector('#inv-menu-close').hidden=true;
-  }
+  // The shared site menu owns dialog behavior on every route. This module
+  // only tracks investor chapters and updates their reading controls.
 
   const update=()=>{
     frame=0;
@@ -62,9 +46,9 @@ export function mountJourney(){
   // section positions without a scroll event.
   const observer=typeof ResizeObserver==='function'?new ResizeObserver(schedule):null;
   sections.forEach(section=>observer?.observe(section));
-  window.addEventListener('pageshow',()=>{if(menu.open&&!menu.classList.contains('inv-menu-fallback'))menu.close();schedule();});
+  window.addEventListener('pageshow',schedule);
   window.addEventListener('pagehide',()=>{if(frame)cancelAnimationFrame(frame);frame=0;});
-  document.querySelectorAll('.inv-chrome a[href^="#"], .inv-journey-menu a[href^="#"], .inv-journey-dock a[href^="#"]').forEach(link=>{
+  document.querySelectorAll('.site-header a[href^="#"], .inv-journey-dock a[href^="#"]').forEach(link=>{
     link.addEventListener('click',()=>{
       const section=document.querySelector(link.getAttribute('href'));
       const heading=section?.querySelector('h1,h2');
