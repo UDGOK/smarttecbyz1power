@@ -11,7 +11,7 @@ const tractAcres = site.tracts.reduce((n, t) => n + t.acres, 0);
   title={`${site.designation} — ${site.name} | ${company.full}`}
   description={`${site.acresRounded} in ${site.county}, Oklahoma, across three tracts. Buildings A, B and C total ${totalSqft.toLocaleString()} sq ft of existing building area; ${site.manufacturing.sqftTotal.toLocaleString()} sq ft of manufacturing is planned on Tract 1 and ${solar.tractAcres} acres are set aside for energy on Tract 3.`}
   kicker={`${site.designation} · ${site.county}, Oklahoma`}
-  heading="One campus, three tracts, three different stages."
+  heading="One campus. Room to build."
   lede={`${site.address}. ${site.acresRounded} organised as manufacturing land, the existing buildings, and land for planned solar and storage. The three are at genuinely different stages, and this page keeps them apart.`}
   meta={[
     { label: 'Campus', value: `${tractAcres.toFixed(2)} acres`, note: 'Three tracts, owner-reported', count: true },

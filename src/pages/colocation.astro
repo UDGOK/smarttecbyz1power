@@ -18,7 +18,7 @@ const netHeadline = network.service.split(' ').slice(0, 2).join(' ');
   title={`Colocation and GPU capacity at ${site.designation} | ${company.full}`}
   description={`Colocation and dedicated compute in ${site.name}. Buildings A, B and C total ${site.buildingArea.toLocaleString()} sq ft of existing building area behind a shared ${power.service} service. First compute is a ${site.powerOn}.`}
   kicker="Colocation and dedicated compute"
-  heading="Two ways to buy, both reviewed before they are offered."
+  heading="A place for your hardware."
   lede={`Bring hardware you own, or take a dedicated allocation on the planned nodes. Either way what you get first is an engineering review: ${site.buildingArea.toLocaleString()} sq ft of existing building area is a starting point, not a commissioned data hall.`}
   meta={[
     { label: 'Existing building area', value: `${site.buildingArea.toLocaleString()} sq ft`, note: 'Buildings A, B and C, gross' },
@@ -52,8 +52,8 @@ const netHeadline = network.service.split(' ').slice(0, 2).join(' ');
         <h3>GPU capacity</h3>
         <p>
           You take a dedicated allocation on the planned fleet — {compute.systems},
-          {' '}{compute.gpus} GPUs in total. {compute.status}. No capital outlay and no
-          hardware lead time of your own. Full specification is on the
+          {' '}{compute.gpus} GPUs in total. {compute.status}. An allocation is subject
+          to procurement, commissioning and agreed commercial terms. The planned specification is on the
           {' '}<a href="/compute">compute page</a>.
         </p>
         <p>
@@ -188,7 +188,7 @@ const netHeadline = network.service.split(' ').slice(0, 2).join(' ');
         </thead>
         <tbody>
           <tr><th scope="row">Location</th><td>{site.address} — {site.county}, Oklahoma</td></tr>
-          <tr><th scope="row">Available space</th><td>Building 1, {site.buildings[0].sqft.toLocaleString()} sq ft. Buildings 2 and 3 available as expansion shells.</td></tr>
+          <tr><th scope="row">Space under review</th><td>Three existing buildings. Allocation, usable rack space and readiness require a site and engineering review.</td></tr>
           <tr><th scope="row">Service availability</th><td>{site.powerOn} power-on target</td></tr>
           <tr><th scope="row">Energy</th><td>{power.rate} at the site</td></tr>
           <tr><th scope="row">Cooling</th><td>{compute.cooling}</td></tr>

@@ -21,9 +21,12 @@
  */
 import { company, site, power } from '../data/site';
 import SiteMenu from './chrome/SiteMenu.astro';
+import {pageExperience,pageExperiences} from '../data/page-experiences';
 
 /** Astro serves /site in dev and /site/ from the directory build. Normalise. */
 const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const page=pageExperience(path);
+const pageNumber=page ? String(pageExperiences.indexOf(page)+1).padStart(2,'0') : '';
 ---
 
 <header class="nav" data-nav>
@@ -48,10 +51,7 @@ const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
       </span>
     </a>
 
-    <p class="nav__status" aria-hidden="true">
-      <span class="nav__dot"></span>
-      <span class="nav__status-text">{power.voltage} · {site.powerOn}</span>
-    </p>
+    <p class="nav__status"><span class="nav__status-text">{page ? `${pageNumber} / ${page.label}` : `${power.voltage} · ${site.powerOn}`}</span></p>
 
     <SiteMenu part="toggle" />
   </div>

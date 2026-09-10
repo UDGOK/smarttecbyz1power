@@ -9,6 +9,7 @@
  * src/data/site.ts — nothing here is typed twice.
  */
 import { company, site, power, network, compute } from '../data/site';
+import BrandLockup from './BrandLockup.astro';
 
 const year = new Date().getFullYear();
 
@@ -59,7 +60,7 @@ const groups = [
         First compute: {site.powerOn} · Buildings A, B and C are not yet commissioned
       </p>
       <p class="foot__statement">{company.tagline}</p>
-      <p class="foot__mark"><a href="/">{company.full}</a></p>
+      <div class="foot__mark"><BrandLockup /></div>
       <address class="foot__address">
         {site.designation}, {site.address}<br />
         {site.county}, Oklahoma
