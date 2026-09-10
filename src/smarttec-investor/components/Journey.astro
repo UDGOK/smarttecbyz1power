@@ -1,0 +1,27 @@
+---
+import BrandLockup from '../../components/BrandLockup.astro';
+import {journey} from '../data/journey.mjs';
+---
+<header class="inv-chrome" aria-label="Investor room">
+  <div class="inv-chrome-brand"><BrandLockup /><span>INVESTOR ROOM</span></div>
+  <nav class="inv-ruler" aria-label="Investor chapters">
+    <div class="inv-ruler-ticks">{journey.map((chapter, index) => <a href={'#'+chapter.id} data-inv-chapter={chapter.id} aria-label={`${index+1} of ${journey.length}: ${chapter.label}`} aria-current={index===0?'location':undefined}><i></i><i></i><i></i><i></i><i></i></a>)}</div>
+    <span id="inv-ruler-label">01 / THE OPPORTUNITY</span>
+  </nav>
+  <div class="inv-chrome-actions"><a class="inv-chrome-return" href="#returns">Returns explorer <span aria-hidden="true">↗</span></a><button id="inv-menu-open" type="button" aria-haspopup="dialog" aria-controls="inv-journey-menu" aria-expanded="false" hidden><span>Explore</span><span class="inv-menu-bars" aria-hidden="true"><i></i><i></i></span></button></div>
+</header>
+<dialog id="inv-journey-menu" class="inv-journey-menu" aria-labelledby="inv-menu-title">
+  <div class="inv-menu-top"><BrandLockup /><button id="inv-menu-close" type="button" aria-label="Close investor navigation">Close <span aria-hidden="true">×</span></button></div>
+  <div class="inv-menu-layout">
+    <div class="inv-menu-intro"><p class="inv-eyebrow">PRIVATE INVESTOR ROOM</p><h2 id="inv-menu-title">Choose your <br/><em>next chapter.</em></h2><p>Explore the place.<br/>Understand the plan.<br/>Test what it takes.</p><a href="/">Back to the SmartTec experience <span aria-hidden="true">↗</span></a></div>
+    <nav class="inv-menu-chapters" aria-label="Explore the investment case">{journey.map((chapter,index)=><a href={'#'+chapter.id} data-inv-chapter={chapter.id} aria-current={index===0?'location':undefined}><span class="inv-menu-number">{String(index+1).padStart(2,'0')}</span><span><strong>{chapter.label}</strong><small>{chapter.note}</small></span><span class="inv-menu-arrow" aria-hidden="true">↗</span></a>)}</nav>
+  </div>
+  <div class="inv-menu-bottom"><span>MEAD, OKLAHOMA / DEVELOPMENT STAGE</span><button id="inv-logout" type="button" class="inv-text-button">Sign out of investor room</button></div>
+</dialog>
+<noscript><nav class="inv-no-script" aria-label="Investor chapters">{journey.map(chapter=><a href={'#'+chapter.id}>{chapter.label}</a>)}</nav></noscript>
+<nav class="inv-journey-dock" aria-label="Continue the investor journey" hidden>
+  <a id="inv-journey-prev" href="#opportunity" aria-label="Back to the beginning"><span aria-hidden="true">←</span><span class="inv-dock-direction">Back</span></a>
+  <span class="inv-dock-current"><span id="inv-journey-count">01 / 07</span><strong id="inv-journey-title">The opportunity</strong></span>
+  <a id="inv-journey-next" href="#campus" aria-label="Next chapter: Explore the campus"><span class="inv-dock-direction">Next</span><span aria-hidden="true">→</span></a>
+</nav>
+<script>import {mountJourney} from '../client/journey.mjs'; mountJourney();</script>

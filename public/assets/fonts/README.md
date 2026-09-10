@@ -3,7 +3,7 @@
 The site currently renders with free stand-ins. Drop the licensed files into
 **this directory**, using exactly these filenames, then rebuild. The type
 becomes an exact match to the reference with no code change — every token
-stack already names the licensed face first, and `src/layouts/Base.astro`
+stack already names the licensed face first, and the shared `src/components/SiteFonts.astro`
 emits the `@font-face` rule for each file it finds here at build time.
 
 The build-time check is deliberate: declaring the faces unconditionally would
@@ -63,3 +63,18 @@ document.fonts.check("16px 'STK Bureau Serif'")
 
 Both returning `true` means the licensed faces are live and the stand-ins are
 no longer being used.
+
+
+## Shared public and investor typography
+
+`Base.astro` and the private investor layout both render `SiteFonts.astro`.
+Space Grotesk (400–700) is served from the existing `/investor-assets/` font
+files; Google Sans Code (400, 700) is now served locally from this directory.
+This keeps private pages within their same-origin font CSP. Ratch and PP
+Supply files, if licensed and added, are picked up by both layouts together.
+The homepage retains its existing Google-hosted editorial families and
+Space Grotesk 300. Do not add an external font service to the private layout.
+
+Google Sans Code source: Google Fonts CSS API, retrieved 10 September 2026;
+upstream https://github.com/googlefonts/googlesans-code.
+`GoogleSansCode-OFL.txt` accompanies the unchanged font files.

@@ -32,6 +32,9 @@ export default defineConfig({
             // presents as the form doing a native GET with the password in
             // the query string. See client/login.mjs.
             if (id.includes('smarttec-investor/client/login')) return 'investor-login';
+            // The small chapter controller must also remain external under
+            // the private room's same-origin-only script policy.
+            if (id.includes('smarttec-investor/client/journey')) return 'investor-journey';
           },
         },
       },

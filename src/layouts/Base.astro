@@ -2,30 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import '../styles/global.css';
-
-/**
- * The reference's three commercial faces. We cannot ship them, but every token
- * stack already names them first — so the moment the licensed files are dropped
- * into public/assets/fonts the type becomes an exact match.
- *
- * The @font-face rules are emitted only for files that actually exist at build
- * time. Declaring them unconditionally would 404 on every page view.
- */
-const LICENSED_FACES = [
-  // Ratch is the intended primary face: a variable geometric grotesk. Both a
-  // variable file and static cuts are accepted, so whichever the licence ships
-  // will be picked up.
-  { family: 'Ratch', file: 'Ratch-Variable.woff2', weight: '100 900' },
-  { family: 'Ratch', file: 'Ratch-Regular.woff2', weight: '400' },
-  { family: 'Ratch', file: 'Ratch-Medium.woff2', weight: '500' },
-  { family: 'Ratch', file: 'Ratch-Bold.woff2', weight: '700' },
-  { family: 'PP Supply Mono', file: 'PPSupplyMono-Regular.otf', weight: '400' },
-  { family: 'PP Supply Sans', file: 'PPSupplySans-Regular.otf', weight: '400' },
-  { family: 'STK Bureau Serif', file: 'STKBureau-SerifBook.otf', weight: '400' },
-] as const;
-
-const fontDir = path.join(process.cwd(), 'public', 'assets', 'fonts');
-const licensed = LICENSED_FACES.filter((f) => fs.existsSync(path.join(fontDir, f.file)));
+import SiteFonts from '../components/SiteFonts.astro';
 
 interface Props {
   title: string;
@@ -87,14 +64,7 @@ const ogImageAlt = 'SmartTec by Z1Power — data centers and colocation';
     <meta name="theme-color" content="#1c4839" />
     {particleCss && <style set:html={particleCss} />}
 
-    {licensed.length > 0 && (
-      <style set:html={licensed
-        .map((f) => {
-          const fmt = f.file.endsWith('.woff2') ? 'woff2' : 'opentype';
-          return `@font-face{font-family:'${f.family}';src:url('/assets/fonts/${f.file}') format('${fmt}');font-weight:${f.weight};font-style:normal;font-display:swap}`;
-        })
-        .join('')} />
-    )}
+    <SiteFonts />
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="SmartTec by Z1Power" />
@@ -117,7 +87,7 @@ const ogImageAlt = 'SmartTec by Z1Power — data centers and colocation';
          See public/assets/fonts/README.md. -->
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,600&family=Space+Grotesk:wght@300;400;500;600;700&family=Caveat:wght@700&family=Google+Sans+Code:wght@400;700&family=Google+Sans+Flex:wght@400;500;600&family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&family=Pinyon+Script&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,700;1,6..96,600&family=Space+Grotesk:wght@300&family=Caveat:wght@700&family=Google+Sans+Flex:wght@400;500;600&family=Inter:wght@400;500;600&family=Newsreader:ital,wght@0,400;0,500;1,400&family=Pinyon+Script&display=swap"
     />
   </head>
   <body data-experience={experience ? '' : undefined}>

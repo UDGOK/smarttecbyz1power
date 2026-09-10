@@ -1,0 +1,14 @@
+---
+interface Props { class?: string; href?: string; }
+const {class: className = '', href = '/'} = Astro.props;
+---
+<a class:list={['brand-lockup', className]} href={href} aria-label="SmartTec by Z1Power — home">
+  <img class="brand-lockup__screen" src="/assets/brand/smarttec-lockup-offwhite-green.svg" width="1231" height="298" alt="SmartTec by Z1Power" decoding="async" />
+  <img class="brand-lockup__print" src="/assets/brand/smarttec-lockup-black.svg" width="1231" height="298" alt="" aria-hidden="true" />
+</a>
+<style>
+  .brand-lockup{display:inline-flex;align-items:center;flex-shrink:0;width:180px;max-width:100%;padding:6px 0;text-decoration:none}
+  .brand-lockup img{display:block;width:100%;height:auto}
+  .brand-lockup .brand-lockup__print{display:none}
+  @media print{.brand-lockup .brand-lockup__screen{display:none}.brand-lockup .brand-lockup__print{display:block}}
+</style>

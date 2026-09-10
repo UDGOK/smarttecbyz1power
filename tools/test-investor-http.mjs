@@ -22,6 +22,20 @@ r=await fetch(origin+'/investors/login');const login=await r.text();assert.equal
 for(const path of ['bootstrap','survey','survey-image','concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy']){r=await fetch(origin+'/api/investor/'+path);assert.equal(r.status,401);checks++;}
 r=await fetch(origin+'/api/investor/login',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({password:'integration-password'})});assert.equal(r.status,200,await r.clone().text());const cookie=r.headers.get('set-cookie').split(';')[0];checks++;
 r=await fetch(origin+'/investors',{headers:{Cookie:cookie}});const page=await r.text();assert.equal(r.status,200);assert.ok(page.includes('8460 US 70, Mead, OK 73449'));assert.ok(page.includes('inv-equipment-rows'));assert.ok(r.headers.get('cache-control').includes('no-store'));checks++;
+// An otherwise successful HTTP response can still ship a dead private menu
+// if Astro inlines its small script and the page CSP refuses to execute it.
+for(const html of [login,page]){
+ const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
+ assert.ok(scripts.length>0);
+ for(const [,attributes,body]of scripts){assert.match(attributes,/\bsrc=/);assert.equal(body.trim(),'');}
+ assert.ok(html.includes('/assets/brand/smarttec-lockup-offwhite-green.svg'));
+ checks++;
+}
+assert.equal((page.match(/id="inv-logout"/g)||[]).length,1);
+assert.ok(page.includes('<dialog'));assert.ok(page.includes('aria-haspopup="dialog"'));
+for(const id of ['opportunity','campus','deployment','capital','returns','evidence','questions'])assert.equal((page.match(new RegExp('id="'+id+'"','g'))||[]).length,1);
+checks++;
+for(const asset of ['/investor-assets/fonts.css','/assets/fonts/GoogleSansCode-Regular.ttf','/assets/fonts/GoogleSansCode-Bold.ttf','/assets/brand/smarttec-lockup-offwhite-green.svg']){r=await fetch(origin+asset);assert.equal(r.status,200);checks++;}
 const bootstrap=await(await fetch(origin+'/api/investor/bootstrap',{headers:{Cookie:cookie}})).json();const headers={Cookie:cookie,Origin:origin,'Content-Type':'application/json','X-CSRF-Token':bootstrap.csrf};
 for(const path of ['concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy']){r=await fetch(origin+'/api/investor/'+path,{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.ok((await r.arrayBuffer()).byteLength>10000);checks++;}
 r=await fetch(origin+'/api/investor/calculate',{method:'POST',headers,body:JSON.stringify({scenario:bootstrap.sample})});assert.equal(r.status,200);const result=await r.json();assert.equal(result.requiredInitialFunding,330000);assert.ok(result.project.totalROI<0);checks++;

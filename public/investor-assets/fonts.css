@@ -26,3 +26,19 @@
   font-display: swap;
   src: url(/investor-assets/space-grotesk-3.ttf) format('truetype');
 }
+
+/* Shared homepage/investor UI labels; SIL OFL in /assets/fonts/. */
+@font-face {
+  font-family: 'Google Sans Code';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/GoogleSansCode-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Google Sans Code';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/assets/fonts/GoogleSansCode-Bold.ttf') format('truetype');
+}
