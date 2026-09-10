@@ -1,5 +1,6 @@
 import {config,RedisStore,authenticate,createSession,revoke,sameOrigin,csrfValid,loginLimit,actionLimit,verifyPassword,cookieHeader,json,readJson,privateHeaders} from './auth.mjs';
 import {architectureAsset} from '../../smarttec-architecture/server/architecture-assets.mjs';
+import {thermalAsset} from '../../smarttec-architecture/server/thermal-assets.mjs';
 import {calculateScenario,requiredRateForNPV} from '../roi-engine.mjs';
 import {answerQuestion,faqList} from './faq.mjs';
 import sample from '../data/illustrative-scenario.json' with {type:'json'};
@@ -29,7 +30,7 @@ export async function handle(request,action,dependencies={}){
    if(!sameOrigin(request,cfg)||!csrfValid(request,session))return json({error:'Request verification failed.'},403);
    if(!await actionLimit(store,session))return json({error:'Too many requests. Try again shortly.'},429);
   }
-  const architecture=architectureAsset(action,request.method);
+  const architecture=thermalAsset(action,request.method)||architectureAsset(action,request.method);
   if(architecture)return new Response(architecture.bytes,{headers:{...privateHeaders,'Content-Type':architecture.mime}});
   if(action==='logout'&&request.method==='POST'){await revoke(store,session);return json({ok:true},200,{'Set-Cookie':cookieHeader(cfg,'',0)});}
   if(action==='bootstrap'&&request.method==='GET')return json({csrf:session.csrf,sample,provenance,catalog,campus,mapData,mapConfig:{satelliteKey:cfg.mapKey||''},faqs:faqList()});

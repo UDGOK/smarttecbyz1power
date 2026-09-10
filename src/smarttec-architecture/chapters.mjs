@@ -24,8 +24,16 @@ export const chapters = {
     model:'module-energy', target:[0,1,2], camera:[31,15,-34], distance:[8,100],
     modelNote:'Generic storage and solar assembly. Equipment count does not establish MW, MWh, capacity or setbacks.'
   },
+  cooling: {
+    label:'Cooling', number:'04', title:'Two loops. Different duties.',
+    text:'A warm circuit for compatible liquid-cooled servers. A chilled circuit for active rear doors. This equipment exhibit is separate from the surveyed campus.',
+    fact:'Dry heat rejection · design intent', status:'EQUIPMENT STUDY / SITING PENDING',
+    image:'thermal-preview', alt:'Geometry-rendered two-loop cooling study with dry coolers, trim chiller, scroll chillers, CDUs, buffer tank and a generator docking pad; not installed equipment',
+    model:'thermal-model', target:[2,1,0], camera:[29,25,33], distance:[12,95],
+    modelNote:'Equipment categories and illustrative sizes only. No capacities or site locations. Mechanical review must establish placement, clearances and redundancy.'
+  },
   overview: {
-    label:'Campus layout', number:'04', title:'One property. Three roles.',
+    label:'Campus layout', number:'05', title:'One property. Three roles.',
     text:'8460 US 70, Mead, Oklahoma. The supplied survey totals 39.21 acres across three tracts. This overview follows the earlier owner-marked concept.',
     fact:'39.21 surveyed acres', status:'OWNER-MARKED CONCEPT',
     image:'architecture-overview', alt:'Geometry-rendered overview of the owner-marked campus concept, showing manufacturing, existing structures and an illustrative solar zone',
@@ -33,6 +41,6 @@ export const chapters = {
     modelNote:'Approximate campus geometry, not a georeferenced satellite overlay or approved site plan.'
   }
 };
-export const imageDisclosure = key => key === 'overview'
+export const imageDisclosure = key => ['overview','cooling'].includes(key)
   ? 'MODEL PREVIEW · APPROXIMATE GEOMETRY'
   : 'AI ARCHITECTURAL CONCEPT · NOT A SITE PHOTO';
