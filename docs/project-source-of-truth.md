@@ -19,3 +19,19 @@ Dates convert the relative targets in the dated owner message. They do not asser
 Selected cooling capacities/models, final B300 configuration, total phase power/cooling load, BESS quantity/MW/MWh, and construction/utility/carrier acceptance require project or engineering inputs. Colocation terms were expressly deferred by the owner. These are proposal/design decisions, not empty public-page placeholders.
 
 The earlier investor calculator illustration remains an **RTX-only example excluding B300**. Numerical assumptions and survey geometry were preserved rather than inventing a new complete phase budget.
+
+
+## Pending team confirmation: behind-the-meter supply
+
+Owner update, 10 September 2026: Yasir reports solar, battery storage and gas generation, a cost below $0.07/kWh, and an agreement. He is waiting for his team to confirm the details and explicitly asked that the questions be saved for follow-up.
+
+Before revising the investor budget or representing power capacity/costs as verified, ask for the team's response to:
+
+1. How many continuous kW are reserved exclusively for SmartTec after other campus loads, derating and redundancy? State generator kW and battery usable kWh separately.
+2. Is the supply operating now? If not, what is the committed delivery/commissioning date?
+3. Does the below-$0.07/kWh cost include gas/fuel, charging energy, maintenance, battery losses and replacement, and generation/storage equipment funding? What does SmartTec pay separately?
+4. What are the agreement term, pricing/escalation mechanism, backup obligations and curtailment rights? Obtain the executed agreement or a commercial summary for review.
+
+Status: waiting on owner's team. No team contact or delivery channel is recorded. Do not send questions to an unspecified recipient. On resuming the investment/power review, check whether the team has replied and use these exact open items. This is a saved project follow-up, not a scheduled reminder.
+
+The existing shared OG&E service is a separate recorded fact. Do not infer that the reported generation/storage agreement is already commissioned or that all service capacity is exclusively available to SmartTec. The 7-cent calculator case is an owner-reported energy-price sensitivity; original demand charges, reserve and other costs remain unchanged pending agreement review.

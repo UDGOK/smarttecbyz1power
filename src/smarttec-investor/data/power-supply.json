@@ -1,0 +1,26 @@
+{
+  "reviewedAt": "2026-09-10",
+  "status": "owner-reported; agreement not reviewed",
+  "sources": [
+    "Solar",
+    "Battery storage",
+    "Gas generators"
+  ],
+  "agreementStatus": "Owner reports having an agreement; executed document and commercial terms not reviewed",
+  "reportedEnergyCost": "Below $0.07/kWh",
+  "sensitivityRatePerKwh": 0.07,
+  "exclusiveContinuousKw": null,
+  "operatingStatus": null,
+  "serviceStartDate": null,
+  "agreementTerm": null,
+  "allInCostScopeVerified": false,
+  "costItemsToConfirm": [
+    "Fuel and purchased charging energy",
+    "Generation and storage equipment funding",
+    "Maintenance and replacement",
+    "Battery losses",
+    "Standby and demand charges",
+    "Backup and curtailment terms"
+  ],
+  "followUpStatus": "Owner is awaiting team reply; questions saved in docs/project-source-of-truth.md"
+}

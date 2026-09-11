@@ -410,6 +410,17 @@
         "economics-review"
       ],
       "reviewedAt": "2026-09-10"
+    },
+    {
+      "id": "F-power-agreement",
+      "question": "Does SmartTec have behind-the-meter power and an energy agreement?",
+      "answer": "The owner reports an agreement for solar, batteries and gas generators at below $0.07/kWh and is awaiting team confirmation of firm exclusive capacity, operating date and included costs. The agreement has not been reviewed. The investor page offers a 7-cent energy-price sensitivity with other costs unchanged; it is not a verified all-in tariff or commissioned-capacity claim.",
+      "status": "owner-reported; team confirmation pending",
+      "sourceIds": [
+        "owner-brief",
+        "economics-review"
+      ],
+      "reviewedAt": "2026-09-10"
     }
   ]
 }

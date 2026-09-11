@@ -2,6 +2,7 @@
 import {options,summarizeOption,sources,assumptions,reviewedAt} from '../underwriting.mjs';
 import {calculateScenario} from '../roi-engine.mjs';
 import original from '../data/illustrative-scenario.json';
+import PowerCase from './PowerCase.astro';
 const baseline=calculateScenario(original);
 const comparisons=options.map(o=>({...o,base:summarizeOption(o.id),downside:summarizeOption(o.id,'downside'),favorable:summarizeOption(o.id,'favorable')}));
 const usd=(n:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
@@ -25,6 +26,7 @@ const pct=(n:number|null)=>n===null?'Not reported':(n*100).toFixed(1)+'%';
     {o.id!=='customer-hosting'&&<p><strong>Hardware-life stress:</strong> Replacing the month-37 10% overhaul allowance with 100% of original hardware cost, with no trade-in credit or extra revenue, changes base-case NPV to {usd(o.base.fullReplacementNPV)}. No capacity or efficiency gain is assumed.</p>}
     <div class="inv-actions">{['base','downside','favorable'].map(kind=><button type="button" disabled class="inv-outline" data-underwriting-option={o.id} data-underwriting-case={kind}>Load {kind} assumptions</button>)}</div>
   </details>)}</div>
+  <PowerCase />
   <details class="inv-details"><summary>How to turn this into a financeable plan</summary><ol><li>Obtain complete OEM and installed-site quotes, including electrical conversion/distribution, cooling, switching/storage, taxes, freight, support and software.</li><li>Reconcile the $8,075/month carrier allowance with actual signed service terms. Match bandwidth and any minimum term to committed customer needs.</li><li>Validate measured customer workload performance. Obtain minimum paid commitments, service-credit limits and enforceable pricing before buying capacity. Reservations are not the same as collected receipts.</li><li>Compare owned compute with customer-owned hosting. Hosting avoids GPU purchase exposure but still must recover site costs and cover power, network, maintenance and tenant credit risk.</li><li>Recalculate the base and downside cases using actual quotes and terms, then agree the raise, use of funds, investor waterfall and tax treatment. A project IRR is not an investor distribution promise.</li></ol></details>
 </div>
 <style>
