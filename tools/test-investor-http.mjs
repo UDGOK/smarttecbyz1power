@@ -43,7 +43,7 @@ for(const asset of ['/investor-assets/fonts.css','/assets/fonts/GoogleSansCode-R
 const bootstrap=await(await fetch(origin+'/api/investor/bootstrap',{headers:{Cookie:cookie}})).json();const headers={Cookie:cookie,Origin:origin,'Content-Type':'application/json','X-CSRF-Token':bootstrap.csrf};
 for(const path of ['concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy']){r=await fetch(origin+'/api/investor/'+path,{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.ok((await r.arrayBuffer()).byteLength>10000);checks++;}
 r=await fetch(origin+'/api/investor/calculate',{method:'POST',headers,body:JSON.stringify({scenario:bootstrap.sample})});assert.equal(r.status,200);const result=await r.json();assert.equal(result.requiredInitialFunding,330000);assert.ok(result.project.totalROI<0);checks++;
-assert.ok(page.includes('Profitability is not yet established'));assert.equal((page.match(/data-underwriting-option=/g)||[]).length,21);checks++;
+assert.ok(page.includes('Profitability is not yet established'));assert.equal((page.match(/data-underwriting-option=/g)||[]).length,26);checks++;
 // Exercise the real editor against the compiled API using a DOM, without live credentials.
 const dom=new JSDOM(page,{url:origin+'/investors',runScripts:'outside-only'}),win=dom.window;
 win.structuredClone=structuredClone;win.matchMedia=()=>({matches:true});win.gsap={from(){}};
@@ -79,6 +79,14 @@ win.document.querySelector('[data-underwriting-power="reported"][data-underwriti
 await until(()=>win.document.querySelector('[data-field="energyRatePerKwh"]').value==='0.07');
 assert.equal(win.document.querySelector('#inv-results').hidden,true);
 assert.equal(win.document.querySelector('#inv-acknowledge').checked,false);checks++;
+win.document.querySelector('[data-underwriting-option="proposed-60-20"]').click();
+await until(()=>win.document.querySelector('[data-field="siteCapex"]').value==='652800');
+assert.equal(win.document.querySelector('#inv-results').hidden,true);
+assert.equal(win.document.querySelector('#inv-acknowledge').checked,false);checks++;
+const owner=await (await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers,body:JSON.stringify({id:'proposed-60-20',ownerPricing:true})})).json();
+assert.equal(owner.scenario.rows.reduce((n,r)=>n+r.systems*r.completeSystemCost,0),5360000);checks++;
+r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers:{...headers,'X-CSRF-Token':'invalid'},body:JSON.stringify({id:'proposed-60-20',ownerPricing:true})});assert.equal(r.status,403);checks++;
+r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers,body:JSON.stringify({id:'invented',ownerPricing:true})});assert.equal(r.status,400);checks++;
 dom.window.close();
 r=await fetch(origin+'/api/investor/survey',{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'application/pdf');checks++;
 r=await fetch(origin+'/api/investor/logout',{method:'POST',headers,body:'{}'});assert.equal(r.status,200);checks++;

@@ -3,20 +3,22 @@ import {options,summarizeOption,sources,assumptions,reviewedAt} from '../underwr
 import {calculateScenario} from '../roi-engine.mjs';
 import original from '../data/illustrative-scenario.json';
 import PowerCase from './PowerCase.astro';
+import OwnerDeployment from './OwnerDeployment.astro';
 const baseline=calculateScenario(original);
 const comparisons=options.map(o=>({...o,base:summarizeOption(o.id),downside:summarizeOption(o.id,'downside'),favorable:summarizeOption(o.id,'favorable')}));
 const usd=(n:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
 const pct=(n:number|null)=>n===null?'Not reported':(n*100).toFixed(1)+'%';
 ---
 <div class="inv-underwriting" id="underwriting">
-  <p class="inv-eyebrow">ECONOMIC REVIEW / {reviewedAt}</p>
+  <OwnerDeployment />
+  <p class="inv-eyebrow">EARLIER BENCHMARK REVIEW / {reviewedAt}</p>
   <h3>Buy against demand.<br/>Expand against returns.</h3>
-  <p class="inv-lead">Profitability is not yet established. The earlier RTX-only example loses {usd(-baseline.project.netProfit)} over five years and never recovers its initial {usd(baseline.requiredInitialFunding)}. Adding a B300 requires a new budget and a customer-backed revenue case.</p>
+  <p class="inv-lead">Profitability is not yet established by verified contracts and costs. The benchmark inputs below predate the latest owner prices above. The earlier RTX-only example loses {usd(-baseline.project.netProfit)} over five years and never recovers its initial {usd(baseline.requiredInitialFunding)}. Adding a B300 requires a new budget and a customer-backed revenue case.</p>
   <div class="inv-warning"><strong>Current decision: validate contracts and quotes before purchasing more GPUs.</strong><p>All six base cases below have negative project NPV at the assumed 15% annual hurdle. A positive operating cash flow can still fail to repay the equipment and site investment. Retail cloud rates are price references, not SmartTec sales commitments.</p></div>
   <div class="inv-table-scroll" tabindex="0" role="region" aria-label="GPU and hosting financial comparison; scroll horizontally on small screens">
     <table><caption>Five-year base cases · pre-tax, unlevered · total funding includes modeled capital calls</caption><thead><tr><th scope="col">Option</th><th scope="col">Total funding</th><th scope="col">Net cash profit / loss</th><th scope="col">NPV at 15%</th><th scope="col">Capital recovered</th></tr></thead><tbody>{comparisons.map(o=><tr><th scope="row">{o.label}</th><td>{usd(o.base.totalFunding)}</td><td class="inv-negative">{usd(o.base.netProfit)}</td><td class="inv-negative">{usd(o.base.npv)}</td><td>{o.base.payback===null?'Not within 60 months':`Month ${o.base.payback}`}</td></tr>)}</tbody></table>
   </div>
-  <p class="inv-note">These are alternative upfront deployments, not additive phases. RTX means four 96GB RTX PRO 6000 Blackwell Server Edition GPUs per node. Each modeled HGX B200/B300 reference has eight GPUs. The planned SmartTec B300 configuration is still unselected.</p>
+  <p class="inv-note">These are alternative upfront deployments, not additive phases. In this earlier comparison, RTX means four 96GB RTX PRO 6000 Blackwell Server Edition GPUs per node. Each modeled HGX B200/B300 reference has eight GPUs. The planned SmartTec B300 configuration is still unselected.</p>
   <details class="inv-details"><summary>Open assumptions, costs and source evidence</summary><ul>{assumptions.map(a=><li>{a}</li>)}</ul><h4>Evidence checked {reviewedAt}</h4>{sources.map(s=><p><a href={s.url} target="_blank" rel="noopener noreferrer">{s.title}</a><br/>{s.basis}</p>)}</details>
   <div class="inv-underwriting-options">{comparisons.map(o=><details class="inv-details">
     <summary>{o.label} — inspect risks and load a case</summary><p>{o.note}</p>

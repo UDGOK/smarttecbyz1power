@@ -5,6 +5,7 @@ import {calculateScenario,requiredRateForNPV} from '../roi-engine.mjs';
 import {makeScenario,requiredRevenueMultiplier} from '../underwriting.mjs';
 import {makePowerScenario} from '../power-sensitivity.mjs';
 import {answerQuestion,faqList} from './faq.mjs';
+import ownerStudy from '../data/owner-deployment-study.json' with {type:'json'};
 import sample from '../data/illustrative-scenario.json' with {type:'json'};
 import provenance from '../data/illustration-provenance.json' with {type:'json'};
 import catalog from '../data/hardware_catalog.json' with {type:'json'};
@@ -37,7 +38,7 @@ export async function handle(request,action,dependencies={}){
   if(action==='logout'&&request.method==='POST'){await revoke(store,session);return json({ok:true},200,{'Set-Cookie':cookieHeader(cfg,'',0)});}
   if(action==='bootstrap'&&request.method==='GET')return json({csrf:session.csrf,sample,provenance,catalog,campus,mapData,mapConfig:{satelliteKey:cfg.mapKey||''},faqs:faqList()});
   if(action==='underwriting-scenario'&&request.method==='POST'){
-   const b=await readJson(request,2048);if(b.powerBasis!==undefined&&b.powerBasis!=='reported')throw new Error('Unknown power basis');return json({scenario:b.powerBasis==='reported'?makePowerScenario(b.id,b.kind):makeScenario(b.id,b.kind)});
+   const b=await readJson(request,2048);if(b.ownerPricing===true){const selected=ownerStudy.cases.find(c=>c.id===b.id);if(!selected)throw new Error('Unknown owner deployment');return json({scenario:selected.scenario});}if(b.powerBasis!==undefined&&b.powerBasis!=='reported')throw new Error('Unknown power basis');return json({scenario:b.powerBasis==='reported'?makePowerScenario(b.id,b.kind):makeScenario(b.id,b.kind)});
   }
   if(action==='marked-survey'&&request.method==='GET')return new Response(Buffer.from(markedPdf,'base64'),{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="SmartTec_Marked_Layout.pdf"'}});
   if(action==='survey'&&request.method==='GET')return new Response(Buffer.from(surveyPdf,'base64'),{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="SmartTec_Boundary_Survey.pdf"'}});

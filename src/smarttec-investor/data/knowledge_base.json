@@ -404,7 +404,7 @@
     {
       "id": "F-economics-2026",
       "question": "Is SmartTec profitable, and should we add more RTX, B200 or B300 GPUs?",
-      "answer": "Profitability is not established. The earlier $330,000 RTX-only illustration loses approximately $225,386 over five years and excludes B300. The economic review compares six configurations across base, downside and favorable cases with explicit cost allowances and price decay. None of those base cases clears the assumed 15% project discount hurdle. A B200 expansion clears it only in the favorable uncontracted case and fails a full replacement stress. Validate customers, quotes and engineering before procurement; these are conditional project returns, not promised investor distributions.",
+      "answer": "Using the latest owner inputs of $670,000 per eight-GPU B300 system at $6.50/GPU-hour and $170,000 per eight-GPU RTX system at $1.50/GPU-hour, the 912-configuration study favors B300-only. The 60-saleable-plus-four-reserve B300 case at 20 paid hours/day models $1.99 million five-year net cash profit and 28.7% TOTAL five-year ROI, but negative $674,000 NPV at the assumed 15% annual hurdle. The smallest mathematical pass is 72 B300 GPUs with no dedicated reserve and 20 paid hours/day; its roughly $7,361 NPV is too thin to support a robust recommendation and fails price-decline and extra-operations stresses. No searched configuration at 18 paid hours/day passes. Confirm paid customer commitments, full costs and usable power before selecting a fleet. Earlier benchmark comparisons are separately labeled; none of these calculations promises investor distributions.",
       "status": "planning-sensitivity-not-quote",
       "sourceIds": [
         "economics-review"

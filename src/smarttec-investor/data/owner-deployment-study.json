@@ -1,0 +1,1180 @@
+{
+  "reviewedAt": "2026-09-10",
+  "tested": 912,
+  "groups": [
+    {
+      "reserve": "none",
+      "hours": 18,
+      "minimum": null,
+      "within64": null
+    },
+    {
+      "reserve": "none",
+      "hours": 20,
+      "minimum": {
+        "b300": 9,
+        "rtx": 0,
+        "hours": 20,
+        "reserve": "none",
+        "installed": 72,
+        "initial": 7658853,
+        "totalFunding": 7773896.560191264,
+        "profit": 3310967.793103922,
+        "totalROI": 0.4259083932321401,
+        "npv": 7360.724071355129,
+        "payback": 45,
+        "irr": null,
+        "peakITkw": 179.29999999999998
+      },
+      "within64": null
+    },
+    {
+      "reserve": "half",
+      "hours": 18,
+      "minimum": null,
+      "within64": null
+    },
+    {
+      "reserve": "half",
+      "hours": 20,
+      "minimum": {
+        "b300": 14,
+        "rtx": 0,
+        "hours": 20,
+        "reserve": "half",
+        "installed": 112,
+        "initial": 11736616,
+        "totalFunding": 11979262.092833064,
+        "profit": 5136285.788527854,
+        "totalROI": 0.42876478941059176,
+        "npv": 65807.76059045154,
+        "payback": 45,
+        "irr": null,
+        "peakITkw": 277.79999999999995
+      },
+      "within64": null
+    },
+    {
+      "reserve": "node",
+      "hours": 18,
+      "minimum": null,
+      "within64": null
+    },
+    {
+      "reserve": "node",
+      "hours": 20,
+      "minimum": null,
+      "within64": null
+    }
+  ],
+  "cases": [
+    {
+      "id": "small-24",
+      "title": "24 B300 GPUs / no dedicated reserve",
+      "b300": 3,
+      "rtx": 0,
+      "hours": 20,
+      "reserve": "none",
+      "scenario": {
+        "schemaVersion": 1,
+        "startMonth": "2026-10",
+        "horizonMonths": 60,
+        "siteCapex": 357300,
+        "softCosts": 231000,
+        "openingReserve": 167238,
+        "monthlyFixedOpex": 14325,
+        "monthlyNetworkCost": 8075,
+        "networkCommitmentMonths": 60,
+        "monthlyDemandCharges": 2182,
+        "energyRatePerKwh": 0.07,
+        "pue": 1.4,
+        "extraITPeakKw": 2,
+        "extraITAverageFraction": 0.5,
+        "annualOpexEscalation": 0.03,
+        "annualDiscountRate": 0.15,
+        "exitSaleProceeds": 0,
+        "exitDecommissionCost": 40000,
+        "exitOtherLiabilities": 0,
+        "investorProRataFraction": null,
+        "debt": {
+          "principal": 0,
+          "annualRate": 0,
+          "termMonths": 60
+        },
+        "capexEvents": [
+          {
+            "month": 37,
+            "cost": 201000
+          }
+        ],
+        "rows": [
+          {
+            "id": "b300-active",
+            "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+            "profileId": "hgx-b300-reference",
+            "ownership": "owned",
+            "systems": 2,
+            "gpusPerSystem": 8,
+            "completeSystemCost": 670000,
+            "peakKwPerSystem": 19.7,
+            "averagePowerFraction": 0.7614213197969544,
+            "operatingStartMonth": 4,
+            "operatingEndMonth": 60,
+            "contracts": [
+              {
+                "startMonth": 4,
+                "endMonth": 60,
+                "billing": "gpu_hour",
+                "rate": 6.5,
+                "paidOccupancy": 0.8333333333333334,
+                "collectionFraction": 0.98,
+                "salesFeeFraction": 0.1,
+                "annualRateEscalation": 0,
+                "collectionLagMonths": 0
+              }
+            ]
+          },
+          {
+            "id": "b300-last",
+            "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+            "profileId": "hgx-b300-reference",
+            "ownership": "owned",
+            "systems": 1,
+            "gpusPerSystem": 8,
+            "completeSystemCost": 670000,
+            "peakKwPerSystem": 19.7,
+            "averagePowerFraction": 0.7614213197969544,
+            "operatingStartMonth": 4,
+            "operatingEndMonth": 60,
+            "contracts": [
+              {
+                "startMonth": 4,
+                "endMonth": 60,
+                "billing": "gpu_hour",
+                "rate": 6.5,
+                "paidOccupancy": 0.8333333333333334,
+                "collectionFraction": 0.98,
+                "salesFeeFraction": 0.1,
+                "annualRateEscalation": 0,
+                "collectionLagMonths": 0
+              }
+            ]
+          }
+        ],
+        "underwriting": {
+          "status": "Optimization sensitivity; not signed customer demand, approved hardware or verified power capacity",
+          "b300Nodes": 3,
+          "rtxNodes": 0,
+          "gpusPurchased": 24,
+          "reservePerHardwareFamily": 0,
+          "paidHoursPerSaleableGpuPerDay": 20,
+          "annualPriceChange": 0,
+          "extraMonthlyOperations": 0
+        }
+      },
+      "hardwareNegotiation": {
+        "maximumSystemCost": 479852.02150590473,
+        "scenario": {
+          "schemaVersion": 1,
+          "startMonth": "2026-10",
+          "horizonMonths": 60,
+          "siteCapex": 357300,
+          "softCosts": 173955.6,
+          "openingReserve": 158681,
+          "monthlyFixedOpex": 12898.89,
+          "monthlyNetworkCost": 8075,
+          "networkCommitmentMonths": 60,
+          "monthlyDemandCharges": 2182,
+          "energyRatePerKwh": 0.07,
+          "pue": 1.4,
+          "extraITPeakKw": 2,
+          "extraITAverageFraction": 0.5,
+          "annualOpexEscalation": 0.03,
+          "annualDiscountRate": 0.15,
+          "exitSaleProceeds": 0,
+          "exitDecommissionCost": 40000,
+          "exitOtherLiabilities": 0,
+          "investorProRataFraction": null,
+          "debt": {
+            "principal": 0,
+            "annualRate": 0,
+            "termMonths": 60
+          },
+          "capexEvents": [
+            {
+              "month": 37,
+              "cost": 143955.6
+            }
+          ],
+          "rows": [
+            {
+              "id": "b300-active",
+              "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+              "profileId": "hgx-b300-reference",
+              "ownership": "owned",
+              "systems": 2,
+              "gpusPerSystem": 8,
+              "completeSystemCost": 479852,
+              "peakKwPerSystem": 19.7,
+              "averagePowerFraction": 0.7614213197969544,
+              "operatingStartMonth": 4,
+              "operatingEndMonth": 60,
+              "contracts": [
+                {
+                  "startMonth": 4,
+                  "endMonth": 60,
+                  "billing": "gpu_hour",
+                  "rate": 6.5,
+                  "paidOccupancy": 0.8333333333333334,
+                  "collectionFraction": 0.98,
+                  "salesFeeFraction": 0.1,
+                  "annualRateEscalation": 0,
+                  "collectionLagMonths": 0
+                }
+              ]
+            },
+            {
+              "id": "b300-last",
+              "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+              "profileId": "hgx-b300-reference",
+              "ownership": "owned",
+              "systems": 1,
+              "gpusPerSystem": 8,
+              "completeSystemCost": 479852,
+              "peakKwPerSystem": 19.7,
+              "averagePowerFraction": 0.7614213197969544,
+              "operatingStartMonth": 4,
+              "operatingEndMonth": 60,
+              "contracts": [
+                {
+                  "startMonth": 4,
+                  "endMonth": 60,
+                  "billing": "gpu_hour",
+                  "rate": 6.5,
+                  "paidOccupancy": 0.8333333333333334,
+                  "collectionFraction": 0.98,
+                  "salesFeeFraction": 0.1,
+                  "annualRateEscalation": 0,
+                  "collectionLagMonths": 0
+                }
+              ]
+            }
+          ],
+          "underwriting": {
+            "status": "Optimization sensitivity; not signed customer demand, approved hardware or verified power capacity",
+            "b300Nodes": 3,
+            "rtxNodes": 0,
+            "gpusPurchased": 24,
+            "reservePerHardwareFamily": 0,
+            "paidHoursPerSaleableGpuPerDay": 20,
+            "annualPriceChange": 0,
+            "extraMonthlyOperations": 0
+          }
+        },
+        "npv": 0.08233490500424523
+      },
+      "result": {
+        "initial": 2765538,
+        "totalFunding": 2765538,
+        "profit": 166248.08659519488,
+        "totalROI": 0.06011419354758274,
+        "npv": -731991.3320905999,
+        "payback": 60,
+        "irr": 0.02155463988786399,
+        "peakITkw": 61.099999999999994
+      },
+      "priceRequired": 7.923071878664236,
+      "declineNPV": -1233285.4847846203,
+      "extraOperationsNPV": -1212190.3865060685
+    },
+    {
+      "id": "proposed-60-18",
+      "title": "60 saleable + 4 reserve B300 / 18 paid hours",
+      "b300": 8,
+      "rtx": 0,
+      "hours": 18,
+      "reserve": "half",
+      "scenario": {
+        "schemaVersion": 1,
+        "startMonth": "2026-10",
+        "horizonMonths": 60,
+        "siteCapex": 652800,
+        "softCosts": 566000,
+        "openingReserve": 264501,
+        "monthlyFixedOpex": 23200,
+        "monthlyNetworkCost": 8075,
+        "networkCommitmentMonths": 60,
+        "monthlyDemandCharges": 4152,
+        "energyRatePerKwh": 0.07,
+        "pue": 1.4,
+        "extraITPeakKw": 2,
+        "extraITAverageFraction": 0.5,
+        "annualOpexEscalation": 0.03,
+        "annualDiscountRate": 0.15,
+        "exitSaleProceeds": 0,
+        "exitDecommissionCost": 40000,
+        "exitOtherLiabilities": 0,
+        "investorProRataFraction": null,
+        "debt": {
+          "principal": 0,
+          "annualRate": 0,
+          "termMonths": 60
+        },
+        "capexEvents": [
+          {
+            "month": 37,
+            "cost": 536000
+          }
+        ],
+        "rows": [
+          {
+            "id": "b300-active",
+            "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+            "profileId": "hgx-b300-reference",
+            "ownership": "owned",
+            "systems": 7,
+            "gpusPerSystem": 8,
+            "completeSystemCost": 670000,
+            "peakKwPerSystem": 19.7,
+            "averagePowerFraction": 0.7614213197969544,
+            "operatingStartMonth": 4,
+            "operatingEndMonth": 60,
+            "contracts": [
+              {
+                "startMonth": 4,
+                "endMonth": 60,
+                "billing": "gpu_hour",
+                "rate": 6.5,
+                "paidOccupancy": 0.75,
+                "collectionFraction": 0.98,
+                "salesFeeFraction": 0.1,
+                "annualRateEscalation": 0,
+                "collectionLagMonths": 0
+              }
+            ]
+          },
+          {
+            "id": "b300-last",
+            "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+            "profileId": "hgx-b300-reference",
+            "ownership": "owned",
+            "systems": 1,
+            "gpusPerSystem": 8,
+            "completeSystemCost": 670000,
+            "peakKwPerSystem": 19.7,
+            "averagePowerFraction": 0.7614213197969544,
+            "operatingStartMonth": 4,
+            "operatingEndMonth": 60,
+            "contracts": [
+              {
+                "startMonth": 4,
+                "endMonth": 60,
+                "billing": "gpu_hour",
+                "rate": 6.5,
+                "paidOccupancy": 0.375,
+                "collectionFraction": 0.98,
+                "salesFeeFraction": 0.1,
+                "annualRateEscalation": 0,
+                "collectionLagMonths": 0
+              }
+            ]
+          }
+        ],
+        "underwriting": {
+          "status": "Optimization sensitivity; not signed customer demand, approved hardware or verified power capacity",
+          "b300Nodes": 8,
+          "rtxNodes": 0,
+          "gpusPurchased": 64,
+          "reservePerHardwareFamily": 4,
+          "paidHoursPerSaleableGpuPerDay": 18,
+          "annualPriceChange": 0,
+          "extraMonthlyOperations": 0
+        }
+      },
+      "hardwareNegotiation": {
+        "maximumSystemCost": 523086.4939756597,
+        "scenario": {
+          "schemaVersion": 1,
+          "startMonth": "2026-10",
+          "horizonMonths": 60,
+          "siteCapex": 652800,
+          "softCosts": 448468.80000000005,
+          "openingReserve": 246871,
+          "monthlyFixedOpex": 20261.72,
+          "monthlyNetworkCost": 8075,
+          "networkCommitmentMonths": 60,
+          "monthlyDemandCharges": 4152,
+          "energyRatePerKwh": 0.07,
+          "pue": 1.4,
+          "extraITPeakKw": 2,
+          "extraITAverageFraction": 0.5,
+          "annualOpexEscalation": 0.03,
+          "annualDiscountRate": 0.15,
+          "exitSaleProceeds": 0,
+          "exitDecommissionCost": 40000,
+          "exitOtherLiabilities": 0,
+          "investorProRataFraction": null,
+          "debt": {
+            "principal": 0,
+            "annualRate": 0,
+            "termMonths": 60
+          },
+          "capexEvents": [
+            {
+              "month": 37,
+              "cost": 418468.80000000005
+            }
+          ],
+          "rows": [
+            {
+              "id": "b300-active",
+              "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+              "profileId": "hgx-b300-reference",
+              "ownership": "owned",
+              "systems": 7,
+              "gpusPerSystem": 8,
+              "completeSystemCost": 523086,
+              "peakKwPerSystem": 19.7,
+              "averagePowerFraction": 0.7614213197969544,
+              "operatingStartMonth": 4,
+              "operatingEndMonth": 60,
+              "contracts": [
+                {
+                  "startMonth": 4,
+                  "endMonth": 60,
+                  "billing": "gpu_hour",
+                  "rate": 6.5,
+                  "paidOccupancy": 0.75,
+                  "collectionFraction": 0.98,
+                  "salesFeeFraction": 0.1,
+                  "annualRateEscalation": 0,
+                  "collectionLagMonths": 0
+                }
+              ]
+            },
+            {
+              "id": "b300-last",
+              "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+              "profileId": "hgx-b300-reference",
+              "ownership": "owned",
+              "systems": 1,
+              "gpusPerSystem": 8,
+              "completeSystemCost": 523086,
+              "peakKwPerSystem": 19.7,
+              "averagePowerFraction": 0.7614213197969544,
+              "operatingStartMonth": 4,
+              "operatingEndMonth": 60,
+              "contracts": [
+                {
+                  "startMonth": 4,
+                  "endMonth": 60,
+                  "billing": "gpu_hour",
+                  "rate": 6.5,
+                  "paidOccupancy": 0.375,
+                  "collectionFraction": 0.98,
+                  "salesFeeFraction": 0.1,
+                  "annualRateEscalation": 0,
+                  "collectionLagMonths": 0
+                }
+              ]
+            }
+          ],
+          "underwriting": {
+            "status": "Optimization sensitivity; not signed customer demand, approved hardware or verified power capacity",
+            "b300Nodes": 8,
+            "rtxNodes": 0,
+            "gpusPurchased": 64,
+            "reservePerHardwareFamily": 4,
+            "paidHoursPerSaleableGpuPerDay": 18,
+            "annualPriceChange": 0,
+            "extraMonthlyOperations": 0
+          }
+        },
+        "npv": 5.0496462110604625
+      },
+      "result": {
+        "initial": 6843301,
+        "totalFunding": 6971211.621662904,
+        "profit": 798643.4420191357,
+        "totalROI": 0.1145630753106629,
+        "npv": -1510418.339799425,
+        "payback": 56,
+        "irr": null,
+        "peakITkw": 159.6
+      },
+      "priceRequired": 7.803736610102821,
+      "declineNPV": -2640659.2583091483,
+      "extraOperationsNPV": -1990480.3028678691
+    },
+    {
+      "id": "proposed-60-20",
+      "title": "60 saleable + 4 reserve B300 / 20 paid hours",
+      "b300": 8,
+      "rtx": 0,
+      "hours": 20,
+      "reserve": "half",
+      "scenario": {
+        "schemaVersion": 1,
+        "startMonth": "2026-10",
+        "horizonMonths": 60,
+        "siteCapex": 652800,
+        "softCosts": 566000,
+        "openingReserve": 264501,
+        "monthlyFixedOpex": 23200,
+        "monthlyNetworkCost": 8075,
+        "networkCommitmentMonths": 60,
+        "monthlyDemandCharges": 4152,
+        "energyRatePerKwh": 0.07,
+        "pue": 1.4,
+        "extraITPeakKw": 2,
+        "extraITAverageFraction": 0.5,
+        "annualOpexEscalation": 0.03,
+        "annualDiscountRate": 0.15,
+        "exitSaleProceeds": 0,
+        "exitDecommissionCost": 40000,
+        "exitOtherLiabilities": 0,
+        "investorProRataFraction": null,
+        "debt": {
+          "principal": 0,
+          "annualRate": 0,
+          "termMonths": 60
+        },
+        "capexEvents": [
+          {
+            "month": 37,
+            "cost": 536000
+          }
+        ],
+        "rows": [
+          {
+            "id": "b300-active",
+            "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+            "profileId": "hgx-b300-reference",
+            "ownership": "owned",
+            "systems": 7,
+            "gpusPerSystem": 8,
+            "completeSystemCost": 670000,
+            "peakKwPerSystem": 19.7,
+            "averagePowerFraction": 0.7614213197969544,
+            "operatingStartMonth": 4,
+            "operatingEndMonth": 60,
+            "contracts": [
+              {
+                "startMonth": 4,
+                "endMonth": 60,
+                "billing": "gpu_hour",
+                "rate": 6.5,
+                "paidOccupancy": 0.8333333333333334,
+                "collectionFraction": 0.98,
+                "salesFeeFraction": 0.1,
+                "annualRateEscalation": 0,
+                "collectionLagMonths": 0
+              }
+            ]
+          },
+          {
+            "id": "b300-last",
+            "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+            "profileId": "hgx-b300-reference",
+            "ownership": "owned",
+            "systems": 1,
+            "gpusPerSystem": 8,
+            "completeSystemCost": 670000,
+            "peakKwPerSystem": 19.7,
+            "averagePowerFraction": 0.7614213197969544,
+            "operatingStartMonth": 4,
+            "operatingEndMonth": 60,
+            "contracts": [
+              {
+                "startMonth": 4,
+                "endMonth": 60,
+                "billing": "gpu_hour",
+                "rate": 6.5,
+                "paidOccupancy": 0.4166666666666667,
+                "collectionFraction": 0.98,
+                "salesFeeFraction": 0.1,
+                "annualRateEscalation": 0,
+                "collectionLagMonths": 0
+              }
+            ]
+          }
+        ],
+        "underwriting": {
+          "status": "Optimization sensitivity; not signed customer demand, approved hardware or verified power capacity",
+          "b300Nodes": 8,
+          "rtxNodes": 0,
+          "gpusPurchased": 64,
+          "reservePerHardwareFamily": 4,
+          "paidHoursPerSaleableGpuPerDay": 20,
+          "annualPriceChange": 0,
+          "extraMonthlyOperations": 0
+        }
+      },
+      "hardwareNegotiation": {
+        "maximumSystemCost": 604471.2009549864,
+        "scenario": {
+          "schemaVersion": 1,
+          "startMonth": "2026-10",
+          "horizonMonths": 60,
+          "siteCapex": 652800,
+          "softCosts": 513576.80000000005,
+          "openingReserve": 256637,
+          "monthlyFixedOpex": 21889.42,
+          "monthlyNetworkCost": 8075,
+          "networkCommitmentMonths": 60,
+          "monthlyDemandCharges": 4152,
+          "energyRatePerKwh": 0.07,
+          "pue": 1.4,
+          "extraITPeakKw": 2,
+          "extraITAverageFraction": 0.5,
+          "annualOpexEscalation": 0.03,
+          "annualDiscountRate": 0.15,
+          "exitSaleProceeds": 0,
+          "exitDecommissionCost": 40000,
+          "exitOtherLiabilities": 0,
+          "investorProRataFraction": null,
+          "debt": {
+            "principal": 0,
+            "annualRate": 0,
+            "termMonths": 60
+          },
+          "capexEvents": [
+            {
+              "month": 37,
+              "cost": 483576.80000000005
+            }
+          ],
+          "rows": [
+            {
+              "id": "b300-active",
+              "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+              "profileId": "hgx-b300-reference",
+              "ownership": "owned",
+              "systems": 7,
+              "gpusPerSystem": 8,
+              "completeSystemCost": 604471,
+              "peakKwPerSystem": 19.7,
+              "averagePowerFraction": 0.7614213197969544,
+              "operatingStartMonth": 4,
+              "operatingEndMonth": 60,
+              "contracts": [
+                {
+                  "startMonth": 4,
+                  "endMonth": 60,
+                  "billing": "gpu_hour",
+                  "rate": 6.5,
+                  "paidOccupancy": 0.8333333333333334,
+                  "collectionFraction": 0.98,
+                  "salesFeeFraction": 0.1,
+                  "annualRateEscalation": 0,
+                  "collectionLagMonths": 0
+                }
+              ]
+            },
+            {
+              "id": "b300-last",
+              "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+              "profileId": "hgx-b300-reference",
+              "ownership": "owned",
+              "systems": 1,
+              "gpusPerSystem": 8,
+              "completeSystemCost": 604471,
+              "peakKwPerSystem": 19.7,
+              "averagePowerFraction": 0.7614213197969544,
+              "operatingStartMonth": 4,
+              "operatingEndMonth": 60,
+              "contracts": [
+                {
+                  "startMonth": 4,
+                  "endMonth": 60,
+                  "billing": "gpu_hour",
+                  "rate": 6.5,
+                  "paidOccupancy": 0.4166666666666667,
+                  "collectionFraction": 0.98,
+                  "salesFeeFraction": 0.1,
+                  "annualRateEscalation": 0,
+                  "collectionLagMonths": 0
+                }
+              ]
+            }
+          ],
+          "underwriting": {
+            "status": "Optimization sensitivity; not signed customer demand, approved hardware or verified power capacity",
+            "b300Nodes": 8,
+            "rtxNodes": 0,
+            "gpusPurchased": 64,
+            "reservePerHardwareFamily": 4,
+            "paidHoursPerSaleableGpuPerDay": 20,
+            "annualPriceChange": 0,
+            "extraMonthlyOperations": 0
+          }
+        },
+        "npv": 2.0542542256007437
+      },
+      "result": {
+        "initial": 6843301,
+        "totalFunding": 6949884.861662904,
+        "profit": 1991566.0820191372,
+        "totalROI": 0.28656101815514307,
+        "npv": -673702.026548761,
+        "payback": 49,
+        "irr": null,
+        "peakITkw": 159.6
+      },
+      "priceRequired": 7.023362949092536,
+      "declineNPV": -1929820.0855511245,
+      "extraOperationsNPV": -1154072.525799428
+    },
+    {
+      "id": "minimum-72",
+      "title": "72 B300 GPUs / no dedicated reserve",
+      "b300": 9,
+      "rtx": 0,
+      "hours": 20,
+      "reserve": "none",
+      "scenario": {
+        "schemaVersion": 1,
+        "startMonth": "2026-10",
+        "horizonMonths": 60,
+        "siteCapex": 711900,
+        "softCosts": 633000,
+        "openingReserve": 283953,
+        "monthlyFixedOpex": 24975,
+        "monthlyNetworkCost": 8075,
+        "networkCommitmentMonths": 60,
+        "monthlyDemandCharges": 4546,
+        "energyRatePerKwh": 0.07,
+        "pue": 1.4,
+        "extraITPeakKw": 2,
+        "extraITAverageFraction": 0.5,
+        "annualOpexEscalation": 0.03,
+        "annualDiscountRate": 0.15,
+        "exitSaleProceeds": 0,
+        "exitDecommissionCost": 40000,
+        "exitOtherLiabilities": 0,
+        "investorProRataFraction": null,
+        "debt": {
+          "principal": 0,
+          "annualRate": 0,
+          "termMonths": 60
+        },
+        "capexEvents": [
+          {
+            "month": 37,
+            "cost": 603000
+          }
+        ],
+        "rows": [
+          {
+            "id": "b300-active",
+            "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+            "profileId": "hgx-b300-reference",
+            "ownership": "owned",
+            "systems": 8,
+            "gpusPerSystem": 8,
+            "completeSystemCost": 670000,
+            "peakKwPerSystem": 19.7,
+            "averagePowerFraction": 0.7614213197969544,
+            "operatingStartMonth": 4,
+            "operatingEndMonth": 60,
+            "contracts": [
+              {
+                "startMonth": 4,
+                "endMonth": 60,
+                "billing": "gpu_hour",
+                "rate": 6.5,
+                "paidOccupancy": 0.8333333333333334,
+                "collectionFraction": 0.98,
+                "salesFeeFraction": 0.1,
+                "annualRateEscalation": 0,
+                "collectionLagMonths": 0
+              }
+            ]
+          },
+          {
+            "id": "b300-last",
+            "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+            "profileId": "hgx-b300-reference",
+            "ownership": "owned",
+            "systems": 1,
+            "gpusPerSystem": 8,
+            "completeSystemCost": 670000,
+            "peakKwPerSystem": 19.7,
+            "averagePowerFraction": 0.7614213197969544,
+            "operatingStartMonth": 4,
+            "operatingEndMonth": 60,
+            "contracts": [
+              {
+                "startMonth": 4,
+                "endMonth": 60,
+                "billing": "gpu_hour",
+                "rate": 6.5,
+                "paidOccupancy": 0.8333333333333334,
+                "collectionFraction": 0.98,
+                "salesFeeFraction": 0.1,
+                "annualRateEscalation": 0,
+                "collectionLagMonths": 0
+              }
+            ]
+          }
+        ],
+        "underwriting": {
+          "status": "Optimization sensitivity; not signed customer demand, approved hardware or verified power capacity",
+          "b300Nodes": 9,
+          "rtxNodes": 0,
+          "gpusPurchased": 72,
+          "reservePerHardwareFamily": 0,
+          "paidHoursPerSaleableGpuPerDay": 20,
+          "annualPriceChange": 0,
+          "extraMonthlyOperations": 0
+        }
+      },
+      "hardwareNegotiation": {
+        "maximumSystemCost": 670000,
+        "scenario": {
+          "schemaVersion": 1,
+          "startMonth": "2026-10",
+          "horizonMonths": 60,
+          "siteCapex": 711900,
+          "softCosts": 633000,
+          "openingReserve": 283953,
+          "monthlyFixedOpex": 24975,
+          "monthlyNetworkCost": 8075,
+          "networkCommitmentMonths": 60,
+          "monthlyDemandCharges": 4546,
+          "energyRatePerKwh": 0.07,
+          "pue": 1.4,
+          "extraITPeakKw": 2,
+          "extraITAverageFraction": 0.5,
+          "annualOpexEscalation": 0.03,
+          "annualDiscountRate": 0.15,
+          "exitSaleProceeds": 0,
+          "exitDecommissionCost": 40000,
+          "exitOtherLiabilities": 0,
+          "investorProRataFraction": null,
+          "debt": {
+            "principal": 0,
+            "annualRate": 0,
+            "termMonths": 60
+          },
+          "capexEvents": [
+            {
+              "month": 37,
+              "cost": 603000
+            }
+          ],
+          "rows": [
+            {
+              "id": "b300-active",
+              "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+              "profileId": "hgx-b300-reference",
+              "ownership": "owned",
+              "systems": 8,
+              "gpusPerSystem": 8,
+              "completeSystemCost": 670000,
+              "peakKwPerSystem": 19.7,
+              "averagePowerFraction": 0.7614213197969544,
+              "operatingStartMonth": 4,
+              "operatingEndMonth": 60,
+              "contracts": [
+                {
+                  "startMonth": 4,
+                  "endMonth": 60,
+                  "billing": "gpu_hour",
+                  "rate": 6.5,
+                  "paidOccupancy": 0.8333333333333334,
+                  "collectionFraction": 0.98,
+                  "salesFeeFraction": 0.1,
+                  "annualRateEscalation": 0,
+                  "collectionLagMonths": 0
+                }
+              ]
+            },
+            {
+              "id": "b300-last",
+              "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+              "profileId": "hgx-b300-reference",
+              "ownership": "owned",
+              "systems": 1,
+              "gpusPerSystem": 8,
+              "completeSystemCost": 670000,
+              "peakKwPerSystem": 19.7,
+              "averagePowerFraction": 0.7614213197969544,
+              "operatingStartMonth": 4,
+              "operatingEndMonth": 60,
+              "contracts": [
+                {
+                  "startMonth": 4,
+                  "endMonth": 60,
+                  "billing": "gpu_hour",
+                  "rate": 6.5,
+                  "paidOccupancy": 0.8333333333333334,
+                  "collectionFraction": 0.98,
+                  "salesFeeFraction": 0.1,
+                  "annualRateEscalation": 0,
+                  "collectionLagMonths": 0
+                }
+              ]
+            }
+          ],
+          "underwriting": {
+            "status": "Optimization sensitivity; not signed customer demand, approved hardware or verified power capacity",
+            "b300Nodes": 9,
+            "rtxNodes": 0,
+            "gpusPurchased": 72,
+            "reservePerHardwareFamily": 0,
+            "paidHoursPerSaleableGpuPerDay": 20,
+            "annualPriceChange": 0,
+            "extraMonthlyOperations": 0
+          }
+        },
+        "npv": 7360.724071355129
+      },
+      "result": {
+        "initial": 7658853,
+        "totalFunding": 7773896.560191264,
+        "profit": 3310967.793103922,
+        "totalROI": 0.4259083932321401,
+        "npv": 7360.724071355129,
+        "payback": 45,
+        "irr": null,
+        "peakITkw": 179.29999999999998
+      },
+      "priceRequired": 6.495234873745331,
+      "declineNPV": -1500165.9901491462,
+      "extraOperationsNPV": -473179.5643629569
+    },
+    {
+      "id": "reserve-112",
+      "title": "108 saleable + 4 reserve B300 / 20 paid hours",
+      "b300": 14,
+      "rtx": 0,
+      "hours": 20,
+      "reserve": "half",
+      "scenario": {
+        "schemaVersion": 1,
+        "startMonth": "2026-10",
+        "horizonMonths": 60,
+        "siteCapex": 1007400,
+        "softCosts": 968000,
+        "openingReserve": 381216,
+        "monthlyFixedOpex": 33850,
+        "monthlyNetworkCost": 8075,
+        "networkCommitmentMonths": 60,
+        "monthlyDemandCharges": 6516,
+        "energyRatePerKwh": 0.07,
+        "pue": 1.4,
+        "extraITPeakKw": 2,
+        "extraITAverageFraction": 0.5,
+        "annualOpexEscalation": 0.03,
+        "annualDiscountRate": 0.15,
+        "exitSaleProceeds": 0,
+        "exitDecommissionCost": 40000,
+        "exitOtherLiabilities": 0,
+        "investorProRataFraction": null,
+        "debt": {
+          "principal": 0,
+          "annualRate": 0,
+          "termMonths": 60
+        },
+        "capexEvents": [
+          {
+            "month": 37,
+            "cost": 938000
+          }
+        ],
+        "rows": [
+          {
+            "id": "b300-active",
+            "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+            "profileId": "hgx-b300-reference",
+            "ownership": "owned",
+            "systems": 13,
+            "gpusPerSystem": 8,
+            "completeSystemCost": 670000,
+            "peakKwPerSystem": 19.7,
+            "averagePowerFraction": 0.7614213197969544,
+            "operatingStartMonth": 4,
+            "operatingEndMonth": 60,
+            "contracts": [
+              {
+                "startMonth": 4,
+                "endMonth": 60,
+                "billing": "gpu_hour",
+                "rate": 6.5,
+                "paidOccupancy": 0.8333333333333334,
+                "collectionFraction": 0.98,
+                "salesFeeFraction": 0.1,
+                "annualRateEscalation": 0,
+                "collectionLagMonths": 0
+              }
+            ]
+          },
+          {
+            "id": "b300-last",
+            "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+            "profileId": "hgx-b300-reference",
+            "ownership": "owned",
+            "systems": 1,
+            "gpusPerSystem": 8,
+            "completeSystemCost": 670000,
+            "peakKwPerSystem": 19.7,
+            "averagePowerFraction": 0.7614213197969544,
+            "operatingStartMonth": 4,
+            "operatingEndMonth": 60,
+            "contracts": [
+              {
+                "startMonth": 4,
+                "endMonth": 60,
+                "billing": "gpu_hour",
+                "rate": 6.5,
+                "paidOccupancy": 0.4166666666666667,
+                "collectionFraction": 0.98,
+                "salesFeeFraction": 0.1,
+                "annualRateEscalation": 0,
+                "collectionLagMonths": 0
+              }
+            ]
+          }
+        ],
+        "underwriting": {
+          "status": "Optimization sensitivity; not signed customer demand, approved hardware or verified power capacity",
+          "b300Nodes": 14,
+          "rtxNodes": 0,
+          "gpusPurchased": 112,
+          "reservePerHardwareFamily": 4,
+          "paidHoursPerSaleableGpuPerDay": 20,
+          "annualPriceChange": 0,
+          "extraMonthlyOperations": 0
+        }
+      },
+      "hardwareNegotiation": {
+        "maximumSystemCost": 670000,
+        "scenario": {
+          "schemaVersion": 1,
+          "startMonth": "2026-10",
+          "horizonMonths": 60,
+          "siteCapex": 1007400,
+          "softCosts": 968000,
+          "openingReserve": 381216,
+          "monthlyFixedOpex": 33850,
+          "monthlyNetworkCost": 8075,
+          "networkCommitmentMonths": 60,
+          "monthlyDemandCharges": 6516,
+          "energyRatePerKwh": 0.07,
+          "pue": 1.4,
+          "extraITPeakKw": 2,
+          "extraITAverageFraction": 0.5,
+          "annualOpexEscalation": 0.03,
+          "annualDiscountRate": 0.15,
+          "exitSaleProceeds": 0,
+          "exitDecommissionCost": 40000,
+          "exitOtherLiabilities": 0,
+          "investorProRataFraction": null,
+          "debt": {
+            "principal": 0,
+            "annualRate": 0,
+            "termMonths": 60
+          },
+          "capexEvents": [
+            {
+              "month": 37,
+              "cost": 938000
+            }
+          ],
+          "rows": [
+            {
+              "id": "b300-active",
+              "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+              "profileId": "hgx-b300-reference",
+              "ownership": "owned",
+              "systems": 13,
+              "gpusPerSystem": 8,
+              "completeSystemCost": 670000,
+              "peakKwPerSystem": 19.7,
+              "averagePowerFraction": 0.7614213197969544,
+              "operatingStartMonth": 4,
+              "operatingEndMonth": 60,
+              "contracts": [
+                {
+                  "startMonth": 4,
+                  "endMonth": 60,
+                  "billing": "gpu_hour",
+                  "rate": 6.5,
+                  "paidOccupancy": 0.8333333333333334,
+                  "collectionFraction": 0.98,
+                  "salesFeeFraction": 0.1,
+                  "annualRateEscalation": 0,
+                  "collectionLagMonths": 0
+                }
+              ]
+            },
+            {
+              "id": "b300-last",
+              "model": "Eight-GPU B300 system; owner price, OEM quote scope pending",
+              "profileId": "hgx-b300-reference",
+              "ownership": "owned",
+              "systems": 1,
+              "gpusPerSystem": 8,
+              "completeSystemCost": 670000,
+              "peakKwPerSystem": 19.7,
+              "averagePowerFraction": 0.7614213197969544,
+              "operatingStartMonth": 4,
+              "operatingEndMonth": 60,
+              "contracts": [
+                {
+                  "startMonth": 4,
+                  "endMonth": 60,
+                  "billing": "gpu_hour",
+                  "rate": 6.5,
+                  "paidOccupancy": 0.4166666666666667,
+                  "collectionFraction": 0.98,
+                  "salesFeeFraction": 0.1,
+                  "annualRateEscalation": 0,
+                  "collectionLagMonths": 0
+                }
+              ]
+            }
+          ],
+          "underwriting": {
+            "status": "Optimization sensitivity; not signed customer demand, approved hardware or verified power capacity",
+            "b300Nodes": 14,
+            "rtxNodes": 0,
+            "gpusPurchased": 112,
+            "reservePerHardwareFamily": 4,
+            "paidHoursPerSaleableGpuPerDay": 20,
+            "annualPriceChange": 0,
+            "extraMonthlyOperations": 0
+          }
+        },
+        "npv": 65807.76059045154
+      },
+      "result": {
+        "initial": 11736616,
+        "totalFunding": 11979262.092833064,
+        "profit": 5136285.788527854,
+        "totalROI": 0.42876478941059176,
+        "npv": 65807.76059045154,
+        "payback": 45,
+        "irr": null,
+        "peakITkw": 277.79999999999995
+      },
+      "priceRequired": 6.471598601377541,
+      "declineNPV": -2195482.310740304,
+      "extraOperationsNPV": -414732.5278438594
+    }
+  ],
+  "assumptions": [
+    "Owner inputs: $670,000 per eight-GPU B300 system and $6.50 per GPU-hour; $170,000 per eight-GPU RTX system and $1.50 per GPU-hour. The corrected $50 figure is excluded. Exact OEM quote scope remains unverified.",
+    "Search includes 912 combinations: all mixes of 1–16 eight-GPU systems, 18/20 paid hours per saleable GPU/day, and zero/four/eight reserved GPUs per hardware family present. B300 and RTX reserve capacity is not interchangeable. More than 128 GPUs is outside this study, not proven infeasible.",
+    "Five-year horizon, October 2026 start, no revenue in months 1–3. Entered paid hours apply every operating day from month 4; there is no further occupancy ramp. Flat rental prices are assumed unless explicitly stressed; 98% cash collection and 10% sales/platform fees are unverified allowances.",
+    "The 15% annual project discount hurdle is assumed, not agreed investor terms. Project NPV ≥ 0 is the pass criterion. Total ROI is over FIVE YEARS, not annual. IRR is suppressed for contribution/distribution patterns with multiple sign changes.",
+    "All equipment is purchased upfront. Site work: ($150,000 + $2,500 per equipment peak kW) × 1.20. Startup: $30,000 + 10% hardware acquisition contingency. Opening reserve: six months of starting operating costs. Month 37: 10% hardware overhaul; exit cost $40,000, zero resale value. Further capital calls remain possible.",
+    "Monthly operations: $9,000 shared staffing/support/security/software/insurance/property allowance + $100/system + 3% of hardware/year for maintenance. Network $8,075/month and demand allowance $1,000 + $20 per equipment peak kW. All operating costs grow 3% annually. These are planning allowances, not complete quotes or a staffed 24/7 roster.",
+    "Energy $0.07/kWh, PUE 1.4. B300 power allowance: 19.7 kW peak / 15 kW average per eight-GPU node. RTX eight-GPU allowance: 10 kW peak / 7 kW average, extrapolated from the earlier RTX planning envelope and not an OEM specification. Supporting IT adds 2 kW peak / 1 kW average. All reserve equipment retains purchase and power costs.",
+    "Power agreement inclusions, exclusive continuous kW and service date are awaiting the team. The search does not certify that the site can support any candidate. Separate generation/storage costs, license/support scope, fabric/storage and engineering must be priced before procurement.",
+    "Stress cases change one assumption at a time: 10% annual rental-price decline, or an additional $10,000/month operating budget escalating 3% annually with a revised opening reserve. No matched customer contracts, guaranteed utilization, tax benefits, property value or manufacturing/energy revenue are included.",
+    "Smallest GPU count and maximum absolute profit are different objectives. Increasing quantity can mechanically raise modeled profit because shared costs are spread wider. A winner at a search boundary is not a universal optimum. Tiny positive NPVs are not robust investment recommendations."
+  ],
+  "recommendation": "B300-only is the stronger modeled owned-compute option at the supplied prices. No deployment of 64 GPUs or fewer meets the 15% hurdle at these allowances. Do not buy extra GPUs merely to cross the threshold: negotiate customer pricing or like-for-like system costs and prove paid demand first."
+}

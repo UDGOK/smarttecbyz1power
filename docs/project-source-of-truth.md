@@ -35,3 +35,19 @@ Before revising the investor budget or representing power capacity/costs as veri
 Status: waiting on owner's team. No team contact or delivery channel is recorded. Do not send questions to an unspecified recipient. On resuming the investment/power review, check whether the team has replied and use these exact open items. This is a saved project follow-up, not a scheduled reminder.
 
 The existing shared OG&E service is a separate recorded fact. Do not infer that the reported generation/storage agreement is already commissioned or that all service capacity is exclusively available to SmartTec. The 7-cent calculator case is an owner-reported energy-price sensitivity; original demand charges, reserve and other costs remain unchanged pending agreement review.
+
+
+## Latest owner hardware and selling prices
+
+Owner corrected the pricing discussion on 10 September 2026:
+- B300 rental: **$6.50 per individual GPU-hour**.
+- Complete **eight-GPU B300 system: $670,000** ($83,750 per GPU by arithmetic).
+- RTX 6000 rental: **$1.50 per individual GPU-hour**.
+- Complete **eight-GPU RTX system: $170,000** ($21,250 per GPU by arithmetic).
+- The preceding **$50 per GPU-hour statement was corrected** and must not be used in the investor case.
+- The proposed operating assumption is **18–20 paid hours/day per saleable GPU**; customer contracts/paid bookings have not been supplied.
+- Owner proposed 60 saleable B300 GPUs plus four in reserve. This is a financial alternative, not an ordered fleet or a confirmed revision of the small first-phase deployment.
+
+Use actual eight-GPU system units. Do not halve the RTX eight-GPU system quote to invent the price of a complete four-GPU server. Exact OEM bill of materials, included support/software/taxes/freight, and the power agreement scope remain pending. These owner-supplied amounts supersede benchmark allowances for NEW procurement scenarios, while older examples remain labeled historical comparisons.
+
+Owner asked for the lowest GPU count with strong investor returns. The current study searches 8–128 installed GPUs, 18/20 paid hours daily, B300/RTX/mixed fleets and no/half-node/full-node reserve per hardware family. The 15% annual project NPV hurdle is a modeling assumption, not promised investor terms. Small mathematical passes have insufficient resilience to be procurement recommendations.
