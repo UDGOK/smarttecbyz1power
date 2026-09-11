@@ -47,16 +47,16 @@ const pad=(n:number)=>String(n).padStart(2,'0');
   <footer class="pitch-controls">
     <div class="pitch-control-top"><button id="pitch-chapters-open" class="pitch-chapters-toggle" type="button" aria-haspopup="dialog"><span aria-hidden="true">☷</span> Chapters <span id="pitch-counter">01 / {pad(chapters.length)}</span></button><span id="pitch-now-title">{chapters[0].title}</span><div class="pitch-nav"><button id="pitch-prev" type="button" aria-label="Previous chapter" disabled>←</button><button id="pitch-play" type="button" aria-label="Play slides" aria-pressed="false" title="Play or pause slides. Sound has its own control."><span id="pitch-play-icon" aria-hidden="true">▶</span><span class="pitch-sr" id="pitch-play-label">Play slides</span></button><button id="pitch-next" type="button" aria-label="Next chapter">→</button></div></div>
     <div class="pitch-progress" role="progressbar" aria-label="Current chapter playback" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="pitch-progress-fill"></span></div>
-    <div class="pitch-control-bottom"><span id="pitch-mode">Use arrows, swipe or scroll to explore</span><button id="pitch-audio-options" class="pitch-volume-button" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="pitch-audio-panel" hidden>Volume 55%</button><span class="pitch-art-note">RUNWAY CONCEPT FILM · NOT INSTALLED EQUIPMENT</span><a href="/api/investor/presentation" download={deck.filename}>PDF edition ↓</a></div>
+    <div class="pitch-control-bottom"><span id="pitch-mode">Use arrows, swipe or scroll to explore</span><button id="pitch-audio-options" class="pitch-volume-button" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="pitch-audio-panel" hidden>Volume 35%</button><span class="pitch-art-note">RUNWAY CONCEPT FILM · NOT INSTALLED EQUIPMENT</span><a href="/api/investor/presentation" download={deck.filename}>PDF edition ↓</a></div>
   </footer>
   <p class="pitch-sr" id="pitch-announcement" aria-live="polite" aria-atomic="true"></p>
   <p id="pitch-media-status" class="pitch-media-status" role="status"></p>
   <p id="pitch-audio-message" class="pitch-audio-message" role="status"></p>
   <dialog id="pitch-audio-panel" class="pitch-audio-panel" aria-labelledby="pitch-audio-title">
     <header><div><p class="pitch-eyebrow">THE SMARTTEC SOUNDSCAPE</p><h2 id="pitch-audio-title">Find your listening level.</h2></div><button id="pitch-audio-close" class="pitch-tool" type="button" aria-label="Close sound settings">×</button></header>
-    <p>Warm synth chords, gentle data pulses and airy textures follow each chapter. Sound continues while you pause the slides to read.</p>
-    <label for="pitch-volume">Volume <output id="pitch-volume-value" for="pitch-volume">55%</output></label>
-    <input id="pitch-volume" type="range" min="0" max="100" step="1" value="55" />
+    <p>Soft piano-like notes fade into quiet pauses, with a gentle melody that follows each chapter. Sound continues while you pause the slides to read.</p>
+    <label for="pitch-volume">Volume <output id="pitch-volume-value" for="pitch-volume">35%</output></label>
+    <input id="pitch-volume" type="range" min="0" max="100" step="1" value="35" />
     <div class="pitch-audio-scale" aria-hidden="true"><span>Silent</span><span>Full</span></div>
     <button id="pitch-audio-mute" class="pitch-secondary" type="button">Turn sound off</button>
   </dialog>

@@ -41,7 +41,7 @@ assert.equal(pitchDoc.querySelector('#pitch-play').getAttribute('aria-label'),'P
 assert.equal(pitchDoc.querySelector('#pitch-audio-options').hasAttribute('hidden'),true);
 assert.equal(pitchDoc.querySelector('#pitch-audio-options').getAttribute('aria-controls'),'pitch-audio-panel');
 assert.equal(pitchDoc.querySelector('#pitch-volume').getAttribute('type'),'range');
-assert.deepEqual(['min','max','value'].map(name=>pitchDoc.querySelector('#pitch-volume').getAttribute(name)),['0','100','55']);
+assert.deepEqual(['min','max','value'].map(name=>pitchDoc.querySelector('#pitch-volume').getAttribute(name)),['0','100','35']);
 pitchDOM.window.close();checks++;
 const launcherDOM=new JSDOM(page),launchers=[...launcherDOM.window.document.querySelectorAll('a[data-pitch-launch]')];
 assert.ok(launchers.length>0,'Investor room needs a visible pitch launch link');
@@ -151,11 +151,11 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
     }
     return nativeConnect.call(this,destination,...args);
    };
-   window.__pitchMeasureAudio=async()=>{
+   window.__pitchMeasureAudio=async(frames=16)=>{
     const context=window.__pitchAudioContexts.at(-1),analyser=context?.__pitchFinalAnalyser;
     if(!analyser)throw new Error('Final audio output was not connected to the measured destination');
     const values=new Float32Array(analyser.fftSize);let squares=0,peak=0,samples=0,finite=true;
-    for(let frame=0;frame<16;frame++){
+    for(let frame=0;frame<frames;frame++){
      analyser.getFloatTimeDomainData(values);
      for(const value of values){finite=finite&&Number.isFinite(value);squares+=value*value;peak=Math.max(peak,Math.abs(value));samples++;}
      await new Promise(resolve=>setTimeout(resolve,50));
@@ -164,8 +164,8 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
    };
   };
   await context.addInitScript(instrumentSound);
-  const measureSound=page=>page.evaluate(()=>window.__pitchMeasureAudio());
-  const audible=(measurement,label)=>{assert.ok(measurement.finite&&measurement.state==='running'&&measurement.rms>.012&&measurement.peak<.65,`${label}: rendered soundtrack should be audible without clipping: ${JSON.stringify(measurement)}`);};
+  const measureSound=(page,frames=16)=>page.evaluate(frames=>window.__pitchMeasureAudio(frames),frames);
+  const audible=(measurement,label)=>{assert.ok(measurement.finite&&measurement.state==='running'&&measurement.rms>.0002&&measurement.peak<.12,`${label}: rendered soundtrack should be audible without clipping: ${JSON.stringify(measurement)}`);};
   const tab=await context.newPage(),browserErrors=[];
   tab.on('pageerror',error=>browserErrors.push(error.message));
   for(const width of [1440,390]){
@@ -208,22 +208,22 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
   assert.equal(await tab.locator('.pitch-progress').getAttribute('aria-valuenow'),pausedProgress,'Pause must stop the chapter clock');checks++;
   await tab.locator('#pitch-sound').click();
   await tab.waitForFunction(()=>window.__pitchAudioContexts.length===1&&window.__pitchAudioContexts[0].state==='running'&&document.querySelector('#pitch-sound').getAttribute('aria-pressed')==='true');
-  await tab.waitForTimeout(900);const pausedAudio=await measureSound(tab);audible(pausedAudio,'Sound enabled with slides paused');
+  await tab.waitForTimeout(900);const pausedAudio=await measureSound(tab,80);audible(pausedAudio,'Sound enabled with slides paused');
   assert.equal(await tab.locator('#pitch-play').getAttribute('aria-label'),'Play slides');assert.equal(await tab.locator('#pitch-film').evaluate(video=>video.paused),true);
-  assert.equal(await tab.locator('#pitch-audio-options').textContent(),'Volume 55%');checks++;
+  assert.equal(await tab.locator('#pitch-audio-options').textContent(),'Volume 35%');checks++;
   await tab.locator('#pitch-audio-options').click();await tab.locator('#pitch-audio-panel[open]').waitFor();
-  assert.equal(await tab.locator('#pitch-volume').inputValue(),'55');assert.equal(await tab.locator('#pitch-volume-value').textContent(),'55%');
+  assert.equal(await tab.locator('#pitch-volume').inputValue(),'35');assert.equal(await tab.locator('#pitch-volume-value').textContent(),'35%');
   const volumeChapter=await tab.locator('body').getAttribute('data-chapter');
   await tab.locator('#pitch-volume').focus();await tab.keyboard.press('ArrowRight');
-  assert.equal(await tab.locator('#pitch-volume').inputValue(),'56');assert.equal(await tab.locator('body').getAttribute('data-chapter'),volumeChapter,'Volume-arrow keys must not navigate chapters');
+  assert.equal(await tab.locator('#pitch-volume').inputValue(),'36');assert.equal(await tab.locator('body').getAttribute('data-chapter'),volumeChapter,'Volume-arrow keys must not navigate chapters');
   await tab.keyboard.press('Home');assert.equal(await tab.locator('#pitch-volume').inputValue(),'0');assert.equal(await tab.locator('#pitch-volume-value').textContent(),'0%');
   await tab.waitForTimeout(350);const mutedAudio=await measureSound(tab);
   assert.ok(mutedAudio.finite&&mutedAudio.peak<.00001,`Volume zero must produce digital silence: ${JSON.stringify(mutedAudio)}`);
   assert.equal(await tab.locator('#pitch-sound').getAttribute('aria-pressed'),'false');
   assert.match(await tab.locator('[data-sound-label]').textContent(),/muted/i);
-  await tab.locator('#pitch-volume').evaluate(input=>{input.value='55';input.dispatchEvent(new Event('input',{bubbles:true}));});
-  await tab.waitForTimeout(350);audible(await measureSound(tab),'Restored volume');
-  assert.equal(await tab.locator('#pitch-volume-value').textContent(),'55%');checks++;
+  await tab.locator('#pitch-volume').evaluate(input=>{input.value='35';input.dispatchEvent(new Event('input',{bubbles:true}));});
+  await tab.waitForTimeout(350);audible(await measureSound(tab,280),'Restored volume');
+  assert.equal(await tab.locator('#pitch-volume-value').textContent(),'35%');checks++;
   await tab.locator('#pitch-audio-close').click();await tab.locator('#pitch-audio-panel[open]').waitFor({state:'hidden'});
   await tab.waitForFunction(()=>document.activeElement?.id==='pitch-audio-options');
   for(const width of [1440,390]){
@@ -357,7 +357,7 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
   await reducedTab.screenshot({path:'tmp/pitch-review/ui-390-reduced-motion.png'});
   assert.equal(await reducedTab.evaluate(()=>window.__pitchAudioContexts.length),0,'Reduced-motion presentation must not start sound automatically');
   await reducedTab.locator('#pitch-sound').click();await reducedTab.waitForFunction(()=>document.querySelector('#pitch-sound').getAttribute('aria-pressed')==='true');
-  await reducedTab.waitForTimeout(900);const reducedAudio=await measureSound(reducedTab);audible(reducedAudio,'Reduced-motion sound opt-in');
+  await reducedTab.waitForTimeout(900);const reducedAudio=await measureSound(reducedTab,80);audible(reducedAudio,'Reduced-motion sound opt-in');
   assert.equal(await reducedTab.locator('#pitch-play').getAttribute('aria-label'),'Play slides');
   assert.equal(await reducedTab.locator('#pitch-film').getAttribute('src'),null);assert.deepEqual(reducedVideoRequests,[],'Sound opt-in must not enable motion or load videos');
   await reducedTab.screenshot({path:'tmp/pitch-audio/reduced-sound-on-390.png'});checks++;

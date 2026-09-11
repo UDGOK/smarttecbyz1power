@@ -25,7 +25,7 @@ function fixture({resumeResults = [], savedVolume, paused = false, reduced = fal
   win.setTimeout = (callback, delay) => { const id = ++timerId; timers.set(id, {callback, delay}); return id; };
   win.clearTimeout = id => timers.delete(id);
   win.matchMedia = () => ({matches: reduced, addEventListener() {}, removeEventListener() {}});
-  if (savedVolume !== undefined) win.sessionStorage.setItem('smarttec:pitch-volume', String(savedVolume));
+  if (savedVolume !== undefined) win.sessionStorage.setItem('smarttec:pitch-soft-keys-volume', String(savedVolume));
   const remainingResumes = [...resumeResults];
   class FakeAudioContext extends win.EventTarget {
     state = 'suspended'; currentTime = 0; resumeCalls = 0; suspendCalls = 0; closeCalls = 0;
@@ -186,7 +186,7 @@ test('zero volume shows muted state and the Sound gesture restores the last audi
   try {
     await f.manager.toggle();
     f.volume(72);
-    assert.equal(f.win.sessionStorage.getItem('smarttec:pitch-volume'), '0.72');
+    assert.equal(f.win.sessionStorage.getItem('smarttec:pitch-soft-keys-volume'), '0.72');
     f.volume(0);
     assert.equal(f.label, 'Sound muted');
     assert.equal(f.$('pitch-sound').getAttribute('aria-pressed'), 'false');

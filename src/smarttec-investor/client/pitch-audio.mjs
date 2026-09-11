@@ -6,9 +6,11 @@ export function mountPitchAudio(doc,win,{onPanelChange=()=>{},createScore=create
   const panel=doc.getElementById('pitch-audio-panel'),options=doc.getElementById('pitch-audio-options');
   const slider=doc.getElementById('pitch-volume'),value=doc.getElementById('pitch-volume-value');
   const label=doc.querySelector('[data-sound-label]'),message=doc.getElementById('pitch-audio-message');
-  let context=null,score=null,enabled=false,starting=false,disposed=false,revision=0,suspendTimer=0,chapter='opening',volume=.55,lastAudible=.55;
+  let context=null,score=null,enabled=false,starting=false,disposed=false,revision=0,suspendTimer=0,chapter='opening',volume=.35,lastAudible=.35;
   const blocked=new Set(),listeners=[];
-  try{const saved=win.sessionStorage.getItem('smarttec:pitch-volume');if(saved!==null&&Number.isFinite(Number(saved)))volume=Math.max(0,Math.min(1,Number(saved)));}catch{}
+  // The calmer arrangement starts fresh instead of inheriting the old mix's loudness.
+  const volumeKey='smarttec:pitch-soft-keys-volume';
+  try{const saved=win.sessionStorage.getItem(volumeKey);if(saved!==null&&Number.isFinite(Number(saved)))volume=Math.max(0,Math.min(1,Number(saved)));}catch{}
   if(volume>0)lastAudible=volume;
   function listen(target,event,fn){if(!target)return;target.addEventListener(event,fn);listeners.push(()=>target.removeEventListener(event,fn));}
   const wanted=()=>enabled&&blocked.size===0&&!disposed;
@@ -68,7 +70,7 @@ export function mountPitchAudio(doc,win,{onPanelChange=()=>{},createScore=create
   function setVolume(raw){
     const next=Number(raw);if(!Number.isFinite(next))return;
     volume=Math.max(0,Math.min(1,next));if(volume>0)lastAudible=volume;
-    score?.setVolume(volume);try{win.sessionStorage.setItem('smarttec:pitch-volume',String(volume));}catch{}
+    score?.setVolume(volume);try{win.sessionStorage.setItem(volumeKey,String(volume));}catch{}
     render();
   }
   function setBlocked(reason,active){

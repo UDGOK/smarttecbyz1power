@@ -61,30 +61,34 @@ try{
         for(const channel of channels)for(let i=first;i<last;i++){const v=channel[i];squares+=v*v;peak=Math.max(peak,Math.abs(v));if(i>first)jump=Math.max(jump,Math.abs(v-channel[i-1]));total++;}
         return {rms:Math.sqrt(squares/total),peak,maxSampleStep:jump};
       }
-      const summary={chapter,scenario,duration,initialNodes,scheduledNodes,...stats(2),
-        windows:scenario==='controls'?{pause:stats(6,7.8),mute:stats(13,14.8),maximum:stats(16,19.8)}:undefined};
+      const summary={chapter,scenario,duration,initialNodes,scheduledNodes,...stats(2),quietGap:scenario==='chapter'?stats(10,12):undefined,
+        windows:scenario==='controls'?{pause:stats(6,7.8),mute:stats(13,14.8),maximum:stats(22,29.8)}:undefined};
       const serial=save?channels.map(channel=>Array.from(channel)):undefined;
       score.dispose();score.dispose();score.schedule(duration+1);
       return{summary,channels:serial,sampleRate};
     },{chapter,duration,scenario,save});
     assert.equal(result.summary.scheduledNodes,result.summary.initialNodes,'Navigation must not allocate nodes');
-    assert.ok(result.summary.peak<.6,'Audio peaks must remain below 0.6');
+    assert.ok(result.summary.peak<.25,'Soft keys must remain below 0.25 even at maximum volume');
     assert.ok(Number.isFinite(result.summary.rms)&&result.summary.rms>0,'Score should be audible');
-    if(scenario==='chapter')assert.ok(result.summary.rms>=.035&&result.summary.rms<=.10,'Default chapter RMS should be .035–.10');
+    if(scenario==='chapter'){
+      assert.ok(result.summary.rms>=.001&&result.summary.rms<=.012,'Sparse keys should stay between .001–.012 RMS at the new default');
+      assert.ok(result.summary.quietGap.peak<1e-7,'Notes must end completely; no hum in the gap between phrases');
+      assert.ok(result.summary.maxSampleStep<.008,'Soft note attacks and releases should not introduce sharp steps');
+    }
     if(scenario==='controls'){
       assert.ok(result.summary.windows.pause.peak<1e-7,'Inactive score must be silent');
       assert.ok(result.summary.windows.mute.peak<1e-7,'Zero volume must be silent');
+      assert.ok(result.summary.windows.maximum.rms>.001,'Maximum-volume measurement must include a played phrase');
     }
     if(save)await writeFile(resolve(target,scenario==='chapter'?chapter+'.wav':scenario+'.wav'),wav(result.channels,result.sampleRate));
     results.push(result.summary);console.log(JSON.stringify(result.summary));
   }
   for(const chapter of ids)await render({chapter,save:chapter==='opening'});
   await render({scenario:'rapid'});
-  await render({scenario:'controls',save:true});
+  await render({scenario:'controls',duration:30,save:true});
   await render({scenario:'medley',duration:ids.length*6,save:true});
   await writeFile(resolve(target,'measurements.json'),JSON.stringify({sampleRate:48000,channel:'chrome',measurements:results},null,2)+'\n');
   console.log('Score renders and measurements saved to tmp/pitch-audio/. These checks do not claim subjective listening.');
 }finally{
   await browser?.close();await new Promise(resolve=>server.close(resolve));
 }
-
