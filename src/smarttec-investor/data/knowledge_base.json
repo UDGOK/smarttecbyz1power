@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-09-10",
+  "reviewedAt": "2026-09-11",
   "publicationState": "owner-updated",
   "policy": "Private server-side content; citations preserve evidence status; do not treat this draft as title, engineering or legal verification",
   "sources": {
@@ -64,18 +64,25 @@
       "title": "SmartTec economic review: editable assumptions, benchmark sources and tested cash-flow engine, 10 September 2026",
       "url": "/investors#underwriting",
       "type": "planning-sensitivity-not-quote"
+    },
+    "owner-deployment-review": {
+      "title": "SmartTec owner-priced fleet study, 11 September 2026",
+      "url": "/investors#owner-deployment",
+      "type": "planning-sensitivity-not-quote"
     }
   },
   "facts": [
     {
       "id": "F01",
       "question": "What is SmartTec developing?",
-      "answer": "SmartTec.dev LLC, under SmartTec Holdings LLC, is developing a 39.39-acre campus in Mead, Oklahoma. Parent Z1Power produces batteries. The first compute deployment combines two RTX nodes and one B300 node, alongside planned manufacturing, solar and storage activities. Utility and fiber commissioning are pending.",
+      "answer": "SmartTec.dev LLC, under SmartTec Holdings LLC, is developing a 39.39-acre campus in Mead, Oklahoma. Parent Z1Power produces batteries. The earlier compute concept combined two four-GPU RTX nodes and one B300 node. Management is now reviewing B300-focused alternatives, including 60 saleable GPUs plus four reserves; the final fleet is not approved. Manufacturing, solar and storage have separate development scopes. Utility and fiber commissioning are pending.",
       "status": "owner-reported",
       "sourceIds": [
-        "owner-brief"
+        "owner-brief",
+        "economics-review",
+        "owner-deployment-review"
       ],
-      "reviewedAt": "2026-09-10"
+      "reviewedAt": "2026-09-11"
     },
     {
       "id": "F02",
@@ -171,12 +178,14 @@
     {
       "id": "F11",
       "question": "What is Phase 1 compute?",
-      "answer": "Phase 1 includes two planned RTX PRO 6000 Blackwell Server Edition nodes, each with four GPUs (eight RTX GPUs), plus one B300 node. The B300 system configuration, accelerator count, price and power/cooling requirements have not been supplied. The earlier 7.5 kW planning figure covers the RTX portion only, not the combined phase.",
+      "answer": "The earlier starter concept used two RTX PRO 6000 Blackwell Server Edition nodes, each with four GPUs, plus one B300 node. Management is now evaluating B300-focused fleet sizes. The latest owner inputs are $670,000 per eight-GPU B300 system at $6.50 per GPU-hour and $170,000 per eight-GPU RTX system at $1.50 per GPU-hour. Those eight-GPU pricing inputs are separate from the earlier four-GPU RTX node concept. Complete OEM quote scope, workload commitments, facility requirements and final procurement remain unverified. The earlier 7.5 kW figure covers only the RTX portion of the starter concept.",
       "status": "owner-reported",
       "sourceIds": [
-        "owner-brief"
+        "owner-brief",
+        "economics-review",
+        "owner-deployment-review"
       ],
-      "reviewedAt": "2026-09-10"
+      "reviewedAt": "2026-09-11"
     },
     {
       "id": "F12",
@@ -201,12 +210,14 @@
     {
       "id": "F14",
       "question": "Is B300 included in Phase 1?",
-      "answer": "One B300 node is included in the owner’s first-phase deployment plan, alongside two planned four-GPU RTX nodes. The exact B300 OEM configuration, accelerator count, cost and facility requirements remain to be confirmed. The DGX B300 AC entry in the calculator is a generic reference, not the selected node.",
+      "answer": "B300 was part of the earlier two-RTX/one-B300 starter concept. Management is now evaluating a B300-focused fleet, including a financial alternative with eight eight-GPU systems: 60 saleable GPUs and four reserves. The owner supplied $670,000 per eight-GPU B300 system and proposed $6.50 per GPU-hour. This is not approved procurement or a complete reviewed OEM quotation. DGX B300 references in the calculator and artwork do not identify a selected SmartTec OEM system. Four reserve GPUs cannot replace an entire eight-GPU node.",
       "status": "owner-reported",
       "sourceIds": [
-        "owner-brief"
+        "owner-brief",
+        "economics-review",
+        "owner-deployment-review"
       ],
-      "reviewedAt": "2026-09-10"
+      "reviewedAt": "2026-09-11"
     },
     {
       "id": "F15",
@@ -231,13 +242,15 @@
     {
       "id": "F17",
       "question": "How much funding is required?",
-      "answer": "The earlier approximately $330,000 allowance, including $50,000 working capital, describes the RTX-only planning example. It excludes the B300 node and is not a budget for the updated combined first phase or the full campus. Exact B300 costs, construction, solar, storage and infrastructure need their own confirmed scopes and budgets.",
+      "answer": "There is no agreed final raise. The latest 60-saleable-plus-four-reserve B300 illustration at 20 paid hours per GPU per day requires approximately $6.84 million initially and $6.95 million including modeled later capital calls. It assumes eight systems at $670,000 each and includes site work, startup costs and an opening operating reserve. It models 28.7% total five-year ROI but approximately negative $674,000 NPV at the assumed 15% annual hurdle. The earlier approximately $330,000 RTX-only example excluded B300 and is not the current fleet budget. Customer commitments, complete quotes, power and engineering, and investor terms must determine the final funding plan. Manufacturing, solar and storage require separate budgets.",
       "status": "planning-assumption",
       "sourceIds": [
         "prior-financial-brief",
-        "owner-brief"
+        "owner-brief",
+        "economics-review",
+        "owner-deployment-review"
       ],
-      "reviewedAt": "2026-09-10"
+      "reviewedAt": "2026-09-11"
     },
     {
       "id": "F18",
@@ -332,12 +345,14 @@
     {
       "id": "F27",
       "question": "What makes this project different?",
-      "answer": "The plan brings together a 39.39-acre property, two RTX nodes plus one B300 node in the first compute deployment, and planned energy and manufacturing activity backed by parent Z1Power’s battery-production background. Performance, operating savings and commercial returns will be established through commissioning and customer delivery.",
+      "answer": "The proposed opportunity combines a 39.39-acre Mead property, a reported solar/battery/gas power agreement and parent Z1Power’s battery-production background. The earlier compute starter concept used two RTX nodes plus one B300 node; the latest study evaluates B300-focused alternatives. Neither the final fleet nor an all-in power advantage is established. Complete supply terms, exclusive usable capacity, customer commitments and service costs must support procurement. Commissioning and actual customer delivery must establish performance, savings and commercial returns.",
       "status": "owner-reported",
       "sourceIds": [
-        "owner-brief"
+        "owner-brief",
+        "economics-review",
+        "owner-deployment-review"
       ],
-      "reviewedAt": "2026-09-10"
+      "reviewedAt": "2026-09-11"
     },
     {
       "id": "F28",

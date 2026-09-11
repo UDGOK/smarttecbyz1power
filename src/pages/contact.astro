@@ -10,9 +10,9 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
   description={`Talk to ${company.full} about dedicated compute or customer-owned hosting at ${site.name}. A submission is an inquiry — it starts a deployment review, and does not reserve capacity.`}
   kicker="Contact"
   heading="Let’s plan your workload."
-  lede={`Discuss dedicated compute on the planned RTX and B300 nodes, or colocation for your own hardware at ${site.name}. Share your workload and target date so we can assess the deployment together.`}
+  lede={`Discuss dedicated compute using RTX or B300 options, or colocation for your own hardware at ${site.name}. Share your workload and target date so we can assess the deployment together.`}
   meta={[
-    { label: 'Initial compute', value: 'RTX + B300', note: compute.phaseSystems, tone: 'signal' },
+    { label: 'Compute fleet', value: 'Under review', note: 'Selected around customer requirements', tone: 'signal' },
     { label: 'Electrical commissioning', value: power.commissioningTarget, note: 'Management target' },
     { label: 'Shared service', value: power.service, note: 'Buildings A, B and C', tone: 'gold' },
     { label: 'Data-center buildings', value: `${site.dataCenterArea.toLocaleString()} sq ft`, note: 'Buildings A and C, gross area' },
@@ -171,7 +171,7 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
       <div class="stack">
         <div class="callout">
           <p>
-            <strong>One campus, two ways to deploy.</strong> Bring your equipment or discuss dedicated capacity on the planned {compute.phaseSystems}. Buildings A and C provide {site.dataCenterArea.toLocaleString()} gross sq ft for data-center development, with Building B supporting batteries, utilities and storage.
+            <strong>One campus, two ways to deploy.</strong> Bring your equipment or discuss dedicated GPU capacity sized around your workload. Buildings A and C provide {site.dataCenterArea.toLocaleString()} gross sq ft for data-center development, with Building B supporting batteries, utilities and storage.
           </p>
         </div>
 

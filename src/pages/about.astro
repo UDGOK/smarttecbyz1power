@@ -3,16 +3,16 @@ import Content from '../layouts/Content.astro';
 import {company,site,compute} from '../data/site';
 import {team} from '../data/team';
 ---
-<Content title={`About ${company.full} — our company and team`} description={`${company.entity}, operating under ${company.holdingCompany}, develops AI infrastructure in Mead, Oklahoma. Meet the SmartTec leadership and advisory team.`} kicker="Company / People / Purpose" heading="The people behind the infrastructure." lede={`SmartTec brings data-center services and energy expertise together on a ${site.acres}-acre campus in Mead, Oklahoma. Our first deployment combines dedicated RTX and B300 compute with space for customer-owned equipment.`} meta={[
+<Content title={`About ${company.full} — our company and team`} description={`${company.entity}, operating under ${company.holdingCompany}, develops AI infrastructure in Mead, Oklahoma. Meet the SmartTec leadership and advisory team.`} kicker="Company / People / Purpose" heading="The people behind the infrastructure." lede={`SmartTec brings data-center services and energy expertise together on a ${site.acres}-acre campus in Mead, Oklahoma. We are evaluating dedicated GPU compute alongside space for customer-owned equipment.`} meta={[
   {label:'Company',value:company.entity,note:`Operating under ${company.holdingCompany}`},
   {label:'Parent company',value:company.parent,note:'Battery production and energy expertise'},
   {label:'Campus',value:`${site.acres} acres`,note:site.name},
-  {label:'First deployment',value:compute.phaseSystems,note:'Planned · colocation in Buildings A and C'},
+  {label:'Compute fleet',value:'Under review',note:'Colocation planned in Buildings A and C'},
 ]}>
   <section aria-labelledby="what" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">01</span><span class="eyebrow__t">Our focus</span></p>
     <h2 id="what">A practical starting point for AI infrastructure</h2>
-    <div class="split"><p>SmartTec is developing its first campus at {site.address}. Buildings A and C provide {site.dataCenterArea.toLocaleString()} sq ft of gross building area for data-center development. Building B supports batteries, utilities and storage. The initial compute plan is {compute.phaseSystems}.</p><p>We work with organizations seeking dedicated compute and customers bringing their own hardware. Each deployment starts with workload, power, cooling and connectivity requirements, followed by an agreed installation and service plan. First service is targeted for Q4 2026, following fit-out and commissioning.</p></div>
+    <div class="split"><p>SmartTec is developing its first campus at {site.address}. Buildings A and C provide {site.dataCenterArea.toLocaleString()} sq ft of gross building area for data-center development. Building B supports batteries, utilities and storage. The earlier {compute.phaseSystems} starter concept is being reassessed against paid demand and B300-focused alternatives.</p><p>We work with organizations seeking dedicated compute and customers bringing their own hardware. Each deployment starts with workload, power, cooling and connectivity requirements, followed by an agreed installation and service plan. First service is targeted for Q4 2026, following fit-out and commissioning.</p></div>
   </section>
   <section aria-labelledby="parentage" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">02</span><span class="eyebrow__t">Energy and compute</span></p>

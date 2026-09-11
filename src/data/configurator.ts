@@ -46,7 +46,7 @@ const nf = new Intl.NumberFormat('en-US');
 const PHASE_1_KW = firstNumber(compute.load, 7.5);
 
 /**
- * The planned fleet. Planned — not inventory.
+ * The planned fleet. Reference status — not inventory.
  *
  * The old field was called `rentableGpus` and the copy said "all of them
  * rentable", which described eight cards as bookable when none has been
@@ -294,7 +294,7 @@ export const questions: ConfiguratorQuestion[] = [
     id: 'gpus',
     kicker: 'Scale',
     prompt: 'How many GPUs do you want?',
-    help: `The RTX portion is ${compute.systems} — ${compute.gpus} GPUs, planned.`,
+    help: `The earlier RTX reference is ${compute.systems} — ${compute.gpus} GPUs, illustrative.`,
     chipLabel: 'GPUs',
     options: [
       {
@@ -321,7 +321,7 @@ export const questions: ConfiguratorQuestion[] = [
       {
         id: 'hall',
         label: `All ${compute.gpus}`,
-        detail: `Both planned servers. ${compute.systems}.`,
+        detail: `Both servers in the earlier example. ${compute.systems}.`,
         chip: `${compute.gpus} GPUs`,
         effects: {
           gpuRange: { min: compute.gpus, max: compute.gpus },
@@ -476,7 +476,7 @@ export const assumptions: Assumption[] = [
     id: 'fleet',
     label: 'Planned fleet',
     value: `${envelope.plannedGpus} GPUs · ${envelope.servers} servers`,
-    source: `${envelope.systems}. Planned — ${compute.status.toLowerCase()}`,
+    source: `${envelope.systems}. Reference status — ${compute.status.toLowerCase()}`,
     estimated: false,
   },
   {

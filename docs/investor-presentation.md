@@ -8,7 +8,7 @@ The latest IEA 2026 executive summary supplies the global market chart: 485 TWh 
 
 ## Build and publication
 
-- Canonical artifact: `output/pdf/SmartTec-Investor-Presentation.pdf`.
+- Canonical artifact: `output/pdf/SmartTec-Investor-Presentation-2026-09.pdf`. The undated PDF is the prior edition; the authenticated download uses the dated edition recorded in `investor-deck.json`.
 - Rebuild with `python tools/build-investor-deck.py` using Python with ReportLab and Pillow, plus Node on PATH. The builder calls `tools/export-investor-deck-data.mjs` to recalculate the financial schedule.
 - The builder also emits server-only PDF bytes and `data/investor-deck.json` metadata. Normal site builds use these committed outputs and do not require Python.
 - Financial tables pull from the ROI engine. Narrative quotes, dates and selected assumptions require editorial review when inputs change. Tests fingerprint the source study and engine so a changed economic model cannot silently leave the PDF stale.

@@ -21,7 +21,7 @@ for(const route of routes){
  }
  assert.doesNotMatch(doc.body.textContent,/two existing (?:four-GPU |RTX)|whole planned first phase|One planned here|Refreshed every 15 minutes/i);checks++;
  assert.equal(doc.querySelectorAll('.todo').length,0,`${route}: public placeholder styling remains`);checks++;
- if(route && route!=='brand') { assert.match(doc.querySelector('footer').textContent,/39\.39 acres/);assert.match(doc.querySelector('footer').textContent,/2 RTX nodes \+ 1 B300 node/);checks+=2; }
+ if(route && route!=='brand') { assert.match(doc.querySelector('footer').textContent,/39\.39 acres/);assert.match(doc.querySelector('footer').textContent,/Sizing under review/);checks+=2; }
  if(route==='about'){
    for(const name of ['Syed Hussain','Yasir J.','Muhammad Siddiqui','Ryan','Javed Iqbal, PhD','Shahb Kazmi','Ali Askara','Ken','Daniel']){assert.ok(doc.querySelector('#people').parentElement.textContent.includes(name),`Missing supplied team member ${name}`);checks++;}
    assert.equal(doc.querySelectorAll('.team-card').length,9);checks++;

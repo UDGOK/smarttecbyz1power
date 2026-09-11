@@ -10,8 +10,8 @@ export const chapters = {
   },
   compute: {
     label:'First compute', number:'02', title:'Start with one rack.',
-    text:'The first phase combines two existing four-GPU RTX nodes with one B300 node. The B300 configuration and combined facility load are still being defined.',
-    fact:'2 RTX nodes + 1 B300 node', status:'COMMISSIONING PENDING',
+    text:'The earlier starter concept paired two four-GPU RTX nodes with one B300 node. B300-focused alternatives are now under review. Fleet size and facility load follow customer commitments, quotes and engineering.',
+    fact:'Earlier starter concept', status:'FLEET UNDER REVIEW',
     image:'concept-compute', alt:'AI concept of a small equipment room with one rack and two GPU server chassis; not installed equipment',
     model:'module-rack', target:[0,1.15,0], camera:[2.9,2.2,-4.0], distance:[1.7,12],
     modelNote:'Earlier RTX-only rack study with two illustrative chassis; the additional B300 node is not depicted. Not an OEM specification or a surveyed room.'

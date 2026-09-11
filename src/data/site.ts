@@ -273,12 +273,12 @@ export const compute = {
   servers: 2,
   b300Servers: 1,
   phaseSystems: '2 RTX nodes + 1 B300 node',
-  phaseNote: 'Two RTX PRO 6000 Blackwell nodes and one B300 node are planned. The B300 OEM configuration and supporting load are being selected.',
+  phaseNote: 'Earlier starter concept: two four-GPU RTX nodes and one B300 node. The current fleet review includes B300-focused alternatives; final size follows paid demand, complete quotes and engineering.',
   gpusPerServer: 4,
   gpus: 8,
   vramPerGpu: '96 GB',
-  systems: '2 planned servers · 4 × NVIDIA RTX PRO 6000 Blackwell Server Edition each',
-  status: 'Planned — procurement and commissioning not complete',
+  systems: 'Earlier example: 2 servers · 4 × NVIDIA RTX PRO 6000 Blackwell Server Edition each',
+  status: 'Illustrative reference — final fleet under review',
   evidence: 'planned' as Evidence,
 
   /** No NVLink on this part, so no pooled memory. */
@@ -308,7 +308,7 @@ export const compute = {
   target: 'Q4 2026 target',
 
   /** Future evaluations, each needing its own OEM design, benchmark and order. */
-  futurePlatforms: 'B300 is included in the first deployment as a separate node. AMD and Cerebras remain future evaluations.',
+  futurePlatforms: 'B300-focused deployment options are under review. AMD and Cerebras remain future evaluations.',
 } as const;
 
 /** The three things actually on offer. */
@@ -316,7 +316,7 @@ export const offers = [
   {
     id: 'dedicated',
     name: 'Dedicated RTX and B300 compute',
-    summary: 'Dedicated capacity on the planned RTX nodes and separate B300 platform, matched to workload requirements.',
+    summary: 'Dedicated GPU capacity, with RTX and B300 options assessed against workload requirements.',
   },
   {
     id: 'hosting',
@@ -421,7 +421,7 @@ export const stages = [
     ruler: '04 / COMPUTE',
     kicker: 'First phase · planned',
     title: 'RTX + B300.\nTwo compute paths.',
-    lede: `${compute.phaseSystems}, planned alongside customer-owned colocation in Buildings A and C. The RTX nodes have eight 96 GB GPUs in total; B300 is a separate configuration.`,
+    lede: `GPU fleet sizing is under review alongside customer-owned colocation in Buildings A and C. The earlier ${compute.phaseSystems} concept is a reference, not an approved procurement plan.`,
     chrome: 'light' as const,
     scrollVh: 300,
     hold: { label: 'Hold to power on', holdLabel: 'Powering on', duration: 2.2 },
