@@ -1,11 +1,11 @@
 ---
 // Deployment configurator: five questions that size a deployment against the
-// Phase 1A envelope at Site 01. Everything is server-rendered — all five
+// Earlier RTX reference at Site 01. Everything is server-rendered — all five
 // questions, all twenty cards, the assumptions and a static fallback — and the
 // script in `src/lib/configurator.ts` collapses it to one question at a time.
 // With JS blocked the block still reads as a spec sheet.
 import { assumptions, envelope, questions } from '../data/configurator';
-import { compute, power, site } from '../data/site';
+import { compute, power, site, publicDeployment as deployment } from '../data/site';
 
 interface Props {
   /** Root element id; also namespaces the generated aria ids. */
@@ -25,16 +25,16 @@ const pad = (n: number): string => String(n).padStart(2, '0');
   aria-labelledby={`${id}-title`}
 >
   <header class="cfg__head">
-    <p class="cfg__kicker mono-label">Deployment configurator · {site.designation}, {site.name}</p>
+    <p class="cfg__kicker mono-label">Earlier RTX sizing reference · {site.designation}</p>
     <h2 class="cfg__title" id={`${id}-title`}>
-      <span class="cfg__line"><span class="cfg__line-inner">Size your</span></span>
-      <span class="cfg__line"><span class="cfg__line-inner">deployment.</span></span>
+      <span class="cfg__line"><span class="cfg__line-inner">Compare an</span></span>
+      <span class="cfg__line"><span class="cfg__line-inner">RTX workload.</span></span>
     </h2>
     <p class="cfg__lede">
-      Explore the earlier RTX starter example: {compute.systems}, {compute.gpus} GPUs.
-      This estimator covers RTX nodes only; the planned B300 node and customer-owned
-      colocation require a separate deployment review. The results prepare an inquiry,
-      not a capacity reservation.
+      The current proposal is {deployment.gpus} B300 GPUs in {deployment.systems} Supermicro systems.
+      <a href="/compute">Explore that deployment</a> or <a href="/model-planner">compare model requirements</a>.
+      This separate RTX-only estimator retains the earlier {compute.servers}-server, {compute.gpus}-GPU example.
+      It prepares a comparative inquiry, not a B300 estimate or capacity reservation.
     </p>
   </header>
 
@@ -112,7 +112,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
               <div class="cfg__result-cell">
                 <span class="cfg__rule" data-rule aria-hidden="true"></span>
                 <dt class="mono-label">GPUs requested</dt>
-                <dd><strong class="cfg__figure" data-field="gpus" data-tally>—</strong> <span class="cfg__unit" data-field="gpu-note">of {compute.gpus} planned RTX GPUs</span></dd>
+                <dd><strong class="cfg__figure" data-field="gpus" data-tally>—</strong> <span class="cfg__unit" data-field="gpu-note">of {compute.gpus} reference RTX GPUs</span></dd>
               </div>
               <div class="cfg__result-cell">
                 <span class="cfg__rule" data-rule aria-hidden="true"></span>
@@ -171,13 +171,13 @@ const pad = (n: number): string => String(n).padStart(2, '0');
       </div>
 
       <div class="cfg__gauge">
-        <div class="cfg__meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Share of the planned GPUs requested">
+        <div class="cfg__meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Share of the reference RTX GPUs requested">
           <span class="cfg__meter-ticks" aria-hidden="true"></span>
           <span class="cfg__meter-fill" data-bar></span>
           <span class="cfg__meter-mark" aria-hidden="true"></span>
         </div>
         <p class="cfg__scale mono-label" aria-hidden="true">
-          <span>0</span><span>{compute.gpus} planned</span>
+          <span>0</span><span>{compute.gpus} in the RTX example</span>
         </p>
       </div>
 

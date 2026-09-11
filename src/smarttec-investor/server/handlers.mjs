@@ -7,6 +7,7 @@ import {investorDeckBase64} from './investor-deck.mjs';
 import deckMetadata from '../data/investor-deck.json' with {type:'json'};
 import {makePowerScenario} from '../power-sensitivity.mjs';
 import {answerQuestion,faqList} from './faq.mjs';
+import {investmentReadiness} from '../investment-readiness.mjs';
 import ownerStudy from '../data/owner-deployment-study.json' with {type:'json'};
 import sample from '../data/illustrative-scenario.json' with {type:'json'};
 import provenance from '../data/illustration-provenance.json' with {type:'json'};
@@ -17,6 +18,18 @@ import campus from '../data/campus.json' with {type:'json'};
 import {surveyPdf,surveyImage} from './survey-assets.mjs';
 function bounded(s){if(!s||!Array.isArray(s.rows)||s.rows.length>12||s.rows.some(r=>!Array.isArray(r.contracts)||r.contracts.length>12)||!Array.isArray(s.capexEvents)||s.capexEvents.length>60)throw new Error('Scenario exceeds supported bounds');return s;}
 const csvCell=x=>'"'+String(x??'').replaceAll('"','""')+'"';
+const currentCostDisclosure='Current project costs remain incomplete: cooling and non-cooling site work, energy and service coverage, revised reserves, later capital needs and the BC LLC annual payment definition require reconciliation. No definitive updated project ROI, NPV or payback is established.';
+function scenarioProvenance(s,illustration=false){
+ return {
+  ...(illustration?provenance:{}),
+  status:illustration?'historical-illustration':s.underwriting?'historical-preset-or-edited-sensitivity':'user-entered-sensitivity',
+  reviewedAt:investmentReadiness.reviewedAt,
+  presetSourceReviewedAt:illustration||s.underwriting?investmentReadiness.historicalModel.reviewedAt:null,
+  currentProjectStatus:investmentReadiness.status,
+  basis:illustration?'Historical RTX-only illustration with synthetic prices and earlier site/operating assumptions; excludes the current B300 deployment and updated costs.':s.underwriting?'Historical preset or edited sensitivity; earlier site and operating allowances do not represent the updated complete Supermicro deployment. Numerical results apply only to entered assumptions.':'Results apply only to entered assumptions; they are not a verified current SmartTec budget or investor return.',
+  currentCostDisclosure
+ };
+}
 export async function handle(request,action,dependencies={}){
  let cfg,store,session;
  try{cfg=dependencies.cfg||config();store=dependencies.store||new RedisStore(cfg);}catch{return json({error:'Private access is not configured.'},503);}
@@ -40,7 +53,7 @@ export async function handle(request,action,dependencies={}){
   if(action==='logout'&&request.method==='POST'){await revoke(store,session);return json({ok:true},200,{'Set-Cookie':cookieHeader(cfg,'',0)});}
   if(action==='bootstrap'&&request.method==='GET')return json({csrf:session.csrf,sample,provenance,catalog,campus,mapData,mapConfig:{satelliteKey:cfg.mapKey||''},faqs:faqList()});
   if(action==='underwriting-scenario'&&request.method==='POST'){
-   const b=await readJson(request,2048);if(b.ownerPricing===true){const selected=ownerStudy.cases.find(c=>c.id===b.id);if(!selected)throw new Error('Unknown owner deployment');return json({scenario:selected.scenario});}if(b.powerBasis!==undefined&&b.powerBasis!=='reported')throw new Error('Unknown power basis');return json({scenario:b.powerBasis==='reported'?makePowerScenario(b.id,b.kind):makeScenario(b.id,b.kind)});
+   const b=await readJson(request,2048);if(b.ownerPricing===true){const selected=ownerStudy.cases.find(c=>c.id===b.id);if(!selected)throw new Error('Unknown owner deployment');return json({scenario:selected.scenario,provenance:scenarioProvenance(selected.scenario)});}if(b.powerBasis!==undefined&&b.powerBasis!=='reported')throw new Error('Unknown power basis');const scenario=b.powerBasis==='reported'?makePowerScenario(b.id,b.kind):makeScenario(b.id,b.kind);return json({scenario,provenance:scenarioProvenance(scenario)});
   }
   if(action==='presentation'&&['GET','HEAD'].includes(request.method)){const bytes=Buffer.from(investorDeckBase64,'base64');return new Response(request.method==='HEAD'?null:bytes,{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Length':String(bytes.length),'Content-Disposition':`attachment; filename="${deckMetadata.filename}"`}});}
   if(action==='marked-survey'&&request.method==='GET')return new Response(Buffer.from(markedPdf,'base64'),{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="SmartTec_Marked_Layout.pdf"'}});
@@ -60,8 +73,9 @@ export async function handle(request,action,dependencies={}){
   if(['calculate','export'].includes(action)&&request.method==='POST'){
    const b=await readJson(request);const scenario=bounded(b.scenario);const result=calculateScenario(scenario);
    if(action==='calculate')return json(result);
-   const bundle={title:'SmartTec conditional investment scenario',generatedAt:new Date().toISOString(),scenario,result,disclosures:['Pre-tax scenario; no guaranteed return or engineering approval.','Property, manufacturing, solar and storage value/revenue excluded.','Price and occupancy inputs are assumptions unless separately evidenced.','Pro-rata investor results do not represent agreed legal terms.','All hardware is purchased at time zero; contract expiry and remaining debt matter.'],provenance:b.illustration===true?provenance:{status:'User-entered assumptions; not quote verified'}};
-   if(b.format==='csv'){const keys=['month','billed','collectedNetFees','peakITkw','averageITkw','facilityKwh','energyCost','nonEnergyCost','operatingCash','capex','debtPayment','debtBalloon'];const lines=['SmartTec conditional monthly ledger; all assumptions in scenario JSON',keys.map(csvCell).join(','),...result.schedule.map(r=>keys.map(k=>csvCell(r[k])).join(','))];return new Response(lines.join('\r\n'),{headers:{...privateHeaders,'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="SmartTec_monthly_ledger.csv"'}});}
+   const exportProvenance=scenarioProvenance(scenario,b.illustration===true);
+   const bundle={title:'SmartTec conditional investment scenario',generatedAt:new Date().toISOString(),scenario,result,disclosures:['Pre-tax scenario; no guaranteed return or engineering approval.','Property, manufacturing, solar and storage value/revenue excluded.','Price and occupancy inputs are assumptions unless separately evidenced.','Pro-rata investor results do not represent agreed legal terms.','All hardware is purchased at time zero; contract expiry and remaining debt matter.',exportProvenance.basis,currentCostDisclosure],provenance:exportProvenance};
+   if(b.format==='csv'){const keys=['month','billed','collectedNetFees','peakITkw','averageITkw','facilityKwh','energyCost','nonEnergyCost','operatingCash','capex','debtPayment','debtBalloon'];const lines=[csvCell('SmartTec conditional monthly ledger; all assumptions in scenario JSON. '+exportProvenance.status+'. '+exportProvenance.basis+' '+currentCostDisclosure),keys.map(csvCell).join(','),...result.schedule.map(r=>keys.map(k=>csvCell(r[k])).join(','))];return new Response(lines.join('\r\n'),{headers:{...privateHeaders,'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="SmartTec_monthly_ledger.csv"'}});}
    return json(bundle,200,{'Content-Disposition':'attachment; filename="SmartTec_investor_scenario.json"'});
   }
   return json({error:'Route or method not supported.'},405);

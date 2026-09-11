@@ -1,4 +1,7 @@
-<a class="power-badge" href="/compute" aria-label="Explore GPU deployment options under review"><span>GPU compute</span><span class="power-badge__qual">under review</span></a>
+---
+import { publicDeployment as deployment } from '../../data/site';
+---
+<a class="power-badge" href="/compute" aria-label={`Explore the proposed ${deployment.gpus}-GPU B300 deployment`}><span>{deployment.gpus} B300</span><span class="power-badge__qual">proposed</span></a>
 
 <style>
 .power-badge { font-size: 11px; letter-spacing: 0; white-space: nowrap; text-decoration: none; padding-inline: 8px; gap: 6px; }

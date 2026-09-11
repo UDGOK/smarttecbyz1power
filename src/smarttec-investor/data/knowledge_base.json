@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "reviewedAt": "2026-09-11",
-  "publicationState": "owner-updated",
+  "publicationState": "current-management-update-with-historical-comparisons",
   "policy": "Private server-side content; citations preserve evidence status; do not treat this draft as title, engineering or legal verification",
   "sources": {
     "owner-brief": {
@@ -66,24 +66,22 @@
       "type": "planning-sensitivity-not-quote"
     },
     "owner-deployment-review": {
-      "title": "SmartTec owner-priced fleet study, 11 September 2026",
+      "title": "Historical owner-priced fleet study using earlier site allowances",
       "url": "/investors#owner-deployment",
-      "type": "planning-sensitivity-not-quote"
+      "type": "historical sensitivity; current cost basis incomplete"
+    },
+    "current-owner-update": {
+      "title": "Management updates on deployment, funding, property, customers and cooling, 11 September 2026",
+      "type": "owner-reported; documents not independently verified",
+      "url": null
+    },
+    "current-readiness": {
+      "title": "Current partial budget and investment-readiness review, 11 September 2026",
+      "type": "analyst assumptions and unresolved inputs",
+      "url": "/investors#capital"
     }
   },
   "facts": [
-    {
-      "id": "F01",
-      "question": "What is SmartTec developing?",
-      "answer": "SmartTec.dev LLC, under SmartTec Holdings LLC, is developing a 39.39-acre campus in Mead, Oklahoma. Parent Z1Power produces batteries. The earlier compute concept combined two four-GPU RTX nodes and one B300 node. Management is now reviewing B300-focused alternatives, including 60 saleable GPUs plus four reserves; the final fleet is not approved. Manufacturing, solar and storage have separate development scopes. Utility and fiber commissioning are pending.",
-      "status": "owner-reported",
-      "sourceIds": [
-        "owner-brief",
-        "economics-review",
-        "owner-deployment-review"
-      ],
-      "reviewedAt": "2026-09-11"
-    },
     {
       "id": "F02",
       "question": "How much land is there?",
@@ -136,16 +134,6 @@
       "reviewedAt": "2026-09-10"
     },
     {
-      "id": "F07",
-      "question": "How much cooling is installed?",
-      "answer": "The stated schedule repeats Building C: 15 tons in C, 10 in B and another 10 in C. Allocation must be clarified. If these are three distinct units, total nominal cooling is 35 tons, approximately 123.1 kW thermal; that is not approved IT capacity.",
-      "status": "unresolved",
-      "sourceIds": [
-        "owner-brief"
-      ],
-      "reviewedAt": "2026-09-09"
-    },
-    {
       "id": "F08",
       "question": "How long will the battery run the servers?",
       "answer": "Runtime is not established. A prior brief mentions 2 MW output, but usable stored energy in MWh, installation status, losses, load and transfer design are not confirmed. MW alone does not determine duration.",
@@ -176,18 +164,6 @@
       "reviewedAt": "2026-09-09"
     },
     {
-      "id": "F11",
-      "question": "What is Phase 1 compute?",
-      "answer": "The earlier starter concept used two RTX PRO 6000 Blackwell Server Edition nodes, each with four GPUs, plus one B300 node. Management is now evaluating B300-focused fleet sizes. The latest owner inputs are $670,000 per eight-GPU B300 system at $6.50 per GPU-hour and $170,000 per eight-GPU RTX system at $1.50 per GPU-hour. Those eight-GPU pricing inputs are separate from the earlier four-GPU RTX node concept. Complete OEM quote scope, workload commitments, facility requirements and final procurement remain unverified. The earlier 7.5 kW figure covers only the RTX portion of the starter concept.",
-      "status": "owner-reported",
-      "sourceIds": [
-        "owner-brief",
-        "economics-review",
-        "owner-deployment-review"
-      ],
-      "reviewedAt": "2026-09-11"
-    },
-    {
       "id": "F12",
       "question": "Does eight GPUs mean one large shared memory pool?",
       "answer": "No. The RTX PRO 6000 Blackwell Server Edition specification is 96 GB per GPU. Do not present eight cards as one unified GPU memory pool; workload scaling depends on the software and supported system topology.",
@@ -206,18 +182,6 @@
         "nvidia-rtx"
       ],
       "reviewedAt": "2026-09-09"
-    },
-    {
-      "id": "F14",
-      "question": "Is B300 included in Phase 1?",
-      "answer": "B300 was part of the earlier two-RTX/one-B300 starter concept. Management is now evaluating a B300-focused fleet, including a financial alternative with eight eight-GPU systems: 60 saleable GPUs and four reserves. The owner supplied $670,000 per eight-GPU B300 system and proposed $6.50 per GPU-hour. This is not approved procurement or a complete reviewed OEM quotation. DGX B300 references in the calculator and artwork do not identify a selected SmartTec OEM system. Four reserve GPUs cannot replace an entire eight-GPU node.",
-      "status": "owner-reported",
-      "sourceIds": [
-        "owner-brief",
-        "economics-review",
-        "owner-deployment-review"
-      ],
-      "reviewedAt": "2026-09-11"
     },
     {
       "id": "F15",
@@ -240,39 +204,6 @@
       "reviewedAt": "2026-09-09"
     },
     {
-      "id": "F17",
-      "question": "How much funding is required?",
-      "answer": "There is no agreed final raise. The latest 60-saleable-plus-four-reserve B300 illustration at 20 paid hours per GPU per day requires approximately $6.84 million initially and $6.95 million including modeled later capital calls. It assumes eight systems at $670,000 each and includes site work, startup costs and an opening operating reserve. It models 28.7% total five-year ROI but approximately negative $674,000 NPV at the assumed 15% annual hurdle. The earlier approximately $330,000 RTX-only example excluded B300 and is not the current fleet budget. Customer commitments, complete quotes, power and engineering, and investor terms must determine the final funding plan. Manufacturing, solar and storage require separate budgets.",
-      "status": "planning-assumption",
-      "sourceIds": [
-        "prior-financial-brief",
-        "owner-brief",
-        "economics-review",
-        "owner-deployment-review"
-      ],
-      "reviewedAt": "2026-09-11"
-    },
-    {
-      "id": "F18",
-      "question": "Is the $2 million property investor collateral?",
-      "answer": "The $2 million is an owner-reported gross value, not automatically investor collateral, cash or net equity. Title, debt, valuation date, issuer ownership and any security arrangements must be documented.",
-      "status": "owner-reported",
-      "sourceIds": [
-        "owner-brief"
-      ],
-      "reviewedAt": "2026-09-09"
-    },
-    {
-      "id": "F19",
-      "question": "What ROI will I receive?",
-      "answer": "There is no established guaranteed return. The calculator reports a conditional project scenario. Investor cash flows require actual investment terms; its optional pro-rata view assumes equal participation in all equity contributions and distributions.",
-      "status": "planning-assumption",
-      "sourceIds": [
-        "model-spec"
-      ],
-      "reviewedAt": "2026-09-09"
-    },
-    {
       "id": "F20",
       "question": "What happens if customers do not pay or utilization is low?",
       "answer": "Revenue and cash collection fall while many operating and financing costs continue. The model consumes the reserve first, then reports additional capital needed and unrecovered capital. The investor should review downside assumptions and actual contractual rights.",
@@ -289,16 +220,6 @@
       "status": "document-reviewed",
       "sourceIds": [
         "model-spec"
-      ],
-      "reviewedAt": "2026-09-09"
-    },
-    {
-      "id": "F22",
-      "question": "Are customer contracts signed?",
-      "answer": "No signed customer contract has been supplied and verified in this package. Proposed rates, workload discussions and inquiry submissions must not be represented as contracted revenue.",
-      "status": "unresolved",
-      "sourceIds": [
-        "owner-brief"
       ],
       "reviewedAt": "2026-09-09"
     },
@@ -341,18 +262,6 @@
         "sec"
       ],
       "reviewedAt": "2026-09-09"
-    },
-    {
-      "id": "F27",
-      "question": "What makes this project different?",
-      "answer": "The proposed opportunity combines a 39.39-acre Mead property, a reported solar/battery/gas power agreement and parent Z1Power’s battery-production background. The earlier compute starter concept used two RTX nodes plus one B300 node; the latest study evaluates B300-focused alternatives. Neither the final fleet nor an all-in power advantage is established. Complete supply terms, exclusive usable capacity, customer commitments and service costs must support procurement. Commissioning and actual customer delivery must establish performance, savings and commercial returns.",
-      "status": "owner-reported",
-      "sourceIds": [
-        "owner-brief",
-        "economics-review",
-        "owner-deployment-review"
-      ],
-      "reviewedAt": "2026-09-11"
     },
     {
       "id": "F28",
@@ -415,27 +324,6 @@
         "marked-survey"
       ],
       "reviewedAt": "2026-09-09"
-    },
-    {
-      "id": "F-economics-2026",
-      "question": "Is SmartTec profitable, and should we add more RTX, B200 or B300 GPUs?",
-      "answer": "Using the latest owner inputs of $670,000 per eight-GPU B300 system at $6.50/GPU-hour and $170,000 per eight-GPU RTX system at $1.50/GPU-hour, the 912-configuration study favors B300-only. The 60-saleable-plus-four-reserve B300 case at 20 paid hours/day models $1.99 million five-year net cash profit and 28.7% TOTAL five-year ROI, but negative $674,000 NPV at the assumed 15% annual hurdle. The smallest mathematical pass is 72 B300 GPUs with no dedicated reserve and 20 paid hours/day; its roughly $7,361 NPV is too thin to support a robust recommendation and fails price-decline and extra-operations stresses. No searched configuration at 18 paid hours/day passes. Confirm paid customer commitments, full costs and usable power before selecting a fleet. Earlier benchmark comparisons are separately labeled; none of these calculations promises investor distributions.",
-      "status": "planning-sensitivity-not-quote",
-      "sourceIds": [
-        "economics-review"
-      ],
-      "reviewedAt": "2026-09-10"
-    },
-    {
-      "id": "F-power-agreement",
-      "question": "Does SmartTec have behind-the-meter power and an energy agreement?",
-      "answer": "The owner reports an agreement for solar, batteries and gas generators at below $0.07/kWh and is awaiting team confirmation of firm exclusive capacity, operating date and included costs. The agreement has not been reviewed. The investor page offers a 7-cent energy-price sensitivity with other costs unchanged; it is not a verified all-in tariff or commissioned-capacity claim.",
-      "status": "owner-reported; team confirmation pending",
-      "sourceIds": [
-        "owner-brief",
-        "economics-review"
-      ],
-      "reviewedAt": "2026-09-10"
     }
   ]
 }

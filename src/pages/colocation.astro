@@ -1,13 +1,13 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power, network, compute } from '../data/site';
+import { company, site, power, network, publicDeployment as deployment } from '../data/site';
 ---
 <Content
   title={`Colocation and dedicated compute in Mead | ${company.full}`}
-  description={`Plan customer-owned hosting or dedicated RTX and B300 compute at ${site.designation}. Buildings A and C provide ${site.dataCenterArea.toLocaleString()} gross sq ft for data-center development.`}
+  description={`Plan customer-owned hosting or dedicated B300 compute at ${site.designation}. Buildings A and C provide ${site.dataCenterArea.toLocaleString()} gross sq ft for data-center development.`}
   kicker="Colocation and dedicated compute"
   heading="Your hardware. Our campus."
-  lede={`Develop your next deployment with SmartTec in ${site.name}. Buildings A and C provide ${site.dataCenterArea.toLocaleString()} gross sq ft for data-center development, supported by an on-site electrical service and a proposed two-loop cooling system.`}
+  lede={`Develop your next deployment with SmartTec in ${site.name}. Buildings A and C provide ${site.dataCenterArea.toLocaleString()} gross sq ft for data-center development. Each customer allocation requires confirmed power, a complete cooling design and commissioning.`}
   meta={[
     { label: 'Data-center buildings', value: `${site.dataCenterArea.toLocaleString()} sq ft`, note: 'Buildings A and C, gross area' },
     { label: 'Utility', value: power.utility, note: power.service, tone: 'gold' },
@@ -28,8 +28,8 @@ import { company, site, power, network, compute } from '../data/site';
       <article class="card">
         <p class="card__tag mono-label">SmartTec hardware</p>
         <h3>Dedicated compute</h3>
-        <p>RTX and B300 options are under review; fleet size follows paid customer demand and complete equipment quotes. We match a dedicated allocation to the workload, subject to procurement, commissioning and an agreed offer.</p>
-        <p><a href="/compute">Explore the RTX and B300 plan →</a></p>
+        <p>The initial proposal is {deployment.gpus} B300 GPUs in {deployment.systems} complete Supermicro systems, together in one building. Dedicated allocations remain subject to customer commitments, procurement, commissioning and an agreed offer.</p>
+        <p><a href="/compute">Explore the B300 proposal →</a></p>
       </article>
     </div>
   </section>
@@ -40,7 +40,7 @@ import { company, site, power, network, compute } from '../data/site';
       <div>
         <p>Buildings A and C are designated for data-center development. Building B supports batteries, utilities and storage, and is excluded from the {site.dataCenterArea.toLocaleString()} sq ft data-center area.</p>
         <p>The existing shared service is {power.service}, supplied by {power.utility} and distributed from Building C. Customer IT allocations follow engineering review and commissioning.</p>
-        <p>The proposed thermal design combines a warm-water circuit for compatible liquid-cooled servers with a separate chilled-water circuit for active rear-door heat exchangers. Final equipment selection establishes the rack configuration and supported density.</p>
+        <p>The B300 systems require new direct liquid cooling. Residual-air cooling is also new, with conventional room cooling and rear-door heat exchangers being compared. A shared plant with separately controlled circuits is one option; each colocation proposal needs its own equipment and service review.</p>
       </div>
       <div class="card">
         <h3>Development milestones</h3>

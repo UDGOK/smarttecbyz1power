@@ -1,21 +1,37 @@
 ---
 import study from '../data/owner-deployment-study.json';
+import {investmentReadiness as readiness} from '../investment-readiness.mjs';
 const usd=(n:number)=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
 ---
 <section id="owner-deployment" aria-labelledby="owner-deployment-title">
-  <p class="inv-eyebrow">LATEST OWNER PRICES / {study.reviewedAt}</p>
-  <h3 id="owner-deployment-title">The smallest fleet.<br/>A return that survives scrutiny.</h3>
-  <p>Eight-GPU B300 system: <strong>$670,000 · $6.50/GPU-hour</strong>. Eight-GPU RTX system: <strong>$170,000 · $1.50/GPU-hour</strong>. These are owner-supplied inputs; complete supplier quotes and paid customer commitments remain unverified.</p>
+  <p class="inv-eyebrow">CURRENT INVESTMENT READINESS / {readiness.reviewedAt}</p>
+  <h3 id="owner-deployment-title">A defined hardware plan.<br/>A budget still being completed.</h3>
+  <p><strong>{readiness.hardware.systems} complete Supermicro systems · {readiness.hardware.installedGPUs} B300 GPUs · {usd(readiness.hardware.totalCost)} hardware.</strong> The proposed allocation is {readiness.hardware.saleableGPUs} saleable GPUs and {readiness.hardware.reserveGPUs} financial reserves, together in one building. {readiness.hardware.coolingRequirement}. {readiness.hardware.scope}</p>
+  <p class="inv-note">{readiness.hardware.verification} {readiness.hardware.reserveNote}</p>
+  <div class="inv-warning"><strong>Updated project ROI and the complete funding requirement remain undetermined.</strong><p>{readiness.decision}</p></div>
+  <div class="inv-table-scroll" tabindex="0" role="region" aria-label="Current partial initial funding comparison; scroll horizontally on small screens">
+    <table><caption>Current partial funding bridge · not a final raise or completed project budget</caption><thead><tr><th scope="col">Cooling option</th><th scope="col">Cooling allowance</th><th scope="col">Partial initial funding</th><th scope="col">Additional founder contribution above the initial $6m</th></tr></thead><tbody>{readiness.cooling.cases.map(c=><tr><th scope="row">{c.label}</th><td>{usd(c.installedCoolingAllowance)}</td><td>{usd(c.partialInitialFunding)}</td><td>{usd(c.additionalFounderContribution)}</td></tr>)}</tbody></table>
+  </div>
+  <p>Each partial total combines {usd(readiness.hardware.totalCost)} hardware, the retained {usd(readiness.budget.startupAllowance)} startup/acquisition allowance, {usd(readiness.budget.openingReserve)} opening reserve and the selected cooling allowance. <strong>Non-cooling site work remains unpriced.</strong> The reserve, later capital needs and any scope overlaps must be reconciled.</p>
+  <p>{readiness.founderCapital.status} {readiness.founderCapital.verification}</p>
+  {readiness.cooling.cases.map(c=><p><strong>{c.label}:</strong> {c.basis}</p>)}
+  <p>{readiness.cooling.existingHVACBasis} {readiness.cooling.energyBasis}</p>
+  <p><strong>Revenue illustration:</strong> {readiness.hardware.saleableGPUs} saleable GPUs × ${readiness.commercial.proposedGrossRatePerGPUHour.toFixed(2)} × {readiness.commercial.illustrativePaidHoursPerDay} paid hours/day × 365 days = <strong>{usd(readiness.commercial.grossAnnualAtIllustrativePaidHours)} gross annual billings</strong>. {readiness.commercial.status} {readiness.commercial.basis}</p>
+  <p><strong>Site-use agreement:</strong> Management confirms both parties signed a {readiness.property.siteAgreementYears}-year agreement with BC LLC. {readiness.property.paymentBasis} The written accounting definition and other obligations have not been reviewed, so this payment has not been inserted into a revised return model.</p>
+  <details class="inv-details inv-historical-owner"><summary>Historical owner-price comparison — superseded cost basis</summary>
+  <p class="inv-warning"><strong>{readiness.historicalModel.label}.</strong> {readiness.historicalModel.basis}</p>
+  <p>Earlier owner-price inputs: eight-GPU B300 system $670,000 at $6.50/GPU-hour; eight-GPU RTX system $170,000 at $1.50/GPU-hour. These cases remain editable for comparison; their generic site allowance does not represent the new cooling scope.</p>
   <p>{study.recommendation}</p>
   <div class="inv-table-scroll" tabindex="0" role="region" aria-label="Owner-price fleet comparison; scroll horizontally on small screens">
-    <table><caption>912 combinations · 8–128 GPUs · pre-tax five-year project cash flows</caption><thead><tr><th scope="col">B300 candidate</th><th scope="col">Total funding, including calls</th><th scope="col">Five-year net cash profit</th><th scope="col">Total five-year ROI</th><th scope="col">NPV at 15% annually</th></tr></thead><tbody>{study.cases.map(c=><tr><th scope="row">{c.title}</th><td>{usd(c.result.totalFunding)}</td><td>{usd(c.result.profit)}</td><td>{(c.result.totalROI*100).toFixed(1)}%</td><td>{usd(c.result.npv)}</td></tr>)}</tbody></table>
+    <table><caption>Historical assumptions only · 912 combinations · 8–128 GPUs · pre-tax five-year cash flows</caption><thead><tr><th scope="col">B300 candidate</th><th scope="col">Total funding, including calls</th><th scope="col">Five-year net cash profit</th><th scope="col">Total five-year ROI</th><th scope="col">NPV at 15% annually</th></tr></thead><tbody>{study.cases.map(c=><tr><th scope="row">{c.title}</th><td>{usd(c.result.totalFunding)}</td><td>{usd(c.result.profit)}</td><td>{(c.result.totalROI*100).toFixed(1)}%</td><td>{usd(c.result.npv)}</td></tr>)}</tbody></table>
   </div>
   <p><strong>Positive operating cash is possible.</strong> The 60-saleable-plus-four-reserve case at 20 paid hours/day produces approximately $162,423 operating cash in a normalized early 30-day operating month, before capital spending, taxes and investor distributions. Its 28.7% ROI is the total over five years; the timing of that cash falls short of the assumed 15% annual hurdle.</p>
   <p><strong>The mathematical minimum is fragile.</strong> At 20 paid hours/day, 72 B300 GPUs with no dedicated reserve barely pass: only {usd(study.cases[3].result.npv)} of NPV on {usd(study.cases[3].result.totalFunding)} of total funding. A 10% annual rental-price decline or another $10,000/month operating allowance makes NPV negative. At 18 paid hours/day, no searched configuration passes. A full eight-GPU reserve node also produces no pass within the search.</p>
   <p><strong>Negotiate terms before increasing the fleet.</strong> Keeping 60 saleable GPUs and four reserves at 20 paid hours/day requires approximately <strong>$7.03/GPU-hour</strong>, or an eight-GPU system price of approximately <strong>$604,000</strong> at $6.50/hour, to reach the hurdle. These alternatives hold other assumptions fixed, with hardware-linked costs recalculated for a lower system price. They leave little margin for error and are not agreed customer or supplier terms.</p>
   <details class="inv-details"><summary>Read the complete assumptions and downside results</summary><ul>{study.assumptions.map(a=><li>{a}</li>)}</ul><div class="inv-table-scroll" tabindex="0" role="region" aria-label="Owner-price downside comparison"><table><thead><tr><th scope="col">Candidate</th><th scope="col">Required flat hourly price, rounded up</th><th scope="col">NPV: 10% annual price decline</th><th scope="col">NPV: $10,000 extra monthly operations</th></tr></thead><tbody>{study.cases.map(c=><tr><th scope="row">{c.title}</th><td>${(Math.ceil(c.priceRequired*100)/100).toFixed(2)}</td><td>{usd(c.declineNPV)}</td><td>{usd(c.extraOperationsNPV)}</td></tr>)}</tbody></table></div></details>
-  <div class="inv-actions">{study.cases.map(c=><button type="button" class="inv-outline" disabled data-underwriting-option={c.id} data-underwriting-owner="true">Explore {c.title.toLowerCase()}</button>)}</div>
+  <div class="inv-actions">{study.cases.map(c=><button type="button" class="inv-outline" disabled data-underwriting-option={c.id} data-underwriting-owner="true">Load historical {c.title.toLowerCase()}</button>)}</div>
   <p class="inv-note">Load a case to inspect and edit its equipment, customer terms and monthly cash flows. Four spare GPUs do not replace a complete eight-GPU node. No procurement or final fleet size is approved by this comparison.</p>
+  </details>
 </section>
 <style>
   section{padding:1.5rem;margin-bottom:3rem;border:1px solid #668575;border-radius:1rem;background:#143b2d}

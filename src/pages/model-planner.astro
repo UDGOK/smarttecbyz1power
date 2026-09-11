@@ -1,6 +1,6 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power, compute } from '../data/site';
+import { company, site, power, publicDeployment as deployment } from '../data/site';
 import { accelerators, precisions, workloads, ACCELERATORS_CHECKED } from '../data/accelerators';
 import catalogue from '../data/models.json';
 import {
@@ -34,7 +34,7 @@ const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference
   meta={[
     { label: 'Models', value: String(models.length), note: 'Self-hostable, from OpenRouter', count: true },
     { label: 'Largest', value: largest.params >= 1e12 ? `${(largest.params / 1e12).toFixed(1)}T` : `${(largest.params / 1e9).toFixed(0)}B`, note: largest.name },
-    { label: 'Accelerators', value: String(accelerators.length), note: `RTX + B300 planned; reference configurations`, count: true },
+    { label: 'Accelerators', value: String(accelerators.length), note: 'B300 proposal plus reference alternatives', count: true },
     { label: 'Catalogue', value: catalogue.fetched, note: 'Refreshed live where available', tone: 'signal' },
   ]}
 >
@@ -142,10 +142,10 @@ const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference
     <h2 id="hardware">What that lands on</h2>
 
     <p>
-      One of these is planned for this site. The rest are platform evaluations — each
-      would need its own OEM design, its own benchmark and a funded order, and none is a
-      drop-in upgrade inside the RTX nodes. They are here because the arithmetic is worth
-      seeing across the field, not because they are on offer. Two of them are facility
+      B300 is the platform in the proposed initial deployment. These cards compare
+      reference configurations; each workload still needs an OEM design, benchmark
+      and funded order before equipment is committed. Reference power is not a measured
+      Supermicro system load or a facility allocation. Two platforms are facility
       decisions before they are hardware ones: the GB300 NVL72 is a whole liquid-cooled
       rack, and the Cerebras CS-3 does not hold weights in device memory at all.
     </p>
@@ -240,9 +240,10 @@ const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference
     <h2 id="next">Bring the number to us</h2>
     <p>
       If the figure above is the deployment you have in mind, the next step is the part
-      this page cannot do: confirming that the facility can carry it. The planned first
-      phase here is {compute.systems} — {compute.gpus} GPUs — and
-      {' '}{compute.status.toLowerCase()}.
+      this page cannot do: confirming that the facility can carry it. The current proposal
+      is {deployment.gpus} B300 GPUs in {deployment.systems} complete Supermicro systems,
+      together in one building with new direct liquid cooling. Procurement, actual
+      workload performance and facility acceptance remain ahead.
     </p>
     <div class="actions">
       <a class="btn" href="/contact">Request a deployment review</a>

@@ -1,24 +1,25 @@
 ---
 import Content from '../layouts/Content.astro';
-import {company,site,compute} from '../data/site';
+import {company,site,publicDeployment as deployment} from '../data/site';
 import {team} from '../data/team';
 ---
 <Content title={`About ${company.full} — our company and team`} description={`${company.entity}, operating under ${company.holdingCompany}, develops AI infrastructure in Mead, Oklahoma. Meet the SmartTec leadership and advisory team.`} kicker="Company / People / Purpose" heading="The people behind the infrastructure." lede={`SmartTec brings data-center services and energy expertise together on a ${site.acres}-acre campus in Mead, Oklahoma. We are evaluating dedicated GPU compute alongside space for customer-owned equipment.`} meta={[
   {label:'Company',value:company.entity,note:`Operating under ${company.holdingCompany}`},
   {label:'Parent company',value:company.parent,note:'Battery production and energy expertise'},
   {label:'Campus',value:`${site.acres} acres`,note:site.name},
-  {label:'Compute fleet',value:'Under review',note:'Colocation planned in Buildings A and C'},
+  {label:'Compute proposal',value:deployment.label,note:'Eight Supermicro systems in one building'},
 ]}>
   <section aria-labelledby="what" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">01</span><span class="eyebrow__t">Our focus</span></p>
     <h2 id="what">A practical starting point for AI infrastructure</h2>
-    <div class="split"><p>SmartTec is developing its first campus at {site.address}. Buildings A and C provide {site.dataCenterArea.toLocaleString()} sq ft of gross building area for data-center development. Building B supports batteries, utilities and storage. The earlier {compute.phaseSystems} starter concept is being reassessed against paid demand and B300-focused alternatives.</p><p>We work with organizations seeking dedicated compute and customers bringing their own hardware. Each deployment starts with workload, power, cooling and connectivity requirements, followed by an agreed installation and service plan. First service is targeted for Q4 2026, following fit-out and commissioning.</p></div>
+    <div class="split"><p>SmartTec is developing its first campus at {site.address}. Buildings A and C provide {site.dataCenterArea.toLocaleString()} sq ft of gross building area for data-center development. Building B supports batteries, utilities and storage. The initial proposal is {deployment.gpus} B300 GPUs in {deployment.systems} Supermicro systems, together in one building with new direct liquid cooling.</p><p>We work with organizations seeking dedicated compute and customers bringing their own hardware. Each deployment starts with workload, power, cooling and connectivity requirements, followed by an agreed installation and service plan. First service is targeted for Q4 2026, following fit-out and commissioning.</p></div>
+    <p>BC LLC is the management-reported landowner. Management confirms that SmartTec has a signed 50-year site-use agreement; document and title review remain part of diligence.</p>
   </section>
   <section aria-labelledby="parentage" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">02</span><span class="eyebrow__t">Energy and compute</span></p>
     <h2 id="parentage">Connected by a shared campus plan</h2>
     <p>{company.entity} operates under {company.holdingCompany}. {company.parent} is the parent company and battery producer. Its energy expertise connects SmartTec's compute deployment with the longer-term battery, solar and manufacturing plan.</p>
-    <div class="cards"><article class="card"><h3>Data-center services</h3><p>Dedicated RTX and B300 compute, plus customer-owned colocation in Buildings A and C.</p><a href="/compute">Explore the compute plan →</a></article><article class="card"><h3>Energy infrastructure</h3><p>An on-site OG&E transformer, planned Z1Power storage and a two-loop cooling concept for the data-center buildings.</p><a href="/power">See power and cooling →</a></article><article class="card"><h3>Campus development</h3><p>Existing buildings anchor the first phase. Planned inverter and battery assembly, solar and storage provide room for future development.</p><a href="/site">Explore Site 01 →</a></article></div>
+    <div class="cards"><article class="card"><h3>Data-center services</h3><p>Proposed dedicated B300 compute, plus customer-owned colocation subject to separate facility allocation.</p><a href="/compute">Explore the compute plan →</a></article><article class="card"><h3>Energy infrastructure</h3><p>A management-reported solar, battery and gas supply agreement, shared OG&E service and all-new cooling. Capacity, costs and commissioning remain under review.</p><a href="/power">See power and cooling →</a></article><article class="card"><h3>Campus development</h3><p>Existing buildings anchor the first phase. Planned inverter and battery assembly, solar and storage provide room for future development.</p><a href="/site">Explore Site 01 →</a></article></div>
   </section>
   <section aria-labelledby="people" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">03</span><span class="eyebrow__t">Our team</span></p>

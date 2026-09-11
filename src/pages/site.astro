@@ -1,24 +1,26 @@
 ---
 import Content from '../layouts/Content.astro';
-import {company,site,power,network,compute} from '../data/site';
+import {company,site,power,network,publicDeployment as deployment} from '../data/site';
 ---
 <Content title={`${site.designation} — ${site.name} | ${company.full}`} description={`A ${site.acres}-acre campus in Mead, Oklahoma. Buildings A and C provide ${site.dataCenterArea.toLocaleString()} sq ft for data-center development; Building B supports batteries, utilities and storage.`} kicker={`${site.designation} / Mead, Oklahoma`} heading="One campus. A connected plan." lede={`${site.acres} acres at ${site.address}. Existing buildings anchor a phased plan for data-center services, inverter and battery assembly, and solar and energy storage.`} meta={[
   {label:'Legal acreage',value:`${site.acres} acres`,note:'Owner-supplied legal description',count:true},
   {label:'Data-center buildings',value:`${site.dataCenterArea.toLocaleString()} sq ft`,note:'A + C · gross building area',count:true},
   {label:'Utility building',value:`${site.utilityArea.toLocaleString()} sq ft`,note:'B · batteries, utilities and storage'},
-  {label:'Compute fleet',value:'Under review',note:'Size follows paid demand and engineering',tone:'signal'},
+  {label:'Compute proposal',value:deployment.label,note:'Eight systems together in one building',tone:'signal'},
 ]}>
   <section aria-labelledby="today" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">01</span><span class="eyebrow__t">The starting point</span></p>
     <h2 id="today">Existing buildings. The next phase ahead.</h2>
     <div class="split"><p>Buildings A, B and C already stand on the property. A and C are designated for data-center services; B supports batteries, utilities and storage. An on-site {power.service} transformer is awaiting OG&E commissioning.</p><p>The next steps connect construction, power, cooling and fiber to the first compute deployment. SmartTec is accepting deployment inquiries while fit-out and commissioning are planned; the campus is not yet offering commissioned capacity.</p></div>
-    <div class="actions"><a class="btn" href="/compute">Explore RTX and B300</a><a class="btn btn--ghost" href="/colocation">Bring your own hardware</a></div>
+    <p>The initial proposal is {deployment.gpus} B300 GPUs in {deployment.systems} complete Supermicro systems, together in one building. The final A or C allocation and all-new cooling design remain to be established.</p>
+    <div class="actions"><a class="btn" href="/compute">Explore the B300 proposal</a><a class="btn btn--ghost" href="/colocation">Bring your own hardware</a></div>
   </section>
   <section aria-labelledby="land" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">02</span><span class="eyebrow__t">Location</span></p>
     <h2 id="land">39.39 acres in Mead, Oklahoma</h2>
     <dl class="spec"><div><dt>Address</dt><dd>{site.address}</dd></div><div><dt>County</dt><dd>{site.county}, Oklahoma</dd></div><div><dt>Legal acreage</dt><dd>{site.acres} acres</dd></div><div><dt>Legal description</dt><dd>{site.legalDescription}</dd></div><div><dt>Access</dt><dd>US Highway 70</dd></div></dl>
     <p class="form-note">The legal acreage above follows the owner's 10 September 2026 correction. The campus plan organizes the property into three functional areas; these are planning zones, not a new legal subdivision.</p>
+    <p><strong>Site-use basis.</strong> {site.ownership}. {site.ownershipNote}</p>
   </section>
   <section aria-labelledby="tracts" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">03</span><span class="eyebrow__t">Campus plan</span></p>
@@ -29,7 +31,7 @@ import {company,site,power,network,compute} from '../data/site';
     <p class="eyebrow"><span class="eyebrow__n">04</span><span class="eyebrow__t">Building roles</span></p>
     <h2 id="buildings">A and C for compute. B for support.</h2>
     <div class="scroller" tabindex="0" role="region" aria-label="Building schedule, scrollable"><table><caption>Existing building schedule</caption><thead><tr><th scope="col">Building</th><th scope="col">Gross area</th><th scope="col">Assigned role</th></tr></thead><tbody>{site.buildings.map(b=><tr><th scope="row">Building {b.id}</th><td class="num">{b.sqft.toLocaleString()} sq ft</td><td>{b.role}</td></tr>)}<tr><th scope="row">Data-center area: A + C</th><td class="num">{site.dataCenterArea.toLocaleString()} sq ft</td><td>Gross buildings before fit-out, not rentable white space</td></tr><tr><th scope="row">All three buildings</th><td class="num">{site.buildingArea.toLocaleString()} sq ft</td><td>Includes the {site.utilityArea.toLocaleString()} sq ft utility building</td></tr></tbody></table></div>
-    <p>The two-loop cooling concept serves A and C, with a candidate mechanical yard behind B. Final rack positions, access, cooling equipment and electrical allocations follow the deployment design.</p><a class="btn btn--ghost" href="/power#thermal">See the cooling architecture</a>
+    <p>The proposed eight-system fleet will occupy one building; A and C remain the wider data-center development areas. All cooling is new. Final rack positions, mechanical-yard siting, access and electrical allocations follow the deployment design.</p><a class="btn btn--ghost" href="/power#thermal">See the cooling options</a>
   </section>
   <section aria-labelledby="schedule" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">05</span><span class="eyebrow__t">Delivery milestones</span></p>

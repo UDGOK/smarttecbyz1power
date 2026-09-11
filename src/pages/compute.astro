@@ -1,39 +1,39 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power, network, compute } from '../data/site';
+import { company, site, power, network, compute, publicDeployment as deployment } from '../data/site';
 ---
 <Content
-  title={`RTX and B300 compute in Mead, Oklahoma | ${company.full}`}
-  description={`SmartTec is evaluating GPU deployment options at ${site.designation}. Explore the planned hardware, workload review and commissioning schedule.`}
-  kicker="Compute options / Fleet under review"
+  title={`B300 compute in Mead, Oklahoma | ${company.full}`}
+  description={`SmartTec proposes ${deployment.gpus} B300 GPUs in ${deployment.systems} complete Supermicro systems at ${site.designation}. Explore the workload, liquid-cooling and commissioning plan.`}
+  kicker="B300 compute / Proposed deployment"
   heading="Build around the workload."
-  lede={`We are evaluating RTX and B300 platforms at ${site.name}, including B300-focused fleet alternatives. Final procurement and fleet size depend on paid customer demand, complete equipment quotes and engineering. The earlier starter configuration below remains an illustrative reference.`}
+  lede={`Our proposed initial fleet brings ${deployment.gpus} B300 GPUs together in ${deployment.systems} complete Supermicro systems, in one building at ${site.name}. Direct liquid cooling is required, and all cooling will be new. Customer commitments, complete costs and engineering acceptance determine procurement and service availability.`}
   meta={[
-    { label: 'Compute fleet', value: 'Under review', note: 'Final procurement not approved', tone: 'signal' },
-    { label: 'Earlier RTX example', value: String(compute.gpus), note: 'Eight GPUs across two four-GPU nodes', count: true },
-    { label: 'RTX memory', value: compute.vramPerGpu, note: 'Per GPU, separate memories' },
-    { label: 'Deployment status', value: 'Planned', note: 'Procurement and commissioning not complete', tone: 'gold' },
+    { label: 'Proposed B300 GPUs', value: String(deployment.gpus), note: 'Planning count, not available inventory', count: true, tone: 'signal' },
+    { label: 'Complete systems', value: String(deployment.systems), note: `${deployment.gpusPerSystem} B300 GPUs per Supermicro system`, count: true },
+    { label: 'Location', value: 'One building', note: 'Final A or C allocation pending' },
+    { label: 'Deployment status', value: 'Proposed', note: 'Procurement and commissioning ahead', tone: 'gold' },
   ]}
 >
   <section aria-labelledby="fleet" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">Earlier starter concept</span></p>
-    <h2 id="fleet">Two platform options, subject to selection.</h2>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">Initial fleet proposal</span></p>
+    <h2 id="fleet">Eight systems. A complete deployment to validate.</h2>
     <div class="cards">
       <article class="card">
-        <p class="card__tag mono-label">{compute.servers} nodes in earlier example</p>
-        <h3>RTX PRO 6000 Blackwell</h3>
-        <p>The earlier example specifies each node with {compute.gpusPerServer} {compute.gpuModel} GPUs, each with {compute.vramPerGpu} of memory. The two nodes provide {compute.gpus} RTX GPUs in total.</p>
-        <p>{compute.workloads}. Large models and training workloads are assessed against the selected configuration.</p>
+        <p class="card__tag mono-label">{deployment.systems} complete Supermicro systems</p>
+        <h3>NVIDIA B300 compute</h3>
+        <p>Each proposed system contains {deployment.gpusPerSystem} B300 GPUs. {deployment.scope}</p>
+        <p>External networking, storage, installation and ongoing service obligations must be reconciled with the full deployment requirements.</p>
       </article>
       <article class="card">
-        <p class="card__tag mono-label">{compute.b300Servers} node in earlier example</p>
-        <h3>B300</h3>
-        <p>The earlier concept included one B300 node alongside RTX. Management is now evaluating B300-focused alternatives; the selected system count, server configuration and workload allocation will be specified in the deployment proposal.</p>
-        <p>The RTX GPU count, memory figures and load estimate on this page apply only to the two RTX nodes.</p>
+        <p class="card__tag mono-label">Proposed allocation</p>
+        <h3>{deployment.saleableGpus} saleable + {deployment.reserveGpus} reserve</h3>
+        <p>{deployment.reserveNote}</p>
+        <p>Scheduling, maintenance and node-failure recovery need validation before we offer a service level. These GPUs are not currently bookable inventory.</p>
       </article>
     </div>
     <div class="callout" style="margin-top: var(--s-6);">
-      <p><strong>Development status.</strong> No final fleet size is approved, and procurement and commissioning are not complete. Customer availability depends on equipment acceptance and the readiness of the facility and network.</p>
+      <p><strong>Commercial stage.</strong> {deployment.demand} Customer availability follows procurement, workload validation and facility and network acceptance.</p>
     </div>
   </section>
   <section aria-labelledby="configuration" data-reveal>
@@ -41,38 +41,40 @@ import { company, site, power, network, compute } from '../data/site';
     <h2 id="configuration">Choose capacity around the job.</h2>
     <div class="split">
       <div>
-        <p>Tell us the application, model size, memory needs, storage throughput and intended software stack. We use those requirements to assess the appropriate platform and dedicated allocation.</p>
-        <p>The RTX GPUs each have separate {compute.vramPerGpu} memories. Applications that span GPUs need a suitable parallel execution strategy; the eight cards do not form one pooled memory space.</p>
-        <p>For an existing workload, representative benchmarks help establish fit before a commercial commitment.</p>
+        <p>Tell us the application, model size, memory needs, storage throughput and intended software stack. We assess the required GPU allocation, networking, security, support and service targets against a representative workload.</p>
+        <p>Inference, rendering and suitable fine-tuning require different software and performance tests. A GPU count alone does not establish throughput, latency or a customer outcome.</p>
+        <p>The model planner compares hardware reference configurations. Its memory and power estimates do not certify the proposed fleet or the facility design.</p>
       </div>
       <dl class="spec">
-        <div><dt>Earlier RTX example</dt><dd>{compute.servers} nodes × {compute.gpusPerServer} GPUs<span class="note">{compute.gpuModel}</span></dd></div>
-        <div><dt>RTX memory</dt><dd>{compute.vramPerGpu} per GPU<span class="note">Separate memories; no NVLink on this part.</span></dd></div>
-        <div><dt>RTX IT load estimate</dt><dd>{compute.load}<span class="note">Two RTX nodes only. Excludes the B300 node and facility cooling; not a measured load.</span></dd></div>
-        <div><dt>Earlier B300 example</dt><dd>{compute.b300Servers} node in earlier example<span class="note">Configuration and load established with the selected system.</span></dd></div>
+        <div><dt>Initial proposal</dt><dd>{deployment.systems} systems × {deployment.gpusPerSystem} B300 GPUs<span class="note">{deployment.gpus} GPUs in total; planning status.</span></dd></div>
+        <div><dt>Cooling requirement</dt><dd>Direct liquid cooling<span class="note">Confirmed by management for the selected server requirement; plant design and acceptance remain open.</span></dd></div>
+        <div><dt>Building allocation</dt><dd>One building<span class="note">The eight systems will be together. Which building and final rack layout remain to be established.</span></dd></div>
+        <div><dt>Power allocation</dt><dd>Engineering review pending<span class="note">No measured OEM load or exclusive continuous site capacity is established by this proposal.</span></dd></div>
       </dl>
     </div>
     <div class="actions"><a class="btn btn--ghost" href="/model-planner">Explore model requirements</a></div>
+    <p class="form-note">RTX remains an alternative requiring its own workload and commercial case. The homepage's RTX-only estimator retains the earlier {compute.servers}-node, {compute.gpus}-GPU example; it does not size the current B300 proposal.</p>
   </section>
   <section aria-labelledby="cooling" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Campus integration</span></p>
-    <h2 id="cooling">Designed with the power and thermal system.</h2>
+    <h2 id="cooling">Designed with power and cooling.</h2>
     <div class="split">
       <div>
-        <p>The proposed cooling architecture uses a warm-water loop for compatible liquid-cooled servers and a separate chilled-water loop for active rear-door heat exchangers. Both use closed circuits and dry heat rejection. Equipment selection and mechanical review establish the final configuration.</p>
-        <p>The campus electrical commissioning milestone is an {power.commissioningTarget}. Planned {network.provider} fiber has an {network.deliveryTarget}. These are management targets, with customer service following facility, equipment and network acceptance.</p>
+        <p>{power.hvac} We are comparing new and warranted refurbished cooling plant, conventional room cooling and rear-door heat exchangers. Separate dry coolers are an optional later economizer investment, subject to design and operating economics.</p>
+        <p>The two-duty cooling concept can use a shared plant with separately controlled circuits. Final equipment count, temperatures, residual-air capacity and redundancy require mechanical and OEM acceptance.</p>
+        <p>The campus electrical commissioning milestone is an {power.commissioningTarget}. Planned {network.provider} fiber has an {network.deliveryTarget}. These management targets are distinct from completed customer service acceptance.</p>
       </div>
       <div class="card">
         <h3>Explore the infrastructure</h3>
-        <p>See the two-loop thermal diagram, shared electrical service and the phased campus plan.</p>
-        <div class="actions"><a href="/power#thermal">Power and cooling →</a><a href="/site">Campus plan →</a></div>
+        <p>Review the behind-the-meter supply strategy, shared electrical service and cooling options. Detailed funding and operating assumptions are in the investor room.</p>
+        <div class="actions"><a href="/power#thermal">Power and cooling →</a><a href="/investors">Investor room →</a></div>
       </div>
     </div>
   </section>
   <section class="is-end" aria-labelledby="buying" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Start a conversation</span></p>
     <h2 id="buying">Bring us your workload.</h2>
-    <p>We review platform fit, capacity, timing and support needs, then provide a proposal with the selected configuration and commercial terms. You can also discuss colocation for hardware you already own.</p>
+    <p>We review platform fit, capacity, timing and support needs, then develop a proposal with the configuration and commercial terms. You can also discuss colocation for hardware you already own.</p>
     <div class="actions"><a class="btn" href="/contact">Discuss compute requirements</a><a class="btn btn--ghost" href="/colocation">Explore colocation</a></div>
   </section>
 </Content>

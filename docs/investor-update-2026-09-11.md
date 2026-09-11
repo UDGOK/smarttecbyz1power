@@ -1,0 +1,13 @@
+# Website and investor update — 11 September 2026
+
+The current first-deployment story is eight complete Supermicro eight-B300 systems: 64 proposed GPUs, with 60 saleable and four financial reserves. The reserve allocation is not full-node redundancy. Hardware price and scope are management-reported; procurement and commissioning are not established.
+
+The protected page, FAQ and 26-page PDF use `investment-readiness.mjs`. Hardware totals $5,360,000. Management reports $6,000,000 initially available and willingness to fund the overage. The $1,083,600 full-scope cooling comparison and hypothetical $831,600 lower-cost sensitivity imply partial initial funding of $7,274,101 and $7,022,101, respectively. These retain earlier startup and opening-reserve allowances. Neither is a contractor bid, minimum price or complete project budget. Non-cooling work, scope overlaps, operating costs, reserves, later capital and the BC LLC payment remain unresolved.
+
+The annual $2,847,000 revenue illustration is 60 × 20 paid hours/day × 365 × $6.50, before costs; it is not contracted revenue or profit. Current ROI, NPV, payback and a final outside raise are not established. Historical calculator presets remain reproducible and explicitly labeled, including standalone JSON/CSV downloads. The owner confirms a signed 50-year BC LLC site agreement and describes a yearly payment of 1% of profit after expenses; documents and the exact accounting definition remain unreviewed.
+
+Public pages and shared navigation now reflect the proposed fleet, one-building deployment, all-new cooling, power-agreement status and unsigned customer discussions. Existing Runway concepts, brand assets, team members and interactive tools are retained. Yasir's full supplied name is used consistently. Mobile budget rows expand vertically so every amount remains visible.
+
+Validation for this update: TypeScript; 155 unit/API tests; Node and Vercel builds; 154 generated-page checks plus 460 content/link/download checks on each build; 54 compiled-server HTTP checks with a local authenticated fixture; desktop/mobile browser visits to all ten public pages and investor login; authenticated local investor-page visual checks; all 26 PDF pages rendered and reviewed. No live investor credentials or real customer inquiries are used in these checks. Independent financial and content reviews do not constitute outside-investor approval or verified contracts.
+
+The PDF download is authenticated, no-store and byte/hash matched to the reviewed artifact. Tests bind its metadata to the current readiness data and historical engine. This report describes local validation; GitHub Actions and Vercel deployment status provide release verification for the pushed commit.

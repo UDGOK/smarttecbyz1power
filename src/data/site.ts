@@ -1,4 +1,4 @@
-/** Shared record: owner corrections supplied 10 September 2026 in Strategy Plan Verification supersede the earlier handoff. See docs/project-source-of-truth.md. */
+/** Shared public record: owner corrections through 11 September 2026 supersede the earlier handoff. See docs/project-source-of-truth.md. */
 export type Evidence =
   /** The owner supplied it. Publish with accurate scope and status. */
   | 'owner-reported'
@@ -11,8 +11,8 @@ export type Evidence =
   /** Conflicting or missing. Use conservative wording; never fill in a number. */
   | 'unresolved';
 
-/** The date the handoff's figures were reviewed. */
-export const REVIEWED = '10 September 2026';
+/** The latest public project-record review. Individual target dates stay explicit. */
+export const REVIEWED = '11 September 2026';
 
 export const company = {
   name: 'SmartTec',
@@ -47,8 +47,8 @@ export const site = {
   constructionTarget: '24 September 2026 target',
   acresEvidence: 'owner-reported' as Evidence,
 
-  ownership: 'Owner-reported as purchased',
-  ownershipNote: 'Owning entity, title, liens and valuation scope remain subject to diligence',
+  ownership: 'BC LLC, management-reported landowner',
+  ownershipNote: 'Management confirms a signed 50-year site-use agreement for SmartTec. The agreement and title records remain subject to document review; land ownership is not attributed to SmartTec.',
 
   tracts: [
     {
@@ -176,13 +176,21 @@ export const power = {
 
   rate: 'a contracted rate and demand-charge schedule to be agreed before an offer',
 
+  behindMeter: {
+    sources: 'Solar, batteries and gas generators',
+    agreement: 'Supply agreement reported by management',
+    rate: 'Below $0.07/kWh, reported by management',
+    note: 'Reserved continuous capacity, service date and complete fuel, maintenance, loss, replacement and equipment costs await confirmation. This is not a verified all-in tariff or a customer electricity offer.',
+    evidence: 'owner-reported' as Evidence,
+  },
+
   /**
-   * Cooling. The owner's statement lists 15 tons at C, 10 at B and a further
-   * 10 at C, and also says all three buildings are cooled — which leaves
-   * Building A unassigned. That contradiction is not silently corrected here.
+   * The latest owner correction confirms that all eight proposed systems go
+   * in one building with no working air conditioning. No old HVAC capacity
+   * is credited. The exact building, equipment and mechanical yard are open.
    */
-  hvac: 'Cooling serves data-center Buildings A and C, with a candidate mechanical yard behind utility Building B and separate facility-water and technology-cooling loops.',
-  hvacUnresolved: 'Final cooling equipment, fluid temperatures and redundancy follow the selected servers and engineering design.',
+  hvac: 'All cooling is new for the proposed eight-system deployment in one building. Direct liquid cooling serves the servers; residual-air and room cooling require a separate costed provision.',
+  hvacUnresolved: 'New and warranted refurbished plant are being compared. Rear-door versus conventional room cooling, optional economizer dry coolers, fluid temperatures, siting and redundancy require quotes and engineering acceptance.',
   hvacEvidence: 'unresolved' as Evidence,
 
   /** Storage. A power rating; the usable energy and status are not known. */
@@ -261,8 +269,28 @@ export const network = {
   publicCopy: 'Dobson fiber is planned, with a management delivery estimate of 4–8 weeks from 10 September 2026. The reported 100 Gbps option, final service levels and resilience design remain subject to carrier confirmation.',
 } as const;
 
+/** Current proposed deployment, separate from the legacy RTX estimator below. */
+export const publicDeployment = {
+  gpuModel: 'NVIDIA B300',
+  supplier: 'Supermicro',
+  systems: 8,
+  gpusPerSystem: 8,
+  gpus: 64,
+  saleableGpus: 60,
+  reserveGpus: 4,
+  label: '64 B300 GPUs · proposed',
+  systemLabel: '8 complete Supermicro systems',
+  building: 'One building; A or C allocation pending',
+  cooling: 'Direct liquid cooling required; all cooling is new',
+  scope: 'Management describes complete systems with CPUs, NVSwitch fabric, networking, storage, software and support. Exact configuration, included cluster infrastructure and support terms remain subject to supplier verification.',
+  reserveNote: 'The four-GPU reserve is a financial allocation within eight complete systems. It is not a complete standby server or a validated failover design.',
+  status: 'Proposed — procurement and commissioning ahead',
+  demand: 'Active customer discussions; no signed customer contracts or guaranteed minimum receipts have been established.',
+  evidence: 'owner-reported' as Evidence,
+} as const;
+
 /**
- * Compute.
+ * Legacy RTX sizing reference, not the current deployment.
  *
  * Planned, not purchased and not operating. The exact product name matters:
  * RTX PRO 6000 Blackwell Server Edition. It has no NVLink, so eight cards are
@@ -273,12 +301,12 @@ export const compute = {
   servers: 2,
   b300Servers: 1,
   phaseSystems: '2 RTX nodes + 1 B300 node',
-  phaseNote: 'Earlier starter concept: two four-GPU RTX nodes and one B300 node. The current fleet review includes B300-focused alternatives; final size follows paid demand, complete quotes and engineering.',
+  phaseNote: 'Earlier starter concept: two four-GPU RTX nodes and one B300 node. The current proposal is 64 B300 GPUs in eight Supermicro systems; this RTX example remains only for comparative sizing.',
   gpusPerServer: 4,
   gpus: 8,
   vramPerGpu: '96 GB',
   systems: 'Earlier example: 2 servers · 4 × NVIDIA RTX PRO 6000 Blackwell Server Edition each',
-  status: 'Illustrative reference — final fleet under review',
+  status: 'Legacy RTX sizing reference — not the current B300 deployment',
   evidence: 'planned' as Evidence,
 
   /** No NVLink on this part, so no pooled memory. */
@@ -308,15 +336,15 @@ export const compute = {
   target: 'Q4 2026 target',
 
   /** Future evaluations, each needing its own OEM design, benchmark and order. */
-  futurePlatforms: 'B300-focused deployment options are under review. AMD and Cerebras remain future evaluations.',
+  futurePlatforms: 'The current proposal uses B300 systems. RTX, AMD and Cerebras require separate workload and procurement cases.',
 } as const;
 
 /** The three things actually on offer. */
 export const offers = [
   {
     id: 'dedicated',
-    name: 'Dedicated RTX and B300 compute',
-    summary: 'Dedicated GPU capacity, with RTX and B300 options assessed against workload requirements.',
+    name: 'Dedicated B300 compute',
+    summary: 'Proposed B300 capacity, with allocations assessed against workload and service requirements.',
   },
   {
     id: 'hosting',
@@ -403,8 +431,8 @@ export const stages = [
     ground: '#1a1204',
     ruler: '03 / POWER',
     kicker: 'On the ground',
-    title: 'Power in place.\nCommissioning next.',
-    lede: `An on-site ${power.service} transformer is awaiting OG&E commissioning. A and C will host compute; B supports batteries, utilities and storage. Z1Power connects the solar and storage plan.`,
+    title: 'Power strategy.\nReadiness next.',
+    lede: `Management reports a solar, battery and gas supply agreement, alongside a shared ${power.service} service awaiting OG&E commissioning. Reserved capacity and complete energy costs are still being confirmed.`,
     chrome: 'light' as const,
     scrollVh: 300,
     hold: { label: 'Hold to energise', holdLabel: 'Energising', duration: 2.0 },
@@ -420,8 +448,8 @@ export const stages = [
     ground: '#070a0f',
     ruler: '04 / COMPUTE',
     kicker: 'First phase · planned',
-    title: 'RTX + B300.\nTwo compute paths.',
-    lede: `GPU fleet sizing is under review alongside customer-owned colocation in Buildings A and C. The earlier ${compute.phaseSystems} concept is a reference, not an approved procurement plan.`,
+    title: '64 B300 GPUs.\nOne focused start.',
+    lede: `${publicDeployment.systemLabel}, proposed together in one building with new direct liquid cooling. Procurement follows customer commitments, complete costs and engineering acceptance. The scene is an illustrative hall, not inventory.`,
     chrome: 'light' as const,
     scrollVh: 300,
     hold: { label: 'Hold to power on', holdLabel: 'Powering on', duration: 2.2 },

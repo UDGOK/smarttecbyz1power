@@ -46,6 +46,10 @@ const bootstrap=await(await fetch(origin+'/api/investor/bootstrap',{headers:{Coo
 for(const path of ['concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy']){r=await fetch(origin+'/api/investor/'+path,{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.ok((await r.arrayBuffer()).byteLength>10000);checks++;}
 r=await fetch(origin+'/api/investor/calculate',{method:'POST',headers,body:JSON.stringify({scenario:bootstrap.sample})});assert.equal(r.status,200);const result=await r.json();assert.equal(result.requiredInitialFunding,330000);assert.ok(result.project.totalROI<0);checks++;
 assert.ok(page.includes('Profitability is not yet established'));assert.equal((page.match(/data-underwriting-option=/g)||[]).length,26);checks++;
+for(const currentAmount of ['$7,274,101','$7,022,101','$1,083,600','$831,600'])assert.ok(page.includes(currentAmount),currentAmount+' current comparison must be present');
+assert.ok(page.includes('BC LLC'));assert.ok(page.includes('non-cooling'));checks++;
+const fundingFAQ=await(await fetch(origin+'/api/investor/faq',{method:'POST',headers,body:JSON.stringify({question:'How much funding is required?'})})).json();
+assert.ok(fundingFAQ.matches.some(f=>f.id==='F17'&&f.answer.includes('$7,274,101')&&f.answer.includes('exclude unknown non-cooling')));checks++;
 // Exercise the real editor against the compiled API using a DOM, without live credentials.
 const dom=new JSDOM(page,{url:origin+'/investors',runScripts:'outside-only'}),win=dom.window;
 win.structuredClone=structuredClone;win.matchMedia=()=>({matches:true});win.gsap={from(){}};
@@ -102,14 +106,23 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
  try{
   const context=await browser.newContext();const split=cookie.indexOf('=');
   await context.addCookies([{name:cookie.slice(0,split),value:cookie.slice(split+1),url:origin}]);
-  const tab=await context.newPage();
+  const tab=await context.newPage(),browserErrors=[];
+  tab.on('pageerror',error=>browserErrors.push(error.message));
   for(const width of [1440,390]){
    await tab.setViewportSize({width,height:1000});await tab.goto(origin+'/investors');
    const section=tab.locator('#investor-presentation');await section.scrollIntoViewIfNeeded();
    await section.locator('img').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
    assert.equal(await tab.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
    await section.screenshot({path:`tmp/pdfs/investor-page-${width}.png`});
+   for(const id of ['opportunity','deployment','capital','returns','evidence','questions']){
+    const target=tab.locator('#'+id);await target.scrollIntoViewIfNeeded();
+    await target.screenshot({path:`tmp/pdfs/investor-${id}-${width}.png`});
+   }
+   assert.equal(await tab.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Private page must fit after all current sections render');
+   assert.equal(await tab.locator('.inv-current-budget .inv-table-scroll').evaluate(el=>el.scrollHeight<=el.clientHeight+1),true,'Current funding rows must not hide in a capped scroll area');
+   assert.deepEqual(await tab.locator('img').evaluateAll(images=>images.filter(i=>i.complete&&i.currentSrc&&!i.naturalWidth).map(i=>i.currentSrc)),[],'Loaded private images must decode');
   }
+  assert.deepEqual(browserErrors,[],'Private browser JavaScript errors');
  }finally{await browser.close();}
 }
 r=await fetch(origin+'/api/investor/presentation',{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'application/pdf');assert.ok(r.headers.get('cache-control').includes('no-store'));assert.ok(r.headers.get('content-disposition').includes(deckMetadata.filename));

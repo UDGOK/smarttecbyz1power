@@ -6,10 +6,10 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
 ---
 <Content
   title={`Power and cooling for phased AI infrastructure | ${company.full}`}
-  description={`${power.utility} serves the on-site ${power.service} transformer at ${site.designation}. Explore the commissioning target, proposed two-loop cooling, and planned solar and storage.`}
+  description={`Explore SmartTec's reported solar, battery and gas supply agreement, shared ${power.utility} service and new liquid-cooling proposal at ${site.designation}. Capacity and commissioning remain under review.`}
   kicker="Power and cooling"
   heading="Infrastructure for the next phase."
-  lede={`The campus starts with an on-site ${power.service} transformer supplied by ${power.utility}. Construction, electrical commissioning and cooling are coordinated around the first compute deployment in Buildings A and C.`}
+  lede={`Management reports a behind-the-meter supply agreement using solar, batteries and gas generators, alongside the campus's shared ${power.utility} service. The proposed eight-system B300 deployment will be together in one building, with all-new cooling. Firm power capacity and complete energy costs are still being confirmed.`}
   meta={[
     { label: 'Utility', value: power.utility, note: 'On-site transformer', tone: 'gold' },
     { label: 'Shared service', value: power.service, note: power.serviceScope },
@@ -22,7 +22,7 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
     <h2 id="service">Transformer on site. Commissioning ahead.</h2>
     <div class="split">
       <div>
-        <p>The on-site transformer and shared distribution serve Buildings A, B and C. Buildings A and C provide {site.dataCenterArea.toLocaleString()} gross sq ft for data-center development; Building B supports batteries, utilities and storage.</p>
+        <p>Management reports an on-site transformer and shared distribution for Buildings A, B and C, with utility commissioning ahead. Buildings A and C provide {site.dataCenterArea.toLocaleString()} gross sq ft for data-center development; Building B supports batteries, utilities and storage.</p>
         <p>{site.contractor} is the construction contractor, with a {site.constructionTarget}. The electrical commissioning milestone is an {power.commissioningTarget}. These management targets are part of the development schedule; customer service begins after equipment, cooling and connectivity are ready.</p>
       </div>
       <dl class="spec">
@@ -36,9 +36,17 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
       <p><strong>Capacity for your deployment.</strong> We size each customer allocation against the electrical design, cooling system and commissioned operating limits. Share your IT load and redundancy requirements to start that review.</p>
     </div>
   </section>
+  <section aria-labelledby="supply" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Behind-the-meter supply</span></p>
+    <h2 id="supply">An energy agreement to validate against the load.</h2>
+    <div class="split">
+      <div><p>Management reports a supply agreement combining solar, batteries and gas generators at below $0.07/kWh. This reported supply arrangement is separate from the shared utility service and the proposed on-site solar development.</p><p>{power.behindMeter.note}</p></div>
+      <dl class="spec"><div><dt>Supply sources</dt><dd>{power.behindMeter.sources}</dd></div><div><dt>Agreement</dt><dd>{power.behindMeter.agreement}</dd></div><div><dt>Continuous reserved capacity</dt><dd>Awaiting team confirmation<span class="note">Neither a shared service rating nor a cooling budget establishes exclusive IT capacity.</span></dd></div><div><dt>Operating readiness</dt><dd>To be established<span class="note">Service date and acceptance evidence remain open.</span></dd></div></dl>
+    </div>
+  </section>
   <ThermalArchitecture />
   <section aria-labelledby="solar" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Energy development</span></p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Energy development</span></p>
     <h2 id="solar">Solar and storage, alongside compute.</h2>
     <div class="split">
       <div>
@@ -58,7 +66,7 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
     </div>
   </section>
   <section class="is-end" aria-labelledby="deployment" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Your requirements</span></p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Your requirements</span></p>
     <h2 id="deployment">Plan the load, cooling and service together.</h2>
     <p>A deployment proposal brings together IT power, cooling, metering, support and commercial terms. Include your uptime and compliance requirements so they can be assessed before an offer. No commissioned capacity or uptime guarantee is advertised at this development stage.</p>
     <div class="actions">

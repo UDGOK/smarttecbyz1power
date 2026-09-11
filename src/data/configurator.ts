@@ -46,7 +46,7 @@ const nf = new Intl.NumberFormat('en-US');
 const PHASE_1_KW = firstNumber(compute.load, 7.5);
 
 /**
- * The planned fleet. Reference status — not inventory.
+ * Earlier RTX fleet example. Reference status — not inventory or the B300 proposal.
  *
  * The old field was called `rentableGpus` and the copy said "all of them
  * rentable", which described eight cards as bookable when none has been
@@ -161,9 +161,9 @@ export const questions: ConfiguratorQuestion[] = [
       {
         id: 'dedicated',
         label: 'Dedicated compute',
-        detail: 'A dedicated allocation on the planned RTX PRO 6000 Blackwell nodes.',
+        detail: 'Compare an allocation using the earlier RTX PRO 6000 Blackwell example.',
         chip: 'Dedicated compute',
-        effects: { note: 'Dedicated allocation on the planned nodes, subject to procurement and commissioning.' },
+        effects: { note: 'RTX comparison only. Any allocation requires its own workload, procurement and commissioning review.' },
       },
       {
         id: 'hosting',
@@ -178,11 +178,11 @@ export const questions: ConfiguratorQuestion[] = [
       {
         id: 'expansion',
         label: 'A larger deployment',
-        detail: 'More than the first phase — built against a funded commitment.',
+        detail: 'Beyond this RTX example — sized against a funded commitment.',
         chip: 'Expansion',
         effects: {
-          note: 'A deployment beyond the first phase is scoped and funded against a commitment, not allocated from planned capacity.',
-          review: 'Deployments beyond the planned fleet are scoped individually.',
+          note: 'A larger deployment is scoped and funded against a commitment, not allocated from this reference example.',
+          review: 'Deployments beyond the RTX example are scoped individually.',
         },
       },
     ],
@@ -283,7 +283,7 @@ export const questions: ConfiguratorQuestion[] = [
         chip: '200B+',
         effects: {
           gpuFloor: 8,
-          gpuFloorReason: 'a model this size would use the whole planned fleet',
+          gpuFloorReason: 'a model this size would use the whole RTX reference example',
           note: `${compute.gpuModel} has no NVLink. Eight cards are eight separate ${compute.vramPerGpu} memories, not one pooled space.`,
           review: 'A model at this scale across cards with no pooled memory domain has to be benchmarked before it can be quoted at all.',
         },
@@ -325,7 +325,7 @@ export const questions: ConfiguratorQuestion[] = [
         chip: `${compute.gpus} GPUs`,
         effects: {
           gpuRange: { min: compute.gpus, max: compute.gpus },
-          note: `The complete planned RTX portion. The separate B300 node is outside this calculator.`,
+          note: `The complete earlier RTX example. The current eight-system B300 proposal is outside this calculator.`,
         },
       },
     ],
@@ -433,7 +433,7 @@ export const fitLevels: Record<FitLevel, FitCopy> = {
   prepared: {
     label: 'Request prepared',
     headline: 'Deployment request prepared.',
-    detail: `We will confirm workload suitability, equipment availability, facility allocation and commercial terms before issuing an offer. The RTX portion comprises ${envelope.servers} planned servers and ${envelope.plannedGpus} RTX GPUs; the separate B300 node is outside this estimate; ${envelope.powerOn} is a target, and procurement and commissioning are not complete.`,
+    detail: `This comparison uses ${envelope.servers} reference servers and ${envelope.plannedGpus} RTX GPUs. It does not size the current eight-system B300 proposal. Workload suitability, equipment availability, facility allocation and commercial terms need review before an offer; ${envelope.powerOn} remains a target.`,
   },
   review: {
     label: 'Technical review required',
@@ -442,8 +442,8 @@ export const fitLevels: Record<FitLevel, FitCopy> = {
   },
   expansion: {
     label: 'Expansion inquiry',
-    headline: 'This runs past the planned fleet.',
-    detail: `Beyond ${envelope.plannedGpus} GPUs this becomes an expansion inquiry, scoped and funded against a commitment. It is not an allocation to another building: Data-center fit-out and capacity in Buildings A and C require engineering review. Building B serves battery, utilities and storage.`,
+    headline: 'This runs past the RTX example.',
+    detail: `Beyond the ${envelope.plannedGpus}-GPU RTX reference, this request needs separate scope and funding review. This threshold is not the current B300 fleet size or a building-capacity limit. Data-center fit-out and allocation require engineering acceptance.`,
   },
 };
 
@@ -469,12 +469,12 @@ export const assumptions: Assumption[] = [
     id: 'per-gpu',
     label: 'Peak draw per GPU',
     value: `${envelope.kwPerGpu.toFixed(2)} kW`,
-    source: `${compute.load} ÷ ${envelope.totalGpus} planned GPUs, host and supply included. Peak, not average`,
+    source: `${compute.load} ÷ ${envelope.totalGpus} reference GPUs, host and supply included. Peak, not average`,
     estimated: true,
   },
   {
     id: 'fleet',
-    label: 'Planned fleet',
+    label: 'Earlier RTX example',
     value: `${envelope.plannedGpus} GPUs · ${envelope.servers} servers`,
     source: `${envelope.systems}. Reference status — ${compute.status.toLowerCase()}`,
     estimated: false,

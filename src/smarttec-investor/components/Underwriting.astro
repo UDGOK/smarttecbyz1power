@@ -11,14 +11,15 @@ const pct=(n:number|null)=>n===null?'Not reported':(n*100).toFixed(1)+'%';
 ---
 <div class="inv-underwriting" id="underwriting">
   <OwnerDeployment />
+  <details class="inv-details inv-historical-benchmarks"><summary>Historical RTX, B200, B300 and hosting benchmarks — earlier costs</summary>
   <p class="inv-eyebrow">EARLIER BENCHMARK REVIEW / {reviewedAt}</p>
-  <h3>Buy against demand.<br/>Expand against returns.</h3>
-  <p class="inv-lead">Profitability is not yet established by verified contracts and costs. The benchmark inputs below predate the latest owner prices above. The earlier RTX-only example loses {usd(-baseline.project.netProfit)} over five years and never recovers its initial {usd(baseline.requiredInitialFunding)}. Adding a B300 requires a new budget and a customer-backed revenue case.</p>
+  <h3>Earlier platform comparisons</h3>
+  <p class="inv-lead">Profitability is not yet established by verified contracts and costs. These historical inputs predate the owner-confirmed Supermicro deployment and the new cooling budget. They exclude the unresolved BC LLC payment and are retained for comparison only. The earlier RTX-only example loses {usd(-baseline.project.netProfit)} over five years and never recovers its initial {usd(baseline.requiredInitialFunding)}.</p>
   <div class="inv-warning"><strong>Current decision: validate contracts and quotes before purchasing more GPUs.</strong><p>All six base cases below have negative project NPV at the assumed 15% annual hurdle. A positive operating cash flow can still fail to repay the equipment and site investment. Retail cloud rates are price references, not SmartTec sales commitments.</p></div>
   <div class="inv-table-scroll" tabindex="0" role="region" aria-label="GPU and hosting financial comparison; scroll horizontally on small screens">
     <table><caption>Five-year base cases · pre-tax, unlevered · total funding includes modeled capital calls</caption><thead><tr><th scope="col">Option</th><th scope="col">Total funding</th><th scope="col">Net cash profit / loss</th><th scope="col">NPV at 15%</th><th scope="col">Capital recovered</th></tr></thead><tbody>{comparisons.map(o=><tr><th scope="row">{o.label}</th><td>{usd(o.base.totalFunding)}</td><td class="inv-negative">{usd(o.base.netProfit)}</td><td class="inv-negative">{usd(o.base.npv)}</td><td>{o.base.payback===null?'Not within 60 months':`Month ${o.base.payback}`}</td></tr>)}</tbody></table>
   </div>
-  <p class="inv-note">These are alternative upfront deployments, not additive phases. In this earlier comparison, RTX means four 96GB RTX PRO 6000 Blackwell Server Edition GPUs per node. Each modeled HGX B200/B300 reference has eight GPUs. The planned SmartTec B300 configuration is still unselected.</p>
+  <p class="inv-note">These are historical alternative deployments. RTX means four 96GB RTX PRO 6000 Blackwell Server Edition GPUs per node in this comparison. Each modeled HGX B200/B300 reference has eight GPUs. Management now identifies complete Supermicro B300 systems requiring direct liquid cooling; the private exact configuration has not been reviewed.</p>
   <details class="inv-details"><summary>Open assumptions, costs and source evidence</summary><ul>{assumptions.map(a=><li>{a}</li>)}</ul><h4>Evidence checked {reviewedAt}</h4>{sources.map(s=><p><a href={s.url} target="_blank" rel="noopener noreferrer">{s.title}</a><br/>{s.basis}</p>)}</details>
   <div class="inv-underwriting-options">{comparisons.map(o=><details class="inv-details">
     <summary>{o.label} — inspect risks and load a case</summary><p>{o.note}</p>
@@ -28,6 +29,7 @@ const pct=(n:number|null)=>n===null?'Not reported':(n*100).toFixed(1)+'%';
     {o.id!=='customer-hosting'&&<p><strong>Hardware-life stress:</strong> Replacing the month-37 10% overhaul allowance with 100% of original hardware cost, with no trade-in credit or extra revenue, changes base-case NPV to {usd(o.base.fullReplacementNPV)}. No capacity or efficiency gain is assumed.</p>}
     <div class="inv-actions">{['base','downside','favorable'].map(kind=><button type="button" disabled class="inv-outline" data-underwriting-option={o.id} data-underwriting-case={kind}>Load {kind} assumptions</button>)}</div>
   </details>)}</div>
+  </details>
   <PowerCase />
   <details class="inv-details"><summary>How to turn this into a financeable plan</summary><ol><li>Obtain complete OEM and installed-site quotes, including electrical conversion/distribution, cooling, switching/storage, taxes, freight, support and software.</li><li>Reconcile the $8,075/month carrier allowance with actual signed service terms. Match bandwidth and any minimum term to committed customer needs.</li><li>Validate measured customer workload performance. Obtain minimum paid commitments, service-credit limits and enforceable pricing before buying capacity. Reservations are not the same as collected receipts.</li><li>Compare owned compute with customer-owned hosting. Hosting avoids GPU purchase exposure but still must recover site costs and cover power, network, maintenance and tenant credit risk.</li><li>Recalculate the base and downside cases using actual quotes and terms, then agree the raise, use of funds, investor waterfall and tax treatment. A project IRR is not an investor distribution promise.</li></ol></details>
 </div>

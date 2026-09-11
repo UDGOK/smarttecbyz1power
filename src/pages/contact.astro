@@ -1,6 +1,6 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power, network, compute } from '../data/site';
+import { company, site, power, network, publicDeployment as deployment } from '../data/site';
 import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
 
 ---
@@ -10,9 +10,9 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
   description={`Talk to ${company.full} about dedicated compute or customer-owned hosting at ${site.name}. A submission is an inquiry — it starts a deployment review, and does not reserve capacity.`}
   kicker="Contact"
   heading="Let’s plan your workload."
-  lede={`Discuss dedicated compute using RTX or B300 options, or colocation for your own hardware at ${site.name}. Share your workload and target date so we can assess the deployment together.`}
+  lede={`Discuss our proposed B300 deployment or colocation for your own hardware at ${site.name}. Share your workload, service requirements and target date so we can assess the deployment together.`}
   meta={[
-    { label: 'Compute fleet', value: 'Under review', note: 'Selected around customer requirements', tone: 'signal' },
+    { label: 'Compute proposal', value: deployment.label, note: 'Eight systems; procurement and acceptance ahead', tone: 'signal' },
     { label: 'Electrical commissioning', value: power.commissioningTarget, note: 'Management target' },
     { label: 'Shared service', value: power.service, note: 'Buildings A, B and C', tone: 'gold' },
     { label: 'Data-center buildings', value: `${site.dataCenterArea.toLocaleString()} sq ft`, note: 'Buildings A and C, gross area' },

@@ -1,24 +1,25 @@
 ---
 import deck from '../data/investor-deck.json';
 const size=(deck.bytes/1e6).toFixed(1);
+const reviewed=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(deck.reviewedAt+'T12:00:00Z'));
 ---
 <section id="investor-presentation" class="inv-section inv-deck" aria-labelledby="investor-deck-title">
   <div>
     <p class="inv-eyebrow">THE INVESTMENT PRESENTATION</p>
     <h2 id="investor-deck-title">The SmartTec case.<br/>Ready for a closer look.</h2>
-    <p>The campus, power strategy, leadership, deployment economics and funding milestones in one presentation. Includes five-year cash flows, downside cases and source notes.</p>
+    <p>The proposed 64-B300 deployment, founder funding, site agreement and lower-cost cooling options in one presentation. Current evidence and unfinished costs are separated from historical financial comparisons.</p>
   </div>
   <div class="inv-deck-download">
     <p class="inv-deck-format">PDF <span>{deck.pages} pages / {size} MB</span></p>
     <a class="inv-button" href="/api/investor/presentation" download={deck.filename}>Download investor presentation</a>
-    <p class="inv-note">11 September 2026 edition. Financial scenarios are conditional. Customer commitments, complete costs and power capacity require verification.</p>
+    <p class="inv-note">{reviewed} edition. Complete funding and updated returns remain open pending customer terms, installed quotes, operating costs and usable power.</p>
     <a href="#owner-deployment">Explore the editable financial scenarios</a>
     <a class="inv-deck-contact" href="mailto:yasir@smarttec.dev?subject=SmartTec%20investment%20diligence">Arrange an investment discussion <span aria-hidden="true">↗</span></a>
   </div>
   <figure class="inv-deck-hero">
     <img src="/assets/investor/b300-studio.webp" alt="Runway studio concept based on NVIDIA's DGX B300 product reference with SmartTec signage" width="2752" height="1536" loading="lazy" decoding="async" />
     <div class="inv-deck-image-copy" aria-hidden="true">AI infrastructure,<br/>built in phases.</div>
-    <figcaption><span>01 / GPU COMPUTE</span> Runway-generated product concept using NVIDIA's DGX B300 visual reference. Final OEM selection remains open.</figcaption>
+    <figcaption><span>01 / GPU COMPUTE</span> Runway-generated concept using NVIDIA's DGX B300 visual reference. Management identifies Supermicro for the proposed systems; this artwork is not the selected configuration.</figcaption>
   </figure>
   <div class="inv-deck-gallery">
     <figure>

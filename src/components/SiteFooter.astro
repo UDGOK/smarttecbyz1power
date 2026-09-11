@@ -8,7 +8,7 @@
  * screens, so this is the reliable copy). Every figure is read from
  * src/data/site.ts — nothing here is typed twice.
  */
-import { company, site, power, network, compute } from '../data/site';
+import { company, site, power, network, publicDeployment as deployment } from '../data/site';
 import BrandLockup from './BrandLockup.astro';
 
 const year = new Date().getFullYear();
@@ -24,7 +24,7 @@ const ledger = [
   { label: 'Data centers', value: `A + C · ${site.dataCenterArea.toLocaleString()} sq ft gross` },
   { label: 'Service', value: `${power.service} · shared` },
   { label: 'Network', value: `${network.service} · planned` },
-  { label: 'Compute fleet', value: 'Sizing under review' },
+  { label: 'Compute proposal', value: deployment.label },
 ] as const;
 
 const groups = [

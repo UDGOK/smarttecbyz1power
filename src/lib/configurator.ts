@@ -878,10 +878,10 @@ export class Configurator {
         : r.gpus === 0
           ? 'Scale it to size the deployment'
           : r.beyondPlanned
-            ? `past the ${envelope.plannedGpus} planned`
+            ? `past the ${envelope.plannedGpus} in the RTX example`
             : r.provisional
-              ? `provisional · of ${envelope.plannedGpus} planned`
-              : `of ${envelope.plannedGpus} planned`,
+              ? `provisional · of ${envelope.plannedGpus} reference GPUs`
+              : `of ${envelope.plannedGpus} reference GPUs`,
     );
     this.text(
       'lift',
@@ -925,7 +925,7 @@ export class Configurator {
       this.announceEl.textContent = r.answered === 0
         ? 'No answers yet.'
         : `${r.answered} of ${r.total} answered. ${fmt.gpus(r.gpus)} ${r.gpus === 1 ? 'GPU' : 'GPUs'} `
-          + `of ${envelope.plannedGpus} planned. ${fmt.kw(r.peakItKw)} kilowatts estimated peak IT load, `
+          + `of ${envelope.plannedGpus} reference RTX GPUs. ${fmt.kw(r.peakItKw)} kilowatts estimated peak IT load, `
           + `${fmt.kw(r.peakTotalKw)} including facility overhead. ${r.fitCopy.label}.`;
     }
   }

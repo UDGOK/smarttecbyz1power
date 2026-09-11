@@ -1,24 +1,24 @@
 ---
-// Public design intent. Vendor maxima and fleet-size estimates remain in review notes.
+// Public design options. Budget sizing is not commissioned or OEM-confirmed capacity.
 const loops = [
- {id:'warm',label:'Loop A · Warm water',title:'Liquid cooling, close to the chip.',intro:'Compatible liquid-cooled servers transfer heat through a coolant distribution unit to an outdoor dry-cooler circuit. A trim chiller supplies additional cooling when conditions require it.',cards:[['Liquid-cooled racks','Server coolant follows the selected OEM specification.'],['CDU isolation','Separate server and facility circuits.'],['Dry coolers + trim','Dry heat rejection with compressor assistance when needed.']],supply:'Supply to the load',return:'Warmer return to the plant'},
- {id:'chilled',label:'Loop B · Chilled water',title:'Capture heat at the rear door.',intro:'Active rear-door heat exchangers are proposed for air-cooled racks and suitable residual rack heat. Air-cooled scroll chillers and a buffer tank serve this circuit.',cards:[['Active rear doors','Rack exhaust transfers heat to the cooling circuit.'],['Buffer + pumps','Stored thermal capacity supports transitions; duration is not yet sized.'],['Air-cooled chillers','Duty and standby capacity will follow the design load.']],supply:'Supply to the doors',return:'Warmer return to the chillers'}
+ {id:'warm',label:'Loop A · Server liquid circuit',title:'Liquid cooling, close to the chip.',intro:'The proposed Supermicro systems require direct liquid cooling. Coolant distribution units isolate and control the server circuit. New and warranted refurbished mechanical plant are being compared; separate dry coolers may be added later for energy savings.',cards:[['Liquid-cooled racks','Coolant, connections and flow follow the selected OEM requirements.'],['CDU isolation','Controlled server coolant, separate from facility water.'],['Mechanical plant','New or warranted refurbished equipment; optional staged dry coolers.']],supply:'Supply to the load',return:'Warmer return to the plant'},
+ {id:'chilled',label:'Loop B · Residual-air cooling option',title:'Cool the heat that stays in the room.',intro:'The selected building has no working air conditioning. All residual-server, network and room cooling must be new. Active rear-door heat exchangers on a chilled circuit are one option; conventional room cooling is being priced as an alternative.',cards:[['Rear doors or room cooling','Choose the complete air-cooling solution after heat-load review.'],['Separate temperature control','The water-circuit option needs appropriate pumps, buffering and control.'],['Shared plant option','Separately controlled circuits may share a modular plant.']],supply:'Supply to the air-cooling load',return:'Warmer return to the plant'}
 ];
 ---
 <section id="thermal" class="thermal" aria-labelledby="thermal-heading">
  <p class="thermal__kicker">[THERMAL ARCHITECTURE · DESIGN INTENT]</p>
- <h2 id="thermal-heading">Warm water for liquid-cooled racks.<br/> A separate loop for air cooling.</h2>
- <p class="thermal__intro">The proposed design separates two cooling duties. Both use closed circuits and dry heat rejection, with no cooling towers or evaporative pads planned.</p>
+ <h2 id="thermal-heading">Liquid cooling for the servers.<br/> Air cooling for the rest.</h2>
+ <p class="thermal__intro">The eight-system B300 proposal is consolidated in one building, with all-new cooling. The concept separates server-liquid and residual-air duties; the water-circuit option is shown below. Quotes and engineering will determine whether a shared plant, rear doors or conventional room cooling provides the complete solution.</p>
  <div class="thermal__facts">
-  <div><strong>Closed circuits</strong><span>Coolant chemistry follows the equipment selection.</span></div>
-  <div><strong>Dry rejection</strong><span>No evaporative water use during normal heat rejection is the design goal.</span></div>
-  <div><strong>N+1 target</strong><span>Redundancy must be demonstrated at the required load.</span></div>
-  <div><strong>Rack-level cooling</strong><span>Room-neutral operation is a target, not a measured result.</span></div>
+  <div><strong>All-new cooling</strong><span>No existing air-conditioning capacity is credited.</span></div>
+  <div><strong>Dry rejection goal</strong><span>No cooling towers or evaporative pads are planned.</span></div>
+  <div><strong>N+1 target</strong><span>Component redundancy and complete failure paths need validation.</span></div>
+  <div><strong>Complete installed cost</strong><span>Compare equipment, piping, power, controls and commissioning together.</span></div>
  </div>
  <div class="thermal__lanes">
  {loops.map(loop=><article class:list={['thermal__lane',`thermal__lane--${loop.id}`]} aria-labelledby={`thermal-${loop.id}`}>
   <p class="thermal__kicker">[{loop.label}]</p><h3 id={`thermal-${loop.id}`}>{loop.title}</h3>
-  <div class="thermal__flow"><div class="thermal__flow-label"><span>BUILDING A / C · AS SELECTED</span><span>OUTDOOR EQUIPMENT · LOCATION PENDING</span></div>
+  <div class="thermal__flow"><div class="thermal__flow-label"><span>ONE BUILDING · A OR C ALLOCATION PENDING</span><span>OUTDOOR EQUIPMENT · LOCATION PENDING</span></div>
    <div class="thermal__nodes">{loop.cards.map(([title,body])=><div><strong>{title}</strong><span>{body}</span></div>)}</div>
    <svg viewBox="0 0 1000 90" role="img" aria-label={`${loop.label}: supply flows from the outdoor plant toward the load; warmer fluid returns to the plant. Schematic only, not a piping design.`}>
     <defs><marker id={`${loop.id}-supply`} markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto"><path d="M0 0 8 4 0 8Z" class="thermal__supply-fill"/></marker><marker id={`${loop.id}-return`} markerWidth="8" markerHeight="8" refX="5" refY="4" orient="auto"><path d="M0 0 8 4 0 8Z" class="thermal__return-fill"/></marker></defs>
@@ -27,7 +27,7 @@ const loops = [
   </div><p>{loop.intro}</p>
  </article>)}
  </div>
- <div class="thermal__notes"><div><h3>Dry does not mean maintenance-free.</h3><p>Initial filling, servicing and possible coolant replacement still use fluid. The proposed design avoids evaporation for heat rejection; it does not claim that cooling consumes no water over its lifetime.</p></div><div><h3>Designed around the selected servers.</h3><p>Water temperature, dew-point control, heat capture, indoor environmental cooling and peak-weather performance need an equipment-specific mechanical design. The split between loops depends on the actual deployment.</p></div></div>
+ <div class="thermal__notes"><div><h3>Economizers are an option, not a shortcut.</h3><p>Separate dry coolers may be staged when their energy savings justify the investment. Hot-weather duty still needs mechanical coverage. Closed circuits need initial filling, servicing and possible coolant replacement.</p></div><div><h3>Designed around the selected servers.</h3><p>Water temperature, dew-point control, heat capture, room cooling and peak-weather performance require an OEM-compatible mechanical design. The two circuits may share a rejection plant; their presence does not prescribe four chillers or establish installed capacity.</p></div></div>
  <p class="thermal__concession">DESIGN INTENT · MECHANICAL REVIEW AND EQUIPMENT SELECTIONS PENDING · NOT INSTALLED CAPACITY OR A PERFORMANCE GUARANTEE</p>
  <a class="btn" href="/contact#reserve-enquiry">Discuss the cooling requirements <span aria-hidden="true">↗</span></a>
 </section>
