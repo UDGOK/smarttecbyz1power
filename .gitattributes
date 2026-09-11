@@ -1,0 +1,2 @@
+# PDF byte offsets and hashes must survive checkout unchanged.
+*.pdf binary

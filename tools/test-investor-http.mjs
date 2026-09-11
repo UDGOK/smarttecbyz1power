@@ -6,6 +6,8 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {spawn,execFileSync} from 'node:child_process';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import deckMetadata from '../src/smarttec-investor/data/investor-deck.json' with {type:'json'};
 import {JSDOM} from 'jsdom';
 import {hashPassword} from '../src/smarttec-investor/server/auth.mjs';
 import {headerSignature} from './header-contract.mjs';
@@ -21,7 +23,7 @@ app=spawn(process.execPath,['dist/server/entry.mjs'],{env,stdio:['ignore','pipe'
 let ready=false;for(let i=0;i<60;i++){try{await fetch(origin);ready=true;break;}catch{await new Promise(r=>setTimeout(r,100));}}assert.ok(ready,'Compiled server did not start: '+logs);
 let r=await fetch(origin+'/investors',{redirect:'manual'});assert.equal(r.status,303);checks++;assert.equal(r.headers.get('location'),'/investors/login');checks++;
 r=await fetch(origin+'/investors/login');const login=await r.text();assert.equal(r.status,200);assert.ok(!login.includes('39.21'));assert.ok(!login.includes('scrypt$'));checks++;
-for(const path of ['bootstrap','survey','survey-image','concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy']){r=await fetch(origin+'/api/investor/'+path);assert.equal(r.status,401);checks++;}
+for(const path of ['presentation','bootstrap','survey','survey-image','concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy']){r=await fetch(origin+'/api/investor/'+path);assert.equal(r.status,401);checks++;}
 r=await fetch(origin+'/api/investor/login',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({password:'integration-password'})});assert.equal(r.status,200,await r.clone().text());const cookie=r.headers.get('set-cookie').split(';')[0];checks++;
 r=await fetch(origin+'/investors',{headers:{Cookie:cookie}});const page=await r.text();assert.equal(r.status,200);assert.ok(page.includes('8460 US 70, Mead, OK 73449'));assert.ok(page.includes('inv-equipment-rows'));assert.ok(r.headers.get('cache-control').includes('no-store'));checks++;
 // An otherwise successful HTTP response can still ship a dead private menu
@@ -88,8 +90,13 @@ assert.equal(owner.scenario.rows.reduce((n,r)=>n+r.systems*r.completeSystemCost,
 r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers:{...headers,'X-CSRF-Token':'invalid'},body:JSON.stringify({id:'proposed-60-20',ownerPricing:true})});assert.equal(r.status,403);checks++;
 r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers,body:JSON.stringify({id:'invented',ownerPricing:true})});assert.equal(r.status,400);checks++;
 dom.window.close();
+assert.ok(page.includes('Download investor presentation'));assert.ok(page.includes('href="/api/investor/presentation"'));checks++;
+r=await fetch(origin+'/api/investor/presentation',{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'application/pdf');assert.ok(r.headers.get('cache-control').includes('no-store'));assert.ok(r.headers.get('content-disposition').includes(deckMetadata.filename));
+const deckBytes=Buffer.from(await r.arrayBuffer());assert.equal(deckBytes.length,deckMetadata.bytes);assert.equal(createHash('sha256').update(deckBytes).digest('hex'),deckMetadata.sha256);checks++;
+r=await fetch(origin+'/api/investor/presentation',{method:'HEAD',headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-length'),String(deckMetadata.bytes));assert.equal((await r.arrayBuffer()).byteLength,0);checks++;
 r=await fetch(origin+'/api/investor/survey',{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'application/pdf');checks++;
 r=await fetch(origin+'/api/investor/logout',{method:'POST',headers,body:'{}'});assert.equal(r.status,200);checks++;
 r=await fetch(origin+'/investors',{headers:{Cookie:cookie},redirect:'manual'});assert.equal(r.status,303);checks++;
+r=await fetch(origin+'/api/investor/presentation',{headers:{Cookie:cookie}});assert.equal(r.status,401);checks++;
 console.log(`PASS: ${checks} compiled-server HTTP checks; local TLS Redis fixture, not a live Upstash/Vercel deployment.`);
 }finally{app?.kill();if(redis)await new Promise(r=>redis.close(r));await rm(dir,{recursive:true,force:true});}
