@@ -35,8 +35,8 @@ PAGE=0; LIGHT=False; TITLES=[]; BOXES=[]
 usd=lambda n:'-'+usd(-n) if n<0 else '${:,.0f}'.format(n)
 million=lambda n:('-' if n<0 else '')+'${:.2f}m'.format(abs(n)/1e6)
 def color(value):return HexColor(value)
-def rect(x,y,w,h,fill):
- c.setFillColor(color(fill));c.rect(x,H-y-h,w,h,fill=1,stroke=0)
+def rect(x,y,w,h,fill,alpha=1):
+ c.setFillColor(color(fill),alpha=alpha);c.rect(x,H-y-h,w,h,fill=1,stroke=0)
 def line(x,y,x2,y2,fill=None,width=1):
  c.setStrokeColor(color(fill or ('#B5C8BC' if LIGHT else '#446454')));c.setLineWidth(width);c.line(x,H-y,x2,H-y2)
 def text(s,x,y,size=20,font='Space',fill=None,w=1024,leading=None):
@@ -46,10 +46,20 @@ def text(s,x,y,size=20,font='Space',fill=None,w=1024,leading=None):
  if y+ph>H-10 or x+w>W+1 or x<0:raise ValueError(f'Page {PAGE} overflow: {s[:65]} at {x},{y},{w},{ph}')
  p.drawOn(c,x,H-y-ph);BOXES.append({'page':PAGE,'text':re.sub('<[^>]+>','',s),'box':[x,y,w,ph]})
  return ph
-def img(path,x,y,w,h):
+def img(path,x,y,w,h,focus=.5):
  # Cropping occurs only in the PDF viewport; the original artwork stays unchanged.
  im=Image.open(ROOT/path);iw,ih=im.size;ratio=max(w/iw,h/ih);dw,dh=iw*ratio,ih*ratio
- c.saveState();p=c.beginPath();p.rect(x,H-y-h,w,h);c.clipPath(p,stroke=0);encoded=BytesIO();im.convert('RGB').save(encoded,format='JPEG',quality=90,optimize=True);encoded.seek(0);c.drawImage(ImageReader(encoded),x+(w-dw)/2,H-y-h+(h-dh)/2,dw,dh,mask='auto');c.restoreState()
+ c.saveState();p=c.beginPath();p.rect(x,H-y-h,w,h);c.clipPath(p,stroke=0);encoded=BytesIO();im=im.convert('RGB');im.thumbnail((2200,1600));im.save(encoded,format='JPEG',quality=85,optimize=True);encoded.seek(0);c.drawImage(ImageReader(encoded),x+(w-dw)*focus,H-y-h+(h-dh)/2,dw,dh,mask='auto');c.restoreState()
+
+def gradient(light=False):
+ shades=['#F5F7F3','#E9F0EA','#CDDED4'] if light else ['#061711','#123B2E','#25654E']
+ c.linearGradient(0,H,W,0,[color(v) for v in shades],[0,.55,1],extend=True)
+
+def scrim(left=.9,right=.5):
+ # Native PDF transparency keeps text legible over the original generated image.
+ c.saveState()
+ rect(0,0,W,H,'#071D16',alpha=(left+right)/2)
+ c.restoreState()
 def logo(x=64,y=34,w=173,light=False):
  # Draw the supplied SVG paths without redesigning or rasterizing the logo.
  root=ET.parse(ROOT/('public/assets/brand/smarttec-lockup-'+('forest-green' if light else 'offwhite-green')+'.svg')).getroot()
@@ -67,9 +77,14 @@ def page(title,section,light=False,bg=None):
  global PAGE,LIGHT
  if PAGE:c.showPage()
  PAGE+=1;LIGHT=light;TITLES.append(title)
- rect(0,0,W,H,PAPER if light else (bg or FOREST));logo(light=light)
+ gradient(light)
+ backgrounds={2:('fiber-gradient',.86,.66),6:('power-supply-concept',.97,.16),9:('fiber-gradient',.93,.8),19:('fiber-gradient',.95,.84),22:('campus-dusk',.96,.82),26:('campus-dusk',.91,.76)}
+ if PAGE in backgrounds:
+  key,left,right=backgrounds[PAGE];img('public/assets/investor/'+key+'.webp',0,0,W,H);scrim(left,right)
+ logo(light=light)
  text(section.upper(),700,44,11,'Mono',w=385)
  text(title,64,113,43,'Medium',w=1024,leading=47)
+ line(64,183,112,183,fill=FOREST if light else SIGNAL,width=3)
  line(64,606,1088,606)
  text('SMARTTEC  /  INVESTOR DISCUSSION  /  11 SEPTEMBER 2026',64,622,9,'Mono',w=840)
  text(f'{PAGE:02}',1045,617,15,'Mono',w=43)
@@ -84,21 +99,24 @@ def table(headers,rows,widths,y=225,rowh=52,size=18,x0=64):
  line(x0,y+40,x0+sum(widths),y+40)
  for i,row in enumerate(rows):
   yy=y+52+i*rowh;x=x0
+  if i%2==0:
+   c.saveState();rect(x0,yy-8,sum(widths),rowh-5,'#FFFFFF',alpha=.28 if LIGHT else .06);c.restoreState()
   for j,(v,w) in enumerate(zip(row,widths)):
    text(str(v),x+10,yy,size,'Medium' if j==0 else 'Space',w=w-20);x+=w
   line(x0,yy+rowh-13,x0+sum(widths),yy+rowh-13,width=.5)
 
 # 01 / cinematic cover
 page('AI infrastructure, built in phases','Investment presentation')
-img('public/assets/investor/power-to-compute.webp',0,0,W,H)
+img('public/assets/investor/b300-studio.webp',0,0,W,H)
+scrim(.55,0)
 BOXES[:]=[b for b in BOXES if b['page']!=1] # The full-bleed cover replaces the standard page furniture.
 
 logo(64,55,275)
-text('AI infrastructure,<br/>built in phases',64,230,61,'Medium',w=640,leading=66)
+text('AI infrastructure,<br/>built in phases',64,230,56,'Medium',w=590,leading=63)
 text('Mead, Oklahoma',67,401,25,w=520)
 text('A development-stage investment in GPU compute<br/>and a behind-the-meter power strategy.',67,453,21,w=565)
 text('INVESTOR PRESENTATION / SEPTEMBER 2026',67,573,11,'Mono',w=700)
-text('RUNWAY CONCEPT ARTWORK / NOT AN OPERATING FACILITY',700,620,8,'Mono',w=415)
+text('RUNWAY PRODUCT CONCEPT / NVIDIA REFERENCE / NOT INSTALLED EQUIPMENT',650,620,8,'Mono',w=465)
 
 # 02
 page('A contract-first AI compute opportunity','Opportunity')
@@ -144,7 +162,6 @@ foot('Owner record, 10 Sep 2026. Legal acreage: 39.39. Legacy survey tract annot
 
 # 05
 page('Behind-the-meter power strategy','Energy')
-img('public/assets/investor/power-supply-concept.webp',580,190,508,348)
 text('&lt;7¢',64,211,90,'Medium',fill=SIGNAL,w=470,leading=92)
 text('per kWh, reported by management',68,319,23,w=475)
 text('Management reports a supply agreement using solar, batteries and gas generators.',64,377,21,w=460)
@@ -163,12 +180,12 @@ foot('Planning records and engineering allowances. Four GPUs do not replace a co
 
 # 07
 page('B300 leads at the supplied prices','Compute products',bg=DARK)
-img('public/assets/investor/compute-infrastructure-concept.webp',694,184,394,355)
+img('public/assets/investor/b300-studio.webp',694,198,394,341,focus=.93)
 table(['OWNER INPUT','B300','RTX 6000'],[
  ['GPU-hour rate','$6.50','$1.50'],['Eight-GPU system','$670,000','$170,000'],['Per-GPU allocation','$83,750','$21,250']
  ],[220,180,180],y=219,rowh=67,size=21)
 text('B300 suits the primary owned-compute study. RTX needs a workload and pricing case that justifies its investment.',74,479,20,w=555)
-foot('Owner inputs, 10 Sep 2026. Exact OEM scope and support remain unverified. RTX context: PRO 6000 Blackwell Server Edition. Image: Runway hardware concept, not the selected OEM.')
+foot('Owner inputs, 10 Sep 2026. OEM scope and support unverified. RTX: PRO 6000 Blackwell Server Edition. Runway product concept uses NVIDIA DGX B300 visual reference; selected OEM pending.')
 
 # 08
 page('The proposed customer offer','Commercial strategy')
@@ -322,7 +339,7 @@ text('Manufacturing and energy development',592,223,29,'Medium',w=496)
 text('Proposed inverter manufacturing, battery assembly, solar and storage each need their own budget and approval.<br/><br/>Customer-owned hosting remains an alternative for separate review. No hosting leases or revenue are assumed.',592,301,22,w=496)
 line(64,493,1088,493)
 text('No manufacturing, electricity resale, land appreciation or speculative terminal valuation supports the GPU return model.',64,515,23,w=1024)
-foot('Development areas are concepts. The reported power agreement does not establish SmartTec ownership of generation assets or a budget for their construction.')
+foot('Runway campus concept, not approved plans. The reported power agreement does not establish ownership of generation assets or a construction budget.')
 
 # 20
 page('Investment risks and information limits','Diligence')
@@ -366,10 +383,10 @@ text('Yasir Jahangir',64,443,30,'Medium',fill=SIGNAL,w=520)
 text('Chief Technology Officer',64,487,21,w=520)
 text('<link href="mailto:yasir@smarttec.dev" color="#EEF1EF">yasir@smarttec.dev</link><br/><link href="tel:+19185203823" color="#EEF1EF">918-520-3823</link>',592,449,23,w=496)
 text('<link href="https://www.smarttec.dev/investors" color="#7BE88A"><u>smarttec.dev/investors</u></link>',592,518,23,w=496)
-foot('8460 US 70, Mead, Oklahoma 73449. Explore the editable model, discuss customer commitments and review the supporting documents in the investor room.')
+foot('8460 US 70, Mead, Oklahoma 73449. Review the model and supporting documents in the investor room. Background: Runway campus concept, not existing buildings.')
 c.save()
 data=OUT.read_bytes();digest=hashlib.sha256(data).hexdigest()
-meta={'title':'SmartTec Investor Presentation','filename':OUT.name,'reviewedAt':'2026-09-11','edition':'Runway graphics and investor diligence revision','pages':PAGE,'bytes':len(data),'sha256':digest,'modelVersion':R.get('modelVersion','1.1.0'),'ownerStudySha256':hashlib.sha256((ROOT/'src/smarttec-investor/data/owner-deployment-study.json').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'engineSha256':hashlib.sha256((ROOT/'src/smarttec-investor/roi-engine.mjs').read_bytes().replace(b'\r\n',b'\n')).hexdigest()}
+meta={'title':'SmartTec Investor Presentation','filename':OUT.name,'reviewedAt':'2026-09-11','edition':'Institutional gradients and branded Runway imagery','pages':PAGE,'bytes':len(data),'sha256':digest,'modelVersion':R.get('modelVersion','1.1.0'),'ownerStudySha256':hashlib.sha256((ROOT/'src/smarttec-investor/data/owner-deployment-study.json').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'engineSha256':hashlib.sha256((ROOT/'src/smarttec-investor/roi-engine.mjs').read_bytes().replace(b'\r\n',b'\n')).hexdigest()}
 (ROOT/'src/smarttec-investor/data/investor-deck.json').write_text(json.dumps(meta,indent=2)+'\n')
 (ROOT/'src/smarttec-investor/server/investor-deck.mjs').write_text('// Generated by tools/build-investor-deck.py. Server-only authenticated download.\nexport const investorDeckBase64='+json.dumps(base64.b64encode(data).decode())+';\n')
 (ROOT/'tmp/pdfs/deck-layout.json').write_text(json.dumps({'titles':TITLES,'boxes':BOXES},indent=2))

@@ -91,7 +91,7 @@ r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',header
 r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers,body:JSON.stringify({id:'invented',ownerPricing:true})});assert.equal(r.status,400);checks++;
 dom.window.close();
 assert.ok(page.includes('Download investor presentation'));assert.ok(page.includes('href="/api/investor/presentation"'));checks++;
-for(const key of ['power-to-compute','power-supply-concept','compute-infrastructure-concept']){
+for(const key of ['b300-studio','power-supply-concept','campus-dusk']){
  const asset='/assets/investor/'+key+'.webp';assert.ok(page.includes('src="'+asset+'"'));
  const response=await fetch(origin+asset);assert.equal(response.status,200);assert.ok(response.headers.get('content-type').includes('image/webp'));
  assert.deepEqual(Buffer.from(await response.arrayBuffer()),await readFile('public'+asset));checks++;

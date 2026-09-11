@@ -17,6 +17,39 @@
       "key": "compute-infrastructure-concept",
       "taskId": "286998b2-c668-46d8-8e3e-40fd56784ead",
       "prompt": "Use case: stylized-concept. One premium close-up conceptual visualization for an institutional GPU-compute investment presentation: a carefully organized high-density server rack with a partly exposed compute tray, realistic metal cooling plates, neat copper and fiber cabling, serviceable connectors, subtle green status lights. Convey engineered reliability and precision rather than futuristic fantasy. Do not depict or label an exact NVIDIA model, no invented hardware specifications, no branding. Landscape 16:9 with hero equipment centered/right and dark forest-green negative space on the left third. Rich charcoal materials, forest green #1C4839 and restrained signal green #7BE88A highlights, controlled off-white rim lighting, photographic material quality, high-definition detail. No text, no numbers, no graphs, no people, no logo, no watermark, no collage."
+    },
+    {
+      "key": "b300-studio",
+      "prompt": "Use case: product-mockup. Create a single ultra-premium institutional technology investment presentation image. Use @hardware as the exact visual reference for the NVIDIA DGX B300 enclosure: preserve its recognizable gold perforated bezel, black frame and proportions, without inventing specifications. Stage one system at a low three-quarter studio angle on the RIGHT 50 percent, with controlled satin-metal reflections and a subtle reflection on a dark polished floor. Include @brand as a small crisp SmartTec wall sign in the distant upper-right background, distinct from the hardware maker's product branding. LEFT half is empty deep forest green #123027 fading to near-black, with a restrained emerald-to-teal atmospheric gradient and narrow mint rim lighting. Premium large-format commercial product photography, precise materials, high definition, confident and quiet. No data labels, no extra typography, no watermark, no people. This is a rendered product concept, not installed SmartTec equipment.",
+      "referenceImages": [
+        {
+          "tag": "hardware",
+          "url": "https://docs.nvidia.com/dgx/dgxb300-user-guide/_images/dgx-b300-with-bezel.png"
+        },
+        {
+          "tag": "brand",
+          "url": "https://www.smarttec.dev/assets/brand/smarttec-email-transparent.png"
+        }
+      ],
+      "taskId": "65e54a07-2622-4459-bcf3-8a4613d033e2"
+    },
+    {
+      "key": "fiber-gradient",
+      "prompt": "Use case: stylized-concept. Single cinematic abstract background for a world-class institutional technology investor presentation. A graceful large-scale ribbon of very fine optical fibers arcs from the lower right toward the upper right, with photoreal glass filaments, restrained mint-green light points and elegant depth of field. Full landscape 16:9. Deep forest green #123027, near-black, emerald and muted teal form an exceptionally smooth luminous atmospheric gradient. The entire LEFT 65 percent and upper-left are calm very dark negative space for crisp white editorial typography, no bright points there. Rich but controlled light at the right edge, subtle volumetric haze, sophisticated material realism. No chips, no processor icons, no symbols, no text, no numbers, no logo, no watermark, no charts. Expensive architectural-photography quality, not sci-fi wallpaper.",
+      "referenceImages": [],
+      "taskId": "a42cc631-754e-40f2-9da6-9c6f45c28410"
+    },
+    {
+      "key": "campus-dusk",
+      "prompt": "Use case: stylized-concept. Single premium architectural visualization for a SmartTec investor presentation. A modest, exceptionally well-designed low-rise GPU compute campus in flat southern Oklahoma prairie at blue hour. Long precise industrial facades, refined charcoal-metal cladding, believable utility yards, a small adjacent solar field and separate battery and enclosed gas equipment. The physical campus sits in the RIGHT half. View from a restrained slightly elevated three-quarter camera, horizontal 16:9 composition, horizon in upper third. LEFT half has dark landscaped foreground and deep forest-green atmospheric negative space for overlaid text. Beautiful warm interior glow contrasts with emerald/teal dusk gradients, precise realistic materials, editorial commercial real-estate photography quality. Do not portray a megacity, enormous hyperscale complex, mountains or forest. Include the exact @brand logo as a discreet illuminated architectural sign on the nearest building at right; no other writing, no labels, no numbers, no watermark. This is a proposed concept visualization, not a photo of an actual SmartTec property.",
+      "referenceImages": [
+        {
+          "tag": "brand",
+          "url": "https://www.smarttec.dev/assets/brand/smarttec-email-transparent.png"
+        }
+      ],
+      "taskId": "3093a563-e0b7-4c78-82f6-d309d6b8fb4e"
     }
-  ]
+  ],
+  "edition": "Institutional gradients and branded product concepts"
 }
