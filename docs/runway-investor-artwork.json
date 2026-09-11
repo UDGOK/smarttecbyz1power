@@ -1,0 +1,22 @@
+{
+  "provider": "Runway, connected Yasir workspace",
+  "generatedAt": "2026-09-11",
+  "type": "AI concept artwork; not installed equipment or as-built plans",
+  "assets": [
+    {
+      "key": "power-to-compute",
+      "taskId": "e75aa29a-d642-4f93-a639-d307e7dacc0e",
+      "prompt": "Use case: stylized-concept. Create one premium cinematic editorial illustration for SmartTec's institutional investor deck cover. Landscape 16:9. A compact, elegant data-center rack structure emerges on the RIGHT from delicate luminous optical-fiber strands and energy particles, suggesting electricity becoming useful computation. Sophisticated physically rendered black anodized metal, subtle glass and polished copper details; no unrealistic holographic UI. Deep forest green #1C4839 and shadow green #123027 background with restrained signal green #7BE88A highlights and soft off-white light. LEFT 48 percent is calm dark negative space for overlaid typography. Camera three-quarter architectural close perspective, quiet dramatic light, high detail, credible industrial scale. This is an abstract future concept, not a photograph of an operating facility. No text, no logo, no numbers, no charts, no badges, no watermark, no collage."
+    },
+    {
+      "key": "power-supply-concept",
+      "taskId": "aa748096-457f-48e7-be85-15db05d85b2d",
+      "prompt": "Use case: stylized-concept. One high-end architectural concept illustration of a small behind-the-meter energy installation for a GPU compute business in flat southern Oklahoma terrain. Clearly show three plausible separate physical systems arranged coherently: photovoltaic panels, compact stationary battery cabinets and an enclosed natural-gas generator set with realistic ventilation; discreet switchgear connects toward a modest industrial compute building in the far background. No giant power station, no skyscrapers, no mountain rainforest, no batteries portrayed as creating energy, no explosions or excessive neon. Landscape 16:9, subjects centered/right, camera low three-quarter elevated view at blue hour. Forest green #1C4839, restrained signal-green #7BE88A equipment indicators, warm metal highlights. Premium architectural visualization with realistic materials and generous breathing space. Not an as-built plan, no measurements, no claims of installed capacity. No text, no labels, no logo, no numbers, no watermarks."
+    },
+    {
+      "key": "compute-infrastructure-concept",
+      "taskId": "286998b2-c668-46d8-8e3e-40fd56784ead",
+      "prompt": "Use case: stylized-concept. One premium close-up conceptual visualization for an institutional GPU-compute investment presentation: a carefully organized high-density server rack with a partly exposed compute tray, realistic metal cooling plates, neat copper and fiber cabling, serviceable connectors, subtle green status lights. Convey engineered reliability and precision rather than futuristic fantasy. Do not depict or label an exact NVIDIA model, no invented hardware specifications, no branding. Landscape 16:9 with hero equipment centered/right and dark forest-green negative space on the left third. Rich charcoal materials, forest green #1C4839 and restrained signal green #7BE88A highlights, controlled off-white rim lighting, photographic material quality, high-definition detail. No text, no numbers, no graphs, no people, no logo, no watermark, no collage."
+    }
+  ]
+}

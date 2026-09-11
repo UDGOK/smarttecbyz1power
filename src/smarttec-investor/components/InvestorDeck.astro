@@ -13,6 +13,22 @@ const size=(deck.bytes/1e6).toFixed(1);
     <a class="inv-button" href="/api/investor/presentation" download={deck.filename}>Download investor presentation</a>
     <p class="inv-note">11 September 2026 edition. Financial scenarios are conditional. Customer commitments, complete costs and power capacity require verification.</p>
     <a href="#owner-deployment">Explore the editable financial scenarios</a>
+    <a class="inv-deck-contact" href="mailto:yasir@smarttec.dev?subject=SmartTec%20investment%20diligence">Arrange an investment discussion <span aria-hidden="true">↗</span></a>
+  </div>
+  <figure class="inv-deck-hero">
+    <img src="/assets/investor/power-to-compute.webp" alt="Concept of a compute rack emerging from illuminated optical fibers" width="2752" height="1536" loading="lazy" decoding="async" />
+    <figcaption><span>01 / POWER TO COMPUTE</span> A vision for phased AI infrastructure. Runway-generated concept artwork.</figcaption>
+  </figure>
+  <div class="inv-deck-gallery">
+    <figure>
+      <img src="/assets/investor/power-supply-concept.webp" alt="Concept arrangement of solar panels, battery cabinets and a gas generator near a compute building" width="2752" height="1536" loading="lazy" decoding="async" />
+      <figcaption><span>02 / ENERGY STRATEGY</span> Solar, storage and gas supply concept. Capacity, cost scope and commissioning require verification.</figcaption>
+    </figure>
+    <figure>
+      <img src="/assets/investor/compute-infrastructure-concept.webp" alt="Concept close-up of a server rack with cooling plates and organized cabling" width="2752" height="1536" loading="lazy" decoding="async" />
+      <figcaption><span>03 / COMPUTE INFRASTRUCTURE</span> Hardware concept. Final equipment, cooling and service design depend on OEM and engineering review.</figcaption>
+    </figure>
+    <p class="inv-note">These AI-generated visuals illustrate the strategy. They do not show installed SmartTec equipment, an operating campus or approved engineering plans.</p>
   </div>
 </section>
 <style>
@@ -22,5 +38,14 @@ const size=(deck.bytes/1e6).toFixed(1);
   .inv-deck-format{font:3rem var(--f-sans);margin:0 0 1.5rem;color:#7be88a}
   .inv-deck-format span{font:13px var(--f-mono);display:block;margin-top:.5rem;color:#eef1ef}
   .inv-deck .inv-button{text-align:center;white-space:normal}
+  .inv-deck-contact{display:block;margin-top:1rem;color:#7be88a}
+  .inv-deck figure{margin:0;min-width:0}
+  .inv-deck-hero,.inv-deck-gallery{grid-column:1/-1}
+  .inv-deck img{display:block;width:100%;height:auto;aspect-ratio:2752/1536;object-fit:cover;border:1px solid #ffffff25}
+  .inv-deck figcaption{font:14px/1.6 var(--f-sans);color:#bcd0c5;padding-top:1rem}
+  .inv-deck figcaption span{display:block;font:11px/1.5 var(--f-mono);letter-spacing:.08em;color:#7be88a;margin-bottom:.5rem}
+  .inv-deck-gallery{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
+  .inv-deck-gallery>.inv-note{grid-column:1/-1;margin:0}
   @media(max-width:760px){.inv-deck{grid-template-columns:1fr;gap:2rem}}
+  @media(max-width:560px){.inv-deck-gallery{grid-template-columns:1fr}}
 </style>

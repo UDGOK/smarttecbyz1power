@@ -11,7 +11,7 @@ test('protected download matches the reviewed PDF and fits the function response
  assert.equal(bytes.subarray(0,5).toString(),'%PDF-');
  assert.ok(bytes.subarray(-30).toString().includes('%%EOF'));
  assert.equal(bytes.length,metadata.bytes);assert.equal(sha(bytes),metadata.sha256);
- assert.ok(bytes.length<4_000_000);assert.equal(metadata.pages,23);
+ assert.ok(bytes.length<4_000_000);assert.equal(metadata.pages,26);
  assert.equal(existsSync('public/SmartTec-Investor-Presentation.pdf'),false);
 });
 test('published PDF economics cannot silently drift from the current study or engine',()=>{

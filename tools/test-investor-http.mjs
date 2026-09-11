@@ -91,6 +91,27 @@ r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',header
 r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers,body:JSON.stringify({id:'invented',ownerPricing:true})});assert.equal(r.status,400);checks++;
 dom.window.close();
 assert.ok(page.includes('Download investor presentation'));assert.ok(page.includes('href="/api/investor/presentation"'));checks++;
+for(const key of ['power-to-compute','power-supply-concept','compute-infrastructure-concept']){
+ const asset='/assets/investor/'+key+'.webp';assert.ok(page.includes('src="'+asset+'"'));
+ const response=await fetch(origin+asset);assert.equal(response.status,200);assert.ok(response.headers.get('content-type').includes('image/webp'));
+ assert.deepEqual(Buffer.from(await response.arrayBuffer()),await readFile('public'+asset));checks++;
+}
+assert.ok(page.includes('These AI-generated visuals illustrate the strategy'));checks++;
+if(process.env.INVESTOR_VISUAL_QA==='1'){
+ const {chromium}=await import('playwright');const browser=await chromium.launch({headless:true,channel:process.env.INVESTOR_QA_BROWSER||undefined});
+ try{
+  const context=await browser.newContext();const split=cookie.indexOf('=');
+  await context.addCookies([{name:cookie.slice(0,split),value:cookie.slice(split+1),url:origin}]);
+  const tab=await context.newPage();
+  for(const width of [1440,390]){
+   await tab.setViewportSize({width,height:1000});await tab.goto(origin+'/investors');
+   const section=tab.locator('#investor-presentation');await section.scrollIntoViewIfNeeded();
+   await section.locator('img').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
+   assert.equal(await tab.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+   await section.screenshot({path:`tmp/pdfs/investor-page-${width}.png`});
+  }
+ }finally{await browser.close();}
+}
 r=await fetch(origin+'/api/investor/presentation',{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'application/pdf');assert.ok(r.headers.get('cache-control').includes('no-store'));assert.ok(r.headers.get('content-disposition').includes(deckMetadata.filename));
 const deckBytes=Buffer.from(await r.arrayBuffer());assert.equal(deckBytes.length,deckMetadata.bytes);assert.equal(createHash('sha256').update(deckBytes).digest('hex'),deckMetadata.sha256);checks++;
 r=await fetch(origin+'/api/investor/presentation',{method:'HEAD',headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-length'),String(deckMetadata.bytes));assert.equal((await r.arrayBuffer()).byteLength,0);checks++;
