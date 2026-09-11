@@ -31,10 +31,10 @@ const pad = (n: number): string => String(n).padStart(2, '0');
       <span class="cfg__line"><span class="cfg__line-inner">deployment.</span></span>
     </h2>
     <p class="cfg__lede">
-      {questions.length} questions against the planned fleet: {compute.systems},
-      {compute.gpus} GPUs, {compute.load}. First compute is a {site.powerOn}, and
-      {compute.status.toLowerCase()} — so this prepares a request, it does not reserve
-      anything.
+      Explore the RTX portion of the deployment: {compute.systems}, {compute.gpus} GPUs.
+      This estimator covers RTX nodes only; the planned B300 node and customer-owned
+      colocation require a separate deployment review. The results prepare an inquiry,
+      not a capacity reservation.
     </p>
   </header>
 
@@ -112,7 +112,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
               <div class="cfg__result-cell">
                 <span class="cfg__rule" data-rule aria-hidden="true"></span>
                 <dt class="mono-label">GPUs requested</dt>
-                <dd><strong class="cfg__figure" data-field="gpus" data-tally>—</strong> <span class="cfg__unit" data-field="gpu-note">of {compute.gpus} planned</span></dd>
+                <dd><strong class="cfg__figure" data-field="gpus" data-tally>—</strong> <span class="cfg__unit" data-field="gpu-note">of {compute.gpus} planned RTX GPUs</span></dd>
               </div>
               <div class="cfg__result-cell">
                 <span class="cfg__rule" data-rule aria-hidden="true"></span>
@@ -226,7 +226,7 @@ const pad = (n: number): string => String(n).padStart(2, '0');
   <div class="cfg__static">
     <p class="cfg__smallprint">
       The interactive sizing needs JavaScript. What it sizes against does not:
-      {compute.systems}, {compute.gpus} GPUs, {compute.load}, behind a shared
+      RTX-only scope: {compute.systems}, {compute.gpus} GPUs, {compute.load}, behind a shared
       {power.service} service originating at Building C. {compute.status}, and
       {power.allocation.toLowerCase()}.
       <a href={ctaHref}>Request a deployment review</a> and we will work it through with you.

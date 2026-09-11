@@ -1,161 +1,38 @@
 ---
 import Content from '../layouts/Content.astro';
-import BrandParticles from '../components/BrandParticles.astro';
-import { company, site, power, network, compute } from '../data/site';
+import {company,site,compute} from '../data/site';
+import {team} from '../data/team';
 ---
-
-<Content
-  title={`About ${company.full} — the data center arm of ${company.parent}`}
-  description={`${company.name} is the AI data center business of ${company.parent}. One campus today: ${site.acresRounded} in ${site.name}, across three tracts, with a ${site.powerOn} for first compute.`}
-  kicker={`About ${company.name}`}
-  heading="Power and compute, together."
-  lede={`A founder-led venture developing a single Oklahoma campus with three complementary activities: data-center services, inverter and battery assembly, and solar and storage development. Each is at a different stage, and this page tries to be exact about which.`}
-  meta={[
-    { label: 'Site', value: site.designation, note: `${site.name}, ${site.county}` },
-    { label: 'Land', value: `${site.acres} acres`, note: 'Three tracts, owner-reported', count: true },
-    { label: 'Service', value: power.service, note: 'Shared across Buildings A, B and C', tone: 'gold' },
-    { label: 'First compute', value: site.powerOn, note: `${compute.gpus} GPUs planned`, tone: 'signal' },
-  ]}
->
+<Content title={`About ${company.full} — our company and team`} description={`${company.entity}, operating under ${company.holdingCompany}, develops AI infrastructure in Mead, Oklahoma. Meet the SmartTec leadership and advisory team.`} kicker="Company / People / Purpose" heading="The people behind the infrastructure." lede={`SmartTec brings data-center services and energy expertise together on a ${site.acres}-acre campus in Mead, Oklahoma. Our first deployment combines dedicated RTX and B300 compute with space for customer-owned equipment.`} meta={[
+  {label:'Company',value:company.entity,note:`Operating under ${company.holdingCompany}`},
+  {label:'Parent company',value:company.parent,note:'Battery production and energy expertise'},
+  {label:'Campus',value:`${site.acres} acres`,note:site.name},
+  {label:'First deployment',value:compute.phaseSystems,note:'Planned · colocation in Buildings A and C'},
+]}>
   <section aria-labelledby="what" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">What we do</span></p>
-    <h2 id="what">We build AI data centers starting from the power, not the rendering</h2>
-
-    <div class="split">
-      <div>
-        <p>
-          {company.name} is developing AI data center capacity. The venture has
-          one site: {site.designation}, {site.acres} acres at {site.address} in
-          {' '}{site.county}, Oklahoma. The first compute phase is
-          {' '}{compute.systems}, on a {site.powerOn}. Which building takes the first
-          installation is not yet confirmed.
-        </p>
-        <p>
-          Most operators start with a site plan and then go looking for electrons. This
-          one started from the opposite end: the parcel was bought with an electrical
-          service and three buildings already standing on it. What that buys is a
-          starting point, not a finished data center — Buildings A, B and C have no
-          established fit-out or commissioning status, and the usable IT capacity behind
-          that service follows an engineering review rather than an arithmetic
-          conversion of the service rating.
-        </p>
-      </div>
-
-      <dl class="spec">
-        <div><dt>Company</dt><dd>{company.full}</dd></div>
-        <div><dt>Associated brand</dt><dd>{company.parent}</dd></div>
-        <div><dt>Sites</dt><dd>{site.designation} — {site.name}</dd></div>
-        <div><dt>Land</dt><dd>{site.acres} acres across three tracts</dd></div>
-        <div><dt>First capacity</dt><dd>{site.powerOn}</dd></div>
-        <div><dt>Legal entity</dt><dd><span class="todo">{company.entity}. Registration and formation details require verification.</span></dd></div>
-        <div><dt>Headquarters</dt><dd><span class="todo">Use the Mead site address for location inquiries; correspondence arrangements are confirmed by email.</span></dd></div>
-      </dl>
-    </div>
+    <p class="eyebrow"><span class="eyebrow__n">01</span><span class="eyebrow__t">Our focus</span></p>
+    <h2 id="what">A practical starting point for AI infrastructure</h2>
+    <div class="split"><p>SmartTec is developing its first campus at {site.address}. Buildings A and C provide {site.dataCenterArea.toLocaleString()} sq ft of gross building area for data-center development. Building B supports batteries, utilities and storage. The initial compute plan is {compute.phaseSystems}.</p><p>We work with organizations seeking dedicated compute and customers bringing their own hardware. Each deployment starts with workload, power, cooling and connectivity requirements, followed by an agreed installation and service plan. First service is targeted for Q4 2026, following fit-out and commissioning.</p></div>
   </section>
-
   <section aria-labelledby="parentage" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">{company.parent}</span></p>
-    <h2 id="parentage">How energy and compute fit together</h2>
-
-    <p>
-      {company.parent} builds LFP battery cabinets. {company.name} is its data center
-      business, and {site.manufacturing.buildings} buildings of
-      {' '}{site.manufacturing.sqftEach.toLocaleString()} sq ft each are planned on Tract 1 for
-      {' '}{site.manufacturing.scope.toLowerCase()}.
-    </p>
-    <p>
-      The argument for that adjacency is a sizing argument rather than a branding one: if
-      storage reaches a site closer to what it costs to build, more of it makes economic
-      sense there. We have not evidenced that advantage yet, and it is not a claim this
-      page will make until it can be:
-      {' '}<span class="todo">Equipment pricing, warranty and service obligations require documentation before any cost-saving claim is made</span>.
-      The planned scope uses purchased cells and components; it is not lithium-ion cell
-      fabrication and not a commissioned production line.
-    </p>
-
-    <div class="cards">
-      <div class="card">
-        <h3>Land</h3>
-        <p>{site.acres} acres in {site.county}, across three tracts. {site.ownership}; the owning entity is being documented.</p>
-      </div>
-      <div class="card">
-        <h3>Power</h3>
-        <p>{power.service}, shared across Buildings A, B and C from Building C. {power.allocation}.</p>
-      </div>
-      <div class="card">
-        <h3>Storage</h3>
-        <p>{power.storage}. {power.storageNote}</p>
-      </div>
-      <div class="card">
-        <h3>Network</h3>
-        <p>{network.service} from {network.provider}, planned. {network.status}.</p>
-      </div>
-    </div>
-
-    <p style="margin-top: var(--s-6);">
-      Detail on the parent company that a counterparty will reasonably ask for —
-      {' '}<span class="todo">Z1Power corporate history, ownership, manufacturing locations and product scope await a verified company profile</span>
-      {' '}and <span class="todo">the entities responsible for land, equipment, customer contracts and any investment terms are being documented</span>.
-    </p>
+    <p class="eyebrow"><span class="eyebrow__n">02</span><span class="eyebrow__t">Energy and compute</span></p>
+    <h2 id="parentage">Connected by a shared campus plan</h2>
+    <p>{company.entity} operates under {company.holdingCompany}. {company.parent} is the parent company and battery producer. Its energy expertise connects SmartTec's compute deployment with the longer-term battery, solar and manufacturing plan.</p>
+    <div class="cards"><article class="card"><h3>Data-center services</h3><p>Dedicated RTX and B300 compute, plus customer-owned colocation in Buildings A and C.</p><a href="/compute">Explore the compute plan →</a></article><article class="card"><h3>Energy infrastructure</h3><p>An on-site OG&E transformer, planned Z1Power storage and a two-loop cooling concept for the data-center buildings.</p><a href="/power">See power and cooling →</a></article><article class="card"><h3>Campus development</h3><p>Existing buildings anchor the first phase. Planned inverter and battery assembly, solar and storage provide room for future development.</p><a href="/site">Explore Site 01 →</a></article></div>
   </section>
-
-  <BrandParticles />
-
-  <section aria-labelledby="how" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">How we publish</span></p>
-    <h2 id="how">Two rules about what appears on this site</h2>
-
-    <div class="cards">
-      <div class="card">
-        <h3>Illustrations are clearly labeled</h3>
-        <p>
-          Concept illustrations and interactive models show the planned direction. They are labeled as illustrations and do not establish current conditions, equipment installation or surveyed boundaries. Current site photography is not yet published; site visits can be arranged individually.
-        </p>
-      </div>
-      <div class="card">
-        <h3>No invented numbers</h3>
-        <p>
-          Project figures identify owner-reported information and planned capacity. Calculators show their methods and assumptions; equipment specifications require vendor confirmation. Anything we do not know —
-          a rack density, a PUE, a price, an SLA — is identified as pending verification. Engineering limits and commercial terms
-          must be confirmed before a commitment.
-        </p>
-      </div>
-    </div>
-
-    <blockquote class="pull">
-      <p>We would rather show you our gaps now than defend them at contract.</p>
-      <p>
-        If a competing proposal quotes you a PUE, a tier and a price for a site that has
-        not been energised, ask which of those three is measured.
-      </p>
-    </blockquote>
-  </section>
-
   <section aria-labelledby="people" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">People</span></p>
-    <h2 id="people">Who you would be dealing with</h2>
-
-    <p>
-      <span class="todo">Email our project contact to discuss the workload and arrange an introduction. A verified leadership profile will be published when available.</span>
-    </p>
-    <p>
-      <span class="todo">Site staffing, access and operating coverage will be confirmed before a visit or service commitment.</span>
-    </p>
-
-    <p>Contact the project team to arrange a site visit and discuss the people responsible for your deployment.</p>
+    <p class="eyebrow"><span class="eyebrow__n">03</span><span class="eyebrow__t">Our team</span></p>
+    <h2 id="people">Leadership, operations and advisors</h2>
+    <p>The people leading SmartTec's business, technology, operations and supporting functions.</p>
+    <div class="team-grid">{team.map(person=><article class="team-card"><span class="team-monogram" aria-hidden="true">{person.initials}</span><div><h3>{person.name}</h3><p>{person.role}</p></div></article>)}</div>
   </section>
-
   <section class="is-end" aria-labelledby="talk" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Next</span></p>
-    <h2 id="talk">Come and look at it</h2>
-    <p>
-      The site is at {site.address}. If you are evaluating capacity for
-      {' '}{site.powerOn} or later, the fastest way to test everything on these pages is
-      to stand on the parcel and look at the transformer.
-    </p>
-    <div class="actions">
-      <a class="btn" href="/contact">Get in touch</a>
-      <a class="btn btn--ghost" href="/site">See {site.designation}</a>
-    </div>
+    <p class="eyebrow"><span class="eyebrow__n">04</span><span class="eyebrow__t">Start a conversation</span></p>
+    <h2 id="talk">Bring us the workload you want to run</h2>
+    <p>Contact Yasir at <a href="mailto:yasir@futonix.com">yasir@futonix.com</a> to discuss your deployment, arrange a site visit or connect with the team.</p>
+    <div class="actions"><a class="btn" href="/contact">Talk to SmartTec</a><a class="btn btn--ghost" href="/site">Visit the campus plan</a></div>
   </section>
 </Content>
+<style>
+.team-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:32px}.team-card{display:flex;align-items:center;gap:18px;padding:26px 22px;border:1px solid #c7e8d52b;border-radius:10px;background:#173d2f66;min-width:0}.team-monogram{display:grid;place-items:center;flex:0 0 54px;height:54px;border:1px solid #7be88a50;background:#7be88a0b;color:#9cf0a8;border-radius:50%;font:17px var(--f-mono)}.team-card h3{font-size:19px;line-height:1.35;margin:0 0 7px;overflow-wrap:anywhere}.team-card p{font-size:13px;line-height:1.5;margin:0;color:#b9cdc0}.team-card div{min-width:0}@media(max-width:1050px){.team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.team-grid{grid-template-columns:1fr}.team-card{padding:22px}.team-card h3{font-size:19px}}
+</style>

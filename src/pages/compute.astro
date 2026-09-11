@@ -1,216 +1,78 @@
 ---
 import Content from '../layouts/Content.astro';
 import { company, site, power, network, compute } from '../data/site';
-
-/* Everything below is arithmetic on the published Phase 1A figures. */
-const systems = Number((compute.systems.match(/[\d.]+/) ?? ['0'])[0]);
-const gpusPerSystem = compute.gpus / systems;
-
-const loadKw = Number((compute.load.match(/[\d.]+/) ?? ['0'])[0]);
-const perSystemKw = loadKw / systems;
 ---
-
 <Content
-  title={`Compute — an eight-GPU first deployment | ${company.full}`}
-  description={`${compute.systems} planned at ${site.designation}, ${site.name}. ${compute.gpus} GPUs, ${compute.vramPerGpu} each, ${compute.load}. ${compute.status}.`}
-  kicker="Phase 1A hardware"
-  heading="Built around your workload."
-  lede={`Two planned servers, four ${compute.gpuModel} each, ${compute.vramPerGpu} per GPU. ${compute.status}, and the building it goes into is not yet assigned.`}
+  title={`RTX and B300 compute in Mead, Oklahoma | ${company.full}`}
+  description={`The initial SmartTec deployment includes ${compute.phaseSystems} at ${site.designation}. Explore the planned hardware, workload review and commissioning schedule.`}
+  kicker="The first compute deployment"
+  heading="Two platforms. One starting point."
+  lede={`The initial plan combines two RTX PRO 6000 Blackwell nodes with one B300 node at ${site.name}. We are matching the hardware, cooling and software to customer workloads as the campus moves through fit-out and commissioning.`}
   meta={[
-    { label: 'Systems', value: String(systems), note: compute.systems, count: true },
-    { label: 'GPUs', value: String(compute.gpus), note: `${gpusPerSystem} per system`, count: true },
-    { label: 'GPUs planned', value: String(compute.gpus), note: `${compute.vramPerGpu} each, separate memories`, tone: 'signal', count: true },
-    { label: 'Estimated IT load', value: compute.load, note: 'Estimated, not measured', tone: 'gold' },
+    { label: 'Initial deployment', value: String(compute.servers + compute.b300Servers) + ' nodes', note: compute.phaseSystems, tone: 'signal' },
+    { label: 'RTX GPUs', value: String(compute.gpus), note: 'Four per RTX node', count: true },
+    { label: 'RTX memory', value: compute.vramPerGpu, note: 'Per GPU, separate memories' },
+    { label: 'Deployment status', value: 'Planned', note: 'Procurement and commissioning not complete', tone: 'gold' },
   ]}
 >
   <section aria-labelledby="fleet" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">The fleet</span></p>
-    <h2 id="fleet">What Phase 1A is</h2>
-
-    <div class="split">
-      <div>
-        <p>
-          The first deployment is deliberately small: {compute.systems}, on a
-          {' '}{compute.target}. It is planned rather than purchased —
-          {' '}{compute.status.toLowerCase()} — and which of Buildings A, B and C takes it
-          has not been confirmed.
-        </p>
-        <p>
-          The point of publishing a fleet this size is that every number on this page is
-          checkable. A larger announced number would be a forecast; this is a planned
-          purchase and a fit-out, and neither has happened yet.
-        </p>
-        <p>
-          All {compute.gpus} GPUs are planned for customer workloads. Nothing is
-          designated as held back, which at this size is worth saying plainly: a spares
-          reserve would be a quarter of the deployment, and how that is handled is
-          {' '}<span class="todo">Spares, acceptance testing and internal allocation will be specified before capacity is offered</span>.
-        </p>
-      </div>
-
-      <dl class="figures">
-        <div>
-          <dt>GPUs planned</dt>
-          <dd class="is-signal"><span data-count>{compute.gpus}</span><span class="sub">across {systems} planned servers</span></dd>
-        </div>
-        <div>
-          <dt>Memory per GPU</dt>
-          <dd>
-            {compute.vramPerGpu}
-            <span class="sub">Separate memories — this part has no NVLink</span>
-          </dd>
-        </div>
-      </dl>
-    </div>
-
-    <blockquote class="pull">
-      <p>One deployment, into a building not yet assigned, behind a shared service whose usable IT allocation follows an engineering review.</p>
-      <p>
-        A larger announced number would be a forecast. This one is a purchase and a
-        fit-out, and every figure on the page is checkable against the site record.
-      </p>
-    </blockquote>
-  </section>
-
-  <section aria-labelledby="arithmetic" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Per system</span></p>
-    <h2 id="arithmetic">The power arithmetic, per system</h2>
-
-    <p>
-      Accelerated compute is bought in kilowatts as much as in GPUs. Here is the
-      published Phase 1A load divided by the published system count, so you can see the
-      density this hall has to carry.
-    </p>
-
-    <div class="scroller" tabindex="0" role="region" aria-label="Phase 1A per-system arithmetic, scrollable">
-      <table>
-        <caption>Phase 1A, worked from published figures</caption>
-        <thead>
-          <tr>
-            <th scope="col">Line</th>
-            <th scope="col">Figure</th>
-            <th scope="col">Basis</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><th scope="row">Systems</th><td class="num">{systems}</td><td>{compute.systems}</td></tr>
-          <tr><th scope="row">GPUs per system</th><td class="num">{gpusPerSystem}</td><td>{compute.gpus} GPUs ÷ {systems} systems</td></tr>
-          <tr><th scope="row">Total IT load</th><td class="num">{compute.load}</td><td>Published Phase 1A draw</td></tr>
-          <tr><th scope="row">Load per system</th><td class="num">≈ {perSystemKw.toFixed(1)} kW</td><td>Total load ÷ system count</td></tr>
-          <tr><th scope="row">Rack density</th><td class="num"><span class="todo">Rack layout and density are not yet established</span></td><td>Depends on the final rack layout, which is not fixed</td></tr>
-          <tr><th scope="row">Memory per GPU</th><td class="num">{compute.vramPerGpu}</td><td>{compute.memoryNote}</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p style="margin-top: var(--s-5);">
-      The modeled load per system is a planning input. It does not determine the
-      cooling method on its own. The selected server, rack layout and site engineering
-      must establish the cooling design and the load that can be commissioned.
-    </p>
-  </section>
-
-  <section aria-labelledby="cooling" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Cooling</span></p>
-    <h2 id="cooling">Cooling is not settled yet</h2>
-
-    <div class="split">
-      <div>
-        <p>
-          {compute.cooling} — NVIDIA documents both air and liquid options for this part,
-          and the selected server governs which applies. Liquid cooling means coolant is carried to a cold plate sitting on the
-          package itself, so the majority of the heat leaves the rack as liquid rather
-          than as hot air pushed into a containment aisle. It is what makes dense
-          accelerator racks practical, and it is far easier to design into a fit-out than
-          to retrofit into an operating hall.
-        </p>
-        <p>
-          Building allocation and any cooling upgrades remain subject to the final
-          design. Existing HVAC does not establish readiness for the proposed IT load;
-          commissioning must verify the selected installation.
-        </p>
-      </div>
-
-      <dl class="spec">
-        <div><dt>Method</dt><dd>{compute.cooling}</dd></div>
-        <div><dt>CDU</dt><dd><span class="todo">A CDU specification will be established if the selected cooling design requires one.</span></dd></div>
-        <div><dt>Supply temperature</dt><dd><span class="todo">Supply temperature and temperature rise depend on the selected cooling design.</span></dd></div>
-        <div><dt>Heat rejection</dt><dd><span class="todo">Heat-rejection equipment and water demand are not yet selected.</span></dd></div>
-        <div><dt>Residual air load</dt><dd><span class="todo">Residual air load and supporting HVAC capacity require engineering verification.</span></dd></div>
-        <div><dt>Leak detection</dt><dd><span class="todo">Leak detection and isolation will be specified with any liquid-cooling design.</span></dd></div>
-      </dl>
-    </div>
-  </section>
-
-  <section aria-labelledby="stack" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">The rest of the stack</span></p>
-    <h2 id="stack">What we have not specified yet</h2>
-
-    <p>
-      The accelerator count is settled. The rest of a training cluster — fabric, storage,
-      host configuration, scheduler — is not, and inventing it here would be the fastest
-      way to lose a technical buyer in the second meeting. These are the open items.
-    </p>
-
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">Initial hardware</span></p>
+    <h2 id="fleet">RTX nodes and B300 are both in the first phase.</h2>
     <div class="cards">
-      <div class="card">
-        <h3>Fabric</h3>
-        <p>
-          <span class="todo">East-west fabric, topology and per-GPU bandwidth await a supported system design and benchmark.</span>
-        </p>
+      <article class="card">
+        <p class="card__tag mono-label">{compute.servers} planned nodes</p>
+        <h3>RTX PRO 6000 Blackwell</h3>
+        <p>Each node is planned with {compute.gpusPerServer} {compute.gpuModel} GPUs, each with {compute.vramPerGpu} of memory. The two nodes provide {compute.gpus} RTX GPUs in total.</p>
+        <p>{compute.workloads}. Large models and training workloads are assessed against the selected configuration.</p>
+      </article>
+      <article class="card">
+        <p class="card__tag mono-label">{compute.b300Servers} planned node</p>
+        <h3>B300</h3>
+        <p>A B300 node is included in the initial deployment alongside the RTX nodes. Its final server configuration and workload allocation will be specified in the deployment proposal.</p>
+        <p>The RTX GPU count, memory figures and load estimate on this page apply only to the two RTX nodes.</p>
+      </article>
+    </div>
+    <div class="callout" style="margin-top: var(--s-6);">
+      <p><strong>Development status.</strong> The fleet is planned and has not completed procurement and commissioning. Customer availability depends on equipment acceptance and the readiness of the facility and network.</p>
+    </div>
+  </section>
+  <section aria-labelledby="configuration" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Match the workload</span></p>
+    <h2 id="configuration">Choose capacity around the job.</h2>
+    <div class="split">
+      <div>
+        <p>Tell us the application, model size, memory needs, storage throughput and intended software stack. We use those requirements to assess the appropriate platform and dedicated allocation.</p>
+        <p>The RTX GPUs each have separate {compute.vramPerGpu} memories. Applications that span GPUs need a suitable parallel execution strategy; the eight cards do not form one pooled memory space.</p>
+        <p>For an existing workload, representative benchmarks help establish fit before a commercial commitment.</p>
+      </div>
+      <dl class="spec">
+        <div><dt>RTX configuration</dt><dd>{compute.servers} nodes × {compute.gpusPerServer} GPUs<span class="note">{compute.gpuModel}</span></dd></div>
+        <div><dt>RTX memory</dt><dd>{compute.vramPerGpu} per GPU<span class="note">Separate memories; no NVLink on this part.</span></dd></div>
+        <div><dt>RTX IT load estimate</dt><dd>{compute.load}<span class="note">Two RTX nodes only. Excludes the B300 node and facility cooling; not a measured load.</span></dd></div>
+        <div><dt>B300 deployment</dt><dd>{compute.b300Servers} planned node<span class="note">Configuration and load established with the selected system.</span></dd></div>
+      </dl>
+    </div>
+    <div class="actions"><a class="btn btn--ghost" href="/model-planner">Explore model requirements</a></div>
+  </section>
+  <section aria-labelledby="cooling" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Campus integration</span></p>
+    <h2 id="cooling">Designed with the power and thermal system.</h2>
+    <div class="split">
+      <div>
+        <p>The proposed cooling architecture uses a warm-water loop for compatible liquid-cooled servers and a separate chilled-water loop for active rear-door heat exchangers. Both use closed circuits and dry heat rejection. Equipment selection and mechanical review establish the final configuration.</p>
+        <p>The campus electrical commissioning milestone is an {power.commissioningTarget}. Planned {network.provider} fiber has an {network.deliveryTarget}. These are management targets, with customer service following facility, equipment and network acceptance.</p>
       </div>
       <div class="card">
-        <h3>Storage</h3>
-        <p>
-          <span class="todo">Storage architecture, usable capacity and full-fleet throughput are not yet specified.</span>
-        </p>
-      </div>
-      <div class="card">
-        <h3>Host configuration</h3>
-        <p>
-          <span class="todo">CPU, system memory and local NVMe will follow the supported OEM configuration.</span>
-        </p>
-      </div>
-      <div class="card">
-        <h3>Software</h3>
-        <p>
-          <span class="todo">Operating system, drivers, runtime and scheduling will be confirmed for the workload.</span>
-        </p>
-      </div>
-      <div class="card">
-        <h3>Tenancy model</h3>
-        <p>
-          <span class="todo">Allocation units, virtualization and tenant isolation will be specified before an offer.</span>
-        </p>
-      </div>
-      <div class="card">
-        <h3>External connectivity</h3>
-        <p>
-          {network.service} from {network.provider} is planned for the site. {network.status}.
-          <span class="todo">Tenant bandwidth and egress policy will be defined in the commercial offer.</span>
-        </p>
+        <h3>Explore the infrastructure</h3>
+        <p>See the two-loop thermal diagram, shared electrical service and the phased campus plan.</p>
+        <div class="actions"><a href="/power#thermal">Power and cooling →</a><a href="/site">Campus plan →</a></div>
       </div>
     </div>
   </section>
-
   <section class="is-end" aria-labelledby="buying" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Buying it</span></p>
-    <h2 id="buying">How capacity is sold</h2>
-
-    <dl class="spec">
-      <div><dt>Available from</dt><dd>{compute.target}</dd></div>
-      <div><dt>Planned units</dt><dd>{compute.gpus} GPUs across {systems} servers</dd></div>
-      <div><dt>Minimum allocation</dt><dd><span class="todo">Minimum GPU or system allocation is subject to workload and commercial review.</span></dd></div>
-      <div><dt>Pricing</dt><dd><span class="todo">Pricing and any term discount are quoted after workload and equipment review.</span></dd></div>
-      <div><dt>Term</dt><dd><span class="todo">Available term options will be confirmed in the offer.</span></dd></div>
-      <div><dt>Support</dt><dd><span class="todo">Replacement commitments, support contacts and coverage hours will be agreed before service.</span></dd></div>
-    </dl>
-
-    <p class="form-note">Site and equipment photography will be published when available. Arrange a site visit to verify current conditions; the visual concepts on this page are illustrative.</p>
-
-    <div class="actions">
-      <a class="btn" href="/contact">Ask what is available</a>
-      <a class="btn btn--ghost" href="/colocation">Colocation terms</a>
-    </div>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Start a conversation</span></p>
+    <h2 id="buying">Bring us your workload.</h2>
+    <p>We review platform fit, capacity, timing and support needs, then provide a proposal with the selected configuration and commercial terms. You can also discuss colocation for hardware you already own.</p>
+    <div class="actions"><a class="btn" href="/contact">Discuss compute requirements</a><a class="btn btn--ghost" href="/colocation">Explore colocation</a></div>
   </section>
 </Content>

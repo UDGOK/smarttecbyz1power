@@ -4,7 +4,7 @@
  * Reworked against the 9 September 2026 handoff, which found this component's
  * arithmetic — not just its wording — unsound. Four defects, all fixed here:
  *
- *   1. Inconsistent boundary. The 7.5 kW figure is the whole first-phase IT
+ *   1. Inconsistent boundary. The 7.5 kW figure is the RTX-only IT
  *      load, host included. Storage and ancillary draw were then added on top
  *      and the sum compared back against that same 7.5 kW, so eight GPUs plus
  *      the smallest storage tier came to 11.1 kW, "exceeded" the envelope, and
@@ -42,7 +42,7 @@ function firstNumber(source: string, fallback: number): number {
 
 const nf = new Intl.NumberFormat('en-US');
 
-/** The estimated first-phase IT load, from the site record. */
+/** The estimated RTX-only IT load, from the site record. */
 const PHASE_1_KW = firstNumber(compute.load, 7.5);
 
 /**
@@ -294,7 +294,7 @@ export const questions: ConfiguratorQuestion[] = [
     id: 'gpus',
     kicker: 'Scale',
     prompt: 'How many GPUs do you want?',
-    help: `The first phase is ${compute.systems} — ${compute.gpus} GPUs, planned.`,
+    help: `The RTX portion is ${compute.systems} — ${compute.gpus} GPUs, planned.`,
     chipLabel: 'GPUs',
     options: [
       {
@@ -325,7 +325,7 @@ export const questions: ConfiguratorQuestion[] = [
         chip: `${compute.gpus} GPUs`,
         effects: {
           gpuRange: { min: compute.gpus, max: compute.gpus },
-          note: `The whole planned first phase. None of it is in inventory yet.`,
+          note: `The complete planned RTX portion. The separate B300 node is outside this calculator.`,
         },
       },
     ],
@@ -433,7 +433,7 @@ export const fitLevels: Record<FitLevel, FitCopy> = {
   prepared: {
     label: 'Request prepared',
     headline: 'Deployment request prepared.',
-    detail: `We will confirm workload suitability, equipment availability, facility allocation and commercial terms before issuing an offer. The first phase is ${envelope.servers} planned servers, ${envelope.plannedGpus} GPUs in total; ${envelope.powerOn} is a target, and procurement and commissioning are not complete.`,
+    detail: `We will confirm workload suitability, equipment availability, facility allocation and commercial terms before issuing an offer. The RTX portion comprises ${envelope.servers} planned servers and ${envelope.plannedGpus} RTX GPUs; the separate B300 node is outside this estimate; ${envelope.powerOn} is a target, and procurement and commissioning are not complete.`,
   },
   review: {
     label: 'Technical review required',
@@ -443,7 +443,7 @@ export const fitLevels: Record<FitLevel, FitCopy> = {
   expansion: {
     label: 'Expansion inquiry',
     headline: 'This runs past the planned fleet.',
-    detail: `Beyond ${envelope.plannedGpus} GPUs this becomes an expansion inquiry, scoped and funded against a commitment. It is not an allocation to another building: Buildings A, B and C have no established fit-out, cooling or electrical allocation to give.`,
+    detail: `Beyond ${envelope.plannedGpus} GPUs this becomes an expansion inquiry, scoped and funded against a commitment. It is not an allocation to another building: Data-center fit-out and capacity in Buildings A and C require engineering review. Building B serves battery, utilities and storage.`,
   },
 };
 

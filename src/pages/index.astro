@@ -12,7 +12,7 @@ const grain =
 ---
 <Base
   title={`${company.full} — AI data centers, Mead Oklahoma`}
-  description={`${site.acresRounded} in ${site.county}, Oklahoma, across three tracts. ${site.buildingArea.toLocaleString()} sq ft of existing buildings designated for data-center deployment, and ${compute.gpus} GPUs planned for the first phase. Colocation and dedicated compute from SmartTec by Z1Power.`}
+  description={`${site.acresRounded} in ${site.county}, Oklahoma, across three tracts. ${site.dataCenterArea.toLocaleString()} sq ft across data-center Buildings A and C, with ${compute.phaseSystems} planned. Colocation and dedicated compute from SmartTec by Z1Power.`}
   experience
 >
   <canvas id="experience-canvas" aria-hidden="true"></canvas>
@@ -85,7 +85,7 @@ const grain =
     <h2>Site 01 — {site.address}</h2>
     <dl>
       <div><dt>Land</dt><dd>{site.acres} acres across three tracts, {site.county}</dd></div>
-      <div><dt>Existing buildings</dt><dd>A, B and C — {site.buildingArea.toLocaleString()} sq ft, not yet commissioned</dd></div>
+      <div><dt>Existing buildings</dt><dd>A + C data centers — {site.dataCenterArea.toLocaleString()} sq ft gross; B is utilities and storage</dd></div>
       <div><dt>First compute</dt><dd>{site.powerOn}</dd></div>
     </dl>
   </section>

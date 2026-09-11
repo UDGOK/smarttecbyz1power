@@ -28,7 +28,7 @@ const topics = [...new Set(sources.map((s) => s.topic))].sort();
   meta={[
     { label: 'Publications', value: String(sources.length), note: 'Public RSS, no intermediary', count: true },
     { label: 'Stories', value: String(items.length), note: 'Most recent first', count: true },
-    { label: 'Updated', value: 'Live', note: 'Refreshed every 15 minutes', tone: 'signal' },
+    { label: 'Feed', value: 'Cached', note: 'Checked on page load', tone: 'signal' },
     { label: 'Snapshot', value: fetched.slice(0, 10), note: 'What ships with the page' },
   ]}
 >

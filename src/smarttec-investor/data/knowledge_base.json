@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-09-09",
-  "publicationState": "owner-review-required",
+  "reviewedAt": "2026-09-10",
+  "publicationState": "owner-updated",
   "policy": "Private server-side content; citations preserve evidence status; do not treat this draft as title, engineering or legal verification",
   "sources": {
     "owner-brief": {
-      "title": "Owner statements in project conversation",
+      "title": "Owner statements and corrections supplied 10 September 2026",
       "type": "owner-reported",
       "url": null
     },
@@ -51,7 +51,7 @@
       "type": "regulator"
     },
     "survey": {
-      "title": "BM Surveying, Inc. \u2014 Land Boundary Survey Plat, sheet 1 of 1 dated 28 December 2025",
+      "title": "BM Surveying, Inc. — Land Boundary Survey Plat, sheet 1 of 1 dated 28 December 2025",
       "url": "/api/investor/survey",
       "type": "supplied-boundary-survey-copy"
     },
@@ -65,22 +65,23 @@
     {
       "id": "F01",
       "question": "What is SmartTec developing?",
-      "answer": "SmartTec is developing a campus in Mead, Oklahoma with a proposed first compute phase and planned manufacturing, solar and storage activities. Commissioned operations and customer contracts have not been established in the reviewed records.",
+      "answer": "SmartTec.dev LLC, under SmartTec Holdings LLC, is developing a 39.39-acre campus in Mead, Oklahoma. Parent Z1Power produces batteries. The first compute deployment combines two RTX nodes and one B300 node, alongside planned manufacturing, solar and storage activities. Utility and fiber commissioning are pending.",
       "status": "owner-reported",
       "sourceIds": [
         "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F02",
       "question": "How much land is there?",
-      "answer": "The supplied survey labels three tracts of 13.50, 7.51 and 18.20 acres, totaling 39.21 acres. Approximately 40 acres is rounded wording. Current title and ownership require separate review.",
-      "status": "document-reviewed",
+      "answer": "The owner supplied the current legal parcel area as 39.39 acres and legal description SEC33-6S-8E E2E2NW LESS .61ACS (958-895) FOR HWY. Earlier survey annotations show 13.50, 7.51 and 18.20 acres, totaling 39.21 acres. Those historical tract labels are retained on the original survey and schematic; they are not the current parcel total.",
+      "status": "owner-reported",
       "sourceIds": [
-        "survey"
+        "survey",
+        "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F03",
@@ -95,32 +96,32 @@
     {
       "id": "F04",
       "question": "What buildings are available for the data center?",
-      "answer": "The owner reports Building A at 1,500 sq ft, B at 2,083 and C at 3,535, totaling 7,118 sq ft of gross candidate space on Tract 2. Gross area is not commissioned IT space.",
+      "answer": "Building A provides 1,500 sq ft and Building C 3,535 sq ft: 5,035 sq ft of gross data-center building area. Building B is 2,083 sq ft for utility, battery and storage uses. B is excluded from data-center area. Gross area does not establish commissioned IT capacity.",
       "status": "owner-reported",
       "sourceIds": [
         "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F05",
       "question": "Is the house or office included in compute space?",
-      "answer": "No. The separately reported 6,500 sq ft house/office is excluded from the 7,118 sq ft compute-building total and has its own reported 200 A service.",
+      "answer": "No. The separately reported 6,500 sq ft house/office is excluded from the 5,035 sq ft data-center area in A and C and has its own reported 200 A service. Building B is also excluded because it serves utility, battery and storage uses.",
       "status": "owner-reported",
       "sourceIds": [
         "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F06",
       "question": "What electrical capacity is available?",
-      "answer": "The owner reports shared 3,000 A, 208 V, three-phase distribution from Building C to A, B and C. The arithmetic is approximately 1.081 MVA apparent power. Approved usable IT kW, existing loads, utility allocation and continuous distribution limits remain unverified.",
+      "answer": "The owner reports a shared 3,000 A, 208 V, three-phase transformer on site, with OG&E commissioning targeted for 8 October 2026. It is not yet commissioned service. Approximately 1.081 MVA is the nameplate arithmetic, not available IT kW. Engineering must establish usable capacity, existing loads and continuous distribution limits.",
       "status": "owner-reported",
       "sourceIds": [
         "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F07",
@@ -145,12 +146,12 @@
     {
       "id": "F09",
       "question": "What is the network plan?",
-      "answer": "The owner reports proposed Dobson 100 Gbps asymmetrical connectivity in roughly 30 days, with a second simultaneous 100 Gbps option. Exact bandwidth profile, delivery commitment, cost, SLA and route diversity require carrier documentation. Two links are not automatically two independent failure paths.",
+      "answer": "Dobson fiber delivery is targeted 4-8 weeks from the 10 September 2026 update: 8 October-5 November 2026. Connectivity is not live. The proposed service is 100 Gbps with a second 100 Gbps option; the bandwidth profile, SLA, cost and route diversity must match the carrier order. Two links alone do not establish independent failure paths.",
       "status": "owner-reported",
       "sourceIds": [
         "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F10",
@@ -165,12 +166,12 @@
     {
       "id": "F11",
       "question": "What is Phase 1 compute?",
-      "answer": "The proposed configuration is two supported servers with four RTX PRO 6000 Blackwell Server Edition GPUs each: eight GPUs total. Complete OEM quotes, site approval, support terms and customer workload tests remain prerequisites.",
-      "status": "planning-assumption",
+      "answer": "Phase 1 includes two planned RTX PRO 6000 Blackwell Server Edition nodes, each with four GPUs (eight RTX GPUs), plus one B300 node. The B300 system configuration, accelerator count, price and power/cooling requirements have not been supplied. The earlier 7.5 kW planning figure covers the RTX portion only, not the combined phase.",
+      "status": "owner-reported",
       "sourceIds": [
         "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F12",
@@ -194,13 +195,13 @@
     },
     {
       "id": "F14",
-      "question": "When would SmartTec buy B300?",
-      "answer": "After a defined customer workload, complete system quote, funding and approved power/cooling/network design support that purchase. It is a separate platform decision, not a GPU swap into an RTX chassis.",
-      "status": "planning-assumption",
+      "question": "Is B300 included in Phase 1?",
+      "answer": "One B300 node is included in the owner’s first-phase deployment plan, alongside two planned four-GPU RTX nodes. The exact B300 OEM configuration, accelerator count, cost and facility requirements remain to be confirmed. The DGX B300 AC entry in the calculator is a generic reference, not the selected node.",
+      "status": "owner-reported",
       "sourceIds": [
         "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F15",
@@ -225,12 +226,13 @@
     {
       "id": "F17",
       "question": "How much funding is required?",
-      "answer": "The prior first-compute-phase planning allowance was approximately $330,000, including $50,000 working capital. It is not a verified current quote or the full campus budget. Construction, solar, storage and major infrastructure work require separate budgets.",
+      "answer": "The earlier approximately $330,000 allowance, including $50,000 working capital, describes the RTX-only planning example. It excludes the B300 node and is not a budget for the updated combined first phase or the full campus. Exact B300 costs, construction, solar, storage and infrastructure need their own confirmed scopes and budgets.",
       "status": "planning-assumption",
       "sourceIds": [
-        "prior-financial-brief"
+        "prior-financial-brief",
+        "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F18",
@@ -295,12 +297,12 @@
     {
       "id": "F24",
       "question": "Is construction already underway?",
-      "answer": "The owner expressed a target to start the two planned manufacturing buildings in two weeks. A dated schedule, approvals and notice to proceed have not been verified here. Do not represent that target as completed work.",
+      "answer": "The owner reports UDGOK construction targeted to start on 24 September 2026. This is a target from the 10 September update, not a claim that construction has begun or finished. The dated delivery schedule remains separate from utility commissioning and carrier delivery.",
       "status": "owner-reported",
       "sourceIds": [
         "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F25",
@@ -325,12 +327,12 @@
     {
       "id": "F27",
       "question": "What makes this project different?",
-      "answer": "Its proposed approach combines an existing property, a defined small compute phase and potential later energy/manufacturing integration. Those features can support a differentiated plan, but savings, demand, operating performance and investor protections still need evidence.",
-      "status": "planning-assumption",
+      "answer": "The plan brings together a 39.39-acre property, two RTX nodes plus one B300 node in the first compute deployment, and planned energy and manufacturing activity backed by parent Z1Power’s battery-production background. Performance, operating savings and commercial returns will be established through commissioning and customer delivery.",
+      "status": "owner-reported",
       "sourceIds": [
         "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F28",
@@ -365,27 +367,29 @@
     {
       "id": "F31",
       "question": "What does the survey confirm?",
-      "answer": "The supplied BM Surveying plat dated 28 December 2025 labels Tract 1 at 13.50 acres, Tract 2 at 7.51 acres and Tract 3 at 18.20 acres, with US 70 at the north frontage. Tract 2 is described as 495 feet deep and Tract 3 as 1,200 feet. The survey includes proposed 50-foot easements; recording and title still require review.",
-      "status": "document-reviewed",
+      "answer": "The historical BM Surveying plat dated 28 December 2025 labels Tract 1 at 13.50 acres, Tract 2 at 7.51 acres and Tract 3 at 18.20 acres, totaling 39.21 acres, with US 70 at the north frontage. Those original annotations and geometry are retained; the owner’s current legal parcel area is 39.39 acres. The plat shows 495-foot and 1,200-foot tract depths and proposed 50-foot easements.",
+      "status": "owner-reported",
       "sourceIds": [
-        "survey"
+        "survey",
+        "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F32",
       "question": "Which surveyed structures are Buildings A, B and C?",
-      "answer": "The marked survey identifies three data-center structures as 1, 2 and 3, running east to west. Their correspondence to earlier A/B/C names is not explicitly supplied. The interactive map uses the owner numbered labels.",
-      "status": "unresolved",
+      "answer": "The owner confirmed mark 1 (east) as Building A, mark 2 (middle) as B and mark 3 (west) as C. A and C are the data-center buildings. B is for utility, battery and storage uses. The schematic retains the approximate traced outlines rather than treating them as measured gross floor areas.",
+      "status": "owner-reported",
       "sourceIds": [
-        "marked-survey"
+        "marked-survey",
+        "owner-brief"
       ],
-      "reviewedAt": "2026-09-09"
+      "reviewedAt": "2026-09-10"
     },
     {
       "id": "F33",
       "question": "Where are the planned factories, BESS and solar?",
-      "answer": "Owner markings place a 200 \u00d7 150 ft inverter factory in northern Tract 1 and a 200 \u00d7 150 ft battery assembly factory farther south in that tract. A 2,000 sq ft BESS area is marked south of the data-center buildings on Tract 2. Tract 3 is designated for solar; the owner asks to omit the former greenhouse/pad from the proposed display. Positions are concept placements, not approved construction setbacks.",
+      "answer": "Owner markings place a 200 × 150 ft inverter factory in northern Tract 1 and a 200 × 150 ft battery assembly factory farther south in that tract. A 2,000 sq ft BESS area is marked south of the data-center buildings on Tract 2. Tract 3 is designated for solar; the owner asks to omit the former greenhouse/pad from the proposed display. Positions are concept placements, not approved construction setbacks.",
       "status": "owner-proposed",
       "sourceIds": [
         "marked-survey"

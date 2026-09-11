@@ -2,258 +2,68 @@
 import Content from '../layouts/Content.astro';
 import ThermalArchitecture from '../components/ThermalArchitecture.astro';
 import { company, site, power, solar } from '../data/site';
-
-/* Derived from the record rather than retyped, so the arithmetic can never
-   drift from it. Apparent power only: sqrt(3) x 208 V x 3,000 A. */
 const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
 ---
-
 <Content
-  title={`Power — the service that is standing, and what it means | ${company.full}`}
-  description={`Buildings A, B and C at ${site.designation} share an owner-reported ${power.service} distribution originating at Building C. Usable IT capacity follows electrical, cooling and commissioning review. Tract 3 holds ${solar.tractAcres} acres for planned solar and storage.`}
-  kicker="The power story"
-  heading="Start with the power."
-  lede={`Buildings A, B and C share an owner-reported ${power.service} distribution originating at Building C. That is a real head start, and it is not the same thing as available capacity — this page keeps the two apart, because most of the industry's power claims do not.`}
+  title={`Power and cooling for phased AI infrastructure | ${company.full}`}
+  description={`${power.utility} serves the on-site ${power.service} transformer at ${site.designation}. Explore the commissioning target, proposed two-loop cooling, and planned solar and storage.`}
+  kicker="Power and cooling"
+  heading="Infrastructure for the next phase."
+  lede={`The campus starts with an on-site ${power.service} transformer supplied by ${power.utility}. Construction, electrical commissioning and cooling are coordinated around the first compute deployment in Buildings A and C.`}
   meta={[
-    { label: 'Shared service', value: power.service, note: power.serviceScope, tone: 'gold' },
-    { label: 'Apparent rating', value: power.serviceApparent, note: 'Arithmetic, not a nameplate' },
-    { label: 'Tenant allocation', value: 'On review', note: power.allocation, tone: 'signal' },
+    { label: 'Utility', value: power.utility, note: 'On-site transformer', tone: 'gold' },
+    { label: 'Shared service', value: power.service, note: power.serviceScope },
+    { label: 'Commissioning', value: power.commissioningTarget, note: 'Management target; not completed', tone: 'signal' },
     { label: 'Planned energy', value: `${solar.tractAcres} acres`, note: 'Tract 3, solar and storage' },
   ]}
 >
-  <section aria-labelledby="queue" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">The problem</span></p>
-    <h2 id="queue">Four things that get called "power"</h2>
-
-    <div class="split">
-      <div>
-        <p>
-          <strong>Existing distribution</strong> is what is physically on the parcel:
-          {' '}{power.service}, one shared rating originating at Building C and serving
-          Buildings A, B and C. <strong>Planned generation</strong> is Tract 3, where
-          {' '}{solar.tractAcres} acres are set aside for solar and storage that does not
-          exist yet.
-        </p>
-      </div>
-      <div>
-        <p>
-          <strong>Storage design</strong> is a separate exercise again — a power rating is
-          not usable energy. And <strong>approved tenant allocation</strong> is the only
-          one of the four you can actually buy, and the only one this site will not put a
-          number on until an engineer has. Conflating them is how a service rating becomes
-          a capacity claim.
-        </p>
-      </div>
-    </div>
-
-    <div class="versus" data-reveal>
-      <div class="versus__side">
-        <p class="versus__label">Apparent service rating</p>
-        <p class="versus__value">{serviceKva.toLocaleString()} kVA</p>
-        <p class="versus__note">
-          √3 × 208 V × 3,000 A. Arithmetic from the stated service current — not a
-          transformer nameplate, not real power, and not something to multiply by a
-          convenient factor and call engineered capacity.
-        </p>
-      </div>
-      <div class="versus__side is-answer">
-        <p class="versus__label">Usable IT capacity</p>
-        <p class="versus__value">On review</p>
-        <p class="versus__note">
-          {power.allocation}. Continuous-load limits, utility allocation, feeder ratings,
-          cooling, existing loads and redundancy all sit between the figure on the left and
-          a number you could build against.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section aria-labelledby="btm" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Behind the meter</span></p>
-    <h2 id="btm">What is actually on the parcel</h2>
-
-    <p>
-      Three things are established, and each one has a boundary worth stating.
-    </p>
-
-    <div class="cards">
-      <div class="card">
-        <h3>Shared distribution</h3>
-        <p>
-          {power.service}, {power.serviceOrigin.toLowerCase()}. {power.serviceScope}. The
-          house and office run on a separate {power.houseOfficeService} supply and are
-          excluded from data-center floor area and capacity.
-        </p>
-      </div>
-      <div class="card">
-        <h3>Existing cooling</h3>
-        <p>
-          {power.hvac} Nominal tonnage is not IT kilowatts, cooling in one building is not
-          automatically available in another, and two units are not automatically N+1.
-        </p>
-      </div>
-      <div class="card">
-        <h3>Planned energy</h3>
-        <p>
-          Tract 3 holds {solar.tractAcres} acres for planned solar and storage.
-          {' '}{power.storage} are reported at {power.storageRating}; that is a power
-          rating, and the usable energy behind it is not established.
-        </p>
-      </div>
-    </div>
-
-    <div class="callout" style="margin-top: var(--s-6);">
-      <p>
-        <strong>The one sentence that matters.</strong> A service standing on owned land
-        is a genuine head start on a greenfield build — and it is a head start on a
-        fit-out, not a finished one. {site.designation} is offering a
-        {' '}{site.powerOn} for first compute and an engineering review to establish what
-        the buildings can take, rather than a capacity number derived from a service
-        rating.
-      </p>
-    </div>
-  </section>
-
   <section aria-labelledby="service" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">The service</span></p>
-    <h2 id="service">What is standing on the parcel</h2>
-
-    <dl class="spec">
-      <div><dt>Shared service</dt><dd>{power.service}<span class="note">{power.serviceScope}. {power.serviceOrigin}.</span></dd></div>
-      <div><dt>Apparent rating</dt><dd>{power.serviceApparent}<span class="note">{power.serviceApparentNote}</span></dd></div>
-      <div><dt>Transformer nameplate</dt><dd><span class="todo">{power.transformerNameplate}</span></dd></div>
-      <div><dt>House / office</dt><dd>{power.houseOfficeService}<span class="note">{power.houseOfficeNote}</span></dd></div>
-      <div><dt>Cooling</dt><dd>{power.hvac}<span class="note">{power.hvacUnresolved}</span></dd></div>
-      <div><dt>Tenant allocation</dt><dd>{power.allocation}</dd></div>
-      <div><dt>Energy rate</dt><dd><span class="todo">{power.rate}</span></dd></div>
-      <div><dt>Interconnection</dt><dd>{power.interconnection}<span class="note">{power.interconnectionNote}</span></dd></div>
-      <div><dt>Utility of record</dt><dd><span class="todo">Serving utility and account allocation await documentation.</span></dd></div>
-    </dl>
-
-    <blockquote class="pull">
-      <p>A service rating is not an allocation.</p>
-      <p>
-        The arithmetic above converts a stated service current into apparent power, and
-        that is all it does. Turning it into a kilowatt figure a tenant could build
-        against needs a single-line diagram, a transformer nameplate, feeder ratings, the
-        serving utility's allocation, the existing loads and a cooling review — none of
-        which this site has published, because it does not yet have them.
-      </p>
-    </blockquote>
-
-    <p class="form-note">Site and equipment photography will be published when available. Arrange a site visit to verify current conditions; the visual concepts on this page are illustrative.</p>
-  </section>
-
-  <section aria-labelledby="solar" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Generation and storage</span></p>
-    <h2 id="solar">Planned solar and storage</h2>
-
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">Electrical infrastructure</span></p>
+    <h2 id="service">Transformer on site. Commissioning ahead.</h2>
     <div class="split">
       <div>
-        <p>
-          {solar.publicCopy}
-        </p>
-        <p>
-          The range below is a screening extrapolation and nothing more. It applies
-          published array-area benchmarks — from a study whose sample is larger
-          utility-scale plants — to an assumed buildable fraction of an unsurveyed
-          parcel. These are alternative layouts, not capacities that add together, and
-          the illustrative AC outputs exceed the existing service rating, which is
-          precisely why a campus electrical and interconnection design has to come first.
-        </p>
-        <p>
-          {company.name} is developing data-center services alongside the {company.parent}
-          energy business. The legal relationship is being documented. Any installed-cost
-          advantage requires documented equipment pricing, warranty and service obligations
-          before a commercial commitment.
-        </p>
+        <p>The on-site transformer and shared distribution serve Buildings A, B and C. Buildings A and C provide {site.dataCenterArea.toLocaleString()} gross sq ft for data-center development; Building B supports batteries, utilities and storage.</p>
+        <p>{site.contractor} is the construction contractor, with a {site.constructionTarget}. The electrical commissioning milestone is an {power.commissioningTarget}. These management targets are part of the development schedule; customer service begins after equipment, cooling and connectivity are ready.</p>
       </div>
-
-      <dl class="figures">
-        <div>
-          <dt>Tract 3</dt>
-          <dd class="is-gold">{solar.tractAcres} acres<span class="sub">Set aside for planned solar and storage</span></dd>
-        </div>
-        <div>
-          <dt>Screening range</dt>
-          <dd>{solar.range}<span class="sub">{solar.status}. Not surveyed capacity and not utility-approved generation.</span></dd>
-        </div>
-        <div>
-          <dt>Storage</dt>
-          <dd>{power.storageRating}<span class="sub">{power.storageNote}</span></dd>
-        </div>
-        <div>
-          <dt>Interconnection</dt>
-          <dd>Unresolved<span class="sub">{power.interconnectionNote}</span></dd>
-        </div>
+      <dl class="spec">
+        <div><dt>Serving utility</dt><dd>{power.utility}</dd></div>
+        <div><dt>On-site transformer</dt><dd>{power.service}<span class="note">One shared service across Buildings A, B and C.</span></dd></div>
+        <div><dt>Apparent service rating</dt><dd>Approximately {serviceKva.toLocaleString()} kVA<span class="note">Calculated from stated voltage and current. This is not an available IT allocation.</span></dd></div>
+        <div><dt>House / office</dt><dd>{power.houseOfficeService}<span class="note">Separate from the data-center building allocation.</span></dd></div>
       </dl>
     </div>
-
-    <p style="margin-top: var(--s-6);">
-      Sizing detail a buyer will want before modelling anything —
-      {' '}<span class="todo">battery quantity, usable energy, C-rate and daily cycling remain to be designed</span>,
-      {' '}<span class="todo">solar configuration, tilt and annual energy yield remain to be designed</span>,
-      and <span class="todo">solar and storage construction and commissioning dates are not committed</span>.
-    </p>
-  </section>
-
-  <section aria-labelledby="economics" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Economics</span></p>
-    <h2 id="economics">What the power costs</h2>
-
-    <p>
-      There is no published rate here yet, so there is no worked example either. The
-      previous version of this page multiplied an estimated load by a rate and an
-      assumed 100% utilisation and presented the product as an annual energy cost. Every
-      input to that was an estimate, and the output read like a quote.
-    </p>
-
-    <dl class="spec">
-      <div><dt>Energy rate</dt><dd><span class="todo">{power.rate}</span></dd></div>
-      <div><dt>Demand charges</dt><dd><span class="todo">The demand-charge schedule will be confirmed with the serving utility.</span></dd></div>
-      <div><dt>Facility overhead</dt><dd><span class="todo">No measured PUE is available before commissioning and operation.</span></dd></div>
-      <div><dt>Tenant billing</dt><dd><span class="todo">Energy metering and billing terms will be specified in the commercial offer.</span></dd></div>
-    </dl>
-
-    <p>
-      When those four exist, the arithmetic goes here in full so you can check it rather
-      than take a "competitive rates" claim on trust. Until then, an estimate dressed as a
-      figure would be worse than the gap.
-    </p>
-
-
-    <p style="margin-top: var(--s-5);">
-      This is arithmetic on two published numbers at full utilisation, for IT load only.
-      It is not a quote, it is not a tenant price, and it does not include cooling
-      overhead, network, or space. Tenant commercial terms are on the
-      {' '}<a href="/colocation">colocation page</a>.
-    </p>
-  </section>
-
-  <section class="is-end" aria-labelledby="unclaimed" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">06</span><span class="eyebrow__t">Not yet claimed</span></p>
-    <h2 id="unclaimed">What we are not claiming about resilience</h2>
-
-    <p>
-      A behind-the-meter position solves schedule. It does not by itself make a claim
-      about uptime, and we are not going to imply one. Every item below is a question a
-      serious tenant asks in the first meeting, and every one of them is open.
-    </p>
-
-    <ul class="bullets">
-      <li><span class="todo">UPS topology and ride-through duration: engineering review pending.</span></li>
-      <li><span class="todo">Standby generation, fuel and runtime: installation and design not verified.</span></li>
-      <li><span class="todo">Distribution and UPS redundancy: no N, N+1 or 2N commitment is made.</span></li>
-      <li><span class="todo">No formal resilience classification is claimed.</span></li>
-      <li><span class="todo">Switchgear and distribution failure points: engineering review pending.</span></li>
-      <li><span class="todo">Uptime commitments and service credits will be agreed before a contract.</span></li>
-      <li><span class="todo">Maintenance windows and notice procedures will be agreed before a contract.</span></li>
-    </ul>
-
-    <div class="actions">
-      <a class="btn" href="/colocation">Colocation terms</a>
-      <a class="btn btn--ghost" href="/site">See the site</a>
+    <div class="callout" style="margin-top: var(--s-6);">
+      <p><strong>Capacity for your deployment.</strong> We size each customer allocation against the electrical design, cooling system and commissioned operating limits. Share your IT load and redundancy requirements to start that review.</p>
     </div>
   </section>
   <ThermalArchitecture />
+  <section aria-labelledby="solar" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Energy development</span></p>
+    <h2 id="solar">Solar and storage, alongside compute.</h2>
+    <div class="split">
+      <div>
+        <p>{solar.publicCopy}</p>
+        <p>{company.parent}, the parent battery producer, connects the campus strategy with energy-storage development. SmartTec.dev LLC operates under SmartTec Holdings LLC, bringing data-center operations into that wider platform.</p>
+        <p>Solar and storage are a planned development phase. Equipment sizing, utility approval and commissioning will establish the contribution they can make to the campus.</p>
+      </div>
+      <div class="card">
+        <h3>Three connected uses</h3>
+        <ul class="bullets">
+          <li>Buildings A and C: compute and colocation.</li>
+          <li>Building B: batteries, utilities and storage.</li>
+          <li>Tract 3: planned solar and energy storage.</li>
+        </ul>
+        <a href="/site">Explore the campus →</a>
+      </div>
+    </div>
+  </section>
+  <section class="is-end" aria-labelledby="deployment" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Your requirements</span></p>
+    <h2 id="deployment">Plan the load, cooling and service together.</h2>
+    <p>A deployment proposal brings together IT power, cooling, metering, support and commercial terms. Include your uptime and compliance requirements so they can be assessed before an offer. No commissioned capacity or uptime guarantee is advertised at this development stage.</p>
+    <div class="actions">
+      <a class="btn" href="/contact">Discuss your deployment</a>
+      <a class="btn btn--ghost" href="/compute">Explore planned compute</a>
+    </div>
+  </section>
 </Content>

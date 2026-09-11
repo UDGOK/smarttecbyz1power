@@ -48,7 +48,7 @@
    ],
    "displayHeightFeet": 0,
    "color": "#7be88a",
-   "description": "Survey-labeled acreage. Simplified boundary visualization; source survey controls.",
+   "description": "Historical survey annotation; the original three tract labels total 39.21 acres, distinct from the current 39.39-acre legal parcel. Survey-labeled acreage. Simplified boundary visualization; source survey controls.",
    "status": "survey-derived schematic"
   },
   {
@@ -79,7 +79,7 @@
    ],
    "displayHeightFeet": 0,
    "color": "#91cbb7",
-   "description": "495-foot tract depth in legal description.",
+   "description": "Historical survey annotation; the original three tract labels total 39.21 acres, distinct from the current 39.39-acre legal parcel. 495-foot tract depth in legal description.",
    "status": "survey-derived schematic"
   },
   {
@@ -110,7 +110,7 @@
    ],
    "displayHeightFeet": 0,
    "color": "#98a7d7",
-   "description": "1200-foot tract depth in legal description.",
+   "description": "Historical survey annotation; the original three tract labels total 39.21 acres, distinct from the current 39.39-acre legal parcel. 1200-foot tract depth in legal description.",
    "status": "survey-derived schematic"
   },
   {
@@ -208,7 +208,7 @@
   },
   {
    "id": "dc-2",
-   "name": "Building B · data center",
+   "name": "Building B · utility / battery / storage",
    "group": "existing",
    "ringFeet": [
     [
@@ -234,7 +234,7 @@
    ],
    "displayHeightFeet": 18,
    "color": "#c5e6d8",
-   "description": "Middle marked metal building. Owner-reported gross area 2,083 sq ft. Owner confirmed on 9 September 2026 that owner mark 2 is Building B. Footprint here is an approximate traced shape, not a measured floor area; the 18 ft height is a display assumption.",
+   "description": "Middle marked metal building. Owner-reported gross area 2,083 sq ft. Owner confirmed on 9 September 2026 that owner mark 2 is Building B. Footprint here is an approximate traced shape, not a measured floor area; the 18 ft height is a display assumption. Current use is utility, battery and storage; excluded from data-center gross area.",
    "status": "existing footprint; owner-confirmed A/B/C label"
   },
   {
@@ -456,10 +456,11 @@
   }
  ],
  "notes": [
-  "Owner annotations identify data-center buildings 1, 2 and 3. The owner confirmed on 9 September 2026 that these are Buildings A, B and C respectively — east, middle and west. The traced footprints rank in the same order as the owner-reported areas (1,500 / 2,083 / 3,535 sq ft), which corroborates the mapping but does not measure it.",
+  "Owner annotations identify structures 1, 2 and 3, confirmed as Buildings A, B and C respectively (east, middle and west). A and C are data-center buildings; B serves utility, battery and storage. Traced footprints are approximate and do not measure the reported gross areas.",
   "Annotated factory rectangles are not drawn to the written dimensions. This model honors 200 × 150 ft and uses approximate positions.",
   "All heights are display assumptions. Site massing is not photogrammetry or architectural design.",
   "11,000 sq ft former-greenhouse concrete pad is intentionally omitted from proposed layers per owner request. Original survey still shows its historical depiction.",
   "No solar yield, panel count or BESS runtime is inferred."
- ]
+ ],
+ "areaBasis": "39.39-acre legal parcel reported by owner 10 September 2026. Historical survey tract labels total 39.21 acres; existing traced geometry is retained."
 }

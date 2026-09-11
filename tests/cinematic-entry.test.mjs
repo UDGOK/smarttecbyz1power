@@ -30,7 +30,7 @@ function entrance(){const e=environment(),loader=new Element(),enter=new Element
 function assertReleased(e){assert.ok(!('entryPending' in e.document.body.dataset));assert.ok(!('inert' in e.main.attributes));assert.equal(e.loader.hidden,true);assert.equal(e.loader.classList.contains('is-done'),true);}
 function pageShow(e,persisted=true){const event=new Event('pageshow');Object.assign(event,{persisted});e.window.dispatchEvent(event);}
 test('first visit enters automatically after the short reveal without audio or a gesture',()=>{
- const e=entrance();try{let starts=0,gestures=0;assert.equal(INTRO_DURATION_MS,4200);initLoader(()=>starts++,()=>gestures++);for(const type of ['wheel','pointerdown','touchstart','keydown'])e.window.dispatchEvent(new Event(type));assert.equal(starts,0);assert.ok('inert' in e.main.attributes);e.fire(INTRO_DURATION_MS);assert.equal(starts,0);e.fire(FADE_MS);assert.equal(starts,1);assert.equal(gestures,0);assertReleased(e);assert.equal(e.document.activeElement,e.main);assert.ok(e.storage.get('smarttec:intro-seen'));assert.equal(e.timers.size,0);}finally{e.restore();}
+ const e=entrance();try{let starts=0,gestures=0;assert.equal(INTRO_DURATION_MS,4200);initLoader(()=>starts++,()=>gestures++);for(const type of ['wheel','pointerdown','touchstart','keydown'])e.window.dispatchEvent(new Event(type));assert.equal(starts,0);assert.ok('inert' in e.main.attributes);e.fire(INTRO_DURATION_MS);assert.equal(starts,0);e.fire(FADE_MS);assert.equal(starts,1);assert.equal(gestures,0);assertReleased(e);assert.equal(e.document.activeElement,e.main);assert.equal(e.timers.size,0);}finally{e.restore();}
 });
 test('Skip cancels automatic entry, tolerates unavailable audio and completes once',()=>{
  const e=entrance();try{let starts=0,gestures=0;initLoader(()=>starts++,()=>{gestures++;throw new Error('audio unavailable');});const staleAuto=[...e.timers.values()][0].fn;assert.equal(e.enter.click().defaultPrevented,true);e.enter.click();staleAuto();assert.equal(starts,0);assert.equal(gestures,1);assert.equal(e.timers.size,1);e.fire(FADE_MS);assert.equal(starts,1);assertReleased(e);assert.equal(e.document.activeElement,e.main);assert.equal(e.timers.size,0);}finally{e.restore();}
@@ -38,10 +38,13 @@ test('Skip cancels automatic entry, tolerates unavailable audio and completes on
 test('automatic fade wins a simultaneous Skip without a second completion or audio',()=>{
  const e=entrance();try{let starts=0,gestures=0;initLoader(()=>starts++,()=>gestures++);e.fire(INTRO_DURATION_MS);e.enter.click();e.fire(FADE_MS);e.enter.click();assert.equal(starts,1);assert.equal(gestures,0);assert.equal(e.timers.size,0);}finally{e.restore();}
 });
+test('repeat visits still show the requested reveal before entering automatically',()=>{
+ const e=entrance();try{e.storage.set('smarttec:intro-seen','true');let starts=0;initLoader(()=>starts++);e.fire(INTRO_DURATION_MS);assert.equal(starts,0);e.fire(FADE_MS);assert.equal(starts,1);assertReleased(e);}finally{e.restore();}
+});
 test('modified Skip clicks preserve their native destination and do not enter early',()=>{
  const e=entrance();try{let starts=0;initLoader(()=>starts++);for(const extra of [{ctrlKey:true},{metaKey:true},{altKey:true},{shiftKey:true},{button:1}])assert.equal(e.enter.click(extra).defaultPrevented,false);assert.equal(starts,0);assert.equal(e.timers.size,1);e.fire(INTRO_DURATION_MS);e.fire(FADE_MS);assert.equal(starts,1);}finally{e.restore();}
 });
-for(const quick of ['reduced motion','repeat visit','hidden startup'])test(`${quick} enters nearly immediately without the animated fade`,()=>{
+for(const quick of ['reduced motion','hidden startup'])test(`${quick} enters nearly immediately without the animated fade`,()=>{
  const e=entrance();try{let starts=0,gestures=0;if(quick==='reduced motion')e.motion.matches=true;if(quick==='repeat visit')e.storage.set('smarttec:intro-seen','true');if(quick==='hidden startup')e.document.hidden=true;assert.equal(REDUCED_INTRO_MS,80);initLoader(()=>starts++,()=>gestures++);e.fire(REDUCED_INTRO_MS);e.fire(0);assert.equal(starts,1);assert.equal(gestures,0);assertReleased(e);assert.equal(e.timers.size,0);}finally{e.restore();}
 });
 for(const interruption of ['tab becomes hidden','reduced motion enabled'])test(`${interruption} completes silently without waiting for the reveal`,()=>{

@@ -1,31 +1,4 @@
-/**
- * Content model, kept separate from presentation.
- *
- * Rewritten against the designer handoff of 9 September 2026, which is the
- * authority for every figure below. That review replaced a set of claims the
- * site had been publishing without support — a 3 MVA service, three identical
- * 3,000 sq ft buildings, a 0.25% utilisation and twentyfold headroom
- * narrative, "no interconnection application required", symmetrical carrier
- * service, and rentable GPUs that have not been procured.
- *
- * Two rules govern everything here, both from the handoff:
- *
- *   1. One shared record generates every occurrence. A figure that appears in
- *      a headline, a scene label, an accessibility string and a meta
- *      description is one constant, so a correction cannot land in four places
- *      and miss a fifth.
- *   2. Status travels with the number. Owner-reported, calculated, planned and
- *      unresolved are different things, and the label is part of the value
- *      rather than a footnote somewhere else on the page.
- *
- * Anything still unconfirmed is qualified as pending and renders with a
- * visible marker. Do not resolve one by inventing a figure.
- */
-
-/**
- * How a fact is known. From the handoff's evidence table — these are its
- * words, and they decide how a value may be published.
- */
+/** Shared record: owner corrections supplied 10 September 2026 in Strategy Plan Verification supersede the earlier handoff. See docs/project-source-of-truth.md. */
 export type Evidence =
   /** The owner supplied it. Publish with accurate scope and status. */
   | 'owner-reported'
@@ -39,7 +12,7 @@ export type Evidence =
   | 'unresolved';
 
 /** The date the handoff's figures were reviewed. */
-export const REVIEWED = '9 September 2026';
+export const REVIEWED = '10 September 2026';
 
 export const company = {
   name: 'SmartTec',
@@ -52,29 +25,27 @@ export const company = {
    * would issue securities — and says not to publish "one company owns
    * everything" until that is documented.
    */
-  entity: 'Contracting entity and relationship to Z1Power are being documented',
+  entity: 'SmartTec.dev LLC',
+  holdingCompany: 'SmartTec Holdings LLC',
 } as const;
 
-/**
- * The campus.
- *
- * Three tracts. The acreage is the sum of the three owner-reported tract
- * sizes, so "approximately 40 acres" is rounded wording rather than a second
- * measurement — the 0.79-acre difference is unexplained and stays that way
- * until the recorded survey settles it.
- */
+/** Legal acreage is authoritative; legacy zone areas remain planning inputs only. */
 export const site = {
   name: 'Mead, Oklahoma',
   designation: 'Site 01',
   address: '8460 US Highway 70, Mead, OK 73449',
   county: 'Bryan County',
 
-  /** Calculated: 13.50 + 7.51 + 18.20. */
-  acres: 39.21,
+  /** Owner-supplied legal acreage. */
+  acres: 39.39,
   /** What may be said in a headline. The exact figure is `acres`. */
-  acresRounded: 'approximately 40 acres',
-  acresNote: 'Sum of three owner-reported tract sizes; reconcile with the recorded survey.',
-  acresEvidence: 'calculated' as Evidence,
+  acresRounded: '39.39 acres',
+  acresNote: 'Owner-supplied legal acreage; planning zones are not a separate legal parcel measurement.',
+  legalDescription: 'SEC 33-6S-8E E2E2NW LESS .61ACS (958-895) FOR HWY',
+  contractor: 'UDGOK',
+  contractorUrl: 'https://udgok.com',
+  constructionTarget: '24 September 2026 target',
+  acresEvidence: 'owner-reported' as Evidence,
 
   ownership: 'Owner-reported as purchased',
   ownershipNote: 'Owning entity, title, liens and valuation scope remain subject to diligence',
@@ -123,14 +94,16 @@ export const site = {
    * the mapping is credible rather than merely asserted.
    */
   buildings: [
-    { id: 'A', sqft: 1500, role: 'Designated for data-center use' },
-    { id: 'B', sqft: 2083, role: 'Designated for data-center use' },
-    { id: 'C', sqft: 3535, role: 'Designated for data-center use; shared electrical distribution originates here' },
+    { id: 'A', sqft: 1500, role: 'Data-center use' },
+    { id: 'B', sqft: 2083, role: 'Battery, utilities and storage' },
+    { id: 'C', sqft: 3535, role: 'Data-center use' },
   ],
   /** Calculated: A + B + C. Gross existing area. */
   buildingArea: 7118,
+  dataCenterArea: 5035,
+  utilityArea: 2083,
   buildingAreaLabel: '7,118 sq ft of existing building area',
-  buildingStatus: 'Fit-out and commissioning status not established',
+  buildingStatus: 'Existing buildings; fit-out and commissioning ahead',
 
   /** Mixed use, and excluded from advertised data-center floor area. */
   houseOffice: {
@@ -148,8 +121,8 @@ export const site = {
     sqftEach: 30000,
     sqftTotal: 60000,
     scope: 'Inverter assembly and manufacturing, battery module and pack assembly, testing and service',
-    startTarget: 'approximately 23 September 2026',
-    startTargetNote: 'Management target. Permit, financing and contractor readiness not independently verified.',
+    startTarget: '24 September 2026 target',
+    startTargetNote: 'Management target supplied 10 September 2026, with UDGOK as contractor; subject to construction readiness.',
     allocation: 'The allocation of inverter and battery assembly between the two buildings is not yet confirmed',
     evidence: 'planned' as Evidence,
   },
@@ -159,7 +132,7 @@ export const site = {
    * the qualifier is inside the value so no interpolation can drop it.
    */
   powerOn: 'Q4 2026 target',
-  powerOnNote: 'Earlier target requiring revalidation. Procurement, building assignment, fit-out, network acceptance and first paid workload are separate milestones.',
+  powerOnNote: 'First service follows equipment installation, cooling, utility commissioning and carrier acceptance. The Q4 target is not an availability guarantee.',
   powerOnEvidence: 'planned' as Evidence,
 } as const;
 
@@ -181,7 +154,10 @@ export const site = {
 export const power = {
   service: '3,000 A at 208 V, three-phase',
   voltage: '208 V three-phase',
-  serviceOrigin: 'Distributed from Building C to Buildings A, B and C',
+  serviceOrigin: 'Shared campus electrical service',
+  utility: 'OG&E',
+  commissioningTarget: '8 October 2026 target',
+  transformerStatus: 'Transformer on site; utility commissioning planned',
   serviceScope: 'One shared rating across the three buildings, not three separate supplies',
   serviceEvidence: 'owner-reported' as Evidence,
 
@@ -196,7 +172,7 @@ export const power = {
   /** The approved wording for what capacity is actually on offer. */
   allocation: 'Usable IT capacity will be allocated following electrical, cooling and commissioning review',
 
-  transformerNameplate: 'Transformer and feeder ratings, utility allocation and the single-line diagram await engineering verification',
+  transformerNameplate: 'An on-site 3,000 A, 208 V, three-phase transformer is reported through OG&E. Final IT allocation follows electrical design and commissioning.',
 
   rate: 'a contracted rate and demand-charge schedule to be agreed before an offer',
 
@@ -205,14 +181,14 @@ export const power = {
    * 10 at C, and also says all three buildings are cooled — which leaves
    * Building A unassigned. That contradiction is not silently corrected here.
    */
-  hvac: 'Existing HVAC serves the data-center buildings. Building-specific cooling capacity and operating limits are being documented for the planned deployments.',
-  hvacUnresolved: 'Building-specific HVAC ratings and the equipment serving Building A await verification',
+  hvac: 'Cooling serves data-center Buildings A and C, with a candidate mechanical yard behind utility Building B and separate facility-water and technology-cooling loops.',
+  hvacUnresolved: 'Final cooling equipment, fluid temperatures and redundancy follow the selected servers and engineering design.',
   hvacEvidence: 'unresolved' as Evidence,
 
   /** Storage. A power rating; the usable energy and status are not known. */
   storage: 'Z1Power LFP battery cabinets',
   storageRating: '2 MW reported',
-  storageNote: 'A power rating. Usable MWh, installed status and transfer architecture are unresolved.',
+  storageNote: 'Z1Power storage is planned alongside solar. Cabinet quantity, usable MWh and backup design will be sized to the approved load.',
   storageSiting: 'Concrete pads behind Building B are a candidate location only',
   storageEvidence: 'unresolved' as Evidence,
 
@@ -221,7 +197,7 @@ export const power = {
    * Utility requirements are specific to the serving utility, which has not
    * been established for this property.
    */
-  interconnection: 'Utility interconnection requirements have not been established for this property',
+  interconnection: 'Solar and storage interconnection will be coordinated with OG&E',
   interconnectionNote: 'Requirements are specific to the serving utility and to the scale of any generation installed.',
   interconnectionEvidence: 'unresolved' as Evidence,
 } as const;
@@ -263,8 +239,9 @@ export const solar = {
 export const network = {
   provider: 'Dobson Telephone Company',
   service: '100 Gbps asymmetrical',
-  leadTime: 'approximately 30 days',
-  leadTimeNote: 'The carrier must confirm when the provisioning period starts',
+  leadTime: '4–8 weeks',
+  deliveryTarget: '8 October–5 November 2026 target window',
+  leadTimeNote: 'Management estimate supplied 10 September 2026; subject to carrier installation and acceptance.',
   secondCircuit: 'A second 100 Gbps circuit can be evaluated',
   diversityNote: 'Two circuits from one carrier do not establish route diversity, independent upstream failure domains or an aggregate rate to a single customer.',
   status: 'Planned — subject to carrier confirmation',
@@ -281,7 +258,7 @@ export const network = {
   profile: 'Committed bandwidth, circuit type, order status, delivery terms, IP arrangements, egress and service levels await carrier confirmation',
 
   /** The approved interim wording, verbatim. */
-  publicCopy: 'High-capacity Dobson connectivity is planned. Management reports a 100 Gbps service option with an approximately 30-day provisioning estimate and the option to evaluate a second 100 Gbps circuit. Final bandwidth profiles, delivery terms and resilience design are subject to carrier confirmation.',
+  publicCopy: 'Dobson fiber is planned, with a management delivery estimate of 4–8 weeks from 10 September 2026. The reported 100 Gbps option, final service levels and resilience design remain subject to carrier confirmation.',
 } as const;
 
 /**
@@ -294,6 +271,9 @@ export const network = {
 export const compute = {
   gpuModel: 'NVIDIA RTX PRO 6000 Blackwell Server Edition',
   servers: 2,
+  b300Servers: 1,
+  phaseSystems: '2 RTX nodes + 1 B300 node',
+  phaseNote: 'Two RTX PRO 6000 Blackwell nodes and one B300 node are planned. The B300 OEM configuration and supporting load are being selected.',
   gpusPerServer: 4,
   gpus: 8,
   vramPerGpu: '96 GB',
@@ -308,15 +288,15 @@ export const compute = {
   workloads: 'Inference, computer vision, rendering and workload-specific fine-tuning',
   workloadNote: 'Training and larger models require benchmarking before any commitment.',
 
-  building: 'Building assignment is not yet confirmed',
+  building: 'Data-center Buildings A and C',
   platform: 'The supported OEM configuration, CPU, memory, local storage and network specification are not yet selected',
 
   /**
    * An estimate, and labelled as one everywhere it appears. It is not a
    * measured load, and it does not establish an approved allocation.
    */
-  load: 'approximately 7.5 kW estimated IT load',
-  loadNote: 'Estimated from board power and host overhead. Not measured, and not an approved facility allocation.',
+  load: 'approximately 7.5 kW estimated RTX-only IT load',
+  loadNote: 'Estimate for two RTX nodes only. Excludes B300, customer-owned racks and facility loads; not a total first-phase power budget.',
   loadEvidence: 'calculated' as Evidence,
 
   /**
@@ -328,15 +308,15 @@ export const compute = {
   target: 'Q4 2026 target',
 
   /** Future evaluations, each needing its own OEM design, benchmark and order. */
-  futurePlatforms: 'B300, AMD and Cerebras are future platform evaluations, not interchangeable upgrades inside the RTX nodes',
+  futurePlatforms: 'B300 is included in the first deployment as a separate node. AMD and Cerebras remain future evaluations.',
 } as const;
 
 /** The three things actually on offer. */
 export const offers = [
   {
     id: 'dedicated',
-    name: 'Dedicated RTX compute',
-    summary: 'Dedicated allocation on the planned RTX PRO 6000 Blackwell nodes.',
+    name: 'Dedicated RTX and B300 compute',
+    summary: 'Dedicated capacity on the planned RTX nodes and separate B300 platform, matched to workload requirements.',
   },
   {
     id: 'hosting',
@@ -387,9 +367,9 @@ export const stages = [
     index: 0,
     scene: 'land' as const,
     ground: '#0e2419',
-    ruler: '-100 BP',
+    ruler: '01 / SITE',
     kicker: 'Site 01 · Mead, Oklahoma',
-    title: 'Forty acres,\nthree tracts.',
+    title: '39.39 acres.\nOne connected plan.',
     lede: `${site.acresRounded} on the US-70 corridor in ${site.county}, across three tracts: manufacturing, the existing buildings, and land for planned solar and storage.`,
     chrome: 'light' as const,
     scrollVh: 250,
@@ -404,13 +384,13 @@ export const stages = [
     index: 1,
     scene: 'wait' as const,
     ground: '#4d0806',
-    ruler: '-75 BP',
-    kicker: 'The industry problem',
-    title: 'Power is\nthe constraint.',
-    lede: 'Across the industry, the gate on new AI capacity has moved from GPU supply to electrical service and the time it takes to secure it.',
+    ruler: '02 / PLAN',
+    kicker: 'The delivery plan',
+    title: 'Built in\nclear phases.',
+    lede: 'UDGOK construction is targeted for 24 September 2026, OG&E commissioning for 8 October, and Dobson fiber for October–early November. First service follows installation and acceptance.',
     chrome: 'light' as const,
     scrollVh: 250,
-    hold: { label: 'Hold to skip the queue', holdLabel: 'Skipping', duration: 1.8 },
+    hold: { label: 'Hold to continue', holdLabel: 'Skipping', duration: 1.8 },
   },
   {
     id: 'power',
@@ -421,10 +401,10 @@ export const stages = [
     index: 2,
     scene: 'power' as const,
     ground: '#1a1204',
-    ruler: '-50 BP',
+    ruler: '03 / POWER',
     kicker: 'On the ground',
-    title: 'Service,\nalready standing.',
-    lede: `Buildings A, B and C share owner-reported ${power.service} distribution originating at Building C. ${site.tracts[2].acres} acres are set aside for planned solar and storage. Usable IT capacity follows engineering review.`,
+    title: 'Power in place.\nCommissioning next.',
+    lede: `An on-site ${power.service} transformer is awaiting OG&E commissioning. A and C will host compute; B supports batteries, utilities and storage. Z1Power connects the solar and storage plan.`,
     chrome: 'light' as const,
     scrollVh: 300,
     hold: { label: 'Hold to energise', holdLabel: 'Energising', duration: 2.0 },
@@ -438,10 +418,10 @@ export const stages = [
     index: 3,
     scene: 'machine' as const,
     ground: '#070a0f',
-    ruler: '-25 BP',
+    ruler: '04 / COMPUTE',
     kicker: 'First phase · planned',
-    title: 'Eight\nBlackwells.',
-    lede: `${compute.servers} planned servers, ${compute.gpusPerServer} × ${compute.gpuModel} each. ${compute.vramPerGpu} per GPU. ${compute.load}. Procurement and commissioning are not complete.`,
+    title: 'RTX + B300.\nTwo compute paths.',
+    lede: `${compute.phaseSystems}, planned alongside customer-owned colocation in Buildings A and C. The RTX nodes have eight 96 GB GPUs in total; B300 is a separate configuration.`,
     chrome: 'light' as const,
     scrollVh: 300,
     hold: { label: 'Hold to power on', holdLabel: 'Powering on', duration: 2.2 },
@@ -455,11 +435,11 @@ export const stages = [
     index: 4,
     scene: 'campus' as const,
     ground: '#dfe5e1',
-    ruler: '0 BP',
+    ruler: '05 / CAMPUS',
     kicker: 'Conceptual campus diagram',
     /** Was "Live." — an unconditional operating state the site does not have. */
     title: 'Walk\nthe campus.',
-    lede: 'Three tracts, three existing buildings, and land for what comes next. Size a deployment and we will confirm what the facility can actually take.',
+    lede: 'A and C for data centers. B for batteries and utilities. Manufacturing, solar and storage complete the campus plan. Explore the site, meet our team, or bring us your workload.',
     chrome: 'dark' as const,
     scrollVh: 200,
     hold: null,

@@ -1,241 +1,73 @@
 ---
 import Content from '../layouts/Content.astro';
 import { company, site, power, network, compute } from '../data/site';
-
-/* Derived from the record rather than retyped. The monthly figure is an
-   unverified commercial input, not a confirmed quote, and is labelled as one
-   wherever it appears. */
-const netMonthly = Number(network.cost.replace(/[^\d.]/g, ''));
-const netGbps = Number((network.service.match(/[\d.]+/) ?? ['0'])[0]);
-const netAnnual = netMonthly * 12;
-const netPerGbps = netMonthly / netGbps;
-/* "100 Gbps" out of "100 Gbps asymmetrical", so the headline figure and its
-   qualifier can be set at different sizes without retyping either. */
-const netHeadline = network.service.split(' ').slice(0, 2).join(' ');
 ---
-
 <Content
-  title={`Colocation and GPU capacity at ${site.designation} | ${company.full}`}
-  description={`Colocation and dedicated compute in ${site.name}. Buildings A, B and C total ${site.buildingArea.toLocaleString()} sq ft of existing building area behind a shared ${power.service} service. First compute is a ${site.powerOn}.`}
+  title={`Colocation and dedicated compute in Mead | ${company.full}`}
+  description={`Plan customer-owned hosting or dedicated RTX and B300 compute at ${site.designation}. Buildings A and C provide ${site.dataCenterArea.toLocaleString()} gross sq ft for data-center development.`}
   kicker="Colocation and dedicated compute"
-  heading="A place for your hardware."
-  lede={`Bring hardware you own, or take a dedicated allocation on the planned nodes. Either way what you get first is an engineering review: ${site.buildingArea.toLocaleString()} sq ft of existing building area is a starting point, not a commissioned data hall.`}
+  heading="Your hardware. Our campus."
+  lede={`Develop your next deployment with SmartTec in ${site.name}. Buildings A and C provide ${site.dataCenterArea.toLocaleString()} gross sq ft for data-center development, supported by an on-site electrical service and a proposed two-loop cooling system.`}
   meta={[
-    { label: 'Existing building area', value: `${site.buildingArea.toLocaleString()} sq ft`, note: 'Buildings A, B and C, gross' },
-    { label: 'Shared service', value: power.service, note: 'From Building C', tone: 'gold' },
-    { label: 'Network', value: netHeadline, note: `${network.provider}, planned` },
-    { label: 'First compute', value: site.powerOn, note: 'Target, not a confirmed date', tone: 'signal' },
+    { label: 'Data-center buildings', value: `${site.dataCenterArea.toLocaleString()} sq ft`, note: 'Buildings A and C, gross area' },
+    { label: 'Utility', value: power.utility, note: power.service, tone: 'gold' },
+    { label: 'Network plan', value: network.service, note: network.provider },
+    { label: 'Current stage', value: 'Development', note: 'Fit-out and commissioning ahead', tone: 'signal' },
   ]}
 >
   <section aria-labelledby="two-ways" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">Two ways to buy</span></p>
-    <h2 id="two-ways">Space and power, or capacity on our machines</h2>
-
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">Choose your approach</span></p>
+    <h2 id="two-ways">Bring your equipment or use our planned nodes.</h2>
     <div class="cards">
-      <div class="card">
-        <p class="card__tag mono-label">Option A</p>
+      <article class="card">
+        <p class="card__tag mono-label">Customer-owned hardware</p>
         <h3>Colocation</h3>
-        <p>
-          You bring the hardware. We provide space in Buildings A, B or C, power from the
-          shared {power.service} service, cooling, network and hands on site. You keep
-          ownership of your accelerators and your software stack. Your equipment has to
-          fit documented rack dimensions and loading, feeder limits, cooling and access
-          constraints — which is what the review establishes.
-        </p>
-        <p>
-          Sensible for anyone who has already bought GPUs, or who has a procurement
-          relationship they do not want to give up.
-        </p>
+        <p>Keep ownership of your servers and software stack. We assess the space, power, cooling and connectivity needed for your equipment in Buildings A and C.</p>
+        <p>Share rack dimensions, equipment weight, IT load and cooling requirements so we can develop an appropriate deployment proposal.</p>
+      </article>
+      <article class="card">
+        <p class="card__tag mono-label">SmartTec hardware</p>
+        <h3>Dedicated compute</h3>
+        <p>The initial plan includes {compute.phaseSystems}. We match a dedicated allocation to the workload, subject to procurement, commissioning and an agreed offer.</p>
+        <p><a href="/compute">Explore the RTX and B300 plan →</a></p>
+      </article>
+    </div>
+  </section>
+  <section aria-labelledby="infrastructure" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">The campus</span></p>
+    <h2 id="infrastructure">Space, power and cooling planned together.</h2>
+    <div class="split">
+      <div>
+        <p>Buildings A and C are designated for data-center development. Building B supports batteries, utilities and storage, and is excluded from the {site.dataCenterArea.toLocaleString()} sq ft data-center area.</p>
+        <p>The existing shared service is {power.service}, supplied by {power.utility} and distributed from Building C. Customer IT allocations follow engineering review and commissioning.</p>
+        <p>The proposed thermal design combines a warm-water circuit for compatible liquid-cooled servers with a separate chilled-water circuit for active rear-door heat exchangers. Final equipment selection establishes the rack configuration and supported density.</p>
       </div>
       <div class="card">
-        <p class="card__tag mono-label">Option B</p>
-        <h3>GPU capacity</h3>
-        <p>
-          You take a dedicated allocation on the planned fleet — {compute.systems},
-          {' '}{compute.gpus} GPUs in total. {compute.status}. An allocation is subject
-          to procurement, commissioning and agreed commercial terms. The planned specification is on the
-          {' '}<a href="/compute">compute page</a>.
-        </p>
-        <p>
-          Suited to inference, computer vision, rendering and workload-specific
-          fine-tuning. Training and larger models need a benchmark first.
-        </p>
+        <h3>Development milestones</h3>
+        <dl class="spec">
+          <div><dt>Construction</dt><dd>{site.constructionTarget}<span class="note">{site.contractor} contractor.</span></dd></div>
+          <div><dt>Electrical commissioning</dt><dd>{power.commissioningTarget}<span class="note">Management target.</span></dd></div>
+          <div><dt>Fiber delivery</dt><dd>{network.deliveryTarget}<span class="note">Management target; carrier delivery and acceptance required.</span></dd></div>
+        </dl>
+        <p>Customer availability follows equipment and facility acceptance. These milestones do not represent live capacity.</p>
       </div>
     </div>
+    <div class="actions"><a class="btn btn--ghost" href="/power#thermal">Explore power and cooling</a><a class="btn btn--ghost" href="/site">See the campus plan</a></div>
   </section>
-
-  <section aria-labelledby="power-terms" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Power</span></p>
-    <h2 id="power-terms">Power is the product; everything else is logistics</h2>
-
-    <div class="split">
-      <div>
-        <p>
-          Colocation is sold by the kilowatt, not by the square foot, because power is
-          what runs out first. What is standing at {site.designation} is a shared
-          {' '}{power.service} distribution originating at Building C and serving A, B and
-          C — one rating across the three, not three separate supplies.
-        </p>
-        <p>
-          What that converts to in usable IT kilowatts is not something arithmetic can
-          settle. Continuous-load limits, utility allocation, feeder ratings, cooling,
-          existing loads and redundancy all sit between a service rating and an
-          allocation. {power.allocation}. Ask us for one and we will run it.
-        </p>
-        <p>
-          Energy is {power.rate}. How that reaches a tenant invoice —
-          metered pass-through, an all-in rate per kW, or a blend — is
-          {' '}<span class="todo">Power metering and billing will be specified before a contract</span>.
-        </p>
-      </div>
-
-      <dl class="figures">
-        <div>
-          <dt>Shared service</dt>
-          <dd class="is-gold">{power.service}<span class="sub">{power.serviceScope}</span></dd>
-        </div>
-        <div>
-          <dt>Tenant allocation</dt>
-          <dd>On review<span class="sub">{power.allocation}. Request an engineering allocation and we will size it against the actual service.</span></dd>
-        </div>
-      </dl>
-    </div>
-  </section>
-
-  <section aria-labelledby="density" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Density and cooling</span></p>
-    <h2 id="density">Density, and what it asks of the cooling</h2>
-
-    <p>
-      An air-cooled hall stops being able to remove heat long before a modern accelerator
-      rack stops wanting to produce it. That is the physical reason legacy colocation
-      cannot simply be repurposed for AI training: the electrical feed may exist, but the
-      thermal path does not.
-    </p>
-    <p>
-      The planned first phase is {compute.systems}, at {compute.load}. Existing HVAC
-      serves the data-center buildings; building-specific capacity and operating limits
-      are being documented. The cooling method has not been
-      fixed yet, and we are not going to claim one before it is:
-      {' '}<span class="todo">{compute.cooling}</span>. What the building will support at
-      higher density is a separate question, answered below.
-    </p>
-
-    <dl class="spec">
-      <div><dt>Cooling method</dt><dd>{compute.cooling}</dd></div>
-      <div><dt>Design density</dt><dd><span class="todo">Supported rack density and rack count await engineering verification.</span><span class="note">Cooling design and commissioning must establish the supported deployment limits.</span></dd></div>
-      <div><dt>Heat rejection</dt><dd><span class="todo">Heat rejection and any water demand will follow the selected cooling design.</span></dd></div>
-      <div><dt>Coolant loop</dt><dd><span class="todo">Any CDU, loop redundancy and supply-temperature specification depends on the selected design.</span></dd></div>
-      <div><dt>Air-cooled space</dt><dd><span class="todo">Air-cooled rack allocation for supporting equipment will be reviewed with the deployment.</span></dd></div>
-      <div><dt>Efficiency</dt><dd><span class="todo">Measured PUE will be available only after commissioning and operation.</span></dd></div>
-    </dl>
-  </section>
-
   <section aria-labelledby="network" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Network</span></p>
-    <h2 id="network">{network.service} into a field in Oklahoma</h2>
-
-    <div class="split">
-      <div>
-        <p>
-          Rural sites are usually dismissed on connectivity before anyone looks at the
-          power. This one carries a signed quote from {network.provider} for
-          {' '}{network.service} — planned, and asymmetrical rather than a shared
-          business broadband product. {network.status}.
-        </p>
-        <p>
-          At {network.cost}, that is roughly ${netPerGbps.toFixed(2)} per Gbps per month
-          committed, or ${netAnnual.toLocaleString()} a year, with installation waived.
-          The figure is here because a buyer will work it out anyway.
-        </p>
-        <p>
-          What that circuit does not yet include is a second one. Carrier diversity,
-          transit and peering arrangements, and whether cross-connects are available to
-          other tenants are all open:
-          {' '}<span class="todo">A second carrier or physical path, transit and cross-connect terms remain unconfirmed</span>.
-        </p>
-      </div>
-
-      <dl class="spec">
-        <div><dt>Provider</dt><dd>{network.provider}</dd></div>
-        <div><dt>Service</dt><dd>{network.service}<span class="note">{network.status}</span></dd></div>
-        <div><dt>Cost</dt><dd>{network.cost}</dd></div>
-        <div><dt>Term</dt><dd>{network.term}</dd></div>
-        <div><dt>Diversity</dt><dd><span class="todo">A second physical path is not yet verified.</span></dd></div>
-        <div><dt>Tenant allocation</dt><dd><span class="todo">Bandwidth allocation and tenant terms will be confirmed with the carrier.</span></dd></div>
-      </dl>
-    </div>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Connectivity</span></p>
+    <h2 id="network">High-capacity Dobson fiber is planned.</h2>
+    <p>{network.service} connectivity from {network.provider} is planned with a {network.leadTime} delivery estimate. We review tenant bandwidth, traffic patterns and resilience requirements as part of each deployment proposal. The circuit is not yet presented as live service.</p>
   </section>
-
-  <section aria-labelledby="terms" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Commercial terms</span></p>
-    <h2 id="terms">Terms, including the ones we have not set</h2>
-
-    <p>
-      This table is deliberately half empty. The filled rows are contractual facts about
-      the site. The empty ones are decisions that have not been made, and we would rather
-      you negotiated them with us than read an invented number here.
-    </p>
-
-    <div class="scroller" tabindex="0" role="region" aria-label="Colocation terms, scrollable">
-      <table>
-        <caption>Colocation terms, {site.designation}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Term</th>
-            <th scope="col">Position</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><th scope="row">Location</th><td>{site.address} — {site.county}, Oklahoma</td></tr>
-          <tr><th scope="row">Space under review</th><td>Three existing buildings. Allocation, usable rack space and readiness require a site and engineering review.</td></tr>
-          <tr><th scope="row">Service availability</th><td>{site.powerOn} power-on target</td></tr>
-          <tr><th scope="row">Energy</th><td>{power.rate} at the site</td></tr>
-          <tr><th scope="row">Cooling</th><td>{compute.cooling}</td></tr>
-          <tr><th scope="row">Network</th><td>{network.service}, {network.provider} — planned</td></tr>
-          <tr><th scope="row">Minimum commitment</th><td><span class="todo">Minimum kW and rack allocation will be agreed after review.</span></td></tr>
-          <tr><th scope="row">Contract length</th><td><span class="todo">Contract duration will be specified in the offer.</span></td></tr>
-          <tr><th scope="row">Pricing</th><td><span class="todo">Space, power and energy charges will be itemized in the offer.</span></td></tr>
-          <tr><th scope="row">Escalator</th><td><span class="todo">Any annual escalator will be stated in the contract.</span></td></tr>
-          <tr><th scope="row">Deposit</th><td><span class="todo">Deposit or credit-support requirements will be stated in the offer.</span></td></tr>
-          <tr><th scope="row">Uptime SLA</th><td><span class="todo">Uptime commitments and credits are not yet established.</span></td></tr>
-          <tr><th scope="row">Remote hands</th><td>Subject to agreement. <span class="todo">Remote-hands scope, rates, response time and coverage hours require agreement.</span></td></tr>
-          <tr><th scope="row">Site access</th><td><span class="todo">Access arrangements and hours will be agreed before equipment delivery.</span></td></tr>
-          <tr><th scope="row">Physical security</th><td><span class="todo">Physical security and staffing arrangements await documentation.</span></td></tr>
-          <tr><th scope="row">Compliance</th><td><span class="todo">No compliance audit or attestation is claimed today.</span></td></tr>
-          <tr><th scope="row">Shipping and receiving</th><td><span class="todo">Receiving hours, unloading and staging requirements will be coordinated per deployment.</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="callout" style="margin-top: var(--s-6);">
-      <p>
-        <strong>No certifications are claimed on this page.</strong> {company.name} holds
-        no audit attestation it has not named. If a compliance requirement is a gate for
-        you, say so in the first conversation and we will tell you honestly whether the
-        {' '}{site.powerOn} timeline can carry it.
-      </p>
-    </div>
-  </section>
-
-  <section aria-labelledby="hall" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">06</span><span class="eyebrow__t">The hall</span></p>
-    <h2 id="hall">Building A, before fit-out</h2>
-
-    <p class="form-note">Current site photography is not yet published. Arrange a site visit to review the existing buildings; illustrations on this page show concepts only.</p>
-  </section>
-
   <section class="is-end" aria-labelledby="reserve" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">07</span><span class="eyebrow__t">Next</span></p>
-    <h2 id="reserve">Review your deployment</h2>
-    <p>
-      The planned first phase is {compute.gpus} GPUs across {compute.servers} servers. Tell us the load in
-      kilowatts, the shape of the workload, and the date you need it live, and we will
-      review equipment availability, facility allocation and commercial terms before an offer.
-    </p>
-    <div class="actions">
-      <a class="btn" href="/contact">Request a deployment review</a>
-      <a class="btn btn--ghost" href="/power">Review the power position</a>
-    </div>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">From requirements to proposal</span></p>
+    <h2 id="reserve">A clear path to your deployment.</h2>
+    <ol class="bullets">
+      <li><strong>Share the requirements.</strong> Hardware, IT load, cooling, network, target date and any compliance requirements.</li>
+      <li><strong>Review the fit.</strong> We assess the equipment and campus design, and coordinate a site visit where useful.</li>
+      <li><strong>Agree the proposal.</strong> The offer defines the allocation, commercial terms, access, support and service commitments before equipment is deployed.</li>
+    </ol>
+    <p>Colocation terms are developed per proposal. Submitting an inquiry starts the review and does not reserve capacity.</p>
+    <div class="actions"><a class="btn" href="/contact">Request a deployment review</a><a class="btn btn--ghost" href="/compute">Explore planned compute</a></div>
   </section>
 </Content>

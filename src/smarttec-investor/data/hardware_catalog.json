@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-09-09",
+  "reviewedAt": "2026-09-10",
   "purpose": "Private planning catalog; no complete system quotes verified",
   "profiles": [
     {
@@ -27,11 +27,11 @@
       "peakKwPerSystem": null,
       "cooling": "DGX AC reference air-cooled; verify exact ordered configuration and engineering",
       "source": "https://docs.nvidia.com/dgx-pdf/data-center-best-practices-with-dgx-b300-v1.pdf",
-      "status": "Reference power is not measured average or universal HGX power; quote and site design required"
+      "status": "Generic DGX AC reference only; not the selected Phase 1 B300 node. Exact OEM configuration, accelerator count, power and price remain to be supplied."
     },
     {
       "id": "amd-custom",
-      "name": "AMD Instinct OEM platform \u2014 exact selection required",
+      "name": "AMD Instinct OEM platform — exact selection required",
       "quantityUnit": "complete system",
       "exampleAccelerator": "MI355X",
       "exampleAcceleratorMemoryGB": 288,
@@ -43,7 +43,7 @@
     },
     {
       "id": "cerebras-custom",
-      "name": "Cerebras \u2014 exact vendor configuration required",
+      "name": "Cerebras — exact vendor configuration required",
       "quantityUnit": "vendor system",
       "model": null,
       "gpusPerSystem": null,

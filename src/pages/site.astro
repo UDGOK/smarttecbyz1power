@@ -1,300 +1,45 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power, network, solar, compute } from '../data/site';
-
-/* Calculated from the record, so the total can never drift from the parts. */
-const totalSqft = site.buildings.reduce((n, b) => n + b.sqft, 0);
-const tractAcres = site.tracts.reduce((n, t) => n + t.acres, 0);
+import {company,site,power,network,compute} from '../data/site';
 ---
-
-<Content
-  title={`${site.designation} — ${site.name} | ${company.full}`}
-  description={`${site.acresRounded} in ${site.county}, Oklahoma, across three tracts. Buildings A, B and C total ${totalSqft.toLocaleString()} sq ft of existing building area; ${site.manufacturing.sqftTotal.toLocaleString()} sq ft of manufacturing is planned on Tract 1 and ${solar.tractAcres} acres are set aside for energy on Tract 3.`}
-  kicker={`${site.designation} · ${site.county}, Oklahoma`}
-  heading="One campus. Room to build."
-  lede={`${site.address}. ${site.acresRounded} organised as manufacturing land, the existing buildings, and land for planned solar and storage. The three are at genuinely different stages, and this page keeps them apart.`}
-  meta={[
-    { label: 'Campus', value: `${tractAcres.toFixed(2)} acres`, note: 'Three tracts, owner-reported', count: true },
-    { label: 'Existing buildings', value: `${totalSqft.toLocaleString()} sq ft`, note: 'A, B and C — gross, not white space', count: true },
-    { label: 'Shared service', value: power.service, note: power.serviceScope, tone: 'gold' },
-    { label: 'First compute', value: site.powerOn, note: 'Target, requires revalidation', tone: 'signal' },
-  ]}
->
+<Content title={`${site.designation} — ${site.name} | ${company.full}`} description={`A ${site.acres}-acre campus in Mead, Oklahoma. Buildings A and C provide ${site.dataCenterArea.toLocaleString()} sq ft for data-center development; Building B supports batteries, utilities and storage.`} kicker={`${site.designation} / Mead, Oklahoma`} heading="One campus. A connected plan." lede={`${site.acres} acres at ${site.address}. Existing buildings anchor a phased plan for data-center services, inverter and battery assembly, and solar and energy storage.`} meta={[
+  {label:'Legal acreage',value:`${site.acres} acres`,note:'Owner-supplied legal description',count:true},
+  {label:'Data-center buildings',value:`${site.dataCenterArea.toLocaleString()} sq ft`,note:'A + C · gross building area',count:true},
+  {label:'Utility building',value:`${site.utilityArea.toLocaleString()} sq ft`,note:'B · batteries, utilities and storage'},
+  {label:'First compute',value:compute.phaseSystems,note:'Planned · Q4 2026 target',tone:'signal'},
+]}>
   <section aria-labelledby="today" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">On the ground</span></p>
-    <h2 id="today">What exists, and what does not</h2>
-
-    <div class="split">
-      <div>
-        <p>
-          Three buildings stand on Tract 2 — A, B and C, {totalSqft.toLocaleString()} sq ft
-          between them — behind a shared {power.service} distribution originating at
-          Building C. That is the part that exists. None of the three has an established
-          fit-out or commissioning status, and the gross floor area above is not certified
-          white space or sellable rack area.
-        </p>
-      </div>
-      <div>
-        <p>
-          Tract 1 is empty land with {site.manufacturing.buildings} buildings planned on
-          it. Tract 3 is empty land set aside for energy. Neither is under construction.
-          What a tenant is underwriting is a fit-out inside buildings that exist, not a
-          finished facility and not a greenfield promise.
-        </p>
-      </div>
-    </div>
-
-    <blockquote class="pull">
-      <p>{tractAcres.toFixed(2)} acres, from three tract sizes.</p>
-      <p>
-        13.50 + 7.51 + 18.20. "Approximately 40 acres" is the rounded form of that sum
-        rather than a second measurement, and the 0.79-acre difference is unexplained
-        until the recorded survey settles it. We would rather show you the arithmetic than
-        the round number on its own.
-      </p>
-    </blockquote>
+    <p class="eyebrow"><span class="eyebrow__n">01</span><span class="eyebrow__t">The starting point</span></p>
+    <h2 id="today">Existing buildings. The next phase ahead.</h2>
+    <div class="split"><p>Buildings A, B and C already stand on the property. A and C are designated for data-center services; B supports batteries, utilities and storage. An on-site {power.service} transformer is awaiting OG&E commissioning.</p><p>The next steps connect construction, power, cooling and fiber to the first compute deployment. SmartTec is accepting deployment inquiries while fit-out and commissioning are planned; the campus is not yet offering commissioned capacity.</p></div>
+    <div class="actions"><a class="btn" href="/compute">Explore RTX and B300</a><a class="btn btn--ghost" href="/colocation">Bring your own hardware</a></div>
   </section>
-
   <section aria-labelledby="land" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">The land</span></p>
-    <h2 id="land">The parcel</h2>
-
-    <div class="split">
-      <dl class="spec">
-        <div><dt>Address</dt><dd>{site.address}</dd></div>
-        <div><dt>County</dt><dd>{site.county}, Oklahoma</dd></div>
-        <div><dt>Acreage</dt><dd>{tractAcres.toFixed(2)} acres<span class="note">{site.acresNote}</span></dd></div>
-        <div><dt>Tenure</dt><dd>{site.ownership}<span class="note">{site.ownershipNote}</span></dd></div>
-        <div><dt>Frontage</dt><dd>US-70<span class="note">Highway frontage at the address above — the parcel is reached directly from the state highway, not from a county section road.</span></dd></div>
-        <div><dt>Parcel ID</dt><dd><span class="todo">Parcel identifiers and the legal description will be confirmed against the recorded survey and title documents.</span></dd></div>
-        <div><dt>Zoning</dt><dd><span class="todo">Zoning and permitted data-center use await verification.</span></dd></div>
-        <div><dt>Utilities on parcel</dt><dd>Electrical distribution is owner-reported; fibre service is planned and subject to carrier confirmation. <span class="todo">Water, sanitary or septic service, and gas availability are not yet verified.</span></dd></div>
-      </dl>
-
-      <p class="form-note">Current site photography is not yet published. Arrange a site visit to review the existing buildings; illustrations on this page show concepts only.</p>
-    </div>
+    <p class="eyebrow"><span class="eyebrow__n">02</span><span class="eyebrow__t">Location</span></p>
+    <h2 id="land">39.39 acres in Mead, Oklahoma</h2>
+    <dl class="spec"><div><dt>Address</dt><dd>{site.address}</dd></div><div><dt>County</dt><dd>{site.county}, Oklahoma</dd></div><div><dt>Legal acreage</dt><dd>{site.acres} acres</dd></div><div><dt>Legal description</dt><dd>{site.legalDescription}</dd></div><div><dt>Access</dt><dd>US Highway 70</dd></div></dl>
+    <p class="form-note">The legal acreage above follows the owner's 10 September 2026 correction. The campus plan organizes the property into three functional areas; these are planning zones, not a new legal subdivision.</p>
   </section>
-
   <section aria-labelledby="tracts" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">The three tracts</span></p>
-    <h2 id="tracts">One campus, organised in three parts</h2>
-
-    <p>
-      The tract schedule below is the record every other figure on this site is
-      generated from. Two of the three tracts are undeveloped land with plans on them;
-      only Tract 2 has anything standing.
-    </p>
-
-    <div class="scroller" tabindex="0" role="region" aria-label="Tract schedule, scrollable">
-      <table>
-        <caption>Tract schedule, {site.designation}</caption>
-        <thead>
-          <tr>
-            <th scope="col">Tract</th>
-            <th scope="col">Area</th>
-            <th scope="col">Intended use</th>
-            <th scope="col">State today</th>
-          </tr>
-        </thead>
-        <tbody>
-          {site.tracts.map((t) => (
-            <tr>
-              <th scope="row">{t.label}</th>
-              <td class="num">{t.acres.toFixed(2)} acres</td>
-              <td>{t.use}</td>
-              <td>{t.state}</td>
-            </tr>
-          ))}
-          <tr>
-            <th scope="row">Total</th>
-            <td class="num">{tractAcres.toFixed(2)} acres</td>
-            <td>Sum of the three owner-reported tract sizes</td>
-            <td>{site.acresNote}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3 style="margin-top: var(--s-7);">Planned manufacturing, Tract 1</h3>
-    <p>
-      {site.manufacturing.buildings} buildings of
-      {' '}{site.manufacturing.sqftEach.toLocaleString()} sq ft each —
-      {' '}{site.manufacturing.sqftTotal.toLocaleString()} sq ft in total — are planned for
-      {' '}{site.manufacturing.scope.toLowerCase()}. Management targets a construction start
-      {' '}{site.manufacturing.startTarget}. {site.manufacturing.startTargetNote} Nothing is
-      under construction today, and this page will not say otherwise until work starts.
-      {' '}<span class="todo">{site.manufacturing.allocation}</span>
-    </p>
-
-    <h3 style="margin-top: var(--s-6);">Three timelines, deliberately separate</h3>
-    <div class="cards">
-      <div class="card">
-        <h3>Manufacturing</h3>
-        <p>
-          Two planned buildings on Tract 1; construction-start target
-          {' '}{site.manufacturing.startTarget}, subject to confirmation of a dated
-          schedule.
-        </p>
-      </div>
-      <div class="card">
-        <h3>Data center</h3>
-        <p>
-          An {compute.gpus}-GPU initial deployment. Procurement, building assignment,
-          fit-out, network acceptance and first paid workload are separate milestones —
-          {' '}{site.powerOn} is an earlier target requiring revalidation, not a confirmed
-          launch.
-        </p>
-      </div>
-      <div class="card">
-        <h3>Energy</h3>
-        <p>
-          Survey and layout, a load and dispatch study, the utility process, funding,
-          construction and commissioning. No completion date has been committed.
-        </p>
-      </div>
-    </div>
+    <p class="eyebrow"><span class="eyebrow__n">03</span><span class="eyebrow__t">Campus plan</span></p>
+    <h2 id="tracts">Three areas, one development strategy</h2>
+    <div class="cards"><article class="card"><h3>Manufacturing</h3><p>Two planned buildings of {site.manufacturing.sqftEach.toLocaleString()} sq ft each support inverter assembly and battery module and pack assembly, testing and service.</p></article><article class="card"><h3>Data centers and utilities</h3><p>The existing A, B and C buildings anchor the first deployment. The separately identified house and office are excluded from data-center floor area.</p></article><article class="card"><h3>Solar and storage</h3><p>The larger energy tract supports the solar and Z1Power battery-storage plan, with layout and equipment sized through electrical and site design.</p><a href="/power">Explore energy and cooling →</a></article></div>
   </section>
-
   <section aria-labelledby="buildings" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">The buildings</span></p>
-    <h2 id="buildings">Buildings A, B and C</h2>
-
-    <p>
-      Three existing buildings on Tract 2, of three different sizes, totalling
-      {' '}{totalSqft.toLocaleString()} sq ft. This is gross existing building area — not
-      certified white space, not sellable rack area, and not a commissioned data hall.
-      Which building takes the first compute installation has not been confirmed. The
-      house and office, {site.houseOffice.sqft.toLocaleString()} sq ft, are separately
-      identified and excluded from these figures entirely.
-    </p>
-
-    <div class="scroller" tabindex="0" role="region" aria-label="Building schedule, scrollable">
-      <table>
-        <caption>Building schedule, Site 01</caption>
-        <thead>
-          <tr>
-            <th scope="col">Building</th>
-            <th scope="col">Footprint</th>
-            <th scope="col">Role</th>
-            <th scope="col">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {site.buildings.map((b) => (
-            <tr>
-              <th scope="row">Building {b.id}</th>
-              <td class="num">{b.sqft.toLocaleString()} sq ft</td>
-              <td>{b.role}</td>
-              <td>{site.buildingStatus}</td>
-            </tr>
-          ))}
-          <tr>
-            <th scope="row">Total</th>
-            <td class="num">{totalSqft.toLocaleString()} sq ft</td>
-            <td>Gross existing building area across {site.buildings.length} buildings</td>
-            <td><span class="todo">Clear height, floor loading and roof structure await building-specific verification.</span></td>
-          </tr>
-          <tr>
-            <th scope="row">House / office</th>
-            <td class="num">{site.houseOffice.sqft.toLocaleString()} sq ft</td>
-            <td>{site.houseOffice.note}</td>
-            <td>Separate {power.houseOfficeService} supply</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <p style="margin-top: var(--s-5);">
-      Structural and mechanical detail a tenant will ask for before signing —
-      clear height, floor loading in lbs/sq ft, door and equipment access,
-      and the route for liquid cooling pipework — is
-      {' '}<span class="todo">not yet verified against as-built drawings and structural reports for Buildings A, B and C</span>.
-      We would rather show you nothing than a number we have not measured.
-    </p>
-
-    <p class="form-note">Site and equipment photography will be published when available. Arrange a site visit to verify current conditions; the visual concepts on this page are illustrative.</p>
+    <p class="eyebrow"><span class="eyebrow__n">04</span><span class="eyebrow__t">Building roles</span></p>
+    <h2 id="buildings">A and C for compute. B for support.</h2>
+    <div class="scroller" tabindex="0" role="region" aria-label="Building schedule, scrollable"><table><caption>Existing building schedule</caption><thead><tr><th scope="col">Building</th><th scope="col">Gross area</th><th scope="col">Assigned role</th></tr></thead><tbody>{site.buildings.map(b=><tr><th scope="row">Building {b.id}</th><td class="num">{b.sqft.toLocaleString()} sq ft</td><td>{b.role}</td></tr>)}<tr><th scope="row">Data-center area: A + C</th><td class="num">{site.dataCenterArea.toLocaleString()} sq ft</td><td>Gross buildings before fit-out, not rentable white space</td></tr><tr><th scope="row">All three buildings</th><td class="num">{site.buildingArea.toLocaleString()} sq ft</td><td>Includes the {site.utilityArea.toLocaleString()} sq ft utility building</td></tr></tbody></table></div>
+    <p>The two-loop cooling concept serves A and C, with a candidate mechanical yard behind B. Final rack positions, access, cooling equipment and electrical allocations follow the deployment design.</p><a class="btn btn--ghost" href="/power#thermal">See the cooling architecture</a>
   </section>
-
-  <section aria-labelledby="why" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Location</span></p>
-    <h2 id="why">Why Mead</h2>
-
-    <p>
-      The location argument is not about a metro or a fibre hub. It is about what was
-      already sitting on this parcel when we bought it.
-    </p>
-
-    <div class="cards">
-      <div class="card">
-        <h3>The service was already there</h3>
-        <p>
-          {power.service}, shared across Buildings A, B and C from Building C. A
-          greenfield build starts by asking a utility for load; this starts with
-          distribution already installed. What it can carry as IT load is a separate
-          question, and it follows an engineering review.
-        </p>
-      </div>
-      <div class="card">
-        <h3>The buildings were already there</h3>
-        <p>
-          {totalSqft.toLocaleString()} sq ft of existing building across A, B and C
-          removes ground-up construction from the critical path. The first deployment is a
-          fit-out rather than a build — and a fit-out that has not started.
-        </p>
-      </div>
-      <div class="card">
-        <h3>The land is owned, not optioned</h3>
-        <p>
-          {site.ownership} in {site.county}. Which entity holds it, and what liens sit
-          against it, is being documented before this page says more than that.
-        </p>
-      </div>
-      <div class="card">
-        <h3>Connectivity is planned</h3>
-        <p>
-          {network.publicCopy} Rural Oklahoma is often written off on connectivity; this
-          parcel looks better than that, and a quote, an order and a live circuit are
-          three different stages.
-        </p>
-      </div>
-    </div>
+  <section aria-labelledby="schedule" data-reveal>
+    <p class="eyebrow"><span class="eyebrow__n">05</span><span class="eyebrow__t">Delivery milestones</span></p>
+    <h2 id="schedule">A dated plan for the next steps</h2>
+    <div class="scroller" tabindex="0" role="region" aria-label="Delivery milestone schedule"><table><thead><tr><th scope="col">Milestone</th><th scope="col">Target</th><th scope="col">Responsible party</th></tr></thead><tbody><tr><th scope="row">Construction start</th><td>{site.constructionTarget}</td><td><a href={site.contractorUrl}>{site.contractor}</a></td></tr><tr><th scope="row">Transformer commissioning</th><td>{power.commissioningTarget}</td><td>{power.utility}</td></tr><tr><th scope="row">Fiber delivery</th><td>{network.deliveryTarget}</td><td>Dobson</td></tr><tr><th scope="row">First compute service</th><td>{site.powerOn}</td><td>SmartTec</td></tr></tbody></table></div>
+    <p class="form-note">Management targets supplied 10 September 2026. Construction, utility and carrier acceptance, cooling and equipment installation determine the actual service date.</p>
   </section>
-
-  <section aria-labelledby="diligence" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">06</span><span class="eyebrow__t">Diligence</span></p>
-    <h2 id="diligence">What we have not published yet</h2>
-
-    <p>
-      Anything below is a real diligence item a tenant or lender will ask for. We have
-      not published a number because we do not yet have one we would stand behind. This
-      list is here so you can ask for the ones that matter to you rather than discover
-      the gap in week six.
-    </p>
-
-    <ul class="bullets">
-      <li><span class="todo">ALTA survey scope and title commitment: diligence pending.</span></li>
-      <li><span class="todo">Parcel flood-zone determination: diligence pending.</span></li>
-      <li><span class="todo">Phase I environmental assessment: diligence pending.</span></li>
-      <li><span class="todo">Geotechnical bearing capacity for equipment pads and solar foundations: not yet verified.</span></li>
-      <li><span class="todo">Seismic and wind design criteria for Buildings A, B and C: not yet verified.</span></li>
-      <li><span class="todo">Water availability and cooling-loop demand: not yet established.</span></li>
-      <li><span class="todo">Applicable local and state tax treatment: diligence pending.</span></li>
-      <li><span class="todo">Travel and access arrangements are coordinated individually before a site visit.</span></li>
-    </ul>
-  </section>
-
-  <section class="is-end" aria-labelledby="next" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">07</span><span class="eyebrow__t">Next</span></p>
-    <h2 id="next">The electrical position is the reason this site is worth reading about</h2>
-    <p>
-      {tractAcres.toFixed(2)} acres is a good starting position. What makes the schedule
-      worth examining is that distribution is already installed and three buildings are
-      already standing — so the question becomes what they can carry, which is a question
-      an engineer can answer rather than a queue.
-    </p>
-    <div class="actions">
-      <a class="btn" href="/power">Read the power story</a>
-      <a class="btn btn--ghost" href="/contact">Arrange a site visit</a>
-    </div>
+  <section class="is-end" aria-labelledby="why" data-reveal>
+    <p class="eyebrow"><span class="eyebrow__n">06</span><span class="eyebrow__t">Your deployment</span></p>
+    <h2 id="why">Come and see how your requirements fit</h2>
+    <p>Start with the workload, hardware, power and timing you need. We can arrange a site visit and work through the deployment plan with you.</p><div class="actions"><a class="btn" href="/contact">Arrange a conversation</a><a class="btn btn--ghost" href="/about#people">Meet the team</a></div>
   </section>
 </Content>

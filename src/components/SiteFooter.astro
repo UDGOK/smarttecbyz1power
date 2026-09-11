@@ -21,10 +21,10 @@ const year = new Date().getFullYear();
  */
 const ledger = [
   { label: 'Campus', value: `${site.acres} acres · three tracts` },
-  { label: 'Buildings', value: `A/B/C · ${site.buildingArea.toLocaleString()} sq ft existing` },
+  { label: 'Data centers', value: `A + C · ${site.dataCenterArea.toLocaleString()} sq ft gross` },
   { label: 'Service', value: `${power.service} · shared` },
   { label: 'Network', value: `${network.service} · planned` },
-  { label: 'First compute', value: `${compute.gpus} GPUs planned · ${site.powerOn}` },
+  { label: 'First compute', value: `${compute.phaseSystems} · planned` },
 ] as const;
 
 const groups = [
@@ -46,6 +46,7 @@ const groups = [
     heading: 'Company',
     links: [
       { href: '/about', label: `About ${company.name}` },
+      { href: '/about#people', label: 'Our team' },
       { href: '/contact', label: 'Contact' },
     ],
   },
@@ -57,7 +58,7 @@ const groups = [
     <div class="foot__lead">
       <p class="foot__kicker">
         <span class="foot__dot" aria-hidden="true"></span>
-        First compute: {site.powerOn} · Buildings A, B and C are not yet commissioned
+        First compute: {site.powerOn} · fit-out and commissioning ahead
       </p>
       <p class="foot__statement">{company.tagline}</p>
       <div class="foot__mark"><BrandLockup /></div>
@@ -94,7 +95,7 @@ const groups = [
     <p class="foot__fine">© {year} {company.full}. {company.domain}</p>
     <p class="foot__fine">
       Project figures identify owner-reported information and plans.
-      Unconfirmed details are marked as pending verification; illustrations show concepts only.
+      Service begins after commissioning. Illustrations show the planned concept.
     </p>
   </div>
 </footer>

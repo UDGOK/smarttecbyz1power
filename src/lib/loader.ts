@@ -13,13 +13,10 @@ export function initLoader(onComplete: () => void, onGesture?: () => void): void
   if(el.dataset.ready)return;
   el.dataset.ready='true';
   const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
-  let seen=false;
-  try{seen=window.sessionStorage.getItem('smarttec:intro-seen')==='true';}catch{}
   let done=false,completed=false,suspended=false,autoTimer=0,fadeTimer=0;
   const clear=()=>{window.clearTimeout(autoTimer);window.clearTimeout(fadeTimer);};
   const complete=()=>{
     if(completed)return;completed=true;el.hidden=true;release();
-    try{window.sessionStorage.setItem('smarttec:intro-seen','true');}catch{}
     try{onComplete();}finally{
       const main=document.querySelector<HTMLElement>('#main');
       if(main){main.tabIndex=-1;main.focus({preventScroll:true});}
@@ -33,11 +30,11 @@ export function initLoader(onComplete: () => void, onGesture?: () => void): void
     done=true;clear();
     if(gesture){try{onGesture?.();}catch{/* Optional audio never blocks entry. */}}
     el.classList.add('is-done');el.setAttribute('inert','');
-    fadeTimer=window.setTimeout(complete,instant||motion.matches||seen?0:FADE_MS);
+    fadeTimer=window.setTimeout(complete,instant||motion.matches?0:FADE_MS);
   };
-  if(motion.matches||seen||document.hidden)el.dataset.quick='true';
+  if(motion.matches||document.hidden)el.dataset.quick='true';
   else el.dataset.playing='true';
-  autoTimer=window.setTimeout(()=>finish(false,document.hidden),motion.matches||seen||document.hidden?REDUCED_INTRO_MS:INTRO_DURATION_MS);
+  autoTimer=window.setTimeout(()=>finish(false,document.hidden),motion.matches||document.hidden?REDUCED_INTRO_MS:INTRO_DURATION_MS);
   enter.addEventListener('click',(event:MouseEvent)=>{
     if(event.button!==0||event.metaKey||event.ctrlKey||event.altKey||event.shiftKey)return;
     event.preventDefault();finish(true);

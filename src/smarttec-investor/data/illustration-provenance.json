@@ -1,8 +1,9 @@
 {
-  "status": "HYPOTHETICAL ILLUSTRATION \u2014 NOT A QUOTE, FORECAST OR INVESTMENT OFFER",
-  "reviewedAt": "2026-09-09",
+  "status": "RTX-ONLY HYPOTHETICAL ILLUSTRATION - EXCLUDES B300; NOT A QUOTE, FORECAST OR INVESTMENT OFFER",
+  "reviewedAt": "2026-09-10",
   "scenarioFile": "illustrative-scenario.json",
   "notes": [
+    "This unchanged two-server, eight-RTX-GPU example covers the RTX portion only. The current first phase also includes one B300 node whose configuration, cost and load are not supplied. Its capital, operating costs and revenue are excluded; these results are not the combined first-phase economics.",
     "Initial capital costs total $280,000 plus $50,000 reserve, solely to illustrate the prior $330,000 planning scale. The $80,000 complete-server cost, $100,000 site allowance and $20,000 soft costs are synthetic allocations, not verified prices.",
     "The $8,075/month network assumption is an unverified figure on the website; a 60-month obligation is modeled explicitly. Confirm it before underwriting.",
     "Monthly $9,000/system rate, 80% paid occupancy, 98% collection and 2% sales fees are hypothetical and do not represent signed contracts.",

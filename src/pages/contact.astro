@@ -1,10 +1,7 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power, compute } from '../data/site';
+import { company, site, power, network, compute } from '../data/site';
 import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
-
-/* Split so the headline figure and its qualifier can be set at different sizes
-   without either being retyped away from the site record. */
 
 ---
 
@@ -13,12 +10,12 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
   description={`Talk to ${company.full} about dedicated compute or customer-owned hosting at ${site.name}. A submission is an inquiry — it starts a deployment review, and does not reserve capacity.`}
   kicker="Contact"
   heading="Let’s plan your workload."
-  lede={`The planned first phase is ${compute.servers} servers and ${compute.gpus} GPUs. Tell us the workload and the date you need it, and you will get a review of what the facility can actually take — not a reservation, and not a number we cannot stand behind.`}
+  lede={`Discuss dedicated compute on the planned RTX and B300 nodes, or colocation for your own hardware at ${site.name}. Share your workload and target date so we can assess the deployment together.`}
   meta={[
-    { label: 'Planned GPUs', value: String(compute.gpus), note: compute.systems, tone: 'signal', count: true },
-    { label: 'Power-on target', value: site.powerOn, note: 'Phase 1A compute hall' },
+    { label: 'Initial compute', value: 'RTX + B300', note: compute.phaseSystems, tone: 'signal' },
+    { label: 'Electrical commissioning', value: power.commissioningTarget, note: 'Management target' },
     { label: 'Shared service', value: power.service, note: 'Buildings A, B and C', tone: 'gold' },
-    { label: 'Allocation', value: 'On review', note: power.allocation },
+    { label: 'Data-center buildings', value: `${site.dataCenterArea.toLocaleString()} sq ft`, note: 'Buildings A and C, gross area' },
   ]}
 >
   <section aria-labelledby="form-heading" data-reveal>
@@ -26,10 +23,8 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
     <h2 id="form-heading">Request a deployment review</h2>
 
     <p class="form-note">
-      This is an inquiry. Sending it does not reserve inventory, commit capacity or
-      fix a price — it starts a conversation in which we confirm workload
-      suitability, equipment availability, facility allocation and commercial terms.
-      Inquiries go to <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> through FormSubmit. You can also email us directly. Please do not include confidential information in this form.
+      Tell us about your equipment, workload and timeline. We will review the technical fit and commercial terms before an offer; an inquiry does not reserve capacity.
+      You can also email <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> directly. This form uses FormSubmit for delivery; please keep confidential information out of the initial inquiry.
     </p>
 
     <form class="form" id="reserve-enquiry" method="post" action={FORM_ACTION}>
@@ -61,7 +56,7 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
               aria-describedby="email-hint"
               required
             />
-            <span class="field__hint" id="email-hint">We reply from a person, not a sequence.</span>
+            <span class="field__hint" id="email-hint">Use an address where we can reach you about the deployment.</span>
           </p>
 
           <p class="field">
@@ -100,16 +95,14 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
               placeholder="Leave blank if not yet known"
             />
             <span class="field__hint" id="load-hint">
-              IT load, not floor area. The planned first phase is {compute.load}. Leave it
-              blank if you do not know yet — a technical input you have not measured is
-              better left empty than guessed.
+              Enter the expected load of your equipment. Leave this blank if you need help sizing it.
             </span>
           </p>
 
           <p class="field">
             <label class="field__label" for="live">Target live date</label>
             <input class="field__input" id="live" name="live_date" type="month" aria-describedby="live-hint" />
-            <span class="field__hint" id="live-hint">Site power-on target is {site.powerOn}.</span>
+            <span class="field__hint" id="live-hint">Electrical commissioning: {power.commissioningTarget}. Fiber: {network.deliveryTarget}. Customer availability follows acceptance.</span>
           </p>
 
           <p class="field">
@@ -133,9 +126,7 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
             rows="5"
             aria-describedby="notes-hint"></textarea>
           <span class="field__hint" id="notes-hint">
-            Workload shape, GPU count, compliance gates, and the diligence items you need
-            answered before you can sign. The open items on these pages are open on
-            purpose — asking about them is the fastest route to a real answer.
+            Include model size, GPU count, storage and network needs, cooling, and any compliance requirements that affect your deployment.
           </span>
         </p>
       </fieldset>
@@ -148,8 +139,7 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
         </button>
         <span class="form__req-note">
           Fields marked <span class="field__req" aria-hidden="true">*</span> are required;
-          leave any technical input blank if it is not yet known. A person reads this,
-          not a sequence.
+          leave technical inputs blank if you need help defining them.
         </span>
       </div>
     </form>
@@ -162,7 +152,7 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
     <div class="split">
       <dl class="spec">
         <div><dt>Email</dt><dd><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></dd></div>
-        <div><dt>Phone</dt><dd><span class="todo">Please email us to arrange a call.</span></dd></div>
+
         <div>
           <dt>Site address</dt>
           <dd>
@@ -174,32 +164,25 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
             </address>
           </dd>
         </div>
-        <div><dt>Site visits</dt><dd>Arranged individually. <span class="todo">Please arrange notice and an escort by email before visiting.</span></dd></div>
-        <div><dt>Response time</dt><dd><span class="todo">We review inquiries individually; no guaranteed response time is currently offered.</span></dd></div>
+        <div><dt>Site visits</dt><dd>Email us to arrange a visit and an on-site contact before traveling.</dd></div>
+
       </dl>
 
       <div class="stack">
         <div class="callout">
           <p>
-            <strong>The short version, if you are comparing sites.</strong> Industry
-            grid interconnection timelines can constrain new capacity. {site.designation} has
-            owner-reported {power.service} distribution already standing. Planned generation
-            and storage require their own design and utility review. Usable IT capacity
-            follows electrical, cooling and commissioning review.
+            <strong>One campus, two ways to deploy.</strong> Bring your equipment or discuss dedicated capacity on the planned {compute.phaseSystems}. Buildings A and C provide {site.dataCenterArea.toLocaleString()} gross sq ft for data-center development, with Building B supporting batteries, utilities and storage.
           </p>
         </div>
 
         <div>
           <h3>What happens after you send this</h3>
           <ol class="bullets">
-            <li>A person reviews your inquiry.</li>
-            <li>We tell you what is genuinely available at {site.designation} for your load and your date — including if the answer is no.</li>
-            <li>We answer the open items on these pages that are gates for you, in writing.</li>
-            <li>Site visit at {site.name}, if the numbers survive step two.</li>
+            <li>We review the workload, equipment and target date.</li>
+            <li>We assess power, cooling, connectivity and campus readiness for your deployment.</li>
+            <li>We coordinate technical follow-up and a site visit where useful.</li>
+            <li>A proposal sets out the configuration, commercial terms and service commitments.</li>
           </ol>
-          <p class="fineprint">
-            Response timing depends on the inquiry; no contractual response time is offered.
-          </p>
         </div>
       </div>
     </div>

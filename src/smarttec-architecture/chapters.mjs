@@ -10,11 +10,11 @@ export const chapters = {
   },
   compute: {
     label:'First compute', number:'02', title:'Start with one rack.',
-    text:'Eight planned RTX PRO 6000 Blackwell Server Edition GPUs across two supported servers. Purchase and commissioning remain separate gates.',
-    fact:'2 servers · 8 GPUs planned', status:'PLANNED FIT-OUT',
+    text:'The first phase combines two existing four-GPU RTX nodes with one B300 node. The B300 configuration and combined facility load are still being defined.',
+    fact:'2 RTX nodes + 1 B300 node', status:'COMMISSIONING PENDING',
     image:'concept-compute', alt:'AI concept of a small equipment room with one rack and two GPU server chassis; not installed equipment',
     model:'module-rack', target:[0,1.15,0], camera:[2.9,2.2,-4.0], distance:[1.7,12],
-    modelNote:'Generic rack study with two illustrative chassis. Not an OEM specification or a surveyed room.'
+    modelNote:'Earlier RTX-only rack study with two illustrative chassis; the additional B300 node is not depicted. Not an OEM specification or a surveyed room.'
   },
   energy: {
     label:'Energy', number:'03', title:'Room for the next phase.',
@@ -34,11 +34,11 @@ export const chapters = {
   },
   overview: {
     label:'Campus layout', number:'05', title:'One property. Three roles.',
-    text:'8460 US 70, Mead, Oklahoma. The supplied survey totals 39.21 acres across three tracts. This overview follows the earlier owner-marked concept.',
-    fact:'39.21 surveyed acres', status:'OWNER-MARKED CONCEPT',
+    text:'8460 US 70, Mead, Oklahoma. The current legal parcel is 39.39 acres. This earlier owner-marked concept retains historical survey tract labels totaling 39.21 acres.',
+    fact:'39.39-acre legal parcel', status:'EARLIER OWNER-MARKED CONCEPT',
     image:'architecture-overview', alt:'Geometry-rendered overview of the owner-marked campus concept, showing manufacturing, existing structures and an illustrative solar zone',
     model:'architecture-model', target:[100,0,360], camera:[700,770,-320], distance:[50,1800],
-    modelNote:'Approximate campus geometry, not a georeferenced satellite overlay or approved site plan.'
+    modelNote:'Historical traced geometry is unchanged. Tract annotations total 39.21 acres, distinct from the current 39.39-acre legal parcel. Not a georeferenced overlay or approved site plan.'
   }
 };
 export const imageDisclosure = key => ['overview','cooling'].includes(key)

@@ -34,7 +34,7 @@ const defaults = { model: models[0]?.id, precision: 'bf16', workload: 'inference
   meta={[
     { label: 'Models', value: String(models.length), note: 'Self-hostable, from OpenRouter', count: true },
     { label: 'Largest', value: largest.params >= 1e12 ? `${(largest.params / 1e12).toFixed(1)}T` : `${(largest.params / 1e9).toFixed(0)}B`, note: largest.name },
-    { label: 'Accelerators', value: String(accelerators.length), note: `One planned here, ${accelerators.length - 1} evaluations`, count: true },
+    { label: 'Accelerators', value: String(accelerators.length), note: `RTX + B300 planned; reference configurations`, count: true },
     { label: 'Catalogue', value: catalogue.fetched, note: 'Refreshed live where available', tone: 'signal' },
   ]}
 >

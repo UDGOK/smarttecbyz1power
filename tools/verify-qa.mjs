@@ -19,6 +19,15 @@ for(const route of routes){
    }
    targets.add(decodeURIComponent(url.pathname));
  }
+ assert.doesNotMatch(doc.body.textContent,/two existing (?:four-GPU |RTX)|whole planned first phase|One planned here|Refreshed every 15 minutes/i);checks++;
+ assert.equal(doc.querySelectorAll('.todo').length,0,`${route}: public placeholder styling remains`);checks++;
+ if(route && route!=='brand') { assert.match(doc.querySelector('footer').textContent,/39\.39 acres/);assert.match(doc.querySelector('footer').textContent,/2 RTX nodes \+ 1 B300 node/);checks+=2; }
+ if(route==='about'){
+   for(const name of ['Syed Hussain','Yasir J.','Muhammad Siddiqui','Ryan','Javed Iqbal, PhD','Shahb Kazmi','Ali Askara','Ken','Daniel']){assert.ok(doc.querySelector('#people').parentElement.textContent.includes(name),`Missing supplied team member ${name}`);checks++;}
+   assert.equal(doc.querySelectorAll('.team-card').length,9);checks++;
+ }
+ if(route==='site'){assert.match(doc.body.textContent,/SEC 33-6S-8E E2E2NW LESS \.61ACS \(958-895\) FOR HWY/);assert.match(doc.body.textContent,/5,035/);checks+=2;}
+ if(route==='compute'){assert.match(doc.body.textContent,/B300/);assert.match(doc.body.textContent,/RTX.only/i);checks+=2;}
  if(route==='contact'||route===''){
    assert.equal(doc.querySelector('form[id^="reserve-"]').action,'https://formsubmit.co/yasir@futonix.com');checks++;
  }

@@ -95,7 +95,7 @@ export const accelerators: Accelerator[] = [
     domainSize: 8,
     interconnect: 'NVLink — 8-GPU coherent domain',
     status: 'evaluation',
-    statusNote: 'Future platform evaluation. Not planned, not ordered, and not a drop-in for the RTX nodes.',
+    statusNote: 'One B300 node is planned for Phase 1. This HGX configuration is a sizing reference; the actual OEM system and accelerator count are not yet selected.',
     source: 'https://www.nvidia.com/en-us/data-center/hgx/',
   },
   {
