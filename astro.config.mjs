@@ -41,6 +41,7 @@ export default defineConfig({
             if (id.endsWith('/src/lib/cinematic.mjs')) return 'cinematic-art';
             if (id.endsWith('/src/lib/menu-preview.mjs')) return 'menu-preview';
             if (id.endsWith('/smarttec-investor/client/pitch-launch.mjs')) return 'investor-pitch-launch';
+            if (id.endsWith('/smarttec-investor/client/pdf-reader.mjs')) return 'investor-pdf-reader';
             if (id.endsWith('/smarttec-investor/client/pitch.mjs') || id.endsWith('/smarttec-investor/client/pitch-state.mjs')) return 'investor-pitch';
           },
         },

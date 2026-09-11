@@ -58,7 +58,13 @@ export async function handle(request,action,dependencies={}){
   if(action==='underwriting-scenario'&&request.method==='POST'){
    const b=await readJson(request,2048);if(b.ownerPricing===true){const selected=ownerStudy.cases.find(c=>c.id===b.id);if(!selected)throw new Error('Unknown owner deployment');return json({scenario:selected.scenario,provenance:scenarioProvenance(selected.scenario)});}if(b.powerBasis!==undefined&&b.powerBasis!=='reported')throw new Error('Unknown power basis');const scenario=b.powerBasis==='reported'?makePowerScenario(b.id,b.kind):makeScenario(b.id,b.kind);return json({scenario,provenance:scenarioProvenance(scenario)});
   }
-  if(action==='presentation'&&['GET','HEAD'].includes(request.method)){const bytes=Buffer.from(investorDeckBase64,'base64');return new Response(request.method==='HEAD'?null:bytes,{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Length':String(bytes.length),'Content-Disposition':`attachment; filename="${deckMetadata.filename}"`}});}
+  if(action==='presentation'&&['GET','HEAD'].includes(request.method)){
+   const bytes=Buffer.from(investorDeckBase64,'base64');
+   const inline=new URL(request.url).searchParams.get('view')==='inline';
+   const headers={...privateHeaders,'Content-Type':'application/pdf','Content-Length':String(bytes.length),'Content-Disposition':`${inline?'inline':'attachment'}; filename="${deckMetadata.filename}"`};
+   if(inline){headers['X-Investor-Session-Expires']=String(session.expires);headers['X-Frame-Options']='SAMEORIGIN';headers['Content-Security-Policy']=headers['Content-Security-Policy'].replace("frame-ancestors 'none'","frame-ancestors 'self'");}
+   return new Response(request.method==='HEAD'?null:bytes,{headers});
+  }
   if(action==='marked-survey'&&request.method==='GET')return new Response(Buffer.from(markedPdf,'base64'),{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="SmartTec_Marked_Layout.pdf"'}});
   if(action==='survey'&&request.method==='GET')return new Response(Buffer.from(surveyPdf,'base64'),{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="SmartTec_Boundary_Survey.pdf"'}});
   if(action==='survey-image'&&request.method==='GET')return new Response(Buffer.from(surveyImage,'base64'),{headers:{...privateHeaders,'Content-Type':'image/png'}});

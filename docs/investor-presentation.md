@@ -12,7 +12,10 @@ The PDF and 13-chapter immersive version address prospective investors. They sta
 - Rebuild with `python tools/build-investor-deck.py` using Python with ReportLab and Pillow, plus Node on PATH. The builder calls `tools/export-investor-deck-data.mjs` to export current readiness inputs and calculate the explicitly historical comparison.
 - The builder also emits server-only PDF bytes and `data/investor-deck.json` metadata. Normal site builds use these committed outputs and do not require Python.
 - Current figures pull from the readiness record; the historical comparison pulls from the ROI engine. Narrative quotes, dates and selected assumptions require editorial review when inputs change. Tests fingerprint the source study and engine so a changed economic model cannot silently leave the PDF stale.
-- The investor header and presentation section link to `/api/investor/presentation`. GET and HEAD require the existing investor session. Responses use private no-store headers and an attachment filename. The PDF is not a public static site asset.
+- PDF entry links open `/investors/presentation` in a new tab with `noopener noreferrer`. This authenticated full-tab reader includes Full screen and Download PDF controls, plus a direct-PDF fallback. True fullscreen requires a user click in that tab.
+- `/api/investor/presentation` remains an authenticated attachment download. Only `?view=inline` returns the same bytes with inline disposition and same-origin embedding permission; all other private routes retain their existing frame restrictions. GET and HEAD require the investor session, with private no-store headers. The PDF is not a public static site asset.
+- The reader checks access before embedding, at session expiry and when the tab becomes active again. Failed access removes the embedded PDF and offers sign-in or retry. Browser settings can force native PDFs to download instead of previewing; the direct and download controls remain available.
+- Reproduce reader browser QA with `INVESTOR_PDF_QA=1` and `INVESTOR_QA_BROWSER=chrome` when running `node tools/test-investor-http.mjs` against a Node build. Screenshots are written under `tmp/pdf-reader`.
 - Website login protects the website download route. It does not make files in the GitHub repository confidential.
 
 ## Validation

@@ -25,11 +25,19 @@ app=spawn(process.execPath,['dist/server/entry.mjs'],{env,stdio:['ignore','pipe'
 let ready=false;for(let i=0;i<60;i++){try{await fetch(origin);ready=true;break;}catch{await new Promise(r=>setTimeout(r,100));}}assert.ok(ready,'Compiled server did not start: '+logs);
 let r=await fetch(origin+'/investors',{redirect:'manual'});assert.equal(r.status,303);checks++;assert.equal(r.headers.get('location'),'/investors/login');checks++;
 r=await fetch(origin+'/investors/pitch',{redirect:'manual'});assert.equal(r.status,303);assert.equal(r.headers.get('location'),'/investors/login');assert.match(r.headers.get('cache-control'),/no-store/);checks++;
+r=await fetch(origin+'/investors/presentation',{redirect:'manual'});assert.equal(r.status,303);assert.equal(r.headers.get('location'),'/investors/login#investor-presentation');assert.match(r.headers.get('cache-control'),/no-store/);assert.equal(r.headers.get('x-frame-options'),'DENY');checks++;
+for(const method of ['GET','HEAD']){r=await fetch(origin+'/api/investor/presentation?view=inline',{method});assert.equal(r.status,401);assert.match(r.headers.get('cache-control'),/no-store/);checks++;}
 r=await fetch(origin+'/investors/login');const login=await r.text();assert.equal(r.status,200);assert.ok(!login.includes('39.21'));assert.ok(!login.includes('scrypt$'));checks++;
 for(const path of ['presentation','bootstrap','survey','survey-image','concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy',...pitchMedia.assets.map(asset=>asset.action)]){r=await fetch(origin+'/api/investor/'+path);assert.equal(r.status,401);checks++;}
 r=await fetch(origin+'/api/investor/login',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({password:'integration-password'})});assert.equal(r.status,200,await r.clone().text());const cookie=r.headers.get('set-cookie').split(';')[0];checks++;
 r=await fetch(origin+'/investors',{headers:{Cookie:cookie}});const page=await r.text();assert.equal(r.status,200);assert.ok(page.includes('8460 US 70, Mead, OK 73449'));assert.ok(page.includes('inv-equipment-rows'));assert.ok(r.headers.get('cache-control').includes('no-store'));checks++;
 assert.equal(r.headers.get('x-frame-options'),'DENY');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);checks++;
+r=await fetch(origin+'/investors/presentation',{headers:{Cookie:cookie}});const readerPage=await r.text();assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.equal(r.headers.get('x-frame-options'),'DENY');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);assert.equal(r.headers.get('x-robots-tag'),'noindex, nofollow');
+const readerDOM=new JSDOM(readerPage),readerDoc=readerDOM.window.document;
+assert.equal(readerDoc.querySelector('#pdf-frame').getAttribute('data-pdf-url'),'/api/investor/presentation?view=inline');assert.equal(readerDoc.querySelector('#pdf-frame').getAttribute('src'),null);assert.equal(readerDoc.querySelector('#pdf-frame').hasAttribute('hidden'),true);
+assert.equal(readerDoc.querySelector('.pdf-download').getAttribute('href'),'/api/investor/presentation');assert.equal(readerDoc.querySelector('#pdf-fullscreen').getAttribute('aria-pressed'),'false');
+for(const script of readerDoc.querySelectorAll('script')){assert.ok(script.src,'PDF controller must stay external under private CSP');assert.equal(script.textContent.trim(),'');}
+readerDOM.window.close();checks++;
 r=await fetch(origin+'/investors/pitch',{headers:{Cookie:cookie}});const pitchPage=await r.text();assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.equal(r.headers.get('x-frame-options'),'SAMEORIGIN');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'self'/);assert.equal(r.headers.get('x-robots-tag'),'noindex, nofollow');checks++;
 const pitchDOM=new JSDOM(pitchPage),pitchDoc=pitchDOM.window.document;
 assert.equal(pitchDoc.querySelectorAll('#pitch-stage [data-chapter]').length,13);
@@ -50,6 +58,9 @@ assert.match(launcherDOM.window.document.querySelector('#opportunity [data-pitch
 assert.equal(launcherDOM.window.document.querySelector('.site-header [data-pitch-launch]')?.getAttribute('href'),'/investors/pitch','Header must offer a direct pitch shortcut');
 assert.equal(launcherDOM.window.document.querySelector('#inv-journey-next')?.getAttribute('href'),'#investor-presentation','Opening navigation must not skip the presentation');
 const launchDialog=launcherDOM.window.document.querySelector('#investor-pitch-dialog');assert.ok(launchDialog);assert.equal(launchDialog.querySelector('iframe').getAttribute('src'),null,'Do not load the pitch before it is opened');launcherDOM.window.close();checks++;
+const pdfLinksDOM=new JSDOM(page),pdfLinks=[...pdfLinksDOM.window.document.querySelectorAll('a[href="/investors/presentation"]')];assert.ok(pdfLinks.length>=2,'Investor entry and presentation section must open the PDF reader');
+for(const link of pdfLinks){assert.equal(link.getAttribute('target'),'_blank');assert.match(link.getAttribute('rel'),/noopener/);assert.match(link.getAttribute('rel'),/noreferrer/);assert.equal(link.hasAttribute('download'),false);}
+pdfLinksDOM.window.close();checks++;
 for(const asset of pitchMedia.assets){
  const url=origin+'/api/investor/'+asset.action;
  r=await fetch(url,{method:'HEAD',headers:{Cookie:cookie,Range:'bytes=0-31'}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),asset.mime);assert.equal(r.headers.get('content-length'),String(asset.bytes));assert.equal(r.headers.get('accept-ranges'),'bytes');assert.equal(r.headers.get('content-range'),null);assert.equal((await r.arrayBuffer()).byteLength,0);assert.match(r.headers.get('cache-control'),/no-store/);checks++;
@@ -125,7 +136,7 @@ assert.equal(owner.scenario.rows.reduce((n,r)=>n+r.systems*r.completeSystemCost,
 r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers:{...headers,'X-CSRF-Token':'invalid'},body:JSON.stringify({id:'proposed-60-20',ownerPricing:true})});assert.equal(r.status,403);checks++;
 r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers,body:JSON.stringify({id:'invented',ownerPricing:true})});assert.equal(r.status,400);checks++;
 dom.window.close();
-assert.ok(page.includes('Download investor presentation'));assert.ok(page.includes('href="/api/investor/presentation"'));checks++;
+assert.ok(page.includes('Open investor presentation'));assert.ok(page.includes('href="/api/investor/presentation"'));checks++;
 for(const key of ['b300-studio','power-supply-concept','campus-dusk']){
  const asset='/assets/investor/'+key+'.webp';assert.ok(page.includes('src="'+asset+'"'));
  const response=await fetch(origin+asset);assert.equal(response.status,200);assert.ok(response.headers.get('content-type').includes('image/webp'));
@@ -367,14 +378,24 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
   assert.deepEqual(browserErrors,[],'Private browser JavaScript errors');
  }finally{await browser.close();}
 }
-r=await fetch(origin+'/api/investor/presentation',{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'application/pdf');assert.ok(r.headers.get('cache-control').includes('no-store'));assert.ok(r.headers.get('content-disposition').includes(deckMetadata.filename));
+if(process.env.INVESTOR_PDF_QA==='1'){const {testInvestorPdfUI}=await import('./test-investor-pdf-ui.mjs');checks+=await testInvestorPdfUI({origin,cookie});}
+r=await fetch(origin+'/api/investor/presentation',{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'application/pdf');assert.ok(r.headers.get('cache-control').includes('no-store'));assert.ok(r.headers.get('content-disposition').includes(deckMetadata.filename));assert.match(r.headers.get('content-disposition'),/^attachment;/);assert.equal(r.headers.get('x-frame-options'),'DENY');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);
 const deckBytes=Buffer.from(await r.arrayBuffer());assert.equal(deckBytes.length,deckMetadata.bytes);assert.equal(createHash('sha256').update(deckBytes).digest('hex'),deckMetadata.sha256);checks++;
 r=await fetch(origin+'/api/investor/presentation',{method:'HEAD',headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-length'),String(deckMetadata.bytes));assert.equal((await r.arrayBuffer()).byteLength,0);checks++;
+for(const method of ['GET','HEAD']){
+ r=await fetch(origin+'/api/investor/presentation?view=inline',{method,headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'application/pdf');assert.equal(r.headers.get('content-length'),String(deckMetadata.bytes));assert.match(r.headers.get('content-disposition'),/^inline;/);assert.ok(r.headers.get('content-disposition').includes(deckMetadata.filename));assert.equal(r.headers.get('x-frame-options'),'SAMEORIGIN');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'self'/);
+ for(const key of ['cache-control','cdn-cache-control','vercel-cdn-cache-control'])assert.match(r.headers.get(key),/no-store/);
+ const bytes=Buffer.from(await r.arrayBuffer());if(method==='HEAD'){assert.equal(bytes.length,0);assert.ok(Number(r.headers.get('x-investor-session-expires'))>Date.now(),'Inline preflight reports the active session expiry');}else assert.deepEqual(bytes,deckBytes);checks++;
+}
+r=await fetch(origin+'/api/investor/presentation?view=unexpected',{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('content-disposition'),/^attachment;/);assert.equal(r.headers.get('x-frame-options'),'DENY');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);assert.deepEqual(Buffer.from(await r.arrayBuffer()),deckBytes);checks++;
+r=await fetch(origin+'/api/investor/presentation?view=inline',{method:'PUT',headers});assert.equal(r.status,405);assert.ok(!r.headers.get('content-type').includes('application/pdf'));checks++;
 r=await fetch(origin+'/api/investor/survey',{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'application/pdf');checks++;
 r=await fetch(origin+'/api/investor/logout',{method:'POST',headers,body:'{}'});assert.equal(r.status,200);checks++;
 r=await fetch(origin+'/investors',{headers:{Cookie:cookie},redirect:'manual'});assert.equal(r.status,303);checks++;
 r=await fetch(origin+'/api/investor/presentation',{headers:{Cookie:cookie}});assert.equal(r.status,401);checks++;
+r=await fetch(origin+'/investors/presentation',{headers:{Cookie:cookie},redirect:'manual'});assert.equal(r.status,303);assert.equal(r.headers.get('location'),'/investors/login#investor-presentation');assert.match(r.headers.get('cache-control'),/no-store/);checks++;
+r=await fetch(origin+'/api/investor/presentation?view=inline',{headers:{Cookie:cookie}});assert.equal(r.status,401);assert.equal(r.headers.get('x-frame-options'),'DENY');checks++;
 r=await fetch(origin+'/investors/pitch',{headers:{Cookie:cookie},redirect:'manual'});assert.equal(r.status,303);assert.equal(r.headers.get('location'),'/investors/login');checks++;
 r=await fetch(origin+'/api/investor/pitch-fiber-video',{headers:{Cookie:cookie,Range:'bytes=0-31'}});assert.equal(r.status,401);checks++;
-console.log(`PASS: ${checks} compiled-server HTTP${process.env.INVESTOR_VISUAL_QA==='1'?' and browser':''} checks; local TLS Redis fixture, not a live Upstash/Vercel deployment.`);
+console.log(`PASS: ${checks} compiled-server HTTP${process.env.INVESTOR_VISUAL_QA==='1'||process.env.INVESTOR_PDF_QA==='1'?' and browser':''} checks; local TLS Redis fixture, not a live Upstash/Vercel deployment.`);
 }finally{app?.kill();if(redis)await new Promise(r=>redis.close(r));assert.ok(resolve(dir).startsWith(resolve(tmpdir())+sep+'smarttec-http-'),'Cleanup must stay inside this test fixture directory');await rm(dir,{recursive:true,force:true});}

@@ -18,7 +18,8 @@ const reviewed=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:
       <small>13 chapters · Runway concept films · Optional sound · Full-screen view</small>
     </a>
     <p class="inv-deck-format">PDF <span>{deck.pages} pages / {size} MB</span></p>
-    <a class="inv-button" href="/api/investor/presentation" download={deck.filename}>Download investor presentation</a>
+    <a class="inv-button" href="/investors/presentation" target="_blank" rel="noopener noreferrer">Open investor presentation ↗</a>
+    <p class="inv-note">Opens in a new tab with full-screen and download controls. <a href="/api/investor/presentation" download={deck.filename}>Download PDF only</a></p>
     <p class="inv-note">{reviewed} edition. Complete funding and updated returns remain open pending customer terms, installed quotes, operating costs and usable power.</p>
     <a href="#owner-deployment">Explore the editable financial scenarios</a>
     <a class="inv-deck-contact" href="mailto:yasir@smarttec.dev?subject=SmartTec%20investment%20diligence">Arrange an investment discussion <span aria-hidden="true">↗</span></a>

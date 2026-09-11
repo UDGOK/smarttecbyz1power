@@ -1,0 +1,60 @@
+---
+import {pageAccess,privateHeaders} from '../../smarttec-investor/server/auth.mjs';
+import deck from '../../smarttec-investor/data/investor-deck.json';
+import SiteFonts from '../../components/SiteFonts.astro';
+import '../../styles/tokens.css';
+export const prerender=false;
+Object.entries(privateHeaders).forEach(([key,value])=>Astro.response.headers.set(key,value));
+const access=await pageAccess(Astro.request);
+if(access.error)return new Response('Private access is temporarily unavailable.',{status:503,headers:privateHeaders});
+if(!access.session)return new Response(null,{status:303,headers:{...privateHeaders,Location:'/investors/login#investor-presentation'}});
+const pdfURL='/api/investor/presentation?view=inline';
+---
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/><meta name="robots" content="noindex,nofollow"/><meta name="theme-color" content="#071b15"/><link rel="icon" href="/favicon.svg" type="image/svg+xml"/><title>SmartTec · Investor presentation</title><SiteFonts /></head>
+<body>
+  <div id="pdf-reader" class="pdf-reader">
+    <header class="pdf-toolbar">
+      <a class="pdf-brand" href="/investors#investor-presentation" aria-label="Return to investor room"><img src="/assets/brand/smarttec-lockup-offwhite-green.svg" width="1231" height="298" alt="SmartTec by Z1Power"/></a>
+      <div class="pdf-heading"><h1>Investor presentation</h1><p>{deck.pages} pages · Private investor edition</p></div>
+      <nav aria-label="Presentation controls">
+        <button id="pdf-fullscreen" type="button" hidden aria-pressed="false">Full screen <span aria-hidden="true">⛶</span></button>
+        <a class="pdf-download" href="/api/investor/presentation" download={deck.filename}>Download PDF <span aria-hidden="true">↓</span></a>
+      </nav>
+    </header>
+    <main class="pdf-document" aria-label="Investor PDF reader">
+      <p id="pdf-loading" class="pdf-loading" role="status" hidden>Opening the presentation…</p>
+      <iframe id="pdf-frame" title="SmartTec investor presentation PDF" data-pdf-url={pdfURL} data-session-expires={access.session.expires} hidden></iframe>
+      <noscript><p class="pdf-no-script">Read the presentation in your browser: <a href={pdfURL}>Open PDF</a>, or use Download PDF above.</p></noscript>
+    </main>
+    <footer class="pdf-footer"><p id="pdf-status" role="status" aria-live="polite">Use the PDF controls to move between pages.</p><a href={pdfURL+'#view=FitH'}>Open PDF directly <span aria-hidden="true">↗</span></a></footer>
+  </div>
+</body>
+</html>
+<script>import '../../smarttec-investor/client/pdf-reader.mjs';</script>
+<style>
+  :global(body){margin:0;background:#071b15;color:#eef1ef;font-family:'Space Grotesk',Arial,sans-serif}
+  :global(*){box-sizing:border-box}
+  .pdf-reader{height:100vh;height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:#071b15}
+  .pdf-toolbar{display:flex;align-items:center;gap:24px;padding:20px 28px;border-bottom:1px solid #375449}
+  .pdf-brand{display:block;flex-shrink:0}
+  .pdf-brand img{display:block;width:155px;height:auto}
+  .pdf-heading{min-width:0;border-left:1px solid #375449;padding-left:24px}
+  h1{font-size:17px;line-height:1.3;margin:0;font-weight:500}
+  .pdf-heading p{font-size:12px;color:#bcd0c5;margin:5px 0 0}
+  nav{display:flex;gap:10px;margin-left:auto;align-items:center}
+  nav a,button,:global(.pdf-loading button){display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:10px 17px;border-radius:999px;border:1px solid #446454;background:transparent;color:#eef1ef;font:500 13px 'Space Grotesk',Arial,sans-serif;text-decoration:none;cursor:pointer;white-space:nowrap}
+  nav .pdf-download{background:#7be88a;color:#071b15;border-color:#7be88a}
+  a:focus-visible,button:focus-visible{outline:2px solid #7be88a;outline-offset:4px}
+  button[hidden],iframe[hidden]{display:none}
+  .pdf-document{position:relative;min-height:0;background:#262c29}
+  iframe{display:block;width:100%;height:100%;border:0;background:#262c29}
+  .pdf-loading,.pdf-no-script{position:absolute;inset:0;display:grid;align-content:center;justify-items:center;gap:12px;text-align:center;padding:32px;margin:0;color:#bcd0c5;font-size:16px}
+  .pdf-loading[hidden]{display:none}
+  .pdf-no-script a{color:#7be88a}
+  .pdf-footer{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:10px 28px;font-size:12px;color:#bcd0c5;border-top:1px solid #375449}
+  .pdf-footer p{margin:0}
+  .pdf-footer a{color:#eef1ef;white-space:nowrap;text-underline-offset:4px}
+  @media(max-width:680px){.pdf-toolbar{flex-wrap:wrap;gap:12px 16px;padding:14px 16px}.pdf-brand img{width:115px}.pdf-heading{padding-left:16px;flex:1}h1{font-size:14px}.pdf-heading p{font-size:11px}nav{width:100%;margin:0}nav a,button{flex:1;min-height:42px}.pdf-footer{padding:10px 16px;gap:12px;align-items:flex-start;font-size:11px}.pdf-footer p{max-width:60%}}
+</style>
