@@ -26,8 +26,9 @@ const usd=(value:number)=>new Intl.NumberFormat('en-US',{style:'currency',curren
   <div class="inv-hero-copy">
     <p class="inv-eyebrow">MEAD, OKLAHOMA / DEVELOPMENT STAGE</p>
     <h1>Build the first revenue.<br/><em>Earn the next expansion.</em></h1>
+    <div class="inv-actions" aria-label="Investor presentations"><a href="/investors/pitch" class="inv-button" data-pitch-launch>Open immersive investor deck <span aria-hidden="true">↗</span></a><a href="/api/investor/presentation" class="inv-outline" download="SmartTec-Investor-Presentation.pdf">Download investor PDF</a></div>
     <p class="inv-lead">A proposed {readiness.hardware.installedGPUs}-B300 deployment on a 39.39-acre campus. Founder funding, long-term site access and a behind-the-meter power strategy support the plan. Customer contracts and complete installed costs are the next milestones.</p>
-    <div class="inv-actions"><a href="#deployment" class="inv-button">Explore the deployment</a><a href="#capital" class="inv-outline">Review the capital plan</a><a href="/api/investor/presentation" class="inv-outline" download="SmartTec-Investor-Presentation.pdf">Download investor PDF</a></div>
+    <nav class="inv-hero-links" aria-label="Explore the investor plan"><a href="#deployment">Explore the deployment ↓</a><a href="#capital">Review the capital plan ↓</a></nav>
   </div>
   <div class="inv-hero-bottom"><span>8460 US 70, Mead, OK 73449<br/><small>AI CONCEPT / NOT A SURVEYED SITE PLAN</small></span><span>PROPOSED FIRST DEPLOYMENT<br/><strong>{readiness.hardware.systems} systems / {readiness.hardware.installedGPUs} B300 GPUs</strong></span></div>
 </section>
@@ -80,6 +81,9 @@ const usd=(value:number)=>new Intl.NumberFormat('en-US',{style:'currency',curren
 <script>import '../../smarttec-investor/client/app.mjs';</script>
 
 <style>
+  .inv-hero-copy [data-pitch-launch]{gap:14px}
+  .inv-hero-links{display:flex;justify-content:center;gap:12px 28px;flex-wrap:wrap;font-size:13px;color:#d0e7d8}
+  .inv-hero-links a{text-underline-offset:4px}
   .inv-current-budget{margin:3rem 0;padding:clamp(1.1rem,3vw,2.25rem);border:1px solid #a7b9ad;background:#e8eee8;border-radius:1rem}
   .inv-current-budget h3{font-size:clamp(1.45rem,2.6vw,2.25rem);line-height:1.2;margin-top:0}
   .inv-current-budget table{width:100%;min-width:760px;border-collapse:collapse;font-variant-numeric:tabular-nums}

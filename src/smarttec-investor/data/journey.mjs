@@ -1,6 +1,7 @@
 // Reading order shared by the menu, ruler and previous/next controls.
 export const journey = Object.freeze([
   {id:'opportunity', label:'The opportunity', note:'A measured beginning'},
+  {id:'investor-presentation', label:'Immersive pitch & PDF', note:'Watch the presentation or download the deck'},
   {id:'campus', label:'Explore the campus', note:'Concepts, models and the survey'},
   {id:'deployment', label:'Deployment under review', note:'Match the fleet to paid demand.'},
   {id:'capital', label:'The capital plan', note:'Existing assets and new funding'},

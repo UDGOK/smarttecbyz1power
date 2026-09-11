@@ -40,6 +40,9 @@ assert.equal(pitchDoc.querySelector('#pitch-sound').getAttribute('aria-pressed')
 const launcherDOM=new JSDOM(page),launchers=[...launcherDOM.window.document.querySelectorAll('a[data-pitch-launch]')];
 assert.ok(launchers.length>0,'Investor room needs a visible pitch launch link');
 for(const link of launchers)assert.equal(link.getAttribute('href'),'/investors/pitch');
+assert.match(launcherDOM.window.document.querySelector('#opportunity [data-pitch-launch]')?.textContent||'',/Open immersive investor deck/,'Opening section must name the immersive deck directly');
+assert.equal(launcherDOM.window.document.querySelector('.site-header [data-pitch-launch]')?.getAttribute('href'),'/investors/pitch','Header must offer a direct pitch shortcut');
+assert.equal(launcherDOM.window.document.querySelector('#inv-journey-next')?.getAttribute('href'),'#investor-presentation','Opening navigation must not skip the presentation');
 const launchDialog=launcherDOM.window.document.querySelector('#investor-pitch-dialog');assert.ok(launchDialog);assert.equal(launchDialog.querySelector('iframe').getAttribute('src'),null,'Do not load the pitch before it is opened');launcherDOM.window.close();checks++;
 for(const asset of pitchMedia.assets){
  const url=origin+'/api/investor/'+asset.action;
@@ -137,7 +140,21 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
   const tab=await context.newPage(),browserErrors=[];
   tab.on('pageerror',error=>browserErrors.push(error.message));
   for(const width of [1440,390]){
-   await tab.setViewportSize({width,height:1000});await tab.goto(origin+'/investors');
+   const height=width===390?844:900;
+   await tab.setViewportSize({width,height});await tab.goto(origin+'/investors');
+   await tab.waitForFunction(()=>document.querySelector('#investor-pitch-dialog')?.dataset.mounted==='true'&&!document.querySelector('.inv-journey-dock').hidden);
+   await tab.evaluate(()=>document.fonts.ready);
+   await tab.waitForFunction(()=>!document.querySelector('#inv-calculator').hidden&&Number(getComputedStyle(document.querySelector('.inv-hero-copy')).opacity)>.99);
+   assert.equal(await tab.evaluate(()=>scrollY),0,'Do not scroll to manufacture initial pitch-link visibility');
+   for(const selector of ['.site-header [data-pitch-launch]','#opportunity [data-pitch-launch]']){
+    const entry=tab.locator(selector),bounds=await entry.boundingBox();
+    assert.ok(bounds&&bounds.x>=0&&bounds.y>=0&&bounds.x+bounds.width<=width+1&&bounds.y+bounds.height<=height,`${width}: ${selector} must be inside the first viewport`);
+    assert.equal(await entry.evaluate(el=>{const r=el.getBoundingClientRect(),hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return el===hit||el.contains(hit);}),true,`${width}: presentation link must be unobscured and clickable`);
+   }
+   await tab.screenshot({path:`tmp/pitch-review/investor-entry-${width}.png`});
+   assert.equal(await tab.locator('#inv-journey-next').getAttribute('href'),'#investor-presentation');
+   await tab.locator('#inv-journey-next').click();
+   await tab.waitForFunction(()=>document.querySelector('#inv-journey-title').textContent==='Immersive pitch & PDF');checks++;
    const section=tab.locator('#investor-presentation');await section.scrollIntoViewIfNeeded();
    await section.locator('img').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
    assert.equal(await tab.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);

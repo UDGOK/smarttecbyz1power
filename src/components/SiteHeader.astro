@@ -19,7 +19,7 @@ const active=mode==='investor'?chapters[0]:chapters.find(ch=>ch.href===current);
     <div class="site-header-ruler__ticks">{chapters.map(ch=><a href={ch.href} aria-label={ch.label} aria-current={ch===active?'location':undefined} data-inv-chapter={mode==='investor'?ch.id:undefined}><i></i><i></i><i></i><i></i></a>)}</div>
     <span class="site-header-ruler__label" id={mode==='investor'?'inv-ruler-label':undefined}>{mode==='investor'?'01 / THE OPPORTUNITY':mode==='login'?'PRIVATE ACCESS':page?String(pageExperiences.indexOf(page)+1).padStart(2,'0')+' / '+page.label.toUpperCase():'SMARTTEC / BRAND'}</span>
   </nav>}
-  {mode==='home'?<PowerBadge />:<a class="power-badge site-header-context" href={mode==='investor'?'#returns':mode==='login'?'/contact':'/investors'}>{mode==='investor'?'Returns':mode==='login'?'Contact SmartTec':'Investor access'}</a>}
+  {mode==='home'?<PowerBadge />:<a class="power-badge site-header-context" href={mode==='investor'?'/investors/pitch':mode==='login'?'/contact':'/investors'} data-pitch-launch={mode==='investor'?true:undefined}>{mode==='investor'?'Immersive deck':mode==='login'?'Contact SmartTec':'Investor access'}</a>}
   <SiteMenu part="toggle" />
 </header>
 <SiteMenu part="overlay" current={current} stageJumps={mode==='home'} investor={mode==='investor'} />
