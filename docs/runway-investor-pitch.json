@@ -1,0 +1,195 @@
+{
+  "version": 1,
+  "provider": "Runway, connected owner workspace",
+  "generatedAt": "2026-09-11",
+  "purpose": "Cinematic backgrounds and stills for the authenticated SmartTec investor presentation.",
+  "disclosure": "AI-generated illustrative concepts; not photographs of installed SmartTec facilities, as-built plans, verified equipment configurations, or specific supplier systems.",
+  "access": "Serve only through authenticated investor media actions. Do not stage into public/.",
+  "generationBudget": {
+    "videoGenerations": 3,
+    "stillGenerations": 1,
+    "paidTopUps": 0
+  },
+  "assets": [
+    {
+      "key": "fiber",
+      "taskId": "16f239b1-7356-46bc-8871-f3eb383e7c99",
+      "model": "seedance-2",
+      "prompt": "One seamless ambient cinematic shot for an institutional technology investor presentation, landscape 16:9. Fine glass fiber-optic strands arc gracefully through the right half of a near-black forest-green space, refined emerald and ivory data pulses flow gently along the strands toward understated abstract graphite compute modules far in the background. Photoreal physical optics, tiny restrained highlights, deep dimensional depth, sophisticated architectural lighting. Slow continuous rhythmic light travel and barely perceptible camera breathing, stable composition, beginning and ending visually compatible for looping. Keep the left third naturally dark and uncluttered for a typography overlay. No text, no logos, no people, no numerical displays, no explosions, no fast flashes, no neon cyberpunk colors. Preserve the premium quiet palette and curved fiber composition of the reference.",
+      "sourceDurationSeconds": 6,
+      "reference": {
+        "publicURL": "https://www.smarttec.dev/assets/investor/fiber-gradient.webp",
+        "type": "previous Runway concept artwork"
+      },
+      "outputs": [
+        "fiber.mp4",
+        "fiber-poster.webp"
+      ],
+      "caption": "Illustrative data-flow concept"
+    },
+    {
+      "key": "campus",
+      "taskId": "9019cd52-b015-417a-b874-c79a0cecfb89",
+      "model": "seedance-2",
+      "prompt": "One continuous restrained dusk aerial shot of an aspirational single-building AI compute facility in open southern Oklahoma prairie, cinematic landscape 16:9, subtle slow lateral drone glide with almost stationary framing suitable for a seamless ambient loop. A single elegant low-rise dark graphite industrial building sits mainly on the right half; practical roofline, warm ivory perimeter lighting, modest neat solar rows beside the building and two discreet unbranded battery enclosures and enclosed mechanical units. Realistic quiet engineering architecture, not a giant hyperscale campus. Deep forest green shadows, muted blue-green twilight sky, warm cream lighting, fine photographic detail and soft atmospheric depth. Dark open grassland foreground and unobstructed sky on left third for typography. Only grass moves softly in the evening breeze. Stable building geometry, no dramatic changes in sunset, no cars or people, no readable text, no brand names, no logos, no watermark, no smoke. Architectural concept rendering, not a documentary image. First and last compositions should closely match for unobtrusive looping.",
+      "sourceDurationSeconds": 6,
+      "outputs": [
+        "campus.mp4",
+        "campus-poster.webp"
+      ],
+      "caption": "Illustrative single-building compute and energy concept",
+      "finishing": "Removed a small invented facade sign during video finishing; no SmartTec or supplier identity is implied."
+    },
+    {
+      "key": "vision",
+      "taskId": "84c9e21f-7b5f-49ce-8d83-46fd47d68558",
+      "model": "nano-banana-pro",
+      "prompt": "A single impeccable architectural photograph-style concept visualization of a compact premium liquid-cooled AI compute room. Landscape 16:9 wide composition, camera low at the entrance looking along a short spotless aisle of four unbranded graphite rack enclosures, discreet stainless steel coolant pipework along rack edges and refined service infrastructure. Credible engineering scale, precise hardware details, fully closed safe panels, no exposed science-fiction machine. Dark forest green and charcoal palette, restrained emerald status indicators, warm ivory architectural light, polished low-reflectance floor, generous dark negative space on the left third for typography overlay. An elegant shaft of diffused light adds depth, quiet cinematic atmosphere, natural physically accurate surfaces and shadow. Premium institutional investor presentation quality, extremely tasteful and minimalist. No people, no logos, no readable text, no watermarks, no neon cyberpunk colors. Illustrative future facility, not a photograph of an installed site or an exact branded server product.",
+      "sourceDimensions": [
+        2752,
+        1536
+      ],
+      "outputs": [
+        "vision.webp"
+      ],
+      "caption": "Illustrative compute-room concept"
+    },
+    {
+      "key": "compute",
+      "taskId": "5c4fd87a-5fa6-4108-a293-c26eb3fa84d8",
+      "model": "seedance-2",
+      "prompt": "Animate this exact premium AI compute-room concept as one very subtle continuous cinematic shot. A gentle almost imperceptible dolly toward the aisle reveals the precise graphite rack surfaces and discreet stainless-steel cooling pipes; soft ivory daylight moves delicately across the floor, emerald status indicators shimmer slowly without flashing. Maintain absolutely stable architecture, rack count, solid equipment and composition. Keep the large dark left area clean for typography. Quiet, confident architectural photography, forest-green charcoal and warm cream palette. Return to the starting framing at the end in an imperceptible smooth camera drift so the clip loops gracefully. No people, no logos or text, no objects appearing, no opening doors, no smoke, no fast lighting changes, no audio. A conceptual future compute room, not an operating-site documentary.",
+      "sourceDurationSeconds": 6,
+      "reference": {
+        "generatedImageTaskId": "84c9e21f-7b5f-49ce-8d83-46fd47d68558",
+        "use": "identical start and end frames"
+      },
+      "outputs": [
+        "compute.mp4",
+        "compute-poster.webp"
+      ],
+      "caption": "Illustrative liquid-cooled compute-room concept"
+    }
+  ],
+  "delivery": {
+    "video": {
+      "container": "MP4",
+      "codec": "H.264 High, Level 4.1",
+      "pixelFormat": "yuv420p",
+      "width": 1920,
+      "height": 1080,
+      "framesPerSecond": 24,
+      "durationSeconds": 5.5,
+      "audio": false,
+      "fastStart": true,
+      "maxBytesPerFile": 2000000,
+      "loop": "Half-second wrap dissolve joins the ending into the initial half-second; next iteration starts at the same source moment."
+    },
+    "poster": {
+      "format": "WebP",
+      "width": 1280,
+      "height": 720,
+      "maxBytesPerFile": 150000
+    },
+    "still": {
+      "format": "WebP",
+      "width": 1920,
+      "height": 1080
+    }
+  },
+  "optimization": {
+    "tools": [
+      "FFmpeg 7.1",
+      "Pillow"
+    ],
+    "h264Settings": {
+      "preset": "slow",
+      "crf": 25,
+      "maxRate": "1500k",
+      "bufferSize": "3000k",
+      "keyframeInterval": 48
+    },
+    "localReproductionHelper": "tmp/optimize-pitch.py",
+    "rawSources": "tmp/pitch-raw/",
+    "signedURLs": "Not included in this document or shipped assets."
+  },
+  "verification": {
+    "completeDecode": "Every final MP4 decoded without errors.",
+    "visualReview": "Inspected generated still, six frame samples per clip, and campus sign-cleanup details.",
+    "reviewFramesSeconds": [
+      0,
+      0.75,
+      1.5,
+      3,
+      4.5,
+      5.4
+    ],
+    "checks": [
+      "Exactly one H.264 video stream and no audio",
+      "yuv420p browser-compatible pixel format",
+      "moov precedes mdat for fast-start",
+      "Each video below 2,000,000 bytes",
+      "Each poster below 150,000 bytes"
+    ],
+    "browserPlayback": "Final authenticated browser playback is verified separately by the integration task."
+  },
+  "files": [
+    {
+      "filename": "campus-poster.webp",
+      "bytes": 26018,
+      "sha256": "a2e58122ce8609dec9bf3768cb13f96f27a317948322fbe5ba30f18566e1da50"
+    },
+    {
+      "filename": "campus.mp4",
+      "bytes": 760584,
+      "sha256": "dc46ff1f76552c8758b6987254c6568ee2bb3758c0a5877facee1d4323cfdd3d"
+    },
+    {
+      "filename": "compute-poster.webp",
+      "bytes": 21356,
+      "sha256": "f74ad009dc8b751be8cc5c5ed6597f31bce709bc183d2589c13e4efc41953f7e"
+    },
+    {
+      "filename": "compute.mp4",
+      "bytes": 895653,
+      "sha256": "a896899a2caac385f41753fe2fb236c46ec75c80a05d15e8c78c217b335e33b7"
+    },
+    {
+      "filename": "fiber-poster.webp",
+      "bytes": 71056,
+      "sha256": "53b970f064e87eee10e361d996c7ed058d1d3ad487e55b5df8fa2096c08836a3"
+    },
+    {
+      "filename": "fiber.mp4",
+      "bytes": 1013440,
+      "sha256": "c1f51126278bca9056a9e67dd521745baa697b1bd60255667123f8439cfc1228"
+    },
+    {
+      "filename": "vision.webp",
+      "bytes": 48722,
+      "sha256": "a54b7a27ab71a0e64e60f6f02e78a0b4cd2905000672cc2dae2ac6022163eb10"
+    }
+  ],
+  "originalRunwayDownloads": [
+    {
+      "filename": "campus.mp4",
+      "bytes": 3873998,
+      "sha256": "73b22db9006f0941c6cf3600f900c93ca8302b0fa37e987c87063406ea0a875d"
+    },
+    {
+      "filename": "compute.mp4",
+      "bytes": 4447307,
+      "sha256": "58b89f3dd4a27000164fc58f866a9c07d90cb5254bd5603e822e3fac01da1ee7"
+    },
+    {
+      "filename": "fiber.mp4",
+      "bytes": 5396465,
+      "sha256": "db4a8547dc99b2412ef40b08662ebb75793c1008398775046b06bf1368bbd0cb"
+    },
+    {
+      "filename": "vision.png",
+      "bytes": 4597186,
+      "sha256": "8f9a2799c532a52b47271b7c3fd9b53def41a29e5f51783dae92991cc57a7151"
+    }
+  ]
+}

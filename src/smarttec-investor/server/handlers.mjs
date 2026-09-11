@@ -4,6 +4,7 @@ import {thermalAsset} from '../../smarttec-architecture/server/thermal-assets.mj
 import {calculateScenario,requiredRateForNPV} from '../roi-engine.mjs';
 import {makeScenario,requiredRevenueMultiplier} from '../underwriting.mjs';
 import {investorDeckBase64} from './investor-deck.mjs';
+import {pitchMediaResponse} from './pitch-media-response.mjs';
 import deckMetadata from '../data/investor-deck.json' with {type:'json'};
 import {makePowerScenario} from '../power-sensitivity.mjs';
 import {answerQuestion,faqList} from './faq.mjs';
@@ -44,6 +45,8 @@ export async function handle(request,action,dependencies={}){
   }
   session=await authenticate(request,store,cfg);
   if(!session)return json({error:'Sign in required.'},401);
+  const pitchMedia= pitchMediaResponse(request,action);
+  if(pitchMedia)return pitchMedia;
   if(request.method==='POST'){
    if(!sameOrigin(request,cfg)||!csrfValid(request,session))return json({error:'Request verification failed.'},403);
    if(!await actionLimit(store,session))return json({error:'Too many requests. Try again shortly.'},429);

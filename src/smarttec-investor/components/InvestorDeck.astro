@@ -10,6 +10,13 @@ const reviewed=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:
     <p>The proposed 64-B300 deployment, founder funding, site agreement and lower-cost cooling options in one presentation. Current evidence and unfinished costs are separated from historical financial comparisons.</p>
   </div>
   <div class="inv-deck-download">
+    <a class="inv-pitch-launch" href="/investors/pitch" data-pitch-launch>
+      <img class="inv-pitch-still" src="/api/investor/pitch-vision-image" alt="New Runway concept of a graphite compute room with emerald indicators" width="2752" height="1536" loading="lazy" decoding="async" />
+      <span class="inv-pitch-tag">NEW / THE CINEMATIC PRESENTATION</span>
+      <strong>See the vision.<br/>Follow the investment case.</strong>
+      <span class="inv-pitch-open">Click here to open the immersive animated version of the investor pitch deck <b aria-hidden="true">↗</b></span>
+      <small>13 chapters · Runway concept films · Optional sound · Full-screen view</small>
+    </a>
     <p class="inv-deck-format">PDF <span>{deck.pages} pages / {size} MB</span></p>
     <a class="inv-button" href="/api/investor/presentation" download={deck.filename}>Download investor presentation</a>
     <p class="inv-note">{reviewed} edition. Complete funding and updated returns remain open pending customer terms, installed quotes, operating costs and usable power.</p>
@@ -33,7 +40,21 @@ const reviewed=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:
     <p class="inv-note">These AI-generated visuals illustrate the strategy. They do not show installed SmartTec equipment, an operating campus or approved engineering plans.</p>
   </div>
 </section>
+<dialog id="investor-pitch-dialog" class="investor-pitch-dialog" aria-label="Immersive SmartTec investor pitch">
+  <div class="pitch-frame-shell">
+    <div id="investor-pitch-loading" class="investor-pitch-loading" role="status">Preparing the SmartTec presentation…</div>
+    <iframe title="SmartTec immersive investor pitch" allow="fullscreen; autoplay" allowfullscreen referrerpolicy="same-origin"></iframe>
+    <button id="investor-pitch-close" class="investor-pitch-close" type="button" aria-label="Close immersive pitch">×</button>
+  </div>
+</dialog>
+<script>import '../client/pitch-launch.mjs';</script>
 <style>
+  .inv-pitch-launch{display:flex;flex-direction:column;gap:16px;padding:26px;margin-bottom:30px;border:1px solid #82efa76b;border-radius:18px;background:#082a20;box-shadow:0 20px 70px #011b1929;text-decoration:none!important;transition:transform .25s,border-color .25s;position:relative;isolation:isolate;overflow:hidden}
+  .inv-deck .inv-pitch-still{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border:0;z-index:-2;opacity:.55}.inv-pitch-launch::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#092719f0,#0927199c 68%,#09271922)}
+  .inv-pitch-launch:hover{transform:translateY(-3px);border-color:#a7f5bd}.inv-pitch-tag{font:9px/1.6 var(--f-mono);letter-spacing:.1em;color:#99efb0}.inv-pitch-launch strong{font:500 clamp(1.7rem,2.4vw,2.3rem)/1.1 var(--f-sans);letter-spacing:-.03em;color:#eef4ed}.inv-pitch-open{display:flex;align-items:center;gap:16px;font:14px/1.55 var(--f-sans);color:#b7ffc8}.inv-pitch-open b{font-size:28px;font-weight:400}.inv-pitch-launch small{font:10px/1.6 var(--f-sans);color:#b0c9ba}
+  .investor-pitch-dialog{position:fixed;inset:0;max-width:none;max-height:none;width:100vw;height:100dvh;padding:0;margin:0;border:0;background:#071b15;overflow:hidden;color:#e8f4eb}.investor-pitch-dialog::backdrop{background:#041710}.pitch-frame-shell{position:relative;width:100%;height:100%;background:#071b15}.pitch-frame-shell:fullscreen{width:100vw;height:100dvh}.pitch-frame-shell iframe{width:100%;height:100%;display:block;border:0;background:transparent}.investor-pitch-close{position:absolute;z-index:10;right:24px;top:24px;width:43px;height:43px;border:1px solid #b0d5b94a;border-radius:50%;color:#e9f7ed;background:#0e3021;cursor:pointer;font:25px/1 var(--f-sans)}.investor-pitch-close:focus-visible{outline:2px solid #86e99d;outline-offset:3px}.investor-pitch-loading{position:absolute;z-index:3;inset:0;display:grid;place-items:center;text-align:center;font:14px/1.6 var(--f-sans);padding:30px;background:radial-gradient(ellipse at 50% 50%,#23523a,#071b15 65%);pointer-events:none}.investor-pitch-loading[hidden]{display:none}
+  @media(max-width:650px){.investor-pitch-close{right:20px;top:18px;width:39px;height:39px}}
+  @media(prefers-reduced-motion:reduce){.inv-pitch-launch{transition:none}.inv-pitch-launch:hover{transform:none}}
   .inv-deck{display:grid;grid-template-columns:1.4fr 1fr;gap:4rem;background:linear-gradient(125deg,#071d16ed,#163e31eb 55%,#285847e8),url('/assets/investor/fiber-gradient.webp') center/cover;border-top:1px solid #ffffff25;border-bottom:1px solid #ffffff25}
   .inv-deck h2{font-size:clamp(2.3rem,4vw,4.2rem)}
   .inv-deck-download{align-self:center;min-width:0}

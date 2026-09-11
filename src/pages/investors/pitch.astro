@@ -1,0 +1,57 @@
+---
+import {pageAccess,privateHeaders} from '../../smarttec-investor/server/auth.mjs';
+import {chapters,pitchContact} from '../../smarttec-investor/data/immersive-pitch.mjs';
+import {investmentReadiness as r} from '../../smarttec-investor/investment-readiness.mjs';
+import deck from '../../smarttec-investor/data/investor-deck.json';
+import SiteFonts from '../../components/SiteFonts.astro';
+import '../../styles/tokens.css';
+import '../../smarttec-investor/styles/pitch.css';
+export const prerender=false;
+const headers={...privateHeaders,'X-Frame-Options':'SAMEORIGIN','Content-Security-Policy':privateHeaders['Content-Security-Policy'].replace("frame-ancestors 'none'","frame-ancestors 'self'")};
+Object.entries(headers).forEach(([key,value])=>Astro.response.headers.set(key,value));
+const access=await pageAccess(Astro.request);
+if(access.error)return new Response('Private access is temporarily unavailable.',{status:503,headers});
+if(!access.session)return new Response(null,{status:303,headers:{...headers,Location:'/investors/login'}});
+const pad=(n:number)=>String(n).padStart(2,'0');
+---
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/><meta name="robots" content="noindex,nofollow"/><meta name="theme-color" content="#071b15"/><meta name="referrer" content="same-origin"/><link rel="icon" href="/favicon.svg" type="image/svg+xml"/><title>SmartTec · The immersive investor pitch</title><SiteFonts /></head>
+<body class="pitch" data-paused="true">
+  <div class="pitch-atmosphere" aria-hidden="true"><img id="pitch-poster" src="/api/investor/pitch-fiber-poster" alt=""/><video id="pitch-film" muted playsinline loop preload="none" disablepictureinpicture></video><div class="pitch-wash"></div><div class="pitch-grain"></div><div class="pitch-orbit"></div><div class="pitch-signal"><i></i><i></i><i></i></div></div>
+  <header class="pitch-toolbar">
+    <a class="pitch-brand" href="/investors" data-pitch-exit aria-label="Return to investor room"><img src="/assets/brand/smarttec-lockup-offwhite-green.svg" width="1231" height="298" alt="SmartTec by Z1Power"/></a>
+    <span class="pitch-edition">PRIVATE INVESTOR EDITION <span>SEPTEMBER 2026</span></span>
+    <div class="pitch-top-actions"><button id="pitch-sound" class="pitch-tool" type="button" aria-pressed="false"><span aria-hidden="true">♫</span> <span data-sound-label>Sound off</span></button><button id="pitch-fullscreen" class="pitch-tool" type="button" aria-label="Enter full screen"><span aria-hidden="true">⛶</span><span class="pitch-wide"> Full screen</span></button><a class="pitch-tool pitch-exit" href="/investors" data-pitch-exit>Close <span aria-hidden="true">×</span></a></div>
+  </header>
+  <main id="pitch-stage" aria-label="SmartTec investor presentation">
+    {chapters.map((chapter,index)=>{
+      const Heading=index===0?'h1':'h2';
+      return <section class:list={['pitch-slide',`pitch-slide--${chapter.kind}`,index===0&&'is-active']} id={`pitch-${chapter.id}`} data-chapter={chapter.id} data-visual={chapter.visual} data-duration={chapter.duration} data-title={chapter.title} hidden={index!==0} aria-labelledby={`pitch-title-${chapter.id}`}>
+        <div class="pitch-content">
+          <div class="pitch-heading"><p class="pitch-eyebrow pitch-reveal"><span>{pad(index+1)}</span> {chapter.eyebrow}</p><Heading class="pitch-title pitch-reveal" id={`pitch-title-${chapter.id}`} tabindex="-1">{chapter.title}</Heading><p class="pitch-lede pitch-reveal">{chapter.lede}</p></div>
+          {chapter.kind==='fleet'&&<div class="pitch-fleet pitch-reveal" role="img" aria-label={`${r.hardware.systems} proposed eight-GPU systems: ${r.hardware.saleableGPUs} saleable GPUs and ${r.hardware.reserveGPUs} financial reserve GPUs, not full-node redundancy.`}><div class="pitch-node-grid">{Array.from({length:r.hardware.systems},(_,node)=><div class="pitch-node"><span>NODE {pad(node+1)}</span><div>{Array.from({length:r.hardware.gpusPerSystem},(_,gpu)=><i class:list={['pitch-gpu',(node*r.hardware.gpusPerSystem+gpu)>=r.hardware.saleableGPUs&&'is-reserve']}></i>)}</div><small>8 × B300</small></div>)}</div><p><i></i> Saleable allocation <i class="is-reserve"></i> Financial reserve</p></div>}
+          {chapter.kind==='power'&&<div class="pitch-power-path pitch-reveal" aria-label="Conceptual solar, battery and gas supply to compute; not a physical electrical diagram"><span>Solar <i aria-hidden="true">☀</i></span><b aria-hidden="true"></b><span>Storage <i aria-hidden="true">▥</i></span><b aria-hidden="true"></b><span>Gas generation <i aria-hidden="true">⌁</i></span><b aria-hidden="true"></b><span class="pitch-power-load">Compute <i aria-hidden="true">▦</i></span></div>}
+          {chapter.kind==='site'&&<div class="pitch-site-mark" aria-hidden="true"><span>{r.property.siteAgreementYears}</span><small>YEARS / REPORTED SITE ACCESS</small></div>}
+          {chapter.metrics.length>0&&<div class="pitch-metrics pitch-reveal" style={`--metrics:${Math.min(4,chapter.metrics.length)}`}>{chapter.metrics.map(metric=><article class="pitch-metric"><p>{metric.label}</p><strong>{metric.value}</strong><span>{metric.note}</span></article>)}</div>}
+          {chapter.kind==='roadmap'&&<div class="pitch-roadmap pitch-reveal">{['Contract the demand','Complete the scope','Procure & commission','Accept the service'].map((label,i)=><div><span>{pad(i+1)}</span><strong>{label}</strong></div>)}</div>}
+          {chapter.team&&<div class="pitch-team pitch-reveal">{chapter.team.map(member=><article><span aria-hidden="true">{member.name.split(' ').slice(0,2).map(word=>word[0]).join('')}</span><div><h3>{member.name}</h3><p>{member.role}</p></div></article>)}</div>}
+          <div class="pitch-points pitch-reveal">{chapter.keypoints.map((point,i)=><p><span aria-hidden="true">{pad(i+1)}</span>{point}</p>)}</div>
+          {chapter.kind==='closing'&&<div class="pitch-closing-actions pitch-reveal"><a class="pitch-primary" href={pitchContact.emailHref+'?subject=SmartTec%20investment%20discussion'}>Arrange a discussion <span aria-hidden="true">↗</span></a><a class="pitch-secondary" href="/api/investor/presentation" download={deck.filename}>Download the PDF <span aria-hidden="true">↓</span></a></div>}
+          <p class="pitch-footnote pitch-reveal">{chapter.footnote}</p>
+        </div>
+      </section>;
+    })}
+  </main>
+  <div class="pitch-reading-hint" id="pitch-reading-hint" hidden>Scroll to read this chapter <span aria-hidden="true">↓</span></div>
+  <footer class="pitch-controls">
+    <div class="pitch-control-top"><button id="pitch-chapters-open" class="pitch-chapters-toggle" type="button" aria-haspopup="dialog"><span aria-hidden="true">☷</span> Chapters <span id="pitch-counter">01 / {pad(chapters.length)}</span></button><span id="pitch-now-title">{chapters[0].title}</span><div class="pitch-nav"><button id="pitch-prev" type="button" aria-label="Previous chapter" disabled>←</button><button id="pitch-play" type="button" aria-label="Play presentation" aria-pressed="false"><span id="pitch-play-icon" aria-hidden="true">▶</span><span class="pitch-sr" id="pitch-play-label">Play presentation</span></button><button id="pitch-next" type="button" aria-label="Next chapter">→</button></div></div>
+    <div class="pitch-progress" role="progressbar" aria-label="Current chapter playback" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="pitch-progress-fill"></span></div>
+    <div class="pitch-control-bottom"><span id="pitch-mode">Use arrows, swipe or scroll to explore</span><span class="pitch-art-note">RUNWAY CONCEPT FILM · NOT INSTALLED EQUIPMENT</span><a href="/api/investor/presentation" download={deck.filename}>PDF edition ↓</a></div>
+  </footer>
+  <p class="pitch-sr" id="pitch-announcement" aria-live="polite" aria-atomic="true"></p>
+  <p id="pitch-media-status" class="pitch-media-status" role="status"></p>
+  <dialog id="pitch-chapters" class="pitch-index" aria-labelledby="pitch-index-title"><header><div><p class="pitch-eyebrow">THE SMARTTEC CASE</p><h2 id="pitch-index-title">Choose a chapter.</h2></div><button id="pitch-chapters-close" class="pitch-tool" type="button" aria-label="Close chapter list">×</button></header><nav aria-label="Pitch chapters">{chapters.map((chapter,i)=><button type="button" data-jump={i} aria-current={i===0?'step':undefined}><span>{pad(i+1)}</span><strong>{chapter.title}</strong><small>{chapter.eyebrow}</small></button>)}</nav><a class="pitch-secondary" href="/api/investor/presentation" download={deck.filename}>Download the current {deck.pages}-page PDF ↓</a></dialog>
+  <noscript><style>.pitch{overflow:auto}.pitch-toolbar,.pitch-controls,.pitch-atmosphere,.pitch-index{display:none}.pitch #pitch-stage{position:static}.pitch-slide,.pitch-slide[hidden]{display:block!important;position:static;overflow:visible;min-height:100vh;padding:3rem 6vw}.pitch-content{max-width:1200px;margin:auto}.pitch-reveal{opacity:1!important;transform:none!important}</style><p class="pitch-no-script">The complete presentation is available below. Enable JavaScript for film, chapter navigation and optional sound. <a href="/investors">Investor room</a></p></noscript>
+  <script>import '../../smarttec-investor/client/pitch.mjs';</script>
+</body></html>

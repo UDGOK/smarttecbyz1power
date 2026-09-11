@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "maxAssetBytes": 2000000,
+  "access": "authenticated-investor-only",
+  "assets": [
+    {
+      "action": "pitch-fiber-video",
+      "filename": "fiber.mp4",
+      "mime": "video/mp4",
+      "bytes": 1013440,
+      "sha256": "c1f51126278bca9056a9e67dd521745baa697b1bd60255667123f8439cfc1228"
+    },
+    {
+      "action": "pitch-fiber-poster",
+      "filename": "fiber-poster.webp",
+      "mime": "image/webp",
+      "bytes": 71056,
+      "sha256": "53b970f064e87eee10e361d996c7ed058d1d3ad487e55b5df8fa2096c08836a3"
+    },
+    {
+      "action": "pitch-compute-video",
+      "filename": "compute.mp4",
+      "mime": "video/mp4",
+      "bytes": 895653,
+      "sha256": "a896899a2caac385f41753fe2fb236c46ec75c80a05d15e8c78c217b335e33b7"
+    },
+    {
+      "action": "pitch-compute-poster",
+      "filename": "compute-poster.webp",
+      "mime": "image/webp",
+      "bytes": 21356,
+      "sha256": "f74ad009dc8b751be8cc5c5ed6597f31bce709bc183d2589c13e4efc41953f7e"
+    },
+    {
+      "action": "pitch-campus-video",
+      "filename": "campus.mp4",
+      "mime": "video/mp4",
+      "bytes": 760584,
+      "sha256": "dc46ff1f76552c8758b6987254c6568ee2bb3758c0a5877facee1d4323cfdd3d"
+    },
+    {
+      "action": "pitch-campus-poster",
+      "filename": "campus-poster.webp",
+      "mime": "image/webp",
+      "bytes": 26018,
+      "sha256": "a2e58122ce8609dec9bf3768cb13f96f27a317948322fbe5ba30f18566e1da50"
+    },
+    {
+      "action": "pitch-vision-image",
+      "filename": "vision.webp",
+      "mime": "image/webp",
+      "bytes": 48722,
+      "sha256": "a54b7a27ab71a0e64e60f6f02e78a0b4cd2905000672cc2dae2ac6022163eb10"
+    }
+  ]
+}

@@ -1,13 +1,15 @@
 // Tests the compiled Node adapter through real HTTP. Redis REST is a local TLS fixture.
 import {createServer as httpsServer} from 'node:https';
 import {createServer} from 'node:net';
-import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {mkdtemp,readFile,rm,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,resolve,sep} from 'node:path';
 import {spawn,execFileSync} from 'node:child_process';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import deckMetadata from '../src/smarttec-investor/data/investor-deck.json' with {type:'json'};
+import pitchMedia from '../src/smarttec-investor/data/pitch-media.json' with {type:'json'};
+import {chapters as pitchChapters} from '../src/smarttec-investor/data/immersive-pitch.mjs';
 import {JSDOM} from 'jsdom';
 import {hashPassword} from '../src/smarttec-investor/server/auth.mjs';
 import {headerSignature} from './header-contract.mjs';
@@ -22,10 +24,30 @@ const env={...process.env,HOST:'127.0.0.1',PORT:String(port),INVESTOR_ORIGIN:ori
 app=spawn(process.execPath,['dist/server/entry.mjs'],{env,stdio:['ignore','pipe','pipe']});let logs='';app.stderr.on('data',b=>logs+=b.toString());
 let ready=false;for(let i=0;i<60;i++){try{await fetch(origin);ready=true;break;}catch{await new Promise(r=>setTimeout(r,100));}}assert.ok(ready,'Compiled server did not start: '+logs);
 let r=await fetch(origin+'/investors',{redirect:'manual'});assert.equal(r.status,303);checks++;assert.equal(r.headers.get('location'),'/investors/login');checks++;
+r=await fetch(origin+'/investors/pitch',{redirect:'manual'});assert.equal(r.status,303);assert.equal(r.headers.get('location'),'/investors/login');assert.match(r.headers.get('cache-control'),/no-store/);checks++;
 r=await fetch(origin+'/investors/login');const login=await r.text();assert.equal(r.status,200);assert.ok(!login.includes('39.21'));assert.ok(!login.includes('scrypt$'));checks++;
-for(const path of ['presentation','bootstrap','survey','survey-image','concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy']){r=await fetch(origin+'/api/investor/'+path);assert.equal(r.status,401);checks++;}
+for(const path of ['presentation','bootstrap','survey','survey-image','concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy',...pitchMedia.assets.map(asset=>asset.action)]){r=await fetch(origin+'/api/investor/'+path);assert.equal(r.status,401);checks++;}
 r=await fetch(origin+'/api/investor/login',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({password:'integration-password'})});assert.equal(r.status,200,await r.clone().text());const cookie=r.headers.get('set-cookie').split(';')[0];checks++;
 r=await fetch(origin+'/investors',{headers:{Cookie:cookie}});const page=await r.text();assert.equal(r.status,200);assert.ok(page.includes('8460 US 70, Mead, OK 73449'));assert.ok(page.includes('inv-equipment-rows'));assert.ok(r.headers.get('cache-control').includes('no-store'));checks++;
+assert.equal(r.headers.get('x-frame-options'),'DENY');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);checks++;
+r=await fetch(origin+'/investors/pitch',{headers:{Cookie:cookie}});const pitchPage=await r.text();assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.equal(r.headers.get('x-frame-options'),'SAMEORIGIN');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'self'/);assert.equal(r.headers.get('x-robots-tag'),'noindex, nofollow');checks++;
+const pitchDOM=new JSDOM(pitchPage),pitchDoc=pitchDOM.window.document;
+assert.equal(pitchDoc.querySelectorAll('#pitch-stage [data-chapter]').length,13);
+assert.deepEqual([...pitchDoc.querySelectorAll('[data-chapter]')].map(slide=>slide.dataset.chapter),pitchChapters.map(chapter=>chapter.id));
+for(const script of pitchDoc.querySelectorAll('script')){assert.ok(script.src,'Pitch controller must stay external under the private CSP');assert.equal(script.textContent.trim(),'');}
+for(const chapter of pitchChapters){const slide=pitchDoc.querySelector(`[data-chapter="${chapter.id}"]`);for(const metric of chapter.metrics)assert.ok(slide.textContent.includes(metric.value),`${chapter.id}: missing financial or project metric ${metric.value}`);}
+assert.equal(pitchDoc.querySelector('#pitch-sound').getAttribute('aria-pressed'),'false');assert.equal(pitchDoc.querySelector('#pitch-film').getAttribute('src'),null);pitchDOM.window.close();checks++;
+const launcherDOM=new JSDOM(page),launchers=[...launcherDOM.window.document.querySelectorAll('a[data-pitch-launch]')];
+assert.ok(launchers.length>0,'Investor room needs a visible pitch launch link');
+for(const link of launchers)assert.equal(link.getAttribute('href'),'/investors/pitch');
+const launchDialog=launcherDOM.window.document.querySelector('#investor-pitch-dialog');assert.ok(launchDialog);assert.equal(launchDialog.querySelector('iframe').getAttribute('src'),null,'Do not load the pitch before it is opened');launcherDOM.window.close();checks++;
+for(const asset of pitchMedia.assets){
+ const url=origin+'/api/investor/'+asset.action;
+ r=await fetch(url,{method:'HEAD',headers:{Cookie:cookie,Range:'bytes=0-31'}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),asset.mime);assert.equal(r.headers.get('content-length'),String(asset.bytes));assert.equal(r.headers.get('accept-ranges'),'bytes');assert.equal(r.headers.get('content-range'),null);assert.equal((await r.arrayBuffer()).byteLength,0);assert.match(r.headers.get('cache-control'),/no-store/);checks++;
+ r=await fetch(url,{headers:{Cookie:cookie,Range:'bytes=0-31'}});assert.equal(r.status,206);assert.equal(r.headers.get('content-range'),`bytes 0-31/${asset.bytes}`);assert.equal(r.headers.get('content-length'),'32');assert.deepEqual(Buffer.from(await r.arrayBuffer()),(await readFile('src/smarttec-investor/media/pitch/'+asset.filename)).subarray(0,32));checks++;
+ r=await fetch(url,{headers:{Cookie:cookie,Range:`bytes=${asset.bytes}-`}});assert.equal(r.status,416);assert.equal(r.headers.get('content-range'),`bytes */${asset.bytes}`);assert.equal((await r.arrayBuffer()).byteLength,0);checks++;
+ r=await fetch(url,{method:'POST',headers:{Cookie:cookie,Origin:origin}});assert.equal(r.status,405);assert.equal(r.headers.get('allow'),'GET, HEAD');checks++;
+}
 // An otherwise successful HTTP response can still ship a dead private menu
 // if Astro inlines its small script and the page CSP refuses to execute it.
 for(const html of [login,page]){
@@ -104,8 +126,14 @@ assert.ok(page.includes('These AI-generated visuals illustrate the strategy'));c
 if(process.env.INVESTOR_VISUAL_QA==='1'){
  const {chromium}=await import('playwright');const browser=await chromium.launch({headless:true,channel:process.env.INVESTOR_QA_BROWSER||undefined});
  try{
-  const context=await browser.newContext();const split=cookie.indexOf('=');
+  await mkdir('tmp/pdfs',{recursive:true});await mkdir('tmp/pitch-review',{recursive:true});
+  const context=await browser.newContext({reducedMotion:'no-preference'});const split=cookie.indexOf('=');
   await context.addCookies([{name:cookie.slice(0,split),value:cookie.slice(split+1),url:origin}]);
+  await context.addInitScript(()=>{
+   window.__pitchAudioContexts=[];
+   const Native=window.AudioContext||window.webkitAudioContext;
+   if(Native)window.AudioContext=new Proxy(Native,{construct(Target,args){const audio=new Target(...args);window.__pitchAudioContexts.push(audio);return audio;}});
+  });
   const tab=await context.newPage(),browserErrors=[];
   tab.on('pageerror',error=>browserErrors.push(error.message));
   for(const width of [1440,390]){
@@ -122,6 +150,131 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
    assert.equal(await tab.locator('.inv-current-budget .inv-table-scroll').evaluate(el=>el.scrollHeight<=el.clientHeight+1),true,'Current funding rows must not hide in a capped scroll area');
    assert.deepEqual(await tab.locator('img').evaluateAll(images=>images.filter(i=>i.complete&&i.currentSrc&&!i.naturalWidth).map(i=>i.currentSrc)),[],'Loaded private images must decode');
   }
+  await tab.setViewportSize({width:1440,height:1000});await tab.goto(origin+'/investors/pitch');
+  await tab.waitForFunction(()=>document.querySelector('#pitch-stage')?.dataset.mounted==='true');
+  await tab.waitForFunction(()=>{const video=document.querySelector('#pitch-film');return video.readyState>=2&&video.videoWidth===1920&&video.currentTime>0&&!video.paused;});
+  assert.equal(await tab.locator('#pitch-sound').getAttribute('aria-pressed'),'false');
+  assert.equal(await tab.evaluate(()=>window.__pitchAudioContexts.length),0,'Pitch must not create an AudioContext before opt-in');
+  await tab.locator('#pitch-sound').click();assert.equal(await tab.locator('#pitch-sound').getAttribute('aria-pressed'),'true');
+  await tab.waitForFunction(()=>window.__pitchAudioContexts.length===1&&window.__pitchAudioContexts[0].state==='running');
+  await tab.locator('#pitch-sound').click();assert.equal(await tab.locator('#pitch-sound').getAttribute('aria-pressed'),'false');
+  await tab.waitForFunction(()=>window.__pitchAudioContexts[0].state==='suspended');checks++;
+  await tab.locator('#pitch-play').click();assert.equal(await tab.locator('#pitch-play').getAttribute('aria-label'),'Play presentation');
+  await tab.waitForFunction(()=>document.querySelector('#pitch-film').paused);
+  const pausedProgress=await tab.locator('.pitch-progress').getAttribute('aria-valuenow');await tab.waitForTimeout(450);
+  assert.equal(await tab.locator('.pitch-progress').getAttribute('aria-valuenow'),pausedProgress,'Pause must stop the chapter clock');checks++;
+  // Exercise the browser denial path deterministically; the presentation remains usable.
+  await tab.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new DOMException('Fixture denial','NotAllowedError'));});
+  await tab.locator('#pitch-fullscreen').click();await tab.waitForFunction(()=>document.querySelector('#pitch-media-status').textContent.includes('Full screen was unavailable'));checks++;
+  await tab.locator('#pitch-chapters-open').click();await tab.locator('#pitch-chapters[open]').waitFor();
+  assert.equal(await tab.locator('#pitch-chapters').getAttribute('aria-labelledby'),'pitch-index-title');
+  assert.equal(await tab.evaluate(()=>document.querySelector('#pitch-chapters').contains(document.activeElement)),true,'Chapter dialog must receive focus');
+  await tab.keyboard.press('Tab');assert.equal(await tab.evaluate(()=>document.querySelector('#pitch-chapters').contains(document.activeElement)),true,'Chapter dialog navigation must remain inside the modal');
+  await tab.keyboard.press('Shift+Tab');assert.equal(await tab.evaluate(()=>document.querySelector('#pitch-chapters').contains(document.activeElement)),true,'Reverse navigation must return within the modal');
+  await tab.keyboard.press('Escape');await tab.locator('#pitch-chapters[open]').waitFor({state:'hidden'});
+  assert.equal(await tab.evaluate(()=>document.activeElement?.id),'pitch-chapters-open');checks++;
+  const jump=async index=>{
+   await tab.locator('#pitch-chapters-open').click();await tab.locator(`#pitch-chapters [data-jump="${index}"]`).click();
+   await tab.waitForFunction(id=>document.body.dataset.chapter===id,pitchChapters[index].id);
+  };
+  await jump(8);assert.match(await tab.locator('#pitch-counter').textContent(),/09 \/ 13/);
+  assert.match(await tab.locator('#pitch-announcement').textContent(),/Chapter 9 of 13/);checks++;
+  await tab.keyboard.press('Home');await tab.waitForFunction(()=>document.body.dataset.chapter==='opening');
+  for(let i=1;i<pitchChapters.length;i++){await tab.keyboard.press('ArrowRight');await tab.waitForFunction(id=>document.body.dataset.chapter===id,pitchChapters[i].id);}
+  assert.equal(await tab.locator('#pitch-next').isDisabled(),true);await tab.keyboard.press('ArrowLeft');
+  await tab.waitForFunction(()=>document.body.dataset.chapter==='investment');await tab.keyboard.press('End');await tab.waitForFunction(()=>document.body.dataset.chapter==='next-steps');checks++;
+  // Real H.264 decoding for every film, not just HTTP success or a loaded poster.
+  for(const [index,visual] of [[0,'fiber'],[1,'campus'],[2,'compute']]){
+   await jump(index);if(await tab.locator('#pitch-play').getAttribute('aria-label')==='Play presentation')await tab.locator('#pitch-play').click();
+   await tab.waitForFunction(visual=>{const video=document.querySelector('#pitch-film');return video.dataset.visual===visual&&video.readyState>=2&&video.videoWidth===1920&&video.currentTime>0&&video.classList.contains('is-ready');},visual);
+   assert.equal(await tab.locator('#pitch-film').evaluate(video=>video.error),null);await tab.locator('#pitch-play').click();checks++;
+  }
+  for(const width of [1440,390]){
+   await tab.setViewportSize({width,height:width===390?844:1000});
+   for(let i=0;i<pitchChapters.length;i++){
+    await jump(i);const chapter=pitchChapters[i],slide=tab.locator(`.pitch-slide[data-chapter="${chapter.id}"]`);
+    await tab.waitForFunction(()=>[...document.querySelectorAll('.pitch-slide.is-active .pitch-reveal')].every(el=>Number(getComputedStyle(el).opacity)>.95));
+    assert.equal(await tab.locator('.pitch-slide:visible').count(),1,`${width} ${chapter.id}: exactly one chapter must be visible`);
+    assert.equal((await slide.locator('.pitch-title').textContent()).trim(),chapter.title);
+    assert.equal(await tab.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,`${width} ${chapter.id}: no horizontal overflow`);
+    assert.equal(await slide.evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,`${width} ${chapter.id}: chapter must fit horizontally`);
+    for(const selector of ['#pitch-chapters-open','#pitch-prev','#pitch-play','#pitch-next','#pitch-sound','#pitch-fullscreen']){
+     const rect=await tab.locator(selector).boundingBox();assert.ok(rect&&rect.x>=-1&&rect.y>=0&&rect.x+rect.width<=width+1&&rect.y+rect.height<=(width===390?844:1000)+1,`${width} ${chapter.id}: control ${selector} must remain on screen`);
+    }
+    const overflow=await slide.evaluate(el=>el.scrollHeight>el.clientHeight+8);
+    assert.equal(await tab.locator('#pitch-reading-hint').isVisible(),overflow,`${width} ${chapter.id}: reading cue must match settled chapter overflow`);
+    await tab.screenshot({path:`tmp/pitch-review/ui-${width}-${chapter.id}.png`});
+    for(const metric of await slide.locator('.pitch-metric strong').all()){
+     await metric.scrollIntoViewIfNeeded();
+     const readable=await metric.evaluate(el=>{const style=getComputedStyle(el),rect=el.getBoundingClientRect(),slide=el.closest('.pitch-slide').getBoundingClientRect();return {text:el.textContent.trim(),font:parseFloat(style.fontSize),opacity:Number(style.opacity),visible:style.visibility!=='hidden'&&rect.width>0&&rect.height>0&&rect.left>=slide.left-1&&rect.right<=slide.right+1&&rect.top>=slide.top-1&&rect.bottom<=slide.bottom+1};});
+     assert.ok(readable.visible&&readable.opacity>.95&&readable.font>=20&&readable.text.length>0,`${width} ${chapter.id}: financial/project value must be readable: ${JSON.stringify(readable)}`);
+    }
+    if(chapter.id==='funding-bridge')await tab.screenshot({path:`tmp/pitch-review/ui-${width}-funding-bridge-metrics.png`});
+    await slide.locator('.pitch-footnote').scrollIntoViewIfNeeded();assert.equal(await slide.locator('.pitch-footnote').isVisible(),true,`${width} ${chapter.id}: disclosures must remain reachable`);
+    checks++;
+   }
+  }
+  // The actual investor-room opener uses a lazy full-window iframe and releases it on close.
+  await tab.setViewportSize({width:1440,height:1000});await tab.goto(origin+'/investors');
+  await tab.waitForFunction(()=>document.querySelector('#investor-pitch-dialog')?.dataset.mounted==='true');
+  const launch=tab.locator('[data-pitch-launch]').first(),frameLocator=tab.frameLocator('#investor-pitch-dialog iframe');
+  const nativeFullscreenSupported=await tab.evaluate(()=>document.fullscreenEnabled&&typeof Element.prototype.requestFullscreen==='function');
+  await launch.click();await tab.locator('#investor-pitch-dialog[open]').waitFor();
+  await frameLocator.locator('#pitch-stage[data-mounted="true"]').waitFor();await tab.locator('#investor-pitch-loading').waitFor({state:'hidden'});
+  if(nativeFullscreenSupported){
+   await tab.waitForFunction(()=>document.fullscreenElement===document.querySelector('#investor-pitch-dialog .pitch-frame-shell'));
+   console.log('PASS: native fullscreen entered the actual presentation shell through a user click.');
+  }else console.log('NOTE: this browser reports native fullscreen unavailable; only the full-window fallback applies.');
+  await tab.locator('#investor-pitch-close').click();
+  await tab.waitForFunction(()=>!document.querySelector('#investor-pitch-dialog iframe').hasAttribute('src')&&!document.fullscreenElement);
+  await tab.waitForFunction(()=>document.activeElement===document.querySelector('[data-pitch-launch]'),undefined,{timeout:3000});
+  assert.equal(await launch.evaluate(el=>document.activeElement===el),true,'Native fullscreen close restores focus and leaves fullscreen');checks++;
+  await tab.evaluate(()=>{Element.prototype.requestFullscreen=()=>Promise.reject(new DOMException('Fixture denial','NotAllowedError'));});
+  assert.equal(await tab.locator('#investor-pitch-dialog iframe').getAttribute('src'),null);
+  await launch.click();await tab.locator('#investor-pitch-dialog[open]').waitFor();
+  await frameLocator.locator('#pitch-stage[data-mounted="true"]').waitFor();await tab.locator('#investor-pitch-loading').waitFor({state:'hidden'});
+  const frameBounds=await tab.locator('#investor-pitch-dialog iframe').boundingBox();
+  assert.ok(frameBounds&&frameBounds.width>=1438&&frameBounds.height>=998,'Embedded pitch must fill the viewport when native fullscreen is denied');
+  assert.equal(await tab.evaluate(()=>document.activeElement?.tagName),'IFRAME','Loaded presentation receives focus');
+  await tab.evaluate(()=>window.postMessage({type:'smarttec:pitch-close'},location.origin));
+  await tab.waitForTimeout(100);assert.equal(await tab.locator('#investor-pitch-dialog').evaluate(el=>el.open),true,'Messages from unrelated windows cannot close the presentation');
+  await tab.locator('#investor-pitch-close').click();await tab.locator('#investor-pitch-dialog[open]').waitFor({state:'hidden'});
+  await tab.waitForFunction(()=>!document.querySelector('#investor-pitch-dialog iframe').hasAttribute('src'));
+  assert.equal(await tab.locator('#investor-pitch-dialog iframe').getAttribute('src'),null,'Closing the presentation must unload its media and audio context');
+  assert.equal(await launch.evaluate(el=>document.activeElement===el),true,'Closing returns focus to the launch link');checks++;
+  await launch.click();await frameLocator.locator('#pitch-stage[data-mounted="true"]').waitFor();
+  await frameLocator.locator('[data-pitch-exit]').first().click();await tab.locator('#investor-pitch-dialog[open]').waitFor({state:'hidden'});
+  await tab.waitForFunction(()=>!document.querySelector('#investor-pitch-dialog iframe').hasAttribute('src'));
+  assert.equal(await tab.locator('#investor-pitch-dialog iframe').getAttribute('src'),null);checks++;
+  await tab.setViewportSize({width:390,height:844});await launch.click();
+  await frameLocator.locator('#pitch-stage[data-mounted="true"]').waitFor();await tab.locator('#investor-pitch-loading').waitFor({state:'hidden'});
+  const mobileFrame=await tab.locator('#investor-pitch-dialog iframe').boundingBox(),parentClose=await tab.locator('#investor-pitch-close').boundingBox();
+  assert.ok(mobileFrame&&mobileFrame.width>=388&&mobileFrame.width<=391&&mobileFrame.height>=842,'Embedded mobile pitch must fill the viewport');
+  for(const selector of ['#pitch-sound','#pitch-fullscreen','.pitch-brand']){
+   const control=await frameLocator.locator(selector).boundingBox();
+   assert.ok(control&&parentClose&&(control.x+control.width<=parentClose.x||control.x>=parentClose.x+parentClose.width||control.y+control.height<=parentClose.y||control.y>=parentClose.y+parentClose.height),`Mobile embedded toolbar ${selector} must not overlap the parent close button`);
+  }
+  assert.equal(await tab.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  await frameLocator.locator('#pitch-poster').evaluate(image=>image.decode());
+  await tab.waitForFunction(()=>{const doc=document.querySelector('#investor-pitch-dialog iframe').contentDocument;const reveals=[...doc.querySelectorAll('.pitch-slide.is-active .pitch-reveal')];return reveals.length>0&&reveals.every(el=>Number(doc.defaultView.getComputedStyle(el).opacity)>.95);});
+  await tab.screenshot({path:'tmp/pitch-review/ui-390-embedded-opening.png'});
+  await tab.locator('#investor-pitch-close').click();await tab.waitForFunction(()=>!document.querySelector('#investor-pitch-dialog iframe').hasAttribute('src'));
+  assert.equal(await launch.evaluate(el=>document.activeElement===el),true);checks++;
+  const reducedContext=await browser.newContext({reducedMotion:'reduce',viewport:{width:390,height:844}});
+  await reducedContext.addCookies([{name:cookie.slice(0,split),value:cookie.slice(split+1),url:origin}]);
+  const reducedTab=await reducedContext.newPage(),reducedVideoRequests=[];
+  reducedTab.on('pageerror',error=>browserErrors.push(error.message));
+  reducedTab.on('request',request=>{if(/\/api\/investor\/pitch-.*-video/.test(request.url()))reducedVideoRequests.push(request.url());});
+  await reducedTab.goto(origin+'/investors/pitch');await reducedTab.waitForFunction(()=>document.querySelector('#pitch-stage')?.dataset.mounted==='true');
+  await reducedTab.locator('#pitch-poster').evaluate(image=>image.decode());
+  assert.equal(await reducedTab.locator('#pitch-film').getAttribute('src'),null);
+  assert.equal(await reducedTab.locator('#pitch-play').getAttribute('aria-label'),'Play presentation');
+  await reducedTab.keyboard.press('ArrowRight');await reducedTab.waitForFunction(()=>document.body.dataset.chapter==='thesis');
+  await reducedTab.locator('#pitch-poster').evaluate(image=>image.decode());await reducedTab.waitForTimeout(300);
+  assert.deepEqual(reducedVideoRequests,[],'Reduced-motion viewers must not fetch videos without pressing Play');
+  await reducedTab.screenshot({path:'tmp/pitch-review/ui-390-reduced-motion.png'});
+  await reducedTab.locator('#pitch-play').click();await reducedTab.waitForFunction(()=>document.querySelector('#pitch-film').readyState>=2&&document.querySelector('#pitch-film').currentTime>0);
+  assert.ok(reducedVideoRequests.length>0,'Reduced-motion viewer can opt into video explicitly');await reducedContext.close();checks++;
   assert.deepEqual(browserErrors,[],'Private browser JavaScript errors');
  }finally{await browser.close();}
 }
@@ -132,5 +285,7 @@ r=await fetch(origin+'/api/investor/survey',{headers:{Cookie:cookie}});assert.eq
 r=await fetch(origin+'/api/investor/logout',{method:'POST',headers,body:'{}'});assert.equal(r.status,200);checks++;
 r=await fetch(origin+'/investors',{headers:{Cookie:cookie},redirect:'manual'});assert.equal(r.status,303);checks++;
 r=await fetch(origin+'/api/investor/presentation',{headers:{Cookie:cookie}});assert.equal(r.status,401);checks++;
-console.log(`PASS: ${checks} compiled-server HTTP checks; local TLS Redis fixture, not a live Upstash/Vercel deployment.`);
-}finally{app?.kill();if(redis)await new Promise(r=>redis.close(r));await rm(dir,{recursive:true,force:true});}
+r=await fetch(origin+'/investors/pitch',{headers:{Cookie:cookie},redirect:'manual'});assert.equal(r.status,303);assert.equal(r.headers.get('location'),'/investors/login');checks++;
+r=await fetch(origin+'/api/investor/pitch-fiber-video',{headers:{Cookie:cookie,Range:'bytes=0-31'}});assert.equal(r.status,401);checks++;
+console.log(`PASS: ${checks} compiled-server HTTP${process.env.INVESTOR_VISUAL_QA==='1'?' and browser':''} checks; local TLS Redis fixture, not a live Upstash/Vercel deployment.`);
+}finally{app?.kill();if(redis)await new Promise(r=>redis.close(r));assert.ok(resolve(dir).startsWith(resolve(tmpdir())+sep+'smarttec-http-'),'Cleanup must stay inside this test fixture directory');await rm(dir,{recursive:true,force:true});}
