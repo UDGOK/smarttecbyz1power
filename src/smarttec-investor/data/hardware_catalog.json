@@ -17,6 +17,26 @@
       "status": "GPU specification documented; complete server and price require quote"
     },
     {
+      "id": "hgx-b300-reference",
+      "name": "Eight-GPU HGX B300 reference \u2014 exact OEM quote required",
+      "quantityUnit": "complete system",
+      "gpusPerSystem": 8,
+      "completeSystemCost": null,
+      "peakKwPerSystem": null,
+      "source": "https://configurator.exxactcorp.com/configure/TS4-104366747",
+      "status": "Retail reference only. Selected SmartTec OEM, installed cost, software, support and electrical/cooling capacity unverified."
+    },
+    {
+      "id": "hgx-b200-reference",
+      "name": "Eight-GPU HGX B200 reference \u2014 exact OEM quote required",
+      "quantityUnit": "complete system",
+      "gpusPerSystem": 8,
+      "completeSystemCost": null,
+      "peakKwPerSystem": null,
+      "source": "https://configurator.exxactcorp.com/configure/TS4-169219634",
+      "status": "Retail reference only. Selected SmartTec OEM, installed cost, software, support and electrical/cooling capacity unverified."
+    },
+    {
       "id": "dgx-b300-ac",
       "name": "NVIDIA DGX B300 AC reference",
       "quantityUnit": "complete system",
@@ -31,7 +51,7 @@
     },
     {
       "id": "amd-custom",
-      "name": "AMD Instinct OEM platform — exact selection required",
+      "name": "AMD Instinct OEM platform \u2014 exact selection required",
       "quantityUnit": "complete system",
       "exampleAccelerator": "MI355X",
       "exampleAcceleratorMemoryGB": 288,
@@ -43,7 +63,7 @@
     },
     {
       "id": "cerebras-custom",
-      "name": "Cerebras — exact vendor configuration required",
+      "name": "Cerebras \u2014 exact vendor configuration required",
       "quantityUnit": "vendor system",
       "model": null,
       "gpusPerSystem": null,

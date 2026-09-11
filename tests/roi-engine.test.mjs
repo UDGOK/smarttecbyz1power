@@ -15,6 +15,13 @@ function fixture() {
         collectionFraction:1,salesFeeFraction:0,annualRateEscalation:0,collectionLagMonths:0}]}]};
 }
 const near=(a,b,eps=1e-6)=>assert.ok(Math.abs(a-b)<eps,`${a} != ${b}`);
+test('negative annual price changes model decay and reject prices below zero',()=>{
+  const s=fixture();s.horizonMonths=24;s.rows[0].operatingEndMonth=24;
+  Object.assign(s.rows[0].contracts[0],{endMonth:24,annualRateEscalation:-.1});
+  const r=calculateScenario(s);near(r.schedule[11].billed,120);near(r.schedule[12].billed,108);near(r.totalBilled,12*(120+108));
+  s.rows[0].contracts[0].annualRateEscalation=-1;near(calculateScenario(s).schedule[12].billed,0);
+  s.rows[0].contracts[0].annualRateEscalation=-1.01;assert.throws(()=>calculateScenario(s),/annualRateEscalation/);
+});
 test('simple return and payback are independently checkable',()=>{
   const r=calculateScenario(fixture());near(r.project.netProfit,240);near(r.project.totalROI,.2);
   near(r.project.equityMultiple,1.2);assert.equal(r.project.sustainedPaybackMonth,10);

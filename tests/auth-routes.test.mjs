@@ -8,6 +8,17 @@ class Store{data=new Map();counts=new Map();async get(k){return this.data.get(k)
 const password='route-test-password';const hash=await hashPassword(password);const cfg=config({INVESTOR_ORIGIN:'https://www.smarttec.dev',INVESTOR_PASSWORD_HASH:hash,INVESTOR_SESSION_SECRET:'S'.repeat(64),VERCEL:'1'});
 const req=(action,body,headers={},method=body===undefined?'GET':'POST')=>new Request('https://www.smarttec.dev/api/investor/'+action,{method,headers:{origin:cfg.origin,'x-vercel-forwarded-for':'198.51.100.1',...(body===undefined?{}:{'Content-Type':'application/json'}),...headers},...(body===undefined?{}:{body:JSON.stringify(body)})});
 async function signed(){const store=new Store();const r=await handle(req('login',{password}),'login',{cfg,store});assert.equal(r.status,200);const cookie=r.headers.get('set-cookie').split(';')[0];const b=await(await handle(req('bootstrap',undefined,{cookie}),'bootstrap',{cfg,store})).json();return {store,cookie,csrf:b.csrf};}
+test('underwriting scenarios require session and CSRF, and exports retain evidence',async()=>{
+ const {store,cookie,csrf}=await signed(),body={id:'planned-mix',kind:'base'};
+ assert.equal((await handle(req('underwriting-scenario',body),'underwriting-scenario',{cfg,store})).status,401);
+ assert.equal((await handle(req('underwriting-scenario',body,{cookie}),'underwriting-scenario',{cfg,store})).status,403);
+ const headers={cookie,'x-csrf-token':csrf};
+ const loaded=await handle(req('underwriting-scenario',body,headers),'underwriting-scenario',{cfg,store});assert.equal(loaded.status,200);
+ const {scenario}=await loaded.json();
+ const exported=await handle(req('export',{scenario,format:'json'},headers),'export',{cfg,store});assert.equal(exported.status,200);
+ const b=await exported.json();assert.equal(b.scenario.underwriting.sources.length,6);assert.ok(b.result.project.npv<0);
+ assert.equal((await handle(req('underwriting-scenario',{id:'bad',kind:'base'},headers),'underwriting-scenario',{cfg,store})).status,400);
+});
 test('new realistic images and modular models remain private',async()=>{const {store,cookie}=await signed();for(const action of ['concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy']){assert.equal((await handle(req(action),action,{cfg,store})).status,401);const r=await handle(req(action,undefined,{cookie}),action,{cfg,store});assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.ok((await r.arrayBuffer()).byteLength>10000);}});
 test('thermal assets remain private, no-store and return valid MIME types',async()=>{const {store,cookie}=await signed();for(const [action,mime] of [['thermal-model','model/gltf-binary'],['thermal-preview','image/webp']]){assert.equal((await handle(req(action),action,{cfg,store})).status,401);const r=await handle(req(action,undefined,{cookie}),action,{cfg,store});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),mime);assert.match(r.headers.get('cache-control'),/no-store/);assert.ok((await r.arrayBuffer()).byteLength>1000);}});
 test('password hashes are salted and wrong passwords fail',async()=>{assert.notEqual(hash,await hashPassword(password));assert.equal(await verifyPassword(password,hash),true);assert.equal(await verifyPassword('wrong',hash),false);assert.equal(await verifyPassword(password,'bad'),false);});

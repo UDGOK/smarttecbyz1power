@@ -1,4 +1,4 @@
-/** SmartTec reference cash-flow engine v1.0.0.
+/** SmartTec reference cash-flow engine v1.1.0.
  * Deterministic, dependency-free ES module. USD; monthly periods.
  * Financial scenario only: never certifies capacity, workload fit, quotes or securities terms.
  * See 03_ROI_Model_Spec.md for scope, units and limitations.
@@ -99,7 +99,8 @@ function validate(s) {
       if (r.ownership === 'customer' && !['system_month', 'reserved_kw_month'].includes(c.billing)) throw new Error('Customer-owned hosting requires explicit hosting billing, not assumed GPU/token sales');
       number(c.rate, 'contract.rate');
       for (const k of ['paidOccupancy', 'collectionFraction', 'salesFeeFraction']) ratio(c[k], `contract.${k}`);
-      number(c.annualRateEscalation, 'contract.annualRateEscalation', 0, 1);
+      // Rental prices can fall as newer hardware enters the market.
+      number(c.annualRateEscalation, 'contract.annualRateEscalation', -1, 1);
       integer(c.collectionLagMonths, 'contract.collectionLagMonths', 0, s.horizonMonths);
       if (c.endMonth + c.collectionLagMonths > s.horizonMonths) throw new Error('Extend horizon to collect modeled receivables; terminal receivables are not silently written off');
       if (c.billing === 'gpu_hour') integer(r.gpusPerSystem, 'gpusPerSystem', 1, 1024);
@@ -181,7 +182,7 @@ export function calculateScenario(s) {
   const project=summarize(ledgers.project.flows,s.annualDiscountRate);
   const equity=summarize(ledgers.equity.flows,s.annualDiscountRate);
   const investor=s.investorProRataFraction===null?null:summarize(ledgers.equity.flows.map(v=>v*s.investorProRataFraction),s.annualDiscountRate);
-  return {schemaVersion:1,modelVersion:'1.0.0',status:'Illustrative financial scenario; not an approved investment or capacity offer',hardwareCapex,initialCapex,requiredInitialFunding,project,equity,investor,rowResults,schedule,totalBilled:sum(bills),totalCollectedNetFees:sum(receipts),peakModeledITkw:Math.max(...schedule.map(m=>m.peakITkw))};
+  return {schemaVersion:1,modelVersion:'1.1.0',status:'Illustrative financial scenario; not an approved investment or capacity offer',hardwareCapex,initialCapex,requiredInitialFunding,project,equity,investor,rowResults,schedule,totalBilled:sum(bills),totalCollectedNetFees:sum(receipts),peakModeledITkw:Math.max(...schedule.map(m=>m.peakITkw))};
 }
 
 export function requiredRateForNPV(scenario, rowId, contractIndex=0, targetNpv=0) {

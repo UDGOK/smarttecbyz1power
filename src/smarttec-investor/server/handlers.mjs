@@ -2,6 +2,7 @@ import {config,RedisStore,authenticate,createSession,revoke,sameOrigin,csrfValid
 import {architectureAsset} from '../../smarttec-architecture/server/architecture-assets.mjs';
 import {thermalAsset} from '../../smarttec-architecture/server/thermal-assets.mjs';
 import {calculateScenario,requiredRateForNPV} from '../roi-engine.mjs';
+import {makeScenario,requiredRevenueMultiplier} from '../underwriting.mjs';
 import {answerQuestion,faqList} from './faq.mjs';
 import sample from '../data/illustrative-scenario.json' with {type:'json'};
 import provenance from '../data/illustration-provenance.json' with {type:'json'};
@@ -34,6 +35,9 @@ export async function handle(request,action,dependencies={}){
   if(architecture)return new Response(architecture.bytes,{headers:{...privateHeaders,'Content-Type':architecture.mime}});
   if(action==='logout'&&request.method==='POST'){await revoke(store,session);return json({ok:true},200,{'Set-Cookie':cookieHeader(cfg,'',0)});}
   if(action==='bootstrap'&&request.method==='GET')return json({csrf:session.csrf,sample,provenance,catalog,campus,mapData,mapConfig:{satelliteKey:cfg.mapKey||''},faqs:faqList()});
+  if(action==='underwriting-scenario'&&request.method==='POST'){
+   const b=await readJson(request,2048);return json({scenario:makeScenario(b.id,b.kind)});
+  }
   if(action==='marked-survey'&&request.method==='GET')return new Response(Buffer.from(markedPdf,'base64'),{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="SmartTec_Marked_Layout.pdf"'}});
   if(action==='survey'&&request.method==='GET')return new Response(Buffer.from(surveyPdf,'base64'),{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="SmartTec_Boundary_Survey.pdf"'}});
   if(action==='survey-image'&&request.method==='GET')return new Response(Buffer.from(surveyImage,'base64'),{headers:{...privateHeaders,'Content-Type':'image/png'}});
@@ -45,7 +49,8 @@ export async function handle(request,action,dependencies={}){
   }
   if(action==='price-floor'&&request.method==='POST'){
    const b=await readJson(request);const s=bounded(b.scenario);const row=s.rows[0];if(!row?.contracts?.length)return json({error:'First equipment row needs a revenue segment.'},400);
-   return json({requiredRate:requiredRateForNPV(s,row.id,0),billing:row.contracts[0].billing,discountRate:s.annualDiscountRate,basis:'Changes the first revenue segment on the first row only; all other assumptions fixed. Project NPV target zero; not a market price or promised investor yield.'});
+   const multiplier=requiredRevenueMultiplier(s);
+   return json({requiredRate:requiredRateForNPV(s,row.id,0),billing:row.contracts[0].billing,discountRate:s.annualDiscountRate,revenueMultiplier:multiplier,ratePaths:s.rows.map(r=>({model:r.model||r.id,rates:r.contracts.map(c=>({startMonth:c.startMonth,endMonth:c.endMonth,billing:c.billing,requiredRate:multiplier===null?null:c.rate*multiplier}))})),basis:'Multiplies every entered rate on every row and revenue segment together, preserving occupancy and the entered price path. All costs stay fixed. Project NPV target zero; not a market price or promised investor yield.'});
   }
   if(['calculate','export'].includes(action)&&request.method==='POST'){
    const b=await readJson(request);const scenario=bounded(b.scenario);const result=calculateScenario(scenario);

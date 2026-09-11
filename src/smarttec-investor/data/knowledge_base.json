@@ -59,6 +59,11 @@
       "title": "Owner-marked campus survey supplied in this conversation",
       "url": "/api/investor/marked-survey",
       "type": "owner-marked-document"
+    },
+    "economics-review": {
+      "title": "SmartTec economic review: editable assumptions, benchmark sources and tested cash-flow engine, 10 September 2026",
+      "url": "/investors#underwriting",
+      "type": "planning-sensitivity-not-quote"
     }
   },
   "facts": [
@@ -395,6 +400,16 @@
         "marked-survey"
       ],
       "reviewedAt": "2026-09-09"
+    },
+    {
+      "id": "F-economics-2026",
+      "question": "Is SmartTec profitable, and should we add more RTX, B200 or B300 GPUs?",
+      "answer": "Profitability is not established. The earlier $330,000 RTX-only illustration loses approximately $225,386 over five years and excludes B300. The economic review compares six configurations across base, downside and favorable cases with explicit cost allowances and price decay. None of those base cases clears the assumed 15% project discount hurdle. A B200 expansion clears it only in the favorable uncontracted case and fails a full replacement stress. Validate customers, quotes and engineering before procurement; these are conditional project returns, not promised investor distributions.",
+      "status": "planning-sensitivity-not-quote",
+      "sourceIds": [
+        "economics-review"
+      ],
+      "reviewedAt": "2026-09-10"
     }
   ]
 }
