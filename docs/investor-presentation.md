@@ -2,24 +2,24 @@
 
 The 26-page landscape PDF uses the site's Space Grotesk and Google Sans Code fonts, original vector logo paths, forest/signal/off-white palette and Runway-generated product, energy, fiber and campus concept imagery. The competitor deck informed topic coverage only. No competitor financial statements, biographies, pipeline, valuation multiples or claims were reused as SmartTec facts.
 
-The presentation covers the opportunity, market context, campus, power, engineering readiness, products, customer strategy, the conditional 60+4 B300 deployment, monthly cash generation, funding, five-year financial schedule, fleet alternatives, required price/capex, downside sensitivities, milestones, the owner-supplied team, proposed governance, expansion, diligence, assumptions, sources and contact.
+The presentation describes the proposed 64-B300 deployment (60 saleable GPUs and four financial reserves), management-reported founder funding and overage intent, commercial pipeline, site rights, behind-the-meter power, new cooling, partial initial funding, illustrative GPU rental revenue, historical model context, delivery milestones, team, potential investment structure, risks and sources.
 
-The latest IEA 2026 executive summary supplies the global market chart: 485 TWh in 2025 and a 950 TWh projection for 2030. It does not establish local customer demand. Owner-reported power terms, capacity gaps, unverified demand and unquoted costs remain explicit. Financial projections are pre-tax project sensitivities and are not audited company statements or agreed investor terms.
+The PDF and 13-chapter immersive version address prospective investors. They state SmartTec's proposal, current status and terms for discussion; internal interview questions and instructions to the founder belong in working diligence records. Proposed governance and procurement gates must remain explicitly proposed. Zero signed customer contracts, uncontracted revenue, unverified supply terms, incomplete funding and unestablished updated returns remain visible. The earlier return model is labeled historical, not presented as a current forecast.
 
 ## Build and publication
 
 - Canonical artifact: `output/pdf/SmartTec-Investor-Presentation-2026-09.pdf`. The undated PDF is the prior edition; the authenticated download uses the dated edition recorded in `investor-deck.json`.
-- Rebuild with `python tools/build-investor-deck.py` using Python with ReportLab and Pillow, plus Node on PATH. The builder calls `tools/export-investor-deck-data.mjs` to recalculate the financial schedule.
+- Rebuild with `python tools/build-investor-deck.py` using Python with ReportLab and Pillow, plus Node on PATH. The builder calls `tools/export-investor-deck-data.mjs` to export current readiness inputs and calculate the explicitly historical comparison.
 - The builder also emits server-only PDF bytes and `data/investor-deck.json` metadata. Normal site builds use these committed outputs and do not require Python.
-- Financial tables pull from the ROI engine. Narrative quotes, dates and selected assumptions require editorial review when inputs change. Tests fingerprint the source study and engine so a changed economic model cannot silently leave the PDF stale.
+- Current figures pull from the readiness record; the historical comparison pulls from the ROI engine. Narrative quotes, dates and selected assumptions require editorial review when inputs change. Tests fingerprint the source study and engine so a changed economic model cannot silently leave the PDF stale.
 - The investor header and presentation section link to `/api/investor/presentation`. GET and HEAD require the existing investor session. Responses use private no-store headers and an attachment filename. The PDF is not a public static site asset.
 - Website login protects the website download route. It does not make files in the GitHub repository confidential.
 
 ## Validation
 
-All 26 pages were rendered with Poppler and visually inspected after layout corrections. Text bounds, contacts, all supplied leadership names, relevant hardware/funding figures, source links and PDF structure were checked. The 1.6 MB PDF stays below the deployment response budget.
+Reproduce PDF validation with `python tools/verify-investor-pdf.py` after rebuilding. All 26 pages are rendered with Poppler and visually inspected after layout corrections. Text bounds, contacts, all supplied leadership names, relevant hardware/funding figures, source links and PDF structure were checked. The 1.6 MB PDF stays below the deployment response budget.
 
-Automated checks: 140 unit tests and 52 compiled-server HTTP checks, including signed-out rejection, authenticated download hash/size/type, HEAD and post-logout rejection. Public-page and link checks also passed. No messages were sent to investors and no financial terms were accepted.
+Automated checks include the unit suite, the PDF verifier and compiled-server HTTP tests for signed-out rejection, authenticated download hash/size/type, HEAD and post-logout rejection. Public-page and link checks also passed. No messages were sent to investors and no financial terms were accepted.
 
 ## Runway and review revision
 
