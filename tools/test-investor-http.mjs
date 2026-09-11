@@ -36,7 +36,13 @@ assert.equal(pitchDoc.querySelectorAll('#pitch-stage [data-chapter]').length,13)
 assert.deepEqual([...pitchDoc.querySelectorAll('[data-chapter]')].map(slide=>slide.dataset.chapter),pitchChapters.map(chapter=>chapter.id));
 for(const script of pitchDoc.querySelectorAll('script')){assert.ok(script.src,'Pitch controller must stay external under the private CSP');assert.equal(script.textContent.trim(),'');}
 for(const chapter of pitchChapters){const slide=pitchDoc.querySelector(`[data-chapter="${chapter.id}"]`);for(const metric of chapter.metrics)assert.ok(slide.textContent.includes(metric.value),`${chapter.id}: missing financial or project metric ${metric.value}`);}
-assert.equal(pitchDoc.querySelector('#pitch-sound').getAttribute('aria-pressed'),'false');assert.equal(pitchDoc.querySelector('#pitch-film').getAttribute('src'),null);pitchDOM.window.close();checks++;
+assert.equal(pitchDoc.querySelector('#pitch-sound').getAttribute('aria-pressed'),'false');assert.equal(pitchDoc.querySelector('#pitch-film').getAttribute('src'),null);
+assert.equal(pitchDoc.querySelector('#pitch-play').getAttribute('aria-label'),'Play slides');
+assert.equal(pitchDoc.querySelector('#pitch-audio-options').hasAttribute('hidden'),true);
+assert.equal(pitchDoc.querySelector('#pitch-audio-options').getAttribute('aria-controls'),'pitch-audio-panel');
+assert.equal(pitchDoc.querySelector('#pitch-volume').getAttribute('type'),'range');
+assert.deepEqual(['min','max','value'].map(name=>pitchDoc.querySelector('#pitch-volume').getAttribute(name)),['0','100','55']);
+pitchDOM.window.close();checks++;
 const launcherDOM=new JSDOM(page),launchers=[...launcherDOM.window.document.querySelectorAll('a[data-pitch-launch]')];
 assert.ok(launchers.length>0,'Investor room needs a visible pitch launch link');
 for(const link of launchers)assert.equal(link.getAttribute('href'),'/investors/pitch');
@@ -129,14 +135,37 @@ assert.ok(page.includes('These AI-generated visuals illustrate the strategy'));c
 if(process.env.INVESTOR_VISUAL_QA==='1'){
  const {chromium}=await import('playwright');const browser=await chromium.launch({headless:true,channel:process.env.INVESTOR_QA_BROWSER||undefined});
  try{
-  await mkdir('tmp/pdfs',{recursive:true});await mkdir('tmp/pitch-review',{recursive:true});
+  await mkdir('tmp/pdfs',{recursive:true});await mkdir('tmp/pitch-review',{recursive:true});await mkdir('tmp/pitch-audio',{recursive:true});
   const context=await browser.newContext({reducedMotion:'no-preference'});const split=cookie.indexOf('=');
   await context.addCookies([{name:cookie.slice(0,split),value:cookie.slice(split+1),url:origin}]);
-  await context.addInitScript(()=>{
+  const instrumentSound=()=>{
    window.__pitchAudioContexts=[];
    const Native=window.AudioContext||window.webkitAudioContext;
    if(Native)window.AudioContext=new Proxy(Native,{construct(Target,args){const audio=new Target(...args);window.__pitchAudioContexts.push(audio);return audio;}});
-  });
+   const nativeConnect=window.AudioNode?.prototype.connect;
+   if(nativeConnect)window.AudioNode.prototype.connect=function(destination,...args){
+    if(destination===this.context.destination){
+     const context=this.context;
+     if(!context.__pitchFinalAnalyser){context.__pitchFinalAnalyser=context.createAnalyser();context.__pitchFinalAnalyser.fftSize=4096;context.__pitchFinalAnalyser.smoothingTimeConstant=0;nativeConnect.call(context.__pitchFinalAnalyser,destination);}
+     nativeConnect.call(this,context.__pitchFinalAnalyser,...args);return destination;
+    }
+    return nativeConnect.call(this,destination,...args);
+   };
+   window.__pitchMeasureAudio=async()=>{
+    const context=window.__pitchAudioContexts.at(-1),analyser=context?.__pitchFinalAnalyser;
+    if(!analyser)throw new Error('Final audio output was not connected to the measured destination');
+    const values=new Float32Array(analyser.fftSize);let squares=0,peak=0,samples=0,finite=true;
+    for(let frame=0;frame<16;frame++){
+     analyser.getFloatTimeDomainData(values);
+     for(const value of values){finite=finite&&Number.isFinite(value);squares+=value*value;peak=Math.max(peak,Math.abs(value));samples++;}
+     await new Promise(resolve=>setTimeout(resolve,50));
+    }
+    const rms=Math.sqrt(squares/samples);return{rms,peak,dbfs:20*Math.log10(rms||Number.MIN_VALUE),finite,state:context.state,sampleRate:context.sampleRate};
+   };
+  };
+  await context.addInitScript(instrumentSound);
+  const measureSound=page=>page.evaluate(()=>window.__pitchMeasureAudio());
+  const audible=(measurement,label)=>{assert.ok(measurement.finite&&measurement.state==='running'&&measurement.rms>.012&&measurement.peak<.65,`${label}: rendered soundtrack should be audible without clipping: ${JSON.stringify(measurement)}`);};
   const tab=await context.newPage(),browserErrors=[];
   tab.on('pageerror',error=>browserErrors.push(error.message));
   for(const width of [1440,390]){
@@ -172,14 +201,49 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
   await tab.waitForFunction(()=>{const video=document.querySelector('#pitch-film');return video.readyState>=2&&video.videoWidth===1920&&video.currentTime>0&&!video.paused;});
   assert.equal(await tab.locator('#pitch-sound').getAttribute('aria-pressed'),'false');
   assert.equal(await tab.evaluate(()=>window.__pitchAudioContexts.length),0,'Pitch must not create an AudioContext before opt-in');
-  await tab.locator('#pitch-sound').click();assert.equal(await tab.locator('#pitch-sound').getAttribute('aria-pressed'),'true');
-  await tab.waitForFunction(()=>window.__pitchAudioContexts.length===1&&window.__pitchAudioContexts[0].state==='running');
-  await tab.locator('#pitch-sound').click();assert.equal(await tab.locator('#pitch-sound').getAttribute('aria-pressed'),'false');
-  await tab.waitForFunction(()=>window.__pitchAudioContexts[0].state==='suspended');checks++;
-  await tab.locator('#pitch-play').click();assert.equal(await tab.locator('#pitch-play').getAttribute('aria-label'),'Play presentation');
+  assert.equal(await tab.locator('#pitch-audio-options').isVisible(),false,'Volume settings stay hidden before sound opt-in');
+  await tab.locator('#pitch-play').click();assert.equal(await tab.locator('#pitch-play').getAttribute('aria-label'),'Play slides');
   await tab.waitForFunction(()=>document.querySelector('#pitch-film').paused);
   const pausedProgress=await tab.locator('.pitch-progress').getAttribute('aria-valuenow');await tab.waitForTimeout(450);
   assert.equal(await tab.locator('.pitch-progress').getAttribute('aria-valuenow'),pausedProgress,'Pause must stop the chapter clock');checks++;
+  await tab.locator('#pitch-sound').click();
+  await tab.waitForFunction(()=>window.__pitchAudioContexts.length===1&&window.__pitchAudioContexts[0].state==='running'&&document.querySelector('#pitch-sound').getAttribute('aria-pressed')==='true');
+  await tab.waitForTimeout(900);const pausedAudio=await measureSound(tab);audible(pausedAudio,'Sound enabled with slides paused');
+  assert.equal(await tab.locator('#pitch-play').getAttribute('aria-label'),'Play slides');assert.equal(await tab.locator('#pitch-film').evaluate(video=>video.paused),true);
+  assert.equal(await tab.locator('#pitch-audio-options').textContent(),'Volume 55%');checks++;
+  await tab.locator('#pitch-audio-options').click();await tab.locator('#pitch-audio-panel[open]').waitFor();
+  assert.equal(await tab.locator('#pitch-volume').inputValue(),'55');assert.equal(await tab.locator('#pitch-volume-value').textContent(),'55%');
+  const volumeChapter=await tab.locator('body').getAttribute('data-chapter');
+  await tab.locator('#pitch-volume').focus();await tab.keyboard.press('ArrowRight');
+  assert.equal(await tab.locator('#pitch-volume').inputValue(),'56');assert.equal(await tab.locator('body').getAttribute('data-chapter'),volumeChapter,'Volume-arrow keys must not navigate chapters');
+  await tab.keyboard.press('Home');assert.equal(await tab.locator('#pitch-volume').inputValue(),'0');assert.equal(await tab.locator('#pitch-volume-value').textContent(),'0%');
+  await tab.waitForTimeout(350);const mutedAudio=await measureSound(tab);
+  assert.ok(mutedAudio.finite&&mutedAudio.peak<.00001,`Volume zero must produce digital silence: ${JSON.stringify(mutedAudio)}`);
+  assert.equal(await tab.locator('#pitch-sound').getAttribute('aria-pressed'),'false');
+  assert.match(await tab.locator('[data-sound-label]').textContent(),/muted/i);
+  await tab.locator('#pitch-volume').evaluate(input=>{input.value='55';input.dispatchEvent(new Event('input',{bubbles:true}));});
+  await tab.waitForTimeout(350);audible(await measureSound(tab),'Restored volume');
+  assert.equal(await tab.locator('#pitch-volume-value').textContent(),'55%');checks++;
+  await tab.locator('#pitch-audio-close').click();await tab.locator('#pitch-audio-panel[open]').waitFor({state:'hidden'});
+  await tab.waitForFunction(()=>document.activeElement?.id==='pitch-audio-options');
+  for(const width of [1440,390]){
+   await tab.setViewportSize({width,height:width===390?844:1000});
+   const volumeBounds=await tab.locator('#pitch-audio-options').boundingBox();
+   assert.ok(volumeBounds&&volumeBounds.x>=0&&volumeBounds.y>=0&&volumeBounds.x+volumeBounds.width<=width+1&&volumeBounds.y+volumeBounds.height<=(width===390?844:1000),'Sound volume control must remain inside the viewport');
+   assert.equal(await tab.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Sound footer must not overflow');
+   await tab.screenshot({path:`tmp/pitch-audio/sound-on-${width}.png`});
+   await tab.locator('.pitch-controls').screenshot({path:`tmp/pitch-audio/footer-${width}.png`});
+   await tab.locator('#pitch-audio-options').click();await tab.locator('#pitch-audio-panel[open]').waitFor();
+   const panelBounds=await tab.locator('#pitch-audio-panel').boundingBox();
+   assert.ok(panelBounds&&panelBounds.x>=0&&panelBounds.y>=0&&panelBounds.x+panelBounds.width<=width+1&&panelBounds.y+panelBounds.height<=(width===390?844:1000),'Sound dialog must fit the viewport');
+   await tab.screenshot({path:`tmp/pitch-audio/volume-dialog-${width}.png`});
+   await tab.locator('#pitch-audio-close').click();await tab.locator('#pitch-audio-panel[open]').waitFor({state:'hidden'});
+  }
+  await tab.setViewportSize({width:1440,height:1000});
+  await tab.locator('#pitch-sound').click();assert.equal(await tab.locator('#pitch-sound').getAttribute('aria-pressed'),'false');
+  await tab.waitForFunction(()=>window.__pitchAudioContexts[0].state==='suspended');
+  assert.equal(await tab.locator('#pitch-audio-options').isVisible(),false);checks++;
+  console.log(`PASS: paused-slide soundtrack measured ${pausedAudio.dbfs.toFixed(1)} dBFS RMS, peak ${pausedAudio.peak.toFixed(3)}; zero volume measured peak ${mutedAudio.peak}.`);
   // Exercise the browser denial path deterministically; the presentation remains usable.
   await tab.evaluate(()=>{document.documentElement.requestFullscreen=()=>Promise.reject(new DOMException('Fixture denial','NotAllowedError'));});
   await tab.locator('#pitch-fullscreen').click();await tab.waitForFunction(()=>document.querySelector('#pitch-media-status').textContent.includes('Full screen was unavailable'));checks++;
@@ -202,7 +266,7 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
   await tab.waitForFunction(()=>document.body.dataset.chapter==='investment');await tab.keyboard.press('End');await tab.waitForFunction(()=>document.body.dataset.chapter==='next-steps');checks++;
   // Real H.264 decoding for every film, not just HTTP success or a loaded poster.
   for(const [index,visual] of [[0,'fiber'],[1,'campus'],[2,'compute']]){
-   await jump(index);if(await tab.locator('#pitch-play').getAttribute('aria-label')==='Play presentation')await tab.locator('#pitch-play').click();
+   await jump(index);if(await tab.locator('#pitch-play').getAttribute('aria-label')==='Play slides')await tab.locator('#pitch-play').click();
    await tab.waitForFunction(visual=>{const video=document.querySelector('#pitch-film');return video.dataset.visual===visual&&video.readyState>=2&&video.videoWidth===1920&&video.currentTime>0&&video.classList.contains('is-ready');},visual);
    assert.equal(await tab.locator('#pitch-film').evaluate(video=>video.error),null);await tab.locator('#pitch-play').click();checks++;
   }
@@ -278,6 +342,7 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
   await tab.locator('#investor-pitch-close').click();await tab.waitForFunction(()=>!document.querySelector('#investor-pitch-dialog iframe').hasAttribute('src'));
   assert.equal(await launch.evaluate(el=>document.activeElement===el),true);checks++;
   const reducedContext=await browser.newContext({reducedMotion:'reduce',viewport:{width:390,height:844}});
+  await reducedContext.addInitScript(instrumentSound);
   await reducedContext.addCookies([{name:cookie.slice(0,split),value:cookie.slice(split+1),url:origin}]);
   const reducedTab=await reducedContext.newPage(),reducedVideoRequests=[];
   reducedTab.on('pageerror',error=>browserErrors.push(error.message));
@@ -285,11 +350,18 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
   await reducedTab.goto(origin+'/investors/pitch');await reducedTab.waitForFunction(()=>document.querySelector('#pitch-stage')?.dataset.mounted==='true');
   await reducedTab.locator('#pitch-poster').evaluate(image=>image.decode());
   assert.equal(await reducedTab.locator('#pitch-film').getAttribute('src'),null);
-  assert.equal(await reducedTab.locator('#pitch-play').getAttribute('aria-label'),'Play presentation');
+  assert.equal(await reducedTab.locator('#pitch-play').getAttribute('aria-label'),'Play slides');
   await reducedTab.keyboard.press('ArrowRight');await reducedTab.waitForFunction(()=>document.body.dataset.chapter==='thesis');
   await reducedTab.locator('#pitch-poster').evaluate(image=>image.decode());await reducedTab.waitForTimeout(300);
   assert.deepEqual(reducedVideoRequests,[],'Reduced-motion viewers must not fetch videos without pressing Play');
   await reducedTab.screenshot({path:'tmp/pitch-review/ui-390-reduced-motion.png'});
+  assert.equal(await reducedTab.evaluate(()=>window.__pitchAudioContexts.length),0,'Reduced-motion presentation must not start sound automatically');
+  await reducedTab.locator('#pitch-sound').click();await reducedTab.waitForFunction(()=>document.querySelector('#pitch-sound').getAttribute('aria-pressed')==='true');
+  await reducedTab.waitForTimeout(900);const reducedAudio=await measureSound(reducedTab);audible(reducedAudio,'Reduced-motion sound opt-in');
+  assert.equal(await reducedTab.locator('#pitch-play').getAttribute('aria-label'),'Play slides');
+  assert.equal(await reducedTab.locator('#pitch-film').getAttribute('src'),null);assert.deepEqual(reducedVideoRequests,[],'Sound opt-in must not enable motion or load videos');
+  await reducedTab.screenshot({path:'tmp/pitch-audio/reduced-sound-on-390.png'});checks++;
+  await reducedTab.locator('#pitch-sound').click();await reducedTab.waitForFunction(()=>window.__pitchAudioContexts[0].state==='suspended');
   await reducedTab.locator('#pitch-play').click();await reducedTab.waitForFunction(()=>document.querySelector('#pitch-film').readyState>=2&&document.querySelector('#pitch-film').currentTime>0);
   assert.ok(reducedVideoRequests.length>0,'Reduced-motion viewer can opt into video explicitly');await reducedContext.close();checks++;
   assert.deepEqual(browserErrors,[],'Private browser JavaScript errors');
