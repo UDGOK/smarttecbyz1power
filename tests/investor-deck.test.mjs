@@ -20,3 +20,7 @@ test('published PDF cannot drift from current readiness or its explicitly histor
   assert.equal(sha(readFileSync(path,'utf8').replaceAll('\r\n','\n')),expected,'Rebuild and review the investor PDF after economic changes');
  }
 });
+
+test('published team slide cannot drift from the shared names and contacts',()=>{
+ assert.equal(metadata.teamSourceSha256,sha(readFileSync('src/data/team.json','utf8').replaceAll('\r\n','\n')),'Rebuild and visually review the PDF team slide after roster changes');
+});

@@ -7,18 +7,9 @@ const full=r.cooling.cases.find(c=>c.id==='full-scope');
 const lower=r.cooling.cases.find(c=>c.id==='lower-cost');
 const metric=(label,value,note)=>({label,value:String(value),note});
 
-// Owner-supplied names and roles. Consistency is tested against the site roster.
-export const teamMembers=[
-  {name:'Syed Hussain',role:'Chief Executive Officer'},
-  {name:'Yasir Jahangir',role:'Chief Technology Officer'},
-  {name:'Muhammad Siddiqui',role:'Chief Operating Officer'},
-  {name:'Ryan',role:'Director of Operations'},
-  {name:'Javed Iqbal, PhD',role:'Strategic Advisor'},
-  {name:'Shahb Kazmi',role:'Senior Advisor'},
-  {name:'Ali Askara',role:'Graphics and Media Relations'},
-  {name:'Ken',role:'Legal'},
-  {name:'Daniel',role:'Chief Financial Officer'}
-];
+// Both investor editions and the public team section use the same owner-supplied roster.
+import roster from '../../data/team.json' with {type:'json'};
+export const teamMembers=roster;
 
 export const pitchContact={
   name:'Yasir Jahangir',role:'Chief Technology Officer',

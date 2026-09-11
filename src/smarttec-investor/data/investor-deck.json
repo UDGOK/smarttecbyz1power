@@ -4,11 +4,12 @@
   "reviewedAt": "2026-09-11",
   "edition": "Founder-backed B300 investment readiness and staged funding",
   "pages": 26,
-  "bytes": 1602991,
-  "sha256": "a941bb64a5688c6605b839262f112388b159c0097b551c9962de63658a4ef611",
+  "bytes": 1605433,
+  "sha256": "083cf01d1b1f4e7a24e7b8b2e9ab33ae0821ca3fa67a9afa1cd64e8e3d00f2b9",
   "modelVersion": "1.1.0",
   "ownerStudySha256": "8d6f43920345bc0102a37c2d49bec22f1d4dc16be0ff0d1a1c1d3b26576cb90d",
   "engineSha256": "3e7329cbbef7fcaa59434fe79c7018e9965ebbb8989b843057d7cde3793696ff",
   "readinessSourceSha256": "6315db86ff1311a2fc12b6df340d46ce9bcd8d2bdeb9c1c5277f50cd92a689c5",
+  "teamSourceSha256": "34531cc4a6310a37343e4dd2a5e6d19133d3d1ff60647d7331faa7fe2ed00296",
   "currentReturnStatus": "not-established"
 }

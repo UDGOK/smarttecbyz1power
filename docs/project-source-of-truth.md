@@ -12,7 +12,7 @@ The owner’s latest investment-readiness discussion supersedes the 10 September
 - On-site shared electrical service is reported as **3,000 A, 208 V, three-phase through OG&E**; commissioning target **8 October 2026**. This is not verified exclusive continuous compute capacity.
 - **UDGOK** construction target **24 September 2026**; **Dobson fiber 4–8 weeks**, target **8 October–5 November 2026**. These remain owner-reported targets, with acceptance pending.
 - **SmartTec.dev LLC** operates under **SmartTec Holdings LLC**; **Z1Power** is the parent battery company.
-- Leadership supplied by the owner: Syed Hussain, CEO; Yasir Jahangir, CTO; Muhammad Siddiqui, COO; Ryan, Director of Operations; Javed Iqbal, PhD, Strategic Advisor; Shahb Kazmi, Senior Advisor; Ali Askara, Graphics and Media Relations; Ken, Legal; Daniel, CFO. Yasir’s supplied full contact name is **Yasir Jahangir**. Do not invent other surnames, biographies or photographs.
+- Leadership supplied by the owner: Syed Hussain, CEO; Yasir Jahangir, CTO; Muhammad Siddiqui, COO; Ryan, Director of Operations; Javed Iqbal, PhD, Strategic Advisor; Shahab Kazmi, Senior Advisor; Ali Askari, Graphics and Media Relations; Ken, Legal; Daniel, CFO. Yasir’s supplied full contact name is **Yasir Jahangir**. Do not invent other surnames, biographies or photographs.
 - Inquiry forms deliver to **yasir@futonix.com**. Supplied investor/signature contact: **yasir@smarttec.dev**, **918-520-3823**. No current site photographs have been supplied; retain concept labels.
 - Customer discussions are active. **No signed customer contracts or guaranteed minimum receipts have been established**. Readiness to sign, marketplace interest and proposed resale arrangements do not establish contracted revenue.
 
@@ -51,3 +51,5 @@ Use actual eight-GPU system units. Do not halve an eight-GPU quote to invent a c
 ## Historical comparisons retained on the public site
 
 The 10 September starter proposal of two RTX PRO 6000 nodes plus one B300 node is superseded. The earlier **two-node, eight-GPU, 7.5 kW RTX** calculator remains a clearly labeled workload reference and excludes B300. Hardware catalogue specifications are reference products, not the selected system’s bill of materials or facility load. The B300 reference card was checked against Supermicro’s published up-to-1,100 W GPU specification on 11 September 2026; complete selected-system demand remains unverified.
+
+- Team names and supplied direct contacts are maintained in `src/data/team.json` for the public team area and both investor editions. LinkedIn profiles are supplied only for Syed Hussain, Yasir Jahangir and Javed Iqbal. Ken has no supplied email or profile; do not create placeholder links.

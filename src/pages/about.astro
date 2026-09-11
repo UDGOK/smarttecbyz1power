@@ -1,7 +1,7 @@
 ---
 import Content from '../layouts/Content.astro';
 import {company,site,publicDeployment as deployment} from '../data/site';
-import {team} from '../data/team';
+import TeamSection from '../components/TeamSection.astro';
 ---
 <Content title={`About ${company.full} — our company and team`} description={`${company.entity}, operating under ${company.holdingCompany}, develops AI infrastructure in Mead, Oklahoma. Meet the SmartTec leadership and advisory team.`} kicker="Company / People / Purpose" heading="The people behind the infrastructure." lede={`SmartTec brings data-center services and energy expertise together on a ${site.acres}-acre campus in Mead, Oklahoma. We are evaluating dedicated GPU compute alongside space for customer-owned equipment.`} meta={[
   {label:'Company',value:company.entity,note:`Operating under ${company.holdingCompany}`},
@@ -21,19 +21,11 @@ import {team} from '../data/team';
     <p>{company.entity} operates under {company.holdingCompany}. {company.parent} is the parent company and battery producer. Its energy expertise connects SmartTec's compute deployment with the longer-term battery, solar and manufacturing plan.</p>
     <div class="cards"><article class="card"><h3>Data-center services</h3><p>Proposed dedicated B300 compute, plus customer-owned colocation subject to separate facility allocation.</p><a href="/compute">Explore the compute plan →</a></article><article class="card"><h3>Energy infrastructure</h3><p>A management-reported solar, battery and gas supply agreement, shared OG&E service and all-new cooling. Capacity, costs and commissioning remain under review.</p><a href="/power">See power and cooling →</a></article><article class="card"><h3>Campus development</h3><p>Existing buildings anchor the first phase. Planned inverter and battery assembly, solar and storage provide room for future development.</p><a href="/site">Explore Site 01 →</a></article></div>
   </section>
-  <section aria-labelledby="people" data-reveal>
-    <p class="eyebrow"><span class="eyebrow__n">03</span><span class="eyebrow__t">Our team</span></p>
-    <h2 id="people">Leadership, operations and advisors</h2>
-    <p>The people leading SmartTec's business, technology, operations and supporting functions.</p>
-    <div class="team-grid">{team.map(person=><article class="team-card"><span class="team-monogram" aria-hidden="true">{person.initials}</span><div><h3>{person.name}</h3><p>{person.role}</p></div></article>)}</div>
-  </section>
+  <TeamSection />
   <section class="is-end" aria-labelledby="talk" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">04</span><span class="eyebrow__t">Start a conversation</span></p>
     <h2 id="talk">Bring us the workload you want to run</h2>
-    <p>Contact Yasir at <a href="mailto:yasir@futonix.com">yasir@futonix.com</a> to discuss your deployment, arrange a site visit or connect with the team.</p>
+    <p>Contact Yasir at <a href="mailto:yasir@smarttec.dev">yasir@smarttec.dev</a> to discuss your deployment, arrange a site visit or connect with the team.</p>
     <div class="actions"><a class="btn" href="/contact">Talk to SmartTec</a><a class="btn btn--ghost" href="/site">Visit the campus plan</a></div>
   </section>
 </Content>
-<style>
-.team-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:32px}.team-card{display:flex;align-items:center;gap:18px;padding:26px 22px;border:1px solid #c7e8d52b;border-radius:10px;background:#173d2f66;min-width:0}.team-monogram{display:grid;place-items:center;flex:0 0 54px;height:54px;border:1px solid #7be88a50;background:#7be88a0b;color:#9cf0a8;border-radius:50%;font:17px var(--f-mono)}.team-card h3{font-size:19px;line-height:1.35;margin:0 0 7px;overflow-wrap:anywhere}.team-card p{font-size:13px;line-height:1.5;margin:0;color:#b9cdc0}.team-card div{min-width:0}@media(max-width:1050px){.team-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.team-grid{grid-template-columns:1fr}.team-card{padding:22px}.team-card h3{font-size:19px}}
-</style>

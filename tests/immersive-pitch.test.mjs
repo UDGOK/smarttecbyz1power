@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chapters,teamMembers,pitchContact} from '../src/smarttec-investor/data/immersive-pitch.mjs';
 import {investmentReadiness as r} from '../src/smarttec-investor/investment-readiness.mjs';
-import {loadTS} from './helpers/load-ts.mjs';
+import team from '../src/data/team.json' with {type:'json'};
 
 const chapter=id=>chapters.find(c=>c.id===id);
 const money=value=>'$'+value.toLocaleString('en-US');
@@ -58,8 +58,7 @@ test('revenue chapter preserves reserve exclusion and uncontracted pricing and d
 });
 
 test('immersive team roster matches the existing owner-supplied site roster',()=>{
-  const {team}=loadTS('src/data/team.ts');
-  assert.deepEqual(teamMembers.map(p=>[p.name,p.role]),team.map(p=>[p.name,p.role]));
+  assert.deepEqual(teamMembers,team);
   assert.deepEqual(chapter('team').team,teamMembers);
   assert.equal(pitchContact.name,'Yasir Jahangir');
   assert.equal(pitchContact.emailHref,'mailto:'+pitchContact.email);

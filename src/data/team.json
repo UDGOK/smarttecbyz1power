@@ -1,0 +1,11 @@
+[
+  {"id":"syed","name":"Syed Hussain","role":"Chief Executive Officer","initials":"SH","discipline":"Leadership","email":"syed@z1power.com","linkedin":"https://www.linkedin.com/in/syed-hussain-033661230/"},
+  {"id":"yasir","name":"Yasir Jahangir","role":"Chief Technology Officer","initials":"YJ","discipline":"Technology","email":"yasir@smarttec.dev","linkedin":"https://www.linkedin.com/in/hyasir/"},
+  {"id":"muhammad","name":"Muhammad Siddiqui","role":"Chief Operating Officer","initials":"MS","discipline":"Leadership","email":"muhammad@z1power.com","linkedin":null},
+  {"id":"ryan","name":"Ryan","role":"Director of Operations","initials":"R","discipline":"Operations","email":"ryan@smarttec.dev","linkedin":null},
+  {"id":"javed","name":"Javed Iqbal, PhD","role":"Strategic Advisor","initials":"JI","discipline":"Advisory","email":"javed@z1power.com","linkedin":"https://www.linkedin.com/in/dagiwal/"},
+  {"id":"shahab","name":"Shahab Kazmi","role":"Senior Advisor","initials":"SK","discipline":"Advisory","email":"shahab.kazmi@estelleslighting.com","linkedin":null},
+  {"id":"ali","name":"Ali Askari","role":"Graphics and Media Relations","initials":"AA","discipline":"Communications","email":"ali@z1power.com","linkedin":null},
+  {"id":"ken","name":"Ken","role":"Legal","initials":"K","discipline":"Legal","email":null,"linkedin":null},
+  {"id":"daniel","name":"Daniel","role":"Chief Financial Officer","initials":"D","discipline":"Finance","email":"daniel@z1power.com","linkedin":null}
+]

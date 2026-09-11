@@ -23,8 +23,12 @@ for(const route of routes){
  assert.equal(doc.querySelectorAll('.todo').length,0,`${route}: public placeholder styling remains`);checks++;
  if(route && route!=='brand') { assert.match(doc.querySelector('footer').textContent,/39\.39 acres/);assert.match(doc.querySelector('footer').textContent,/64 B300 GPUs · proposed/);checks+=2; }
  if(route==='about'){
-   for(const name of ['Syed Hussain','Yasir Jahangir','Muhammad Siddiqui','Ryan','Javed Iqbal, PhD','Shahb Kazmi','Ali Askara','Ken','Daniel']){assert.ok(doc.querySelector('#people').parentElement.textContent.includes(name),`Missing supplied team member ${name}`);checks++;}
+   for(const name of ['Syed Hussain','Yasir Jahangir','Muhammad Siddiqui','Ryan','Javed Iqbal, PhD','Shahab Kazmi','Ali Askari','Ken','Daniel']){assert.ok(doc.querySelector('#people').closest('section').textContent.includes(name),`Missing supplied team member ${name}`);checks++;}
    assert.equal(doc.querySelectorAll('.team-card').length,9);checks++;
+   const people=doc.querySelector('[data-team-section]');
+   assert.equal(people.querySelectorAll('a[href^="mailto:"]').length,8);
+   assert.equal(people.querySelectorAll('a[href^="https://www.linkedin.com/"]').length,3);
+   assert.equal(people.querySelector('[data-person="ken"]').querySelectorAll('a').length,0);checks+=3;
  }
  if(route==='site'){assert.match(doc.body.textContent,/SEC 33-6S-8E E2E2NW LESS \.61ACS \(958-895\) FOR HWY/);assert.match(doc.body.textContent,/5,035/);checks+=2;}
  if(route==='compute'){
