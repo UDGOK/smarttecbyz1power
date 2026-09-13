@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import team from '../src/data/team.json' with {type:'json'};
+import credentials from '../src/data/yasir-credentials.json' with {type:'json'};
 const origin=process.argv[2]||'http://127.0.0.1:4333';
 const credlyURL='https://www.credly.com/users/yasirj/badges/credly';
 assert.equal(team.find(person=>person.id==='yasir').credly,credlyURL);
@@ -13,6 +14,16 @@ try{
     await page.setViewportSize({width,height:950});await page.goto(origin+'/about#people');
     const section=page.locator('[data-team-section]');await section.waitFor();
     await page.locator('#people').scrollIntoViewIfNeeded();await page.waitForFunction(()=>document.querySelector('[data-team-section]').classList.contains('is-motion-active'));
+    const badges=page.locator('.leadership-badge');assert.equal(await badges.count(),2);
+    for(let i=0;i<2;i++){
+      const badge=badges.nth(i);await badge.scrollIntoViewIfNeeded();
+      assert.equal(await badge.getAttribute('href'),credentials.certifications[i].verificationUrl);
+      assert.equal(await badge.getAttribute('target'),'_blank');assert.match(await badge.getAttribute('rel'),/noopener noreferrer/);
+      await badge.locator('img').evaluate(img=>img.decode());
+      assert.equal(await badge.locator('img').evaluate(img=>img.naturalWidth===512&&img.naturalHeight===512&&getComputedStyle(img).filter==='none'&&getComputedStyle(img).opacity==='1'),true);
+      assert.equal(await badge.evaluate(el=>el.scrollWidth<=el.clientWidth+1),true,'Badge artwork and full title fit');
+    }
+    if(width===1440||width===390)await page.locator('.leadership-credentials').screenshot({path:`tmp/team-review/badges-${width}.png`});
     for(const person of team){
       const card=page.locator(`[data-person="${person.id}"]`);await card.scrollIntoViewIfNeeded();
       assert.equal(await card.locator('h3').textContent(),person.name);

@@ -1,5 +1,6 @@
 ---
 import {team} from '../data/team';
+import LeadershipCredentials from './LeadershipCredentials.astro';
 ---
 <section class="team-section" aria-labelledby="people" data-team-section>
   <p class="eyebrow"><span class="eyebrow__n">03</span><span class="eyebrow__t">Our team</span></p>
@@ -7,6 +8,7 @@ import {team} from '../data/team';
     <div><h2 id="people">Leadership, operations and advisors</h2><p class="team-intro">The people connecting energy, technology and the delivery of SmartTec's first campus.</p></div>
     <button class="team-motion" type="button" aria-pressed="false" hidden><span aria-hidden="true">Ⅱ</span><span data-team-motion-label>Pause motion</span></button>
   </div>
+  <LeadershipCredentials />
   <div class="team-stage">
     <div class="team-grid">{team.map((person,index)=><article class="team-card" data-person={person.id} style={`--team-order:${index%3}`} aria-labelledby={`team-name-${person.id}`}>
       <div class="team-card-top"><span class="team-monogram" aria-hidden="true"><span>{person.initials}</span></span><span class="team-discipline">{person.discipline}</span></div>
