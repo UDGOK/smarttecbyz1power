@@ -125,7 +125,7 @@ async function returnToCampusSlowly(page){
  await page.waitForTimeout(180);
  assert.equal(await page.locator('#campus-ui').isVisible(),false,'the gallery stays hidden below its visibility boundary');
  await page.mouse.move(320,330);await page.mouse.wheel(0,-100);
- await page.waitForFunction(()=>document.querySelector('[data-stage-panel][data-stage="campus"]').getBoundingClientRect().bottom>100);
+ await page.waitForFunction(()=>document.querySelector('[data-stage-panel][data-stage="campus"]').getBoundingClientRect().bottom>=80);
  await page.locator('#campus-ui').waitFor({state:'visible',timeout:5000});
  await page.locator('#home-campus-visual').waitFor({state:'visible',timeout:5000});
  return await page.locator('[data-stage-panel][data-stage="campus"]').evaluate(panel=>panel.getBoundingClientRect().bottom);

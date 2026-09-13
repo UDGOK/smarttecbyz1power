@@ -28,6 +28,12 @@ The gallery hides when scrolled into the services below, restores on return and 
 - Instrumented WebGL recorded zero idle homepage draws while navigation callbacks continued. Network observation confirmed no full campus assets loaded through these entry points.
 - Desktop and mobile screenshots reviewed for imagery, text contrast, control placement, matching menu disclosures and links to the full viewer. Additional 1366×768 and 390×667 checks found no overlap or horizontal overflow.
 
+### Production verification
+
+Implementation commit `57056b179b2d8157eb3c183b981f75516a01d30c` deployed successfully through Vercel and passed the GitHub Site QA workflow. Live HTML for `/`, `/site`, `/about` and `/contact` references the approved imagery and current viewer. SHA-256 comparisons confirmed that all four deployed gallery images match the approved local files.
+
+All five browser scenarios were verified against `https://www.smarttec.dev` in installed stable Edge. The mobile scroll assertion was aligned with the actual inclusive 80-pixel visibility boundary: Edge can move less than the requested wheel delta. Its real wheel event was not cancelled, and the gallery restored correctly. The focused mobile rerun passed with a panel bottom of 85 pixels; the other four live groups passed in the original run. No production code correction was needed after deployment.
+
 Re-run the focused browser coverage against a served production build:
 
 ```sh
