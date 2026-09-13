@@ -14,7 +14,7 @@ export const prerender=false;
 Object.entries(privateHeaders).forEach(([k,v])=>Astro.response.headers.set(k,v));
 const access=await pageAccess(Astro.request);
 if(access.error)return new Response('Private access is temporarily unavailable.',{status:503,headers:privateHeaders});
-if(!access.session)return Astro.redirect('/investors/login',303);
+if(!access.session)return new Response(null,{status:303,headers:{...privateHeaders,Location:'/investors/login'}});
 const core=model.scenarios.filter(s=>!['maximum-base','delayed'].includes(s.id));
 const infrastructureLabels:Record<string,string>={'Electrical distribution from the 3,000A main':'Electrical distribution allowance','Daikin Trailblazer chillers, installed (incl. spare)':'Two nominal 50-ton chillers, installed allowance','Contingency (things we haven\'t thought of)':'Contingency'};
 ---
