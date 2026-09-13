@@ -31,6 +31,8 @@ export interface SceneContext {
 
 export interface StageScene {
   readonly id: string;
+  /** DOM-backed chapters need one background frame, not continuous GPU work. */
+  readonly static?: boolean;
 
   /** Build geometry into `ctx.scene`. Called once when the stage is entered. */
   build(ctx: SceneContext, settings: TierSettings): void;

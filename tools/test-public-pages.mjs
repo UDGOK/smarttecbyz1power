@@ -24,18 +24,27 @@ for(const[route,kind,anchor,compact]of routes){
   assert.equal(new Set(ids).size,ids.length,`${route}: duplicate IDs`);checks++;
   assert.equal((html.match(/<h1\b/g)||[]).length,1,`${route}: heading hierarchy`);checks++;
   assert.ok(ids.includes(anchor),`${route}: primary link target missing`);checks++;
-  assert.equal((html.match(/<figure[^>]*\bdata-page-scene\b/g)||[]).length,1);checks++;
-  assert.ok(html.includes(`data-scene-kind="${kind}"`));checks++;
-  assert.ok(html.includes(`data-scene-compact="${compact}"`));checks++;
+  if(kind==='campus'){
+    assert.equal((html.match(/<figure[^>]*\bdata-page-scene\b/g)||[]).length,0);
+    assert.match(html,/<a[^>]*class="page-scene__campus-link"[^>]*href="\/site\/campus"/);
+    assert.ok(html.includes('/assets/campus/2026-09/renders/13-hero-arrival-1600.webp'));
+    assert.ok(!html.includes('data-scene-host'),'campus entry does not retain the old canvas');checks+=4;
+  }else{
+    assert.equal((html.match(/<figure[^>]*\bdata-page-scene\b/g)||[]).length,1);checks++;
+    assert.ok(html.includes(`data-scene-kind="${kind}"`));checks++;
+    assert.ok(html.includes(`data-scene-compact="${compact}"`));checks++;
+  }
   assert.ok(html.includes('smarttec-lockup-offwhite-green.svg'));checks++;
   assert.ok(html.includes('/investor-assets/fonts.css'));checks++;
   assert.ok(html.includes('class="page-trail"'));checks++;
-  assert.ok(html.includes('data-cinematic'));assert.ok(html.includes('/assets/cinematic/'));assert.ok(html.includes('data-menu-preview'));assert.ok(!/<body[^>]*data-entry-pending/.test(html));checks+=4;
+  assert.ok(html.includes('data-cinematic'));assert.ok(html.includes(kind==='campus'?'/assets/campus/':'/assets/cinematic/'));assert.ok(html.includes('data-menu-preview'));assert.ok(!/<body[^>]*data-entry-pending/.test(html));checks+=4;
   assert.ok(!html.includes('/api/investor/'),`${route}: private API reference`);checks++;
   assert.ok(!html.includes('id="gate"'),`${route}: unexpected entry gate`);checks++;
   const sceneScript=[...html.matchAll(/<script[^>]*\bsrc="([^"]+)"/g)].map(match=>match[1]).find(src=>src.includes('PageScene.'));
-  assert.ok(sceneScript,`${route}: missing scene controller`);checks++;
-  if(entry)assert.equal(entry,sceneScript);else entry=sceneScript;
+  if(kind!=='campus'){
+    assert.ok(sceneScript,`${route}: missing scene controller`);checks++;
+    if(entry)assert.equal(entry,sceneScript);else entry=sceneScript;
+  }
   if(compact){assert.match(html,/<details class="page-scene-fold">/);checks++;}
   else{assert.ok(html.includes('page-scene--backdrop'));checks++;}
   if(route==='contact'){assert.match(html,/<form\b/);checks++;}

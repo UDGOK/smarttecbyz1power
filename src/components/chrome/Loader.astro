@@ -1,13 +1,15 @@
 ---
 import { company } from '../../data/site';
+import { artImage } from '../../data/cinematic';
 import '../../styles/intro.css';
 const lanes=Array.from({length:12},(_,i)=>i);
+const campusArtwork=artImage('campus');
 const particles=Array.from({length:19},(_,i)=>({x:500+Math.cos(i*2.4)*Math.sqrt(i)*9,y:300+Math.sin(i*2.4)*Math.sqrt(i)*9}));
 ---
 <section class="intro" id="loader" aria-label="Welcome to SmartTec">
   <div class="intro__world" aria-hidden="true">
     <div class="intro__stars"></div>
-    <img class="intro__facility" src="/assets/cinematic/campus-1586.webp" srcset="/assets/cinematic/campus-800.webp 800w, /assets/cinematic/campus-1586.webp 1586w" sizes="100vw" alt="" width="1586" height="992" decoding="async" />
+    <img class="intro__facility" src={campusArtwork.src} srcset={campusArtwork.srcset} sizes="100vw" alt="" width={campusArtwork.width} height={campusArtwork.height} decoding="async" />
     <div class="intro__facility-shade"></div>
     <svg class="intro__signal" viewBox="0 0 1000 600" fill="none" preserveAspectRatio="xMidYMid slice">
       <defs><radialGradient id="intro-core"><stop stop-color="#f4ffed"/><stop offset=".45" stop-color="#98fba8"/><stop offset="1" stop-color="#2b926d"/></radialGradient></defs>
@@ -23,5 +25,5 @@ const particles=Array.from({length:19},(_,i)=>({x:500+Math.cos(i*2.4)*Math.sqrt(
   <div class="intro__top"><span>SMARTTEC / THE SIGNAL</span><a class="intro__skip" id="loader-skip" href="/site">Skip intro <span aria-hidden="true">↗</span></a></div>
   <div class="intro__identity"><img class="intro__logo-flat" src="/assets/brand/smarttec-lockup-offwhite-green.svg" alt={company.full} width="1231" height="298" fetchpriority="high" decoding="async" /><p>From energy to intelligence.</p></div>
   <div class="intro__story" aria-hidden="true"><span>01 / Energy</span><span>02 / Signal</span><span>03 / Intelligence</span></div>
-  <div class="intro__footer"><p class="intro__auto">Entering automatically</p><p class="intro__fallback">Follow the signal. <a href="/site">Enter site ↗</a></p><div class="intro__timeline" aria-hidden="true"><span></span></div><span class="intro__concept">An abstract infrastructure concept</span></div>
+  <div class="intro__footer"><p class="intro__auto">Entering automatically</p><p class="intro__fallback">Follow the signal. <a href="/site">Enter site ↗</a></p><div class="intro__timeline" aria-hidden="true"><span></span></div><span class="intro__concept">Blender campus study · Abstract signal animation</span></div>
 </section>

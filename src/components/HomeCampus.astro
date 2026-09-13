@@ -1,0 +1,24 @@
+---
+interface Props {part:'visual'|'controls'}
+const {part}=Astro.props;
+const views=[['13-hero-arrival','Arrival'],['01-campus-aerial','Aerial'],['14-datahall-interior','Data hall'],['16-manufacturing-interior','Manufacturing']];
+---
+{part==='visual'?<div id="home-campus-visual" class="home-campus-visual" hidden aria-hidden="true">
+  <img class="home-campus-image" width="1600" height="900" alt="" decoding="async" />
+  <img class="home-campus-image" width="1600" height="900" alt="" decoding="async" />
+  <div class="home-campus-veil"></div>
+</div>:<div class="home-campus-gallery">
+  <div class="home-campus-selection">
+    <p class="home-campus-credit">BLENDER CAMPUS STUDY · PROPOSED FACILITIES</p>
+    <nav class="home-campus-views" aria-label="Rendered campus views">{views.map(([key,label],i)=><button type="button" data-campus-view={key} aria-pressed={i===0?'true':'false'}><span>{String(i+1).padStart(2,'0')}</span>{label}</button>)}</nav>
+    <p id="home-campus-status" class="home-campus-status" role="status">Choose a view. Explore every connection in the full 3D experience.</p>
+  </div>
+  <a class="home-campus-open" href="/site/campus">Explore the campus in 3D <span aria-hidden="true">↗</span><small>16 views · cooling, power and fiber</small></a>
+</div>}
+<style>
+.home-campus-visual{position:fixed;inset:0;z-index:1;overflow:hidden;pointer-events:none;background:#e3e8e1}.home-campus-visual[hidden]{display:none}.home-campus-image{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover;object-position:58% center;opacity:0;transition:opacity .6s ease;transform:scale(1.025)}.home-campus-image.is-active{opacity:1}.home-campus-visual.is-moving .home-campus-image.is-active{animation:campus-breathe 4.5s ease-out both}.home-campus-veil{position:absolute;inset:0;background:linear-gradient(90deg,#edf0ebe8 0%,#edf0ebd9 16%,#edf0eb4d 38%,#edf0eb00 62%),linear-gradient(0deg,#e5eadef2 0%,#e5eadecc 13%,#e5eade00 38%),linear-gradient(180deg,#e5eadeb3,#e5eade00 20%)}@keyframes campus-breathe{from{transform:scale(1.025)}to{transform:scale(1.055)}}
+.home-campus-gallery{position:absolute;left:4vw;right:4vw;bottom:110px;display:flex;justify-content:space-between;align-items:end;gap:32px;pointer-events:none}.home-campus-selection{min-width:0}.home-campus-credit{margin:0 0 14px;font:9px var(--f-mono);letter-spacing:.13em;color:#354e3f}.home-campus-views{display:flex;gap:8px;flex-wrap:wrap;pointer-events:auto}.home-campus-views button{display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 16px;border:1px solid #244b3033;border-radius:6px;background:#f4f7eecc;color:#284832;font:12px var(--f-sans);cursor:pointer;transition:background .2s,color .2s}.home-campus-views button>span{font:9px var(--f-mono);opacity:.65}.home-campus-views button[aria-pressed=true]{background:#183e2b;color:#f0f7eb;border-color:#183e2b}.home-campus-views button:hover{background:#d9e6d5}.home-campus-views button[aria-pressed=true]:hover{background:#28543a}.home-campus-status{margin:12px 0 0;max-width:55ch;color:#344b3c;font:11px/1.5 var(--f-sans)}.home-campus-open{position:relative;display:block;padding:17px 56px 16px 22px;background:#163d2a;color:#eef5e8;border:1px solid #294e37;border-radius:8px;text-decoration:none;font:500 15px var(--f-sans);pointer-events:auto;box-shadow:0 8px 30px #1b39241c;white-space:nowrap}.home-campus-open>span{position:absolute;right:20px;top:18px;font-size:25px}.home-campus-open>small{display:block;margin-top:9px;font:10px var(--f-mono);color:#b3d0b5}.home-campus-open:hover{background:#28543a}.home-campus-open:focus-visible,.home-campus-views button:focus-visible{outline:3px solid #ad740b;outline-offset:4px}
+@media(max-width:900px){.home-campus-gallery{gap:20px}.home-campus-views{gap:6px}.home-campus-views button{padding:10px 12px;font-size:11px}.home-campus-open{font-size:13px;padding-left:16px}.home-campus-open>small{font-size:9px}}
+@media(max-width:640px){.home-campus-veil{background:linear-gradient(180deg,#edf0ebf5 0%,#edf0ebe6 42%,#edf0eb1a 58%,#e5eade59 62%,#e5eadef2 80%)}.home-campus-image{object-position:60% center}.home-campus-gallery{left:20px;right:20px;bottom:130px;display:grid;gap:14px}.home-campus-views{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.home-campus-views button{padding:8px 5px;gap:4px;justify-content:center;font-size:10px;min-height:40px}.home-campus-views button>span{display:none}.home-campus-credit{font-size:8px;margin-bottom:9px;letter-spacing:.08em}.home-campus-status{font-size:10px;margin-top:8px}.home-campus-open{padding:13px 46px 12px 16px;font-size:13px}.home-campus-open>small{margin-top:6px}.home-campus-open>span{top:13px}.home-campus-gallery{pointer-events:none}.home-campus-selection{max-width:100%}}
+@media(prefers-reduced-motion:reduce){.home-campus-image{transition:none;transform:none!important;animation:none!important}}
+</style>

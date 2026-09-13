@@ -2,7 +2,7 @@
 export function mountMenuPreview(){
   const menu=document.querySelector('#site-menu');
   if(!menu||menu.dataset.previewMounted)return;menu.dataset.previewMounted='true';
-  const image=menu.querySelector('[data-preview-image]'),heading=menu.querySelector('[data-preview-heading]'),caption=menu.querySelector('[data-preview-caption]'),link=menu.querySelector('[data-preview-link]');
+  const image=menu.querySelector('[data-preview-image]'),heading=menu.querySelector('[data-preview-heading]'),caption=menu.querySelector('[data-preview-caption]'),link=menu.querySelector('[data-preview-link]'),disclosure=menu.querySelector('small[data-preview-disclosure]');
   if(!image||!heading||!caption||!link)return;
   const links=[...menu.querySelectorAll('[data-preview-art]')];
   let selected=links.find(item=>item.getAttribute('aria-current')==='page')||links[0],generation=0;
@@ -10,6 +10,7 @@ export function mountMenuPreview(){
     if(!item)return;selected=item;const current=++generation;
     links.forEach(node=>node.toggleAttribute('data-preview-active',node===item));
     heading.textContent=item.dataset.previewTitle;caption.textContent=item.dataset.previewNote;link.href=item.getAttribute('href');
+    if(disclosure)disclosure.textContent=item.dataset.previewDisclosure||'';
     const src=item.dataset.previewArt;
     if(!matchMedia('(min-width: 761px)').matches)return;
     if(image.getAttribute('src')===src&&image.complete&&image.naturalWidth){image.hidden=false;return;}

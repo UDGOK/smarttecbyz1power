@@ -5,6 +5,7 @@ import CtaBar from '../components/chrome/CtaBar.astro';
 import Loader from '../components/chrome/Loader.astro';
 import JourneyCue from '../components/chrome/JourneyCue.astro';
 import ServiceOverview from '../components/ServiceOverview.astro';
+import HomeCampus from '../components/HomeCampus.astro';
 import { company, site, publicDeployment as deployment, stages } from '../data/site';
 
 const grain =
@@ -16,6 +17,7 @@ const grain =
   experience
 >
   <canvas id="experience-canvas" aria-hidden="true"></canvas>
+  <HomeCampus part="visual" />
   <div class="scrim" aria-hidden="true"></div>
   <div class="grain" aria-hidden="true" style={`--grain-src: ${grain};`}></div>
   <div class="flash" id="flash" aria-hidden="true"></div>
@@ -56,19 +58,9 @@ const grain =
 
     <div id="hold-slot" class="hold-slot"></div>
 
-    <!-- Campus explorer chrome. Inert until stage 5 hands over control. -->
+    <!-- Lightweight approved renders; the full model opens on the campus page. -->
     <div class="campus-ui" id="campus-ui" hidden>
-      <div class="campus-hotspots" id="campus-hotspots" aria-hidden="true"></div>
-      <nav class="campus-controls" aria-label="Campus view">
-        <button type="button" class="campus-btn" data-campus="in" aria-label="Zoom in">+</button>
-        <div class="campus-controls__row">
-          <button type="button" class="campus-btn" data-campus="left" aria-label="Orbit left">‹</button>
-          <button type="button" class="campus-btn" data-campus="right" aria-label="Orbit right">›</button>
-        </div>
-        <button type="button" class="campus-btn" data-campus="out" aria-label="Zoom out">−</button>
-        <button type="button" class="campus-btn campus-btn--wide mono-label" data-campus="reset">Reset</button>
-      </nav>
-      <ul class="campus-legend" id="campus-legend"></ul>
+      <HomeCampus part="controls" />
     </div>
 
     <CtaBar />
@@ -83,6 +75,7 @@ const grain =
 
   <section class="static-path" id="static-path" inert data-entry-content>
     <h2>Site 01 — {site.address}</h2>
+    <a href="/site/campus"><img src="/assets/campus/2026-09/renders/13-hero-arrival-1600.webp" width="1600" height="900" loading="lazy" decoding="async" alt="Approved Blender study of the proposed SmartTec campus" /></a>
     <dl>
       <div><dt>Land</dt><dd>{site.acres} acres across three tracts, {site.county}</dd></div>
       <div><dt>Existing buildings</dt><dd>A + C data centers — {site.dataCenterArea.toLocaleString()} sq ft gross; B is utilities and storage</dd></div>
@@ -299,7 +292,8 @@ const grain =
     [data-stage="campus"] .stage-panel { padding-top: 80px; max-width: 30ch; }
   }
 
-  .after { position: relative; z-index: var(--z-content); background: var(--c-campus); }
+  /* Keep services above the campus backdrop and below the shared fixed header. */
+  .after { position: relative; z-index: calc(var(--z-content) - 1); background: var(--c-campus); }
 
   .static-path {
     position: relative;

@@ -143,11 +143,6 @@ export function initCursor(): void {
   const ringTc = reduced ? 0 : RING_TC;
   const trailTc = reduced ? 0 : TRAIL_TC;
 
-  function campusLive(): boolean {
-    const ui = document.getElementById('campus-ui');
-    return !!ui && !ui.hasAttribute('hidden');
-  }
-
   function stateFor(node: Element | null): CursorState {
     if (!node) return 'default';
 
@@ -168,11 +163,6 @@ export function initCursor(): void {
     }
 
     if (node.closest(INTERACTIVE)) return 'action';
-
-    // Once the campus is handed over, the world itself is the control: the
-    // whole scene reads as something you can push around. Anything above it
-    // that is actually a control has already been claimed above.
-    if (campusLive()) return 'grab';
 
     return 'default';
   }

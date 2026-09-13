@@ -8,7 +8,7 @@ html body dialog.menu .menu__label{font-size:clamp(1.7rem,3vw,3.7rem);line-heigh
 html body dialog.menu .menu__note{grid-column:2;text-align:left;font-size:12px;letter-spacing:.03em;color:#b9ccc0;line-height:1.5}
 html body dialog.menu .menu__link[data-preview-active] .menu__label{color:#7be88a}
 html body dialog.menu .menu__link:hover .menu__label{transform:translateX(7px)}
-.menu__preview{position:sticky;top:0;height:calc(100dvh - 145px);min-height:510px;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 70% 40%,#294331,#071410 75%);border-radius:4px}
+.menu__preview{position:sticky;top:0;width:100%;min-width:0;justify-self:stretch;height:calc(100dvh - 145px);min-height:510px;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 70% 40%,#294331,#071410 75%);border-radius:4px}
 .menu__preview>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:70% 50%;animation:menu-preview-in .55s ease both}
 .menu__preview-shade{position:absolute;inset:0;background:linear-gradient(0deg,#071410 0%,#07141030 50%,#07141040 100%);pointer-events:none}
 .menu__preview-copy{position:absolute;bottom:70px;left:32px;right:24px;color:#eef1ef}

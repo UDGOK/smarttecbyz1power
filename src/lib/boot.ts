@@ -10,7 +10,7 @@
 import gsap from 'gsap';
 import { SceneHost } from './scene/host';
 import { loadScene, warmScene } from './scene/registry';
-import type { CampusScene } from './scene/stage-campus';
+import { initHomeCampus } from './home-campus';
 import { prefersReducedMotion } from './hold-button';
 import { initCursor } from './cursor';
 import { revealLines, scramble } from './type-motion';
@@ -128,7 +128,7 @@ function run(): void {
   const rulerTrack = document.querySelector<HTMLElement>('.scroll-ruler-track');
   const powerValue = document.querySelector<HTMLElement>('#power-value');
   const campusUI = document.querySelector<HTMLElement>('#campus-ui');
-  const hotspotLayer = document.querySelector<HTMLElement>('#campus-hotspots');
+  const homeCampus = initHomeCampus();
   const after = document.querySelector<HTMLElement>('#after');
 
   const reduced = prefersReducedMotion();
@@ -791,13 +791,6 @@ function run(): void {
   }
 
   // --- Campus ------------------------------------------------------------
-  let hotspotRaf = 0;
-
-  function campus(): CampusScene | null {
-    const s = host?.currentStage;
-    return s && s.id === 'campus' ? (s as CampusScene) : null;
-  }
-
   /**
    * On the campus the page scrolls natively, so the manager cannot see an
    * overscroll. Watch for a sustained pull upward at the top of the document
@@ -838,82 +831,17 @@ function run(): void {
   };
 
   function enterCampus(): void {
-    const scene = campus();
-    if (!scene || !campusUI) return;
+    // The DOM chapter also works when WebGL is unavailable.
     campusPull = 0;
     if (!nativeScroll) {
       window.addEventListener('wheel', campusWheel, { passive: true });
       window.addEventListener('touchstart', campusTouchStart, { passive: true });
       window.addEventListener('touchmove', campusTouchMove, { passive: true });
-      // The journey is over: give the page back to the browser so the
-      // configurator and the reading path below can actually be reached.
       scroller.disable();
       delete document.body.dataset.virtualScroll;
     }
-    campusUI.hidden = false;
     if (after) after.hidden = false;
-    scene.setInteractive(true);
-
-    const legend = document.querySelector<HTMLElement>('#campus-legend');
-    if (legend && !legend.childElementCount) {
-      for (const h of scene.hotspots) {
-        const li = document.createElement('li');
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'campus-legend__btn mono-label';
-        btn.textContent = h.label;
-        btn.addEventListener('click', () => { audio.play('click'); scene.focusHotspot(h.id); });
-        const mark = (on: boolean) => {
-          hotspotLayer
-            ?.querySelector<HTMLElement>(`[data-hotspot="${h.id}"]`)
-            ?.classList.toggle('is-active', on);
-        };
-        btn.addEventListener('pointerenter', () => mark(true));
-        btn.addEventListener('pointerleave', () => mark(false));
-        btn.addEventListener('focus', () => mark(true));
-        btn.addEventListener('blur', () => mark(false));
-        li.appendChild(btn);
-        legend.appendChild(li);
-      }
-    }
-
-    const trackHotspots = () => {
-      const sc = campus();
-      if (!sc || !hotspotLayer || !host) return;
-      const projected = sc.projectHotspots(host.context);
-    hotspotLayer.setAttribute('aria-hidden', 'true');
-      for (const p of projected) {
-        let node = hotspotLayer.querySelector<HTMLElement>(`[data-hotspot="${p.id}"]`);
-        if (!node) {
-          node = document.createElement('span');
-          node.className = 'campus-hotspot';
-          node.dataset.hotspot = p.id;
-          const label = document.createElement('span');
-          label.className = 'campus-hotspot__label mono-label';
-          label.textContent = p.label;
-          node.appendChild(label);
-          const dot = node;
-          dot.addEventListener('click', () => {
-            audio.play('click');
-            sc.focusHotspot(p.id);
-            // On touch there is no hover and the legend is hidden, so the tap
-            // itself has to reveal the label — otherwise the visitor is flown
-            // somewhere with no idea what they are looking at.
-            hotspotLayer?.querySelectorAll('.campus-hotspot.is-active')
-              .forEach((n) => { if (n !== dot) n.classList.remove('is-active'); });
-            dot.classList.toggle('is-active');
-          });
-          hotspotLayer.appendChild(node);
-        }
-        node.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
-        node.style.opacity = p.visible ? '1' : '0';
-        // A label opening rightwards from a dot near the right edge runs off.
-        node.classList.toggle('campus-hotspot--flip', p.x > window.innerWidth * 0.55);
-      }
-      hotspotRaf = requestAnimationFrame(trackHotspots);
-    };
-    cancelAnimationFrame(hotspotRaf);
-    trackHotspots();
+    homeCampus.enter();
   }
 
   function exitCampus(): void {
@@ -926,24 +854,10 @@ function run(): void {
       document.body.dataset.virtualScroll = '';
       window.scrollTo({ top: 0, behavior: 'auto' });
     }
-    cancelAnimationFrame(hotspotRaf);
+    homeCampus.exit();
     if (campusUI) campusUI.hidden = true;
     if (after) after.hidden = true;
   }
-
-  document.querySelectorAll<HTMLElement>('[data-campus]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const scene = campus();
-      if (!scene) return;
-      audio.play('click');
-      const action = btn.dataset.campus;
-      if (action === 'in') scene.zoom(2);
-      if (action === 'out') scene.zoom(-2);
-      if (action === 'left') scene.orbit(-70, 0);
-      if (action === 'right') scene.orbit(70, 0);
-      if (action === 'reset') scene.resetView();
-    });
-  });
 
   // --- Site menu ---------------------------------------------------------
   // Behaviour is shared with the reading pages; what belongs to this route is

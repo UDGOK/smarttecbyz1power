@@ -471,10 +471,10 @@ export const stages = [
     scene: 'campus' as const,
     ground: '#dfe5e1',
     ruler: '05 / CAMPUS',
-    kicker: 'Conceptual campus diagram',
+    kicker: 'The Blender campus study',
     /** Was "Live." — an unconditional operating state the site does not have. */
     title: 'Walk\nthe campus.',
-    lede: 'A and C for data centers. B for batteries and utilities. Manufacturing, solar and storage complete the campus plan. Explore the site, meet our team, or bring us your workload.',
+    lede: 'A and C for compute. B for energy and network support. Explore the proposed campus, from liquid-cooled racks to inverter manufacturing and future solar.',
     chrome: 'dark' as const,
     scrollVh: 200,
     hold: null,

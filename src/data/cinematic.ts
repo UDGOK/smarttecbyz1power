@@ -2,7 +2,7 @@
 import { publicDeployment as deployment, campusConcept } from './site';
 export type ArtKind = 'campus' | 'compute' | 'energy';
 export interface VisualStory { art:ArtKind; label:string; note:string; topics:readonly {label:string; text:string}[]; }
-const campusNote='AI concept illustration · Not a photograph or surveyed site plan.';
+const campusNote='Blender campus design study · Proposed facilities, not a photograph or surveyed site plan.';
 const equipmentNote='AI hardware concept · Not installed inventory or an OEM configuration drawing.';
 export const visualStories:Record<string,VisualStory>={
   '/site':{art:'campus',label:'The campus concept',note:campusNote,topics:[{label:'Land',text:'The 39.39-acre legal parcel connects compute, manufacturing and energy development. Historical survey traces remain visible in the project records.'},{label:'Buildings',text:'A and C provide 5,035 sq ft of gross data-center area. B serves utility, battery and storage uses.'},{label:'Expansion',text:'UDGOK construction is targeted for 24 September 2026. Manufacturing, solar and storage progress through separate delivery milestones.'}]},
@@ -17,4 +17,8 @@ export const visualStories:Record<string,VisualStory>={
   '/brand':{art:'compute',label:'The SmartTec identity',note:'Concept backdrop · Official brand artwork and downloads follow below.',topics:[]},
 };
 export function visualStory(path:string):VisualStory{return visualStories[path.replace(/\/+$/,'')]||visualStories['/site'];}
-export function artSource(kind:ArtKind,width=1586){return `/assets/cinematic/${kind}-${width}.webp`;}
+export function artSource(kind:ArtKind,width=1586){return kind==='campus'?`/assets/campus/2026-09/renders/13-hero-arrival-${width>1600?2400:1600}.webp`:`/assets/cinematic/${kind}-${width}.webp`;}
+export function artImage(kind:ArtKind){
+  const campus=kind==='campus';
+  return {src:artSource(kind),srcset:campus?`${artSource(kind)} 1600w`:`${artSource(kind,800)} 800w, ${artSource(kind)} 1586w`,width:campus?1600:1586,height:campus?900:992};
+}

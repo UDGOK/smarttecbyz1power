@@ -13,7 +13,7 @@ const loaders: Record<SceneId, () => Promise<StageScene>> = {
   wait:    async () => new (await import('./stage-wait')).WaitScene(),
   power:   async () => new (await import('./stage-power')).PowerStage(),
   machine: async () => new (await import('./stage-machine')).MachineScene(),
-  campus:  async () => new (await import('./stage-campus')).CampusScene(),
+  campus:  async () => new (await import('./stage-campus-preview')).CampusPreviewScene(),
 };
 
 export function loadScene(id: SceneId): Promise<StageScene> {

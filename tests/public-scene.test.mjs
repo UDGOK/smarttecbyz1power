@@ -15,7 +15,7 @@ function fixture({coarse=false,reduced=false,compact=false,saveData=false,load}=
   const keys=['document','window','matchMedia','IntersectionObserver','navigator'];
   const descriptors=keys.map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]);
   const install=(key,value)=>Object.defineProperty(globalThis,key,{configurable:true,writable:true,value});
-  const root=new Element();root.dataset={sceneKind:'campus',sceneCompact:String(compact)};
+  const root=new Element();root.dataset={sceneKind:'machine',sceneCompact:String(compact)};
   const nodes=Object.fromEntries(['host','launch','fallback','controls','status','badge','position','panel'].map(key=>[key,new Element()]));
   const actions=Object.fromEntries(['close','reset','left','right','in','out','interact','play'].map(key=>{
     const el=new Element();el.dataset.sceneAction=key;return[key,el];

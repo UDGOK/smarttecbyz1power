@@ -82,6 +82,7 @@ const path = current.replace(/\/+$/, '') || current;
             data-preview-art={artSource(visualStory(l.href).art)}
             data-preview-title={l.label}
             data-preview-note={visualStory(l.href).label}
+            data-preview-disclosure={visualStory(l.href).note}
             aria-current={path === l.href ? 'page' : undefined}
           >
             <span class="menu__n mono-label">{String(i + 1).padStart(2, '0')}</span>
@@ -112,7 +113,7 @@ const path = current.replace(/\/+$/, '') || current;
   <aside class="menu__preview" data-menu-preview aria-label="Page preview">
     <img data-preview-image alt="" width="1586" height="992" decoding="async" hidden />
     <div class="menu__preview-shade" aria-hidden="true"></div>
-    <div class="menu__preview-copy"><p class="mono-label" data-preview-caption>The campus concept</p><p class="menu__preview-title" data-preview-heading>Site 01</p><a href="/site" data-preview-link>Explore this page <span aria-hidden="true">↗</span></a><small>AI concept illustration · Not installed facilities</small></div>
+    <div class="menu__preview-copy"><p class="mono-label" data-preview-caption>The campus concept</p><p class="menu__preview-title" data-preview-heading>Site 01</p><a href="/site" data-preview-link>Explore this page <span aria-hidden="true">↗</span></a><small data-preview-disclosure>{visualStory('/site').note}</small></div>
     <p class="menu__preview-hint">Hover or focus a page to explore its world.</p>
   </aside>
 </dialog>

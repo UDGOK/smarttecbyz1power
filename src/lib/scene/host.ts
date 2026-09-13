@@ -33,6 +33,7 @@ export class SceneHost {
   private up = new THREE.Vector3();
   private post: PostChain;
   private transition: Transition;
+  private needsRender = true;
 
   running = false;
 
@@ -64,6 +65,7 @@ export class SceneHost {
       // Order matters: setQuality re-measures from the pixel ratio we just set.
       this.post.setQuality(tier);
       this.stage?.onTier(settings, this.ctx());
+      this.needsRender = true;
     });
 
     this.resize();
@@ -92,6 +94,7 @@ export class SceneHost {
     this.stage = next;
     next.build(this.ctx(), settings);
     next.frame(this.ctx());
+    this.needsRender = true;
   }
 
   get currentStage(): StageScene | null { return this.stage; }
@@ -120,12 +123,14 @@ export class SceneHost {
 
   setClearColor(color: THREE.ColorRepresentation): void {
     this.renderer.setClearColor(color, 1);
+    this.needsRender = true;
   }
 
   /** Each world grades itself — a daylight campus wants far less bloom than a
       hall full of emissive racks. */
   setPost(settings: Partial<PostSettings>): void {
     this.post.set(settings);
+    this.needsRender = true;
   }
 
   /** Crossings are scrubbed straight from scroll position. */
@@ -139,6 +144,7 @@ export class SceneHost {
 
   endTransition(): void {
     this.transition.end();
+    this.needsRender = true;
   }
 
   get transitionActive(): boolean { return this.transition.active; }
@@ -153,6 +159,7 @@ export class SceneHost {
     this.post.setSize(w, h);
     this.transition.setSize(w, h);
     this.stage?.frame(this.ctx());
+    this.needsRender = true;
   };
 
   start(): void {
@@ -166,11 +173,13 @@ export class SceneHost {
       const delta = this.clock.getDelta();
       const elapsed = this.reducedMotion ? 0 : this.clock.getElapsedTime();
       for (const fn of this.frameCbs) fn(delta, elapsed);
-      this.stage?.update(elapsed, delta, this.scroll, this.ctx());
-      this.applyRig();
-      this.post.render(this.scene, this.camera, elapsed);
-      // Composites straight onto the frame the post chain just wrote.
-      this.transition.render(this.camera, elapsed);
+      if (!this.stage?.static || this.needsRender || this.transition.active) {
+        this.stage?.update(elapsed, delta, this.scroll, this.ctx());
+        if (!this.stage?.static) this.applyRig();
+        this.post.render(this.scene, this.camera, elapsed);
+        this.transition.render(this.camera, elapsed);
+        this.needsRender = false;
+      }
       this.raf = requestAnimationFrame(loop);
     };
     this.raf = requestAnimationFrame(loop);
