@@ -7,6 +7,7 @@ historical comparison calculated by the monthly ROI engine.
 from pathlib import Path
 import base64, hashlib, json, re, subprocess, xml.etree.ElementTree as ET
 from io import BytesIO
+from datetime import date
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -21,6 +22,8 @@ subprocess.run(['node','tools/export-investor-deck-data.mjs'],cwd=ROOT,check=Tru
 D=json.loads((ROOT/'tmp/pdfs/deck-financials.json').read_text(encoding='utf-8'))
 R=D['result']
 Q=D['readiness']
+CREDENTIALS=json.loads((ROOT/'src/data/yasir-credentials.json').read_text(encoding='utf-8'))
+EDITION_DATE=max(Q['reviewedAt'],CREDENTIALS['verifiedAt'])
 OUT=ROOT/'output/pdf/SmartTec-Investor-Presentation-2026-09.pdf'
 OUT.parent.mkdir(parents=True,exist_ok=True)
 for name,path in [('Space','public/investor-assets/space-grotesk-0.ttf'),('Medium','public/investor-assets/space-grotesk-1.ttf'),('Bold','public/investor-assets/space-grotesk-3.ttf'),('Mono','public/assets/fonts/GoogleSansCode-Regular.ttf')]:
@@ -90,7 +93,7 @@ def page(title,section,light=False,bg=None):
  text(title,64,113,43,'Medium',w=1024,leading=47)
  line(64,183,112,183,fill=FOREST if light else SIGNAL,width=3)
  line(64,606,1088,606)
- text('SMARTTEC  /  INVESTOR DISCUSSION  /  11 SEPTEMBER 2026',64,622,9,'Mono',w=840)
+ text('SMARTTEC  /  INVESTOR DISCUSSION  /  '+date.fromisoformat(EDITION_DATE).strftime('%d %B %Y').upper(),64,622,9,'Mono',w=840)
  text(f'{PAGE:02}',1045,617,15,'Mono',w=43)
  c.bookmarkPage(f'page-{PAGE}');c.addOutlineEntry(title,f'page-{PAGE}',0)
 def foot(s):text(s,64,571,11,w=1024,fill='#456252' if LIGHT else MUTED,leading=14)
@@ -312,9 +315,11 @@ for i,person in enumerate(team):
  if person.get('linkedin'):name=f'<link href="{person["linkedin"]}" color="{PAPER}">{name}</link>'
  text(name,x,y,23,'Medium',w=320)
  text(person['role'],x,y+35,15.5,fill=MUTED,w=320)
- if person.get('email'):text(f'<link href="mailto:{person["email"]}" color="{SIGNAL}">{person["email"]}</link>',x,y+63,13,w=320)
+ if person.get('email'):text(f'<link href="mailto:{person["email"]}" color="{SIGNAL}">{person["email"]}</link>',x,y+63,13,w=200 if person.get('credly') else 320)
+ if person.get('credly'):text(f'<link href="{person["credly"]}" color="{SIGNAL}"><u>Credentials</u></link>',x+212,y+63,13,w=108)
  line(x,y+94,x+314,y+94)
-foot('Names, roles and contacts supplied by management. Experience and commitment levels have not been independently verified.')
+credential_links=' / '.join(f'<link href="{item["verificationUrl"]}"><u>{item["shortLabel"]}</u></link>' for item in CREDENTIALS['certifications'])
+foot('Yasir Jahangir: '+credential_links+'. Credly verified, '+date.fromisoformat(CREDENTIALS['verifiedAt']).strftime('%d %b %Y')+'. Personal credentials; project experience and commitment levels remain unreviewed.')
 
 # 20 / investment terms
 page('Investor participation and governance','Terms for discussion',True)
@@ -404,7 +409,7 @@ pending=OUT.with_suffix('.pending.pdf')
 pending.write_bytes(data)
 pending.replace(OUT)
 digest=hashlib.sha256(data).hexdigest()
-meta={'title':'SmartTec Investor Presentation','filename':OUT.name,'reviewedAt':Q['reviewedAt'],'edition':'Founder-backed B300 proposal and investor participation','pages':PAGE,'bytes':len(data),'sha256':digest,'modelVersion':R.get('modelVersion','1.1.0'),'ownerStudySha256':hashlib.sha256((ROOT/'src/smarttec-investor/data/owner-deployment-study.json').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'engineSha256':hashlib.sha256((ROOT/'src/smarttec-investor/roi-engine.mjs').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'readinessSourceSha256':hashlib.sha256((ROOT/'src/smarttec-investor/investment-readiness.mjs').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'teamSourceSha256':hashlib.sha256((ROOT/'src/data/team.json').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'currentReturnStatus':'not-established'}
+meta={'title':'SmartTec Investor Presentation','filename':OUT.name,'reviewedAt':EDITION_DATE,'financialBasisReviewedAt':Q['reviewedAt'],'credentialsSourceSha256':hashlib.sha256((ROOT/'src/data/yasir-credentials.json').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'edition':'Founder-backed B300 proposal and investor participation','pages':PAGE,'bytes':len(data),'sha256':digest,'modelVersion':R.get('modelVersion','1.1.0'),'ownerStudySha256':hashlib.sha256((ROOT/'src/smarttec-investor/data/owner-deployment-study.json').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'engineSha256':hashlib.sha256((ROOT/'src/smarttec-investor/roi-engine.mjs').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'readinessSourceSha256':hashlib.sha256((ROOT/'src/smarttec-investor/investment-readiness.mjs').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'teamSourceSha256':hashlib.sha256((ROOT/'src/data/team.json').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'currentReturnStatus':'not-established'}
 (ROOT/'src/smarttec-investor/data/investor-deck.json').write_text(json.dumps(meta,indent=2)+'\n',encoding='utf-8')
 (ROOT/'src/smarttec-investor/server/investor-deck.mjs').write_text('// Generated by tools/build-investor-deck.py. Server-only authenticated download.\nexport const investorDeckBase64='+json.dumps(base64.b64encode(data).decode())+';\n',encoding='utf-8')
 (ROOT/'tmp/pdfs/deck-layout.json').write_text(json.dumps({'titles':TITLES,'boxes':BOXES},indent=2),encoding='utf-8')

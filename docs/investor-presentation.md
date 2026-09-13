@@ -1,10 +1,12 @@
-# Investor presentation, 11 September 2026
+# Investor presentation, 12 September 2026
 
 The 26-page landscape PDF uses the site's Space Grotesk and Google Sans Code fonts, original vector logo paths, forest/signal/off-white palette and Runway-generated product, energy, fiber and campus concept imagery. The competitor deck informed topic coverage only. No competitor financial statements, biographies, pipeline, valuation multiples or claims were reused as SmartTec facts.
 
 The presentation describes the proposed 64-B300 deployment (60 saleable GPUs and four financial reserves), management-reported founder funding and overage intent, commercial pipeline, site rights, behind-the-meter power, new cooling, partial initial funding, illustrative GPU rental revenue, historical model context, delivery milestones, team, potential investment structure, risks and sources.
 
 The PDF and 13-chapter immersive version address prospective investors. They state SmartTec's proposal, current status and terms for discussion; internal interview questions and instructions to the founder belong in working diligence records. Proposed governance and procurement gates must remain explicitly proposed. Zero signed customer contracts, uncontracted revenue, unverified supply terms, incomplete funding and unestablished updated returns remain visible. The earlier return model is labeled historical, not presented as a current forecast.
+
+Yasir Jahangir’s personal certifications were verified through Credly on 12 September 2026 and are linked from the team slide and immersive chapter. The canonical badge details and scope are in `src/data/yasir-credentials.json`; the saved project note is `docs/yasir-credentials.md`. This edition updates credentials; the financial readiness record retains its own review date.
 
 ## Build and publication
 

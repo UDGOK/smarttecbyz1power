@@ -9,6 +9,7 @@ const metric=(label,value,note)=>({label,value:String(value),note});
 
 // Both investor editions and the public team section use the same owner-supplied roster.
 import roster from '../../data/team.json' with {type:'json'};
+import credentials from '../../data/yasir-credentials.json' with {type:'json'};
 export const teamMembers=roster;
 
 export const pitchContact={
@@ -155,8 +156,8 @@ export const chapters=[
     title:'Accountability across every stage.',
     lede:'Leadership, operations and advisors connect commercial commitments with technical delivery, financial controls and the development of the business.',
     metrics:[],team:teamMembers,
-    keypoints:['Proposed execution responsibilities span customer agreements, technical delivery and financial oversight.'],
-    footnote:'Names, roles and contacts supplied by management. Experience, commitment levels and detailed responsibilities have not been independently verified.'
+    keypoints:[credentials.investorSummary],
+    footnote:`Names and roles supplied by management. Yasir’s personal credentials checked on Credly ${credentials.verifiedAt}; project experience and commitment levels remain unreviewed.`
   },
   {
     id:'investment',kind:'metrics',visual:'fiber',duration:22,

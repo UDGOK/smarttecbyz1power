@@ -22,5 +22,6 @@ test('published PDF cannot drift from current readiness or its explicitly histor
 });
 
 test('published team slide cannot drift from the shared names and contacts',()=>{
+ assert.equal(metadata.credentialsSourceSha256,sha(readFileSync('src/data/yasir-credentials.json','utf8').replaceAll('\r\n','\n')),'Rebuild the team slide after verified credential changes');
  assert.equal(metadata.teamSourceSha256,sha(readFileSync('src/data/team.json','utf8').replaceAll('\r\n','\n')),'Rebuild and visually review the PDF team slide after roster changes');
 });

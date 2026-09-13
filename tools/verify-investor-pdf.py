@@ -44,6 +44,12 @@ links = [annotation.get_object().get('/A', {}).get('/URI') for page in pdf.pages
 for url in ['mailto:yasir@smarttec.dev', 'tel:+19185203823', 'https://www.smarttec.dev/investors', 'https://docs.nvidia.com/dgx/dgxb300-user-guide/introduction-to-dgxb300.html']:
     assert url in links, url
 
+credentials = read_json('src/data/yasir-credentials.json')
+assert credentials['profileUrl'] in links
+for credential in credentials['certifications']:
+    assert credential['shortLabel'] in texts[18]
+    assert credential['verificationUrl'] in links
+
 layout = read_json('tmp/pdfs/deck-layout.json')
 for page in range(1, 27):
     boxes = [box for box in layout['boxes'] if box['page'] == page]

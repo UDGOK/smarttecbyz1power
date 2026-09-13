@@ -1,15 +1,17 @@
 {
   "title": "SmartTec Investor Presentation",
   "filename": "SmartTec-Investor-Presentation-2026-09.pdf",
-  "reviewedAt": "2026-09-11",
+  "reviewedAt": "2026-09-12",
+  "financialBasisReviewedAt": "2026-09-11",
+  "credentialsSourceSha256": "b9b4b4229b520cdd2f072de6b586a5a31a666d613942738ec9721559b437d45e",
   "edition": "Founder-backed B300 proposal and investor participation",
   "pages": 26,
-  "bytes": 1604862,
-  "sha256": "2494dace1684d4770428f65875445e18255a8e1b1f908880ba0d97e0a5664702",
+  "bytes": 1606266,
+  "sha256": "d64f0467e41b767e2f73081cc63750db9e12f1bf648413093823933081a51442",
   "modelVersion": "1.1.0",
   "ownerStudySha256": "8d6f43920345bc0102a37c2d49bec22f1d4dc16be0ff0d1a1c1d3b26576cb90d",
   "engineSha256": "3e7329cbbef7fcaa59434fe79c7018e9965ebbb8989b843057d7cde3793696ff",
   "readinessSourceSha256": "6315db86ff1311a2fc12b6df340d46ce9bcd8d2bdeb9c1c5277f50cd92a689c5",
-  "teamSourceSha256": "34531cc4a6310a37343e4dd2a5e6d19133d3d1ff60647d7331faa7fe2ed00296",
+  "teamSourceSha256": "4315828a2d05bd2f83c11985872aca34c17f404d74d13a9e6145fc0c83cd32a9",
   "currentReturnStatus": "not-established"
 }

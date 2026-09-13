@@ -3,6 +3,8 @@ import {mkdir} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import team from '../src/data/team.json' with {type:'json'};
 const origin=process.argv[2]||'http://127.0.0.1:4333';
+const credlyURL='https://www.credly.com/users/yasirj/badges/credly';
+assert.equal(team.find(person=>person.id==='yasir').credly,credlyURL);
 await mkdir('tmp/team-review',{recursive:true});
 const browser=await chromium.launch({channel:'chrome',headless:true});
 try{
@@ -18,6 +20,9 @@ try{
       if(person.email)assert.equal(await card.locator('.team-email').getAttribute('href'),'mailto:'+person.email);
       assert.equal(await card.locator('.team-linkedin').count(),person.linkedin?1:0);
       if(person.linkedin){assert.equal(await card.locator('.team-linkedin').getAttribute('href'),person.linkedin);assert.match(await card.locator('.team-linkedin').getAttribute('rel'),/noopener/);}
+      const credentials=card.locator('.team-profiles .team-credentials');
+      assert.equal(await credentials.count(),person.credly?1:0);
+      if(person.credly){assert.equal(await credentials.getAttribute('href'),credlyURL);assert.equal(await credentials.getAttribute('target'),'_blank');assert.match(await credentials.getAttribute('rel'),/noopener noreferrer/);assert.match(await credentials.getAttribute('aria-label'),/Yasir Jahangir.*Credly/);}
     }
     await page.waitForTimeout(900);
     const layout=await page.locator('.team-card').evaluateAll(cards=>cards.map(card=>{
@@ -29,7 +34,7 @@ try{
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
     await page.locator('#people').scrollIntoViewIfNeeded();await page.waitForTimeout(250);
     if(width===1440)await section.screenshot({path:'tmp/team-review/team-1440.png'});
-    if(width===390)await page.screenshot({path:'tmp/team-review/team-390.png'});
+    if(width===390){await page.screenshot({path:'tmp/team-review/team-390.png'});await page.locator('[data-person="yasir"]').screenshot({path:'tmp/team-review/yasir-390.png'});}
   }
   await page.setViewportSize({width:1440,height:1000});await page.locator('#people').scrollIntoViewIfNeeded();
   const toggle=page.locator('.team-motion');await toggle.click();assert.equal(await toggle.getAttribute('aria-pressed'),'true');
@@ -38,6 +43,7 @@ try{
   await toggle.click();assert.equal(await toggle.getAttribute('aria-pressed'),'false');
   await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await toggle.isVisible(),false);
   assert.equal(await page.locator('.team-monogram').first().evaluate(el=>getComputedStyle(el,'::before').animationName),'none');
+  await page.waitForFunction(()=>!document.querySelector('[data-team-section]').classList.contains('is-motion-active'));
   assert.equal(await page.locator('[data-team-section]').evaluate(el=>el.classList.contains('is-motion-active')),false);
   await page.emulateMedia({reducedMotion:'no-preference'});
   await page.evaluate(()=>window.scrollTo(0,0));await page.waitForTimeout(300);
@@ -46,6 +52,6 @@ try{
   await page.addStyleTag({content:'html{font-size:200%!important}'});await page.locator('#people').scrollIntoViewIfNeeded();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Enlarged text must not cause page overflow');
   const plain=await browser.newContext({javaScriptEnabled:false,viewport:{width:390,height:900}}),nojs=await plain.newPage();await nojs.goto(origin+'/about#people');
-  assert.equal(await nojs.locator('.team-email').count(),8);assert.equal(await nojs.locator('.team-motion').isVisible(),false);assert.equal(await nojs.locator('[data-person="shahab"] h3').isVisible(),true);
+  assert.equal(await nojs.locator('.team-email').count(),8);assert.equal(await nojs.locator('.team-motion').isVisible(),false);assert.equal(await nojs.locator('[data-person="shahab"] h3').isVisible(),true);assert.equal(await nojs.locator('[data-person="yasir"] .team-credentials').getAttribute('href'),credlyURL);
   await plain.close();assert.deepEqual(errors,[]);console.log('PASS: team names/contacts, aligned rows at1440/960/390/320, pause/reduced/offscreen motion, enlarged text and no-JS content.');
 }finally{await browser.close();}
