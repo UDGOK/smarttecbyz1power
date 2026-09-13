@@ -19,14 +19,23 @@ const browser=await chromium.launch({
 
 // Test-only observations of actual GPU work. No production globals are required.
 function installProbe(){
- const probe=window.__campusQA={draws:0,uploads:0,persistedShows:0};
+ const probe=window.__campusQA={draws:0,uploads:0,persistedShows:0,canvases:[],failNextDraw:false,thrownDraws:0},records=new WeakMap();
  addEventListener('pageshow',event=>{if(event.persisted)probe.persistedShows++;});
  for(const Type of [window.WebGLRenderingContext,window.WebGL2RenderingContext]){
   if(!Type)continue;
-  for(const name of ['drawElements','drawArrays','drawElementsInstanced','drawArraysInstanced','texImage2D','compressedTexImage2D']){
+  for(const name of ['drawElements','drawArrays','drawElementsInstanced','drawArraysInstanced','texImage2D','texSubImage2D','texImage3D','texSubImage3D','compressedTexImage2D','compressedTexSubImage2D','compressedTexImage3D','compressedTexSubImage3D']){
    const original=Type.prototype[name];if(typeof original!=='function')continue;
+   const textureUpload=name.includes('Image');
    Type.prototype[name]=function(...args){
-    if(this.canvas?.closest?.('#canvas')){if(name.includes('Image2D'))probe.uploads++;else probe.draws++;}
+    const host=this.canvas?.closest?.('#canvas');
+    if(host){
+     if(!host.hidden&&!textureUpload&&probe.failNextDraw){probe.failNextDraw=false;probe.thrownDraws++;throw new Error('Intentional QA render exception');}
+     let record=records.get(this.canvas);if(!record){record={canvas:this.canvas,draws:0,visibleDraws:0,uploads:0};records.set(this.canvas,record);probe.canvases.push(record);}
+     // WebGL2 uploads decoded maps through texSubImage2D after texStorage2D.
+     // Count data transfers during hidden prewarming too, but not null allocations.
+     if(textureUpload){if(args.at(-1)!=null){probe.uploads++;record.uploads++;}}
+     else{probe.draws++;record.draws++;if(!host.hidden)record.visibleDraws++;}
+    }
     return original.apply(this,args);
    };
   }
@@ -58,12 +67,14 @@ async function modelReady(page){
  await page.locator('#stage').scrollIntoViewIfNeeded();
  await page.waitForFunction(()=>{
   const host=document.querySelector('#canvas'),canvas=host?.querySelector('canvas');
-  return host&&!host.hidden&&canvas?.width>0&&document.querySelector('#model-mode')?.getAttribute('aria-pressed')==='true'&&window.__campusQA.draws>0;
+  const visibleDraws=window.__campusQA.canvases.find(record=>record.canvas===canvas)?.visibleDraws||0;
+  return host&&!host.hidden&&canvas?.width>0&&document.querySelector('#model-mode')?.getAttribute('aria-pressed')==='true'&&visibleDraws>0;
  },null,{timeout});
  await page.locator('#loading').waitFor({state:'hidden',timeout});
 }
 async function load3D(page){await page.locator('#model-mode').click();await modelReady(page);}
-const draws=page=>page.evaluate(()=>window.__campusQA.draws);
+// HDR setup on a hidden canvas and rendering into a detached old canvas do not count.
+const draws=page=>page.evaluate(()=>window.__campusQA.canvases.find(record=>record.canvas===document.querySelector('#canvas canvas'))?.visibleDraws||0);
 async function changeInDraws(page,ms=450){const before=await draws(page);await page.waitForTimeout(ms);return (await draws(page))-before;}
 const imageHash=async page=>createHash('sha256').update(await page.locator('#canvas canvas').screenshot({timeout:30000})).digest('hex');
 async function pauseMotion(page){
@@ -160,26 +171,107 @@ try{
    await pauseMotion(page);const beforeBackDrag=await imageHash(page);await drag(page);
    assert.notEqual(await imageHash(page),beforeBackDrag,'real back navigation restores usable controls');
    const backCache=await page.evaluate(()=>window.__campusQA.persistedShows);
-   const lost=await page.locator('#canvas canvas').evaluate(canvas=>{const gl=canvas.getContext('webgl2')||canvas.getContext('webgl');const ext=gl?.getExtension('WEBGL_lose_context');if(!ext)return false;ext.loseContext();return true;});
+   const modelRequestsBeforeLoss=observed.requests.filter(url=>url.includes(`${asset}/campus.glb`)).length;
+   const lost=await page.locator('#canvas canvas').evaluate(canvas=>{window.__campusQA.lostCanvas=canvas;const gl=canvas.getContext('webgl2')||canvas.getContext('webgl');const ext=gl?.getExtension('WEBGL_lose_context');if(!ext)return false;ext.loseContext();return true;});
    assert.ok(lost,'Chrome exposes the context-loss test extension');await page.locator('#render').waitFor({state:'visible'});
    assert.equal(await page.locator('#canvas').isHidden(),true,'context loss falls back to a real render');
    await page.locator('[data-view="13-hero-arrival"]').click();await page.waitForFunction(()=>{const image=document.querySelector('#render');return image.complete&&image.naturalWidth>0;});
+   await page.waitForFunction(()=>!document.querySelector('#model-mode').disabled);
+   assert.match(await page.locator('#model-mode').innerText(),/restart\s+3d/i,'context loss offers in-page recovery');
+   await load3D(page);
+   assert.equal(await page.evaluate(()=>document.querySelector('#canvas canvas')!==window.__campusQA.lostCanvas),true,'restart creates a fresh canvas');
+   assert.equal(observed.requests.filter(url=>url.includes(`${asset}/campus.glb`)).length,modelRequestsBeforeLoss,'restart reuses the successfully downloaded model');
+   await pauseMotion(page);const restartImage=await imageHash(page);
+   await page.locator('[data-view="14-datahall-interior"]').click();await modelReady(page);await page.waitForTimeout(1100);
+   assert.notEqual(await imageHash(page),restartImage,'restarted renderer responds to camera selection');
+   await page.locator('#image-mode').click();assert.equal(await page.locator('#render').isVisible(),true);
+   await load3D(page);await pauseMotion(page);const restartDraws=await draws(page);await drag(page);
+   assert.ok(await draws(page)>restartDraws,'new active canvas draws after mode switches and orbit input');
    await assertClean(observed);return {textureUploads:await page.evaluate(()=>window.__campusQA.uploads),persistedShows:backCache};
   }finally{await ctx.close();}
  });
 
- await run('model failure leaves images usable and can retry successfully',async()=>{
-  const ctx=await context(),page=await ctx.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));let attempts=0,rejectModel=true;
-  // Fail both compressed and uncompressed paths in the first attempt.
-  await page.route('**/assets/campus/**/campus.glb*',async request=>{attempts++;if(rejectModel)await request.fulfill({status:503,contentType:'text/plain',body:'Intentional QA model failure'});else await request.continue();});
+ await run('High selected during a failed load retries into a working new renderer',async()=>{
+  const ctx=await context(),page=await ctx.newPage();const errors=[];page.on('pageerror',error=>errors.push(error.message));let attempts=0,rejectModel=true,releaseFailure,firstRequest;
+  const requestSeen=new Promise(resolve=>{firstRequest=resolve;}),failureGate=new Promise(resolve=>{releaseFailure=resolve;});
+  // Hold the first attempt while High is selected, then fail both gzip/plain paths.
+  await page.route('**/assets/campus/**/campus.glb*',async request=>{attempts++;if(rejectModel){firstRequest();await failureGate;await request.fulfill({status:503,contentType:'text/plain',body:'Intentional QA model failure'});}else await request.continue();});
   try{
    await goto(page);await page.locator('#model-mode').click();
+   await Promise.race([requestSeen,new Promise((_,reject)=>setTimeout(()=>reject(Error('Model request did not start')),30000))]);
+   await page.evaluate(()=>{window.__campusQA.failedCanvas=document.querySelector('#canvas canvas');});
+   await page.locator('#quality').selectOption('high');await page.waitForTimeout(1200);releaseFailure();
    await page.waitForFunction(()=>{const status=document.querySelector('#status')?.textContent||'';return /could not|unavailable|retry/i.test(status)&&!document.querySelector('#model-mode').disabled;},null,{timeout});
    assert.equal(await page.locator('#render').isVisible(),true);assert.equal(await page.locator('#canvas').isHidden(),true);
    await page.locator('[data-view="14-datahall-interior"]').click();
    await page.waitForFunction(()=>{const image=document.querySelector('#render');return image.complete&&image.naturalWidth>0&&image.currentSrc.includes('14-datahall-interior');});
    rejectModel=false;const beforeRetry=attempts;
    await load3D(page);assert.ok(attempts>beforeRetry,'retry fetched a new model');assert.deepEqual(errors,[]);
+   assert.equal(await page.locator('#quality').inputValue(),'high','latest quality choice survives the failed attempt');
+   assert.equal(await page.evaluate(()=>document.querySelector('#canvas canvas')!==window.__campusQA.failedCanvas),true,'failed renderer is replaced');
+   await pauseMotion(page);const highImage=await imageHash(page),beforeView=await draws(page);
+   await page.locator('[data-view="03-compute-cooling"]').click();await modelReady(page);await page.waitForTimeout(1100);
+   assert.ok(await draws(page)>beforeView,'High renders into the current canvas after retry');
+   assert.notEqual(await imageHash(page),highImage,'High camera changes affect visible pixels');
+   await page.locator('#quality').selectOption('balanced');await page.locator('#quality').selectOption('high');
+   await pauseMotion(page);const beforeDrag=await draws(page);await drag(page);assert.ok(await draws(page)>beforeDrag);
+   assert.deepEqual(errors,[],'retry and subsequent quality changes have no uncaught errors');
+  }finally{releaseFailure();await ctx.close();}
+ });
+
+ await run('rapid controls settle on the latest view, mode and quality',async()=>{
+  const ctx=await context(),page=await ctx.newPage(),observed=observe(page);
+  try{
+   await goto(page);await load3D(page);
+   await page.evaluate(()=>{
+    const click=selector=>document.querySelector(selector).click();
+    const quality=value=>{const select=document.querySelector('#quality');select.value=value;select.dispatchEvent(new Event('change',{bubbles:true}));};
+    click('[data-view="14-datahall-interior"]');click('[data-system="power"]');quality('high');
+    click('[data-view="16-manufacturing-interior"]');click('[data-system="fiber"]');quality('balanced');
+    click('[data-appearance="system"]');quality('high');click('[data-system="cooling"]');quality('balanced');
+    click('[data-appearance="photoreal"]');
+   });
+   await modelReady(page);await page.waitForTimeout(1200);
+   assert.equal(await page.locator('[data-view="10-rack-liquid-cooling"]').getAttribute('aria-pressed'),'true');
+   assert.equal(await page.locator('[data-system="cooling"]').getAttribute('aria-pressed'),'true');
+   assert.equal(await page.locator('[data-system][aria-pressed="true"]').count(),1);
+   assert.equal(await page.locator('#quality').inputValue(),'balanced');
+   assert.equal(await page.locator('[data-appearance="photoreal"]').getAttribute('aria-pressed'),'true');
+   await pauseMotion(page);const before=await imageHash(page);await drag(page);assert.notEqual(await imageHash(page),before);
+   await page.evaluate(()=>{
+    const quality=document.querySelector('#quality');quality.value='high';quality.dispatchEvent(new Event('change',{bubbles:true}));
+    document.querySelector('#image-mode').click();document.querySelector('[data-view="16-manufacturing-interior"]').click();
+    document.querySelector('#model-mode').click();document.querySelector('#image-mode').click();
+    document.querySelector('[data-view="13-hero-arrival"]').click();
+   });
+   await page.waitForTimeout(1500);
+   assert.equal(await page.locator('#render').isVisible(),true,'late quality work does not steal image mode');
+   assert.equal(await page.locator('#canvas').isHidden(),true);
+   assert.equal(await page.locator('[data-view="13-hero-arrival"]').getAttribute('aria-pressed'),'true');
+   assert.equal(await changeInDraws(page),0,'image mode does not continue GPU rendering');
+   await load3D(page);await pauseMotion(page);const count=await draws(page);await drag(page);assert.ok(await draws(page)>count);
+   await assertClean(observed);
+  }finally{await ctx.close();}
+ });
+
+ await run('one-time render exception recovers through Restart 3D without refresh',async()=>{
+  const ctx=await context(),page=await ctx.newPage(),observed=observe(page);
+  try{
+   await goto(page);await load3D(page);await pauseMotion(page);
+   await page.evaluate(()=>{window.__campusQA.failedDrawCanvas=document.querySelector('#canvas canvas');window.__campusQA.failNextDraw=true;});
+   await page.locator('#reset').click();
+   await page.locator('#render').waitFor({state:'visible'});
+   assert.equal(await page.evaluate(()=>window.__campusQA.thrownDraws),1,'exception was injected into an active render');
+   assert.equal(await page.locator('#canvas').isHidden(),true);
+   assert.equal(await page.locator('#model-mode').isEnabled(),true);
+   assert.match(await page.locator('#model-mode').innerText(),/restart\s+3d/i);
+   assert.match(await page.locator('#status').innerText(),/rendering.*interrupted/i,'failure is explained in the page');
+   await load3D(page);await pauseMotion(page);
+   assert.equal(await page.evaluate(()=>document.querySelector('#canvas canvas')!==window.__campusQA.failedDrawCanvas),true,'restart replaces the renderer that threw');
+   const before=await draws(page),picture=await imageHash(page);await drag(page);
+   assert.ok(await draws(page)>before,'replacement renderer handles new input');assert.notEqual(await imageHash(page),picture);
+   assert.equal(await page.evaluate(()=>window.__campusQA.thrownDraws),1,'fault injection fires only once');
+   await assertClean(observed);
   }finally{await ctx.close();}
  });
 
