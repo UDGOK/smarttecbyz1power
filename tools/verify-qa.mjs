@@ -37,7 +37,8 @@ for(const route of routes){
    assert.match(doc.body.textContent,/8 complete Supermicro systems/);
    assert.match(doc.body.textContent,/financial allocation within eight complete systems/);
    assert.match(doc.body.textContent,/no signed customer contracts/i);
-   assert.match(doc.body.textContent,/air-cooled server/i);checks+=5;
+   assert.match(doc.body.textContent,/direct[ -]liquid/i);
+   assert.match(doc.body.textContent,/v6\.1.*earlier air-cooled.*one-building/i);checks+=6;
  }
  if(['','compute','model-planner'].includes(route)){
    for(const service of ['Shared inference capacity','Dedicated GPU servers','Colocation']){

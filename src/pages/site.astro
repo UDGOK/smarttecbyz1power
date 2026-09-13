@@ -1,20 +1,23 @@
 ---
 import Content from '../layouts/Content.astro';
-import {company,site,power,network,publicDeployment as deployment} from '../data/site';
+import {company,site,power,network,publicDeployment as deployment,campusConcept} from '../data/site';
+import CampusPreview from '../components/CampusPreview.astro';
 ---
 <Content title={`${site.designation} — ${site.name} | ${company.full}`} description={`A ${site.acres}-acre campus in Mead, Oklahoma. Buildings A and C provide ${site.dataCenterArea.toLocaleString()} sq ft for data-center development; Building B supports batteries, utilities and storage.`} kicker={`${site.designation} / Mead, Oklahoma`} heading="One campus. A connected plan." lede={`${site.acres} acres at ${site.address}. Existing buildings anchor a phased plan for data-center services, inverter and battery assembly, and solar and energy storage.`} meta={[
   {label:'Legal acreage',value:`${site.acres} acres`,note:'Owner-supplied legal description',count:true},
   {label:'Data-center buildings',value:`${site.dataCenterArea.toLocaleString()} sq ft`,note:'A + C · gross building area',count:true},
   {label:'Utility building',value:`${site.utilityArea.toLocaleString()} sq ft`,note:'B · batteries, utilities and storage'},
-  {label:'Compute proposal',value:deployment.label,note:'Eight systems together in one building',tone:'signal'},
+  {label:'Compute proposal',value:deployment.label,note:'Eight systems · A/C spatial concept',tone:'signal'},
 ]}>
   <section aria-labelledby="today" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">01</span><span class="eyebrow__t">The starting point</span></p>
     <h2 id="today">Existing buildings. The next phase ahead.</h2>
     <div class="split"><p>Management reports existing Buildings A, B and C on the property. A and C are designated for data-center services; B supports batteries, utilities and storage. An on-site transformer and shared {power.service} distribution await OG&E commissioning and electrical verification.</p><p>The first compute deployment is planned on grid power. Solar and BESS are a separate later investment. SmartTec is accepting deployment inquiries while fit-out and commissioning are planned; the campus is not yet offering commissioned capacity.</p></div>
-    <p>The initial proposal is {deployment.gpus} B300 GPUs in {deployment.systems} complete Supermicro systems, together in one building. {deployment.buildingNote} The final location and all-new cooling design remain to be established.</p>
+    <p>The initial proposal is {deployment.gpus} B300 GPUs in {deployment.systems} complete Supermicro systems. The campus study shows direct liquid cooling in A and C, with the cooling yard behind B. {campusConcept.allocationNote}</p>
+    <p class="form-note">{campusConcept.budgetBasis}</p>
     <div class="actions"><a class="btn" href="/compute">Explore the B300 proposal</a><a class="btn btn--ghost" href="/colocation">Bring your own hardware</a></div>
   </section>
+  <CampusPreview />
   <section aria-labelledby="land" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">02</span><span class="eyebrow__t">Location</span></p>
     <h2 id="land">39.39 acres in Mead, Oklahoma</h2>
@@ -25,13 +28,13 @@ import {company,site,power,network,publicDeployment as deployment} from '../data
   <section aria-labelledby="tracts" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">03</span><span class="eyebrow__t">Campus plan</span></p>
     <h2 id="tracts">Three areas, one development strategy</h2>
-    <div class="cards"><article class="card"><h3>Manufacturing</h3><p>Two planned buildings of {site.manufacturing.sqftEach.toLocaleString()} sq ft each would support inverter assembly and battery module and pack assembly, testing and service.</p></article><article class="card"><h3>Data centers and utilities</h3><p>The existing A, B and C buildings anchor the first deployment. The separately identified house and office are excluded from data-center floor area.</p></article><article class="card"><h3>Later solar and storage</h3><p>The energy tract is planned for future solar and Z1Power battery storage. This phase follows a separate design and investment review; the launch plan uses grid power.</p><a href="/power">Explore energy and cooling →</a></article></div>
+    <div class="cards"><article class="card"><h3>Manufacturing</h3><p>Two planned buildings of {site.manufacturing.sqftEach.toLocaleString()} sq ft each would support inverter assembly and battery module and pack assembly, testing and service.</p></article><article class="card"><h3>Data centers and utilities</h3><p>The existing A, B and C buildings anchor the first deployment. The separately identified house and office are excluded from data-center floor area.</p></article><article class="card"><h3>Later solar and storage</h3><p>The energy tract is planned for future solar, with BESS proposed inside Building B. This phase follows a separate design and investment review; the launch plan uses grid power.</p><a href="/power">Explore energy and cooling →</a></article></div>
   </section>
   <section aria-labelledby="buildings" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">04</span><span class="eyebrow__t">Building roles</span></p>
     <h2 id="buildings">A and C for compute. B for support.</h2>
     <div class="scroller" tabindex="0" role="region" aria-label="Building schedule, scrollable"><table><caption>Existing building schedule</caption><thead><tr><th scope="col">Building</th><th scope="col">Gross area</th><th scope="col">Assigned role</th></tr></thead><tbody>{site.buildings.map(b=><tr><th scope="row">Building {b.id}</th><td class="num">{b.sqft.toLocaleString()} sq ft</td><td>{b.role}</td></tr>)}<tr><th scope="row">Data-center area: A + C</th><td class="num">{site.dataCenterArea.toLocaleString()} sq ft</td><td>Gross buildings before fit-out, not rentable white space</td></tr><tr><th scope="row">All three buildings</th><td class="num">{site.buildingArea.toLocaleString()} sq ft</td><td>Includes the {site.utilityArea.toLocaleString()} sq ft utility building</td></tr></tbody></table></div>
-    <p>The proposed eight-system fleet will occupy one building; A and C remain the wider data-center development areas. All cooling is new. Final rack positions, mechanical-yard siting, access and electrical allocations follow the deployment design.</p><a class="btn btn--ghost" href="/power#thermal">See the cooling options</a>
+    <p>A and C are designated for compute. The new study illustrates overhead liquid-cooling headers, rack manifolds and separate facility and server-coolant circuits. B supports future BESS, controls and the owner-reported Dobson handoff. Exact equipment, final rack allocation, measured clearances and utility acceptance remain subject to design.</p><a class="btn btn--ghost" href="/power#thermal">Follow the cooling plan</a>
   </section>
   <section aria-labelledby="schedule" data-reveal>
     <p class="eyebrow"><span class="eyebrow__n">05</span><span class="eyebrow__t">Delivery milestones</span></p>

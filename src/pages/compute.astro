@@ -1,17 +1,17 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power, network, offers, publicDeployment as deployment } from '../data/site';
+import { company, site, power, network, offers, campusConcept, publicDeployment as deployment } from '../data/site';
 ---
 <Content
   title={`B300 compute in Mead, Oklahoma | ${company.full}`}
-  description={`SmartTec proposes ${deployment.gpus} B300 GPUs in ${deployment.systems} complete Supermicro systems at ${site.designation}. Explore the workload, air-cooled budgeting basis and commissioning plan.`}
+  description={`SmartTec proposes ${deployment.gpus} B300 GPUs in ${deployment.systems} complete Supermicro systems at ${site.designation}. Explore the direct-liquid campus concept, workload requirements and commissioning plan.`}
   kicker="B300 compute / Proposed deployment"
   heading="Build around the workload."
-  lede={`Our proposed initial fleet brings ${deployment.gpus} B300 GPUs together in ${deployment.systems} complete Supermicro systems, in one building at ${site.name}. The current budget uses an air-cooled server basis with all-new room or in-row cooling; the exact OEM SKU remains to be confirmed. Customer commitments, complete costs and engineering acceptance determine procurement and service availability.`}
+  lede={`Our proposed initial fleet brings ${deployment.gpus} B300 GPUs together in ${deployment.systems} complete Supermicro systems at ${site.name}. The campus concept places direct-liquid-cooled systems in Buildings A and C. Final equipment, installed costs and engineering acceptance determine procurement and service availability.`}
   meta={[
     { label: 'Proposed B300 GPUs', value: String(deployment.gpus), note: 'Planning count, not available inventory', count: true, tone: 'signal' },
     { label: 'Complete systems', value: String(deployment.systems), note: `${deployment.gpusPerSystem} B300 GPUs per Supermicro system`, count: true },
-    { label: 'Location', value: 'One building', note: 'Full-fleet layout and location pending' },
+    { label: 'Campus concept', value: 'Buildings A + C', note: 'Four-plus-four split is illustrative' },
     { label: 'Deployment status', value: 'Proposed', note: 'Procurement and commissioning ahead', tone: 'gold' },
   ]}
 >
@@ -51,27 +51,28 @@ import { company, site, power, network, offers, publicDeployment as deployment }
       </div>
       <dl class="spec">
         <div><dt>Initial proposal</dt><dd>{deployment.systems} systems × {deployment.gpusPerSystem} B300 GPUs<span class="note">{deployment.gpus} GPUs in total; planning status.</span></dd></div>
-        <div><dt>Cooling budget basis</dt><dd>Air-cooled servers; room/in-row cooling<span class="note">Exact Supermicro SKU and supported environment require supplier confirmation. This is a planning basis, not an approved cooling design.</span></dd></div>
-        <div><dt>Building allocation</dt><dd>One building proposed<span class="note">{deployment.buildingNote}</span></dd></div>
+        <div><dt>Cooling concept</dt><dd>Direct liquid cooling<span class="note">Exact Supermicro SKU, server coolant requirements and residual room cooling need supplier and engineering confirmation.</span></dd></div>
+        <div><dt>Building allocation</dt><dd>Buildings A and C<span class="note">{deployment.buildingNote}</span></dd></div>
         <div><dt>Power allocation</dt><dd>Engineering review pending<span class="note">No measured OEM load or exclusive continuous site capacity is established by this proposal.</span></dd></div>
       </dl>
     </div>
-    <div class="actions"><a class="btn btn--ghost" href="/model-planner">Explore model requirements</a></div>
-    <p class="form-note">Alternative accelerators require a separate workload, procurement and commercial case. Published financial scenarios are available in the protected investor area.</p>
+    <div class="actions"><a class="btn" href={campusConcept.href}>Explore the campus in 3D</a><a class="btn btn--ghost" href="/model-planner">Explore model requirements</a></div>
+    <p class="form-note">{campusConcept.budgetBasis} Financial scenarios remain in the protected investor area.</p>
   </section>
   <section aria-labelledby="cooling" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Campus integration</span></p>
     <h2 id="cooling">Designed with power and cooling.</h2>
     <div class="split">
       <div>
-        <p>{power.hvac} We are comparing new and warranted refurbished cooling plant against the complete installed scope. Any alternate server cooling architecture requires a revised OEM-compatible design and budget.</p>
-        <p>Airflow, containment, terminal units and heat rejection must work as one system. Peak-weather capacity and service during maintenance or a unit failure require mechanical and OEM acceptance.</p>
+        <p>{power.hvac}</p>
+        <p>A coolant distribution unit (CDU) exchanges heat between separate facility-water and server-coolant circuits. Overhead supply and return pipes feed rack manifolds and server cold plates. Residual room cooling, maintenance access and local-weather performance remain part of the complete design.</p>
+        <p>{network.handoff}. {network.handoffNote}</p>
         <p>The campus electrical commissioning milestone is an {power.commissioningTarget}. Planned {network.provider} fiber has an {network.deliveryTarget}. These management targets are distinct from completed customer service acceptance.</p>
       </div>
       <div class="card">
         <h3>Explore the infrastructure</h3>
-        <p>Review the grid-first launch plan, later solar and BESS investment, shared electrical service and cooling options. Detailed funding and operating assumptions are in the protected investor room.</p>
-        <div class="actions"><a href="/power#thermal">Power and cooling →</a><a href="/investors">Investor room →</a></div>
+        <p>Explore the latest campus concept, then trace its cooling, electrical and fiber connections. Equipment placement and routing illustrate the proposal; they do not establish installed capacity.</p>
+        <div class="actions"><a href={campusConcept.href}>Full campus viewer →</a><a href="/power#thermal">Power and cooling →</a></div>
       </div>
     </div>
   </section>

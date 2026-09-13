@@ -15,12 +15,12 @@
       "acres": 7.51,
       "status": "Existing structures",
       "depthFeet": 495,
-      "description": "Owner-confirmed structures 1 (east), 2 (middle), 3 (west) correspond to A, B and C. A and C provide 5,035 sq ft gross data-center area. B provides 2,083 sq ft for utility, battery and storage; a separate 2,000 sq ft BESS area remains proposed."
+      "description": "Owner-confirmed structures 1 (east), 2 (middle), 3 (west) correspond to A, B and C. A and C provide 5,035 sq ft gross data-center area. B provides 2,083 sq ft for utility, battery and storage. The earlier overlay showed a separate 2,000 sq ft BESS area; the current campus concept instead places future BESS inside Building B. Historical source imagery remains unchanged."
     },
     {
       "id": 3,
       "acres": 18.2,
-      "status": "Proposed solar and storage",
+      "status": "Proposed solar development",
       "depthFeet": 1200,
       "description": "Proposed solar development area. Former greenhouse/pad omitted from the proposed overlay as requested; historical source documents remain unchanged."
     }

@@ -1,0 +1,17 @@
+SmartTec campus architectural visualization — September 2026
+Proposed campus geometry and design visualization: SmartTec.
+
+Photographic material maps and lighting environment: Poly Haven, CC0 1.0.
+License: https://polyhaven.com/license
+Asset source pages:
+https://polyhaven.com/a/dry_field
+https://polyhaven.com/a/brown_mud_dry
+https://polyhaven.com/a/grass_path_2
+https://polyhaven.com/a/concrete_floor_02
+https://polyhaven.com/a/rocky_trail
+The outdoor HDR environment is a generic lighting reference, not site photography.
+
+Three.js r180: MIT, https://github.com/mrdoob/three.js/blob/r180/LICENSE
+Meshoptimizer 1.2 decoder: MIT, https://github.com/zeux/meshoptimizer/blob/v1.2/LICENSE.md
+Geometry compression retains the reviewed scene graph, equipment and triangles.
+Render and material compression are for web delivery; equipment remains proposed.

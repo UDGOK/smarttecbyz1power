@@ -23,7 +23,10 @@ test('public deployment and protected underwriting describe the same proposed fl
     [base.capacity.nodes,base.capacity.installedGpus/base.capacity.nodes,base.capacity.installedGpus,base.capacity.saleableGpus,base.capacity.heldBackGpus]);
   assert.equal(p.supplier,'Supermicro');
   assert.match(p.status,/Proposed/);
-  assert.match(p.cooling,/all-new cooling design pending/);
+  assert.match(p.cooling,/Direct liquid/i);
+  const {campusConcept}=loadTS('src/data/site.ts');
+  assert.match(campusConcept.budgetBasis,/v6\.1.*earlier air-cooled.*one-building/);
+  assert.match(campusConcept.budgetBasis,/repricing/);
   assert.match(p.demand,/no signed customer contracts/);
   const capacity=fact('F11').answer;
   assert.ok(capacity.includes(`${base.capacity.installedGpus} installed`));

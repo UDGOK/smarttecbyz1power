@@ -9,9 +9,9 @@ import '../styles/site-header.css';
 interface Props {mode?:'home'|'public'|'investor'|'login';}
 const {mode='public'}=Astro.props;
 const current=Astro.url.pathname.replace(/\/+$/,'')||'/';
-const page=pageExperience(current);
+const page=pageExperience(current==='/site/campus'?'/site':current);
 const chapters=mode==='investor'?journey.map(ch=>({href:'#'+ch.id,label:ch.label,id:ch.id})):pageExperiences.map(ch=>({href:ch.path,label:ch.label,id:ch.path}));
-const active=mode==='investor'?chapters[0]:chapters.find(ch=>ch.href===current);
+const active=mode==='investor'?chapters[0]:chapters.find(ch=>ch.href===(current==='/site/campus'?'/site':current));
 ---
 <header class="site-header" data-site-header data-header-version="2" data-header-mode={mode} aria-label="SmartTec navigation">
   <Brandmark />

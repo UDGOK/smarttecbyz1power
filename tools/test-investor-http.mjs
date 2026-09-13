@@ -122,8 +122,8 @@ assert.ok(win.document.querySelector('#inv-answer').textContent.includes(model.s
 assert.equal(win.document.querySelector('#inv-scenario-form'),null);assert.equal(win.document.querySelector('#inv-calculator'),null);checks++;
 dom.window.close();
 assert.ok(page.includes('href="/investors/presentation"'));assert.ok(page.includes('href="/api/investor/presentation"'));checks++;
-for(const key of ['b300-studio','power-supply-concept','campus-dusk']){
- const asset='/assets/investor/'+key+'.webp';assert.ok(page.includes('src="'+asset+'"'));
+for(const asset of ['/assets/investor/b300-studio.webp','/assets/investor/power-supply-concept.webp','/assets/campus/2026-09/renders/08-campus-dusk-1600.webp']){
+ assert.ok(page.includes('src="'+asset+'"'));
  const response=await fetch(origin+asset);assert.equal(response.status,200);assert.ok(response.headers.get('content-type').includes('image/webp'));
  assert.deepEqual(Buffer.from(await response.arrayBuffer()),await readFile('public'+asset));checks++;
 }

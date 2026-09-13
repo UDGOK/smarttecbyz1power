@@ -23,6 +23,7 @@ const pdfURL='/api/investor/presentation?view=inline';
         <a class="pdf-download" href="/api/investor/presentation" download={deck.filename}>Download PDF <span aria-hidden="true">↓</span></a>
       </nav>
     </header>
+    <p class="pdf-baseline">Reviewed v6.1 financial baseline · Earlier one-building, air-cooled scope. The <a href="/site/campus" target="_blank" rel="noopener">new direct-liquid campus concept</a> requires updated equipment quotes and financial review.</p>
     <main class="pdf-document" aria-label="Investor PDF reader">
       <p id="pdf-loading" class="pdf-loading" role="status" hidden>Opening the presentation…</p>
       <iframe id="pdf-frame" title="SmartTec investor presentation PDF" data-pdf-url={pdfURL} data-session-expires={access.session.expires} hidden></iframe>
@@ -36,7 +37,7 @@ const pdfURL='/api/investor/presentation?view=inline';
 <style>
   :global(body){margin:0;background:#071b15;color:#eef1ef;font-family:'Space Grotesk',Arial,sans-serif}
   :global(*){box-sizing:border-box}
-  .pdf-reader{height:100vh;height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:#071b15}
+  .pdf-reader{height:100vh;height:100dvh;display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;background:#071b15}
   .pdf-toolbar{display:flex;align-items:center;gap:24px;padding:20px 28px;border-bottom:1px solid #375449}
   .pdf-brand{display:block;flex-shrink:0}
   .pdf-brand img{display:block;width:155px;height:auto}
@@ -48,6 +49,7 @@ const pdfURL='/api/investor/presentation?view=inline';
   nav .pdf-download{background:#7be88a;color:#071b15;border-color:#7be88a}
   a:focus-visible,button:focus-visible{outline:2px solid #7be88a;outline-offset:4px}
   button[hidden],iframe[hidden]{display:none}
+  .pdf-baseline{margin:0;padding:10px 28px;background:#14372b;color:#bed3c4;font-size:12px;line-height:1.6}.pdf-baseline a{color:#b1ebbb;text-underline-offset:3px}
   .pdf-document{position:relative;min-height:0;background:#262c29}
   iframe{display:block;width:100%;height:100%;border:0;background:#262c29}
   .pdf-loading,.pdf-no-script{position:absolute;inset:0;display:grid;align-content:center;justify-items:center;gap:12px;text-align:center;padding:32px;margin:0;color:#bcd0c5;font-size:16px}

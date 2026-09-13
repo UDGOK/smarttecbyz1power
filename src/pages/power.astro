@@ -1,7 +1,6 @@
 ---
 import Content from '../layouts/Content.astro';
-import ThermalArchitecture from '../components/ThermalArchitecture.astro';
-import { company, site, power, solar } from '../data/site';
+import { company, site, power, solar, campusConcept } from '../data/site';
 const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
 ---
 <Content
@@ -9,7 +8,7 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
   description={`SmartTec plans a grid-first launch at ${site.designation}, with solar and BESS as a later investment. Explore shared ${power.utility} service, cooling and the commissioning requirements.`}
   kicker="Power and cooling"
   heading="Grid first. Hybrid in phases."
-  lede={`The initial B300 deployment is planned to start on ${power.utility} grid power. Solar and battery energy storage (BESS) follow as a separate investment after launch. The eight proposed systems will be together in one building, with new cooling and a power allocation confirmed through engineering and commissioning.`}
+  lede={`The initial B300 deployment is planned to start on ${power.utility} grid power. The campus concept places direct-liquid-cooled compute in Buildings A and C, with the chiller yard behind B. Solar and battery energy storage (BESS) follow as a separate investment; equipment and power allocations require engineering and commissioning.`}
   meta={[
     { label: 'Utility', value: power.utility, note: 'On-site transformer', tone: 'gold' },
     { label: 'Shared service', value: power.service, note: power.serviceScope },
@@ -44,29 +43,48 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
       <dl class="spec"><div><dt>Initial energy source</dt><dd>{power.launchSource}</dd></div><div><dt>Grid commercial terms</dt><dd>Utility confirmation required<span class="note">Energy, demand charges and any minimum billing requirements belong in the complete tariff review.</span></dd></div><div><dt>Continuous IT allocation</dt><dd>Engineering and utility review<span class="note">A shared service rating does not establish exclusive continuous IT capacity.</span></dd></div><div><dt>Later hybrid phase</dt><dd>Solar and BESS<span class="note">Separate capital, approvals and commissioning; savings and backup performance require validation.</span></dd></div></dl>
     </div>
   </section>
-  <ThermalArchitecture />
+  <section id="thermal" aria-labelledby="thermal-heading" data-reveal>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Campus cooling concept</span></p>
+    <h2 id="thermal-heading">Direct liquid cooling. Separate water circuits.</h2>
+    <div class="split">
+      <div>
+        <p>{power.hvac}</p>
+        <p>Facility water carries heat from the coolant distribution units (CDUs) to the outdoor plant. Inside each CDU, a heat exchanger keeps facility water separate from the server-coolant circuit.</p>
+        <p>Overhead supply and return pipes carry server coolant to rack manifolds and B300 cold plates. Room cooling still handles residual heat and humidity. The routing study includes service access, isolation and leak detection; final equipment and installation details require engineering.</p>
+      </div>
+      <dl class="spec">
+        <div><dt>Compute layout</dt><dd>Buildings A and C<span class="note">{campusConcept.allocationNote}</span></dd></div>
+        <div><dt>Heat rejection</dt><dd>Proposed yard behind B<span class="note">Closed-loop Daikin at 208V is the owner’s intent. Exact model, voltage compatibility and operating temperatures remain to be confirmed.</span></dd></div>
+        <div><dt>Server cooling</dt><dd>CDU → overhead headers → rack manifolds<span class="note">Supply and return form a separate server-coolant circuit; facility water does not feed the cold plates directly.</span></dd></div>
+        <div><dt>Complete design</dt><dd>Supplier and engineering review<span class="note">{power.hvacUnresolved}</span></dd></div>
+      </dl>
+    </div>
+    <div class="actions"><a class="btn" href={campusConcept.href}>Trace the cooling in 3D</a><a class="btn btn--ghost" href="/contact#reserve-enquiry">Discuss cooling requirements</a></div>
+    <p class="form-note">{campusConcept.budgetBasis}</p>
+  </section>
   <section aria-labelledby="solar" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Energy development</span></p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Energy development</span></p>
     <h2 id="solar">Add solar and storage as the campus develops.</h2>
     <div class="split">
       <div>
         <p>{solar.publicCopy}</p>
         <p>{company.parent}, the parent battery producer, connects the campus strategy with energy-storage development. SmartTec.dev LLC operates under SmartTec Holdings LLC, bringing data-center operations into that wider platform.</p>
         <p>Solar and storage are a later development phase. Equipment sizing, interval-load analysis, tariff treatment, battery losses and replacement costs will establish their investment case. Utility approval and commissioning will establish their contribution to the campus.</p>
+        <p>The concept connects future BESS through a power conversion system (PCS) at the common distribution bus, on a branch separate from the IT UPS. This arrangement does not establish backup duration or islanding capability.</p>
       </div>
       <div class="card">
         <h3>Three connected uses</h3>
         <ul class="bullets">
           <li>Buildings A and C: compute and colocation.</li>
-          <li>Building B: batteries, utilities and storage.</li>
-          <li>Tract 3: planned solar and energy storage.</li>
+          <li>Building B: future BESS, utilities and storage.</li>
+          <li>Tract 3: planned solar development.</li>
         </ul>
-        <a href="/site">Explore the campus →</a>
+        <a href={campusConcept.href}>Explore the full campus viewer →</a>
       </div>
     </div>
   </section>
   <section class="is-end" aria-labelledby="deployment" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">04</span><span class="eyebrow__t">Your requirements</span></p>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">05</span><span class="eyebrow__t">Your requirements</span></p>
     <h2 id="deployment">Plan the load, cooling and service together.</h2>
     <p>A deployment proposal brings together IT power, cooling, metering, support and commercial terms. Include your uptime and compliance requirements so they can be assessed before an offer. No commissioned capacity or uptime guarantee is advertised at this development stage.</p>
     <div class="actions">

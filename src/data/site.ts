@@ -14,6 +14,13 @@ export type Evidence =
 /** The latest public project-record review. Individual target dates stay explicit. */
 export const REVIEWED = '13 September 2026';
 
+/** Owner-approved campus concept; it does not reprice the versioned investor model. */
+export const campusConcept = {
+  href: '/site/campus',
+  allocationNote: 'Four systems in A and four in C are illustrated; final allocation and measured fit-out remain subject to design.',
+  budgetBasis: 'Published v6.1 financial scenarios retain the earlier air-cooled, one-building budgeting basis. The direct-liquid campus concept requires updated equipment quotes, design and repricing.',
+} as const;
+
 export const company = {
   name: 'SmartTec',
   parent: 'Z1Power',
@@ -71,7 +78,7 @@ export const site = {
       id: 3,
       acres: 18.2,
       label: 'Tract 3',
-      use: 'Planned solar and energy storage',
+      use: 'Planned solar development',
       state: 'Undeveloped',
       evidence: 'owner-reported' as Evidence,
     },
@@ -187,20 +194,16 @@ export const power = {
     evidence: 'planned' as Evidence,
   },
 
-  /**
-   * The latest owner correction confirms that all eight proposed systems go
-   * in one building with no working air conditioning. No old HVAC capacity
-   * is credited. The exact building, equipment and mechanical yard are open.
-   */
-  hvac: 'All cooling is new for the proposed eight-system deployment in one building. The current budget assumes air-cooled servers with room or in-row cooling; the exact Supermicro SKU and OEM requirements remain to be confirmed.',
-  hvacUnresolved: 'New and warranted refurbished plant are being compared. The room/in-row design, site-weather derating, airflow, fluid temperatures, electrical loads and capacity during a unit failure require quotes and engineering acceptance.',
+  /** Current campus design intent; the earlier air-cooled financial basis remains versioned separately. */
+  hvac: 'The campus concept uses direct liquid cooling for B300 systems in Buildings A and C, with a proposed chiller yard behind B. The owner specifies a closed-loop Daikin plant at 208V; the exact model and compatible operating conditions remain to be confirmed.',
+  hvacUnresolved: 'The server SKU, CDU and facility-water circuits, residual room cooling, local-weather duty, voltage compatibility and complete installed cost require supplier quotes and engineering acceptance.',
   hvacEvidence: 'unresolved' as Evidence,
 
   /** Storage. A power rating; the usable energy and status are not known. */
   storage: 'Z1Power LFP battery cabinets',
   storageRating: 'Capacity subject to design',
   storageNote: 'Z1Power storage is planned as a later phase alongside solar. Cabinet quantity, usable MWh, usable kW and backup design will be sized to the approved load.',
-  storageSiting: 'Concrete pads behind Building B are a candidate location only',
+  storageSiting: 'Future BESS is shown inside Building B; equipment selection and final siting require design confirmation',
   storageEvidence: 'unresolved' as Evidence,
 
   /**
@@ -214,7 +217,7 @@ export const power = {
 } as const;
 
 /**
- * Planned solar and storage on Tract 3.
+ * Planned solar on Tract 3; the campus concept places future BESS inside B.
  *
  * A screening extrapolation, not surveyed capacity and not utility-approved
  * generation. The density benchmarks come from Berkeley Lab's 2022 land-use
@@ -236,7 +239,7 @@ export const solar = {
     { name: 'Higher / fixed tilt', fraction: 0.8, arrayAcres: 14.56, density: 0.35, mwdc: 5.1, mwac: 3.92, modules: 7800 },
   ],
   caveat: 'Final layout must account for panel dimensions, row spacing, roads, setbacks, drainage, topography, shading, easements, equipment and emergency access. The 650 W module rating is an illustrative input, not a selected product.',
-  publicCopy: 'Tract 3 is the planned area for later solar and energy-storage development. Its 18.20-acre planning estimate is not a buildable-area survey. Generation capacity will follow site layout, electrical design, permitting and utility approval.',
+  publicCopy: 'Tract 3 is the planned area for later solar development, with future BESS shown inside Building B. The 18.20-acre tract planning estimate is not a buildable-area survey. Generation capacity will follow site layout, electrical design, permitting and utility approval.',
 } as const;
 
 /**
@@ -249,6 +252,9 @@ export const solar = {
  */
 export const network = {
   provider: 'Dobson Telephone Company',
+  handoff: 'Owner-reported Dobson handoff in Building B',
+  handoffNote: 'The external provider route and internal campus fiber paths remain unverified. The reported handoff location does not establish an accepted or live service.',
+  handoffEvidence: 'owner-reported' as Evidence,
   service: '100 Gbps asymmetrical option',
   leadTime: '4–8 weeks',
   deliveryTarget: '8 October–5 November 2026 target window',
@@ -264,8 +270,8 @@ export const network = {
 
   profile: 'Committed bandwidth, upstream and downstream rates, circuit type, order status, installation, IP arrangements, egress and service levels await carrier confirmation. Internet service is distinct from the internal GPU fabric and server network interfaces.',
 
-  /** The approved interim wording, verbatim. */
-  publicCopy: 'A Dobson fiber option is under review. The management delivery estimate was 4–8 weeks from 10 September 2026 and requires carrier confirmation. The reported 100 Gbps asymmetrical option is not an ordered, commissioned or included service commitment.',
+  /** The handoff location is owner-reported; carrier delivery and service remain separate. */
+  publicCopy: 'The owner reports the Dobson handoff in Building B; the external route remains unverified. A fiber service option is under review. The management delivery estimate was 4–8 weeks from 10 September 2026 and requires carrier confirmation. The reported 100 Gbps asymmetrical option is not an ordered, commissioned or included service commitment.',
 } as const;
 
 /** Current proposed deployment, separate from the legacy RTX estimator below. */
@@ -279,9 +285,9 @@ export const publicDeployment = {
   reserveGpus: 4,
   label: '64 B300 GPUs · proposed',
   systemLabel: '8 complete Supermicro systems',
-  building: 'One building; full-fleet layout and location require validation',
-  buildingNote: 'Gross building area is not usable rack space. The complete fleet, cooling equipment, aisles, service access and electrical systems require a measured layout before a building is selected.',
-  cooling: 'Air-cooled server budgeting basis; exact OEM SKU and all-new cooling design pending',
+  building: 'Buildings A and C in the proposed campus layout',
+  buildingNote: campusConcept.allocationNote + ' Gross building area is not usable rack space; equipment, aisles, service access and electrical systems require a measured layout.',
+  cooling: 'Direct liquid cooling proposed; exact Supermicro SKU, cooling design and installed scope pending',
   scope: 'Management describes complete systems with CPUs, NVSwitch fabric, networking, storage, software and support. Exact configuration, included cluster infrastructure and support terms remain subject to supplier verification.',
   reserveNote: 'The four-GPU reserve is a financial allocation within eight complete systems. It is not a complete standby server or a validated failover design.',
   status: 'Proposed — procurement and commissioning ahead',
@@ -399,7 +405,7 @@ export const stages = [
     ruler: '01 / SITE',
     kicker: 'Site 01 · Mead, Oklahoma',
     title: '39.39 acres.\nOne connected plan.',
-    lede: `${site.acresRounded} on the US-70 corridor in ${site.county}, across three tracts: manufacturing, the existing buildings, and land for planned solar and storage.`,
+    lede: `${site.acresRounded} on the US-70 corridor in ${site.county}, across three tracts: manufacturing, the existing buildings, and land for planned solar.`,
     chrome: 'light' as const,
     scrollVh: 250,
     hold: { label: 'Hold to continue', holdLabel: 'Keep holding', duration: 1.6 },
@@ -450,7 +456,7 @@ export const stages = [
     ruler: '04 / COMPUTE',
     kicker: 'First phase · planned',
     title: '64 B300 GPUs.\nOne focused start.',
-    lede: `${publicDeployment.systemLabel}, proposed together in one building with all-new room/in-row cooling on the current air-cooled budgeting basis. Procurement follows customer commitments, complete costs and engineering acceptance. The scene is an illustrative hall, not inventory.`,
+    lede: `${publicDeployment.systemLabel}, proposed across Buildings A and C with direct liquid cooling. The four-plus-four arrangement is illustrative; final allocation, equipment and costs require validation. Procurement follows customer commitments and engineering acceptance.`,
     chrome: 'light' as const,
     scrollVh: 300,
     hold: { label: 'Hold to power on', holdLabel: 'Powering on', duration: 2.2 },
