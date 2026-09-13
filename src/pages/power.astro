@@ -6,15 +6,15 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
 ---
 <Content
   title={`Power and cooling for phased AI infrastructure | ${company.full}`}
-  description={`Explore SmartTec's reported solar, battery and gas supply agreement, shared ${power.utility} service and new liquid-cooling proposal at ${site.designation}. Capacity and commissioning remain under review.`}
+  description={`SmartTec plans a grid-first launch at ${site.designation}, with solar and BESS as a later investment. Explore shared ${power.utility} service, cooling and the commissioning requirements.`}
   kicker="Power and cooling"
-  heading="Infrastructure for the next phase."
-  lede={`Management reports a behind-the-meter supply agreement using solar, batteries and gas generators, alongside the campus's shared ${power.utility} service. The proposed eight-system B300 deployment will be together in one building, with all-new cooling. Firm power capacity and complete energy costs are still being confirmed.`}
+  heading="Grid first. Hybrid in phases."
+  lede={`The initial B300 deployment is planned to start on ${power.utility} grid power. Solar and battery energy storage (BESS) follow as a separate investment after launch. The eight proposed systems will be together in one building, with new cooling and a power allocation confirmed through engineering and commissioning.`}
   meta={[
     { label: 'Utility', value: power.utility, note: 'On-site transformer', tone: 'gold' },
     { label: 'Shared service', value: power.service, note: power.serviceScope },
     { label: 'Commissioning', value: power.commissioningTarget, note: 'Management target; not completed', tone: 'signal' },
-    { label: 'Planned energy', value: `${solar.tractAcres} acres`, note: 'Tract 3, solar and storage' },
+    { label: 'Later phase', value: 'Solar + BESS', note: 'Separate design and investment' },
   ]}
 >
   <section aria-labelledby="service" data-reveal>
@@ -27,32 +27,32 @@ const serviceKva = Math.round(Math.sqrt(3) * 208 * 3000 / 1000);
       </div>
       <dl class="spec">
         <div><dt>Serving utility</dt><dd>{power.utility}</dd></div>
-        <div><dt>On-site transformer</dt><dd>{power.service}<span class="note">One shared service across Buildings A, B and C.</span></dd></div>
+        <div><dt>Reported shared service</dt><dd>{power.service}<span class="note">One rating across Buildings A, B and C. Transformer nameplate and usable IT allocation require verification.</span></dd></div>
         <div><dt>Apparent service rating</dt><dd>Approximately {serviceKva.toLocaleString()} kVA<span class="note">Calculated from stated voltage and current. This is not an available IT allocation.</span></dd></div>
         <div><dt>House / office</dt><dd>{power.houseOfficeService}<span class="note">Separate from the data-center building allocation.</span></dd></div>
       </dl>
     </div>
     <div class="callout" style="margin-top: var(--s-6);">
-      <p><strong>Capacity for your deployment.</strong> We size each customer allocation against the electrical design, cooling system and commissioned operating limits. Share your IT load and redundancy requirements to start that review.</p>
+      <p><strong>Capacity for your deployment.</strong> Each proposed allocation will be assessed against the electrical design, cooling system and accepted operating limits. Share your IT load and redundancy requirements to start that review.</p>
     </div>
   </section>
   <section aria-labelledby="supply" data-reveal>
-    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Behind-the-meter supply</span></p>
-    <h2 id="supply">An energy agreement to validate against the load.</h2>
+    <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">The launch power plan</span></p>
+    <h2 id="supply">Build the first phase around the grid.</h2>
     <div class="split">
-      <div><p>Management reports a supply agreement combining solar, batteries and gas generators at below $0.07/kWh. This reported supply arrangement is separate from the shared utility service and the proposed on-site solar development.</p><p>{power.behindMeter.note}</p></div>
-      <dl class="spec"><div><dt>Supply sources</dt><dd>{power.behindMeter.sources}</dd></div><div><dt>Agreement</dt><dd>{power.behindMeter.agreement}</dd></div><div><dt>Continuous reserved capacity</dt><dd>Awaiting team confirmation<span class="note">Neither a shared service rating nor a cooling budget establishes exclusive IT capacity.</span></dd></div><div><dt>Operating readiness</dt><dd>To be established<span class="note">Service date and acceptance evidence remain open.</span></dd></div></dl>
+      <div><p>{power.launchNote}</p><p>{power.laterPhase} The initial operating case does not depend on solar savings or battery dispatch. Any future gas-generation proposal will need its own fuel, maintenance, emissions, interconnection and reliability review.</p></div>
+      <dl class="spec"><div><dt>Initial energy source</dt><dd>{power.launchSource}</dd></div><div><dt>Grid commercial terms</dt><dd>Utility confirmation required<span class="note">Energy, demand charges and any minimum billing requirements belong in the complete tariff review.</span></dd></div><div><dt>Continuous IT allocation</dt><dd>Engineering and utility review<span class="note">A shared service rating does not establish exclusive continuous IT capacity.</span></dd></div><div><dt>Later hybrid phase</dt><dd>Solar and BESS<span class="note">Separate capital, approvals and commissioning; savings and backup performance require validation.</span></dd></div></dl>
     </div>
   </section>
   <ThermalArchitecture />
   <section aria-labelledby="solar" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Energy development</span></p>
-    <h2 id="solar">Solar and storage, alongside compute.</h2>
+    <h2 id="solar">Add solar and storage as the campus develops.</h2>
     <div class="split">
       <div>
         <p>{solar.publicCopy}</p>
         <p>{company.parent}, the parent battery producer, connects the campus strategy with energy-storage development. SmartTec.dev LLC operates under SmartTec Holdings LLC, bringing data-center operations into that wider platform.</p>
-        <p>Solar and storage are a planned development phase. Equipment sizing, utility approval and commissioning will establish the contribution they can make to the campus.</p>
+        <p>Solar and storage are a later development phase. Equipment sizing, interval-load analysis, tariff treatment, battery losses and replacement costs will establish their investment case. Utility approval and commissioning will establish their contribution to the campus.</p>
       </div>
       <div class="card">
         <h3>Three connected uses</h3>

@@ -1,4 +1,4 @@
-/** Shared public record: owner corrections through 11 September 2026 supersede the earlier handoff. See docs/project-source-of-truth.md. */
+/** Shared public record: owner corrections through 13 September 2026 supersede the earlier handoff. See docs/public-content-consistency-2026-09-13.md. */
 export type Evidence =
   /** The owner supplied it. Publish with accurate scope and status. */
   | 'owner-reported'
@@ -12,7 +12,7 @@ export type Evidence =
   | 'unresolved';
 
 /** The latest public project-record review. Individual target dates stay explicit. */
-export const REVIEWED = '11 September 2026';
+export const REVIEWED = '13 September 2026';
 
 export const company = {
   name: 'SmartTec',
@@ -48,7 +48,7 @@ export const site = {
   acresEvidence: 'owner-reported' as Evidence,
 
   ownership: 'BC LLC, management-reported landowner',
-  ownershipNote: 'Management confirms a signed 50-year site-use agreement for SmartTec. The agreement and title records remain subject to document review; land ownership is not attributed to SmartTec.',
+  ownershipNote: 'Management reports a signed 50-year site-use agreement for SmartTec with BC LLC, a related party. The agreement and title records remain subject to document review; land ownership is not attributed to SmartTec.',
 
   tracts: [
     {
@@ -131,8 +131,8 @@ export const site = {
    * The compute target. A target requiring revalidation, not a launch date —
    * the qualifier is inside the value so no interpolation can drop it.
    */
-  powerOn: 'Q4 2026 target',
-  powerOnNote: 'First service follows equipment installation, cooling, utility commissioning and carrier acceptance. The Q4 target is not an availability guarantee.',
+  powerOn: 'After procurement and commissioning',
+  powerOnNote: 'A customer service date will follow confirmed equipment delivery, cooling, utility commissioning and carrier acceptance. Earlier Q4 2026 targets require revalidation; model launch assumptions are not delivery commitments.',
   powerOnEvidence: 'planned' as Evidence,
 } as const;
 
@@ -152,6 +152,9 @@ export const site = {
  * calling the result engineered capacity is not permitted.
  */
 export const power = {
+  launchSource: 'Grid power first',
+  launchNote: 'The initial deployment is planned to run on grid power. The utility tariff, demand charges, continuous allocation and commissioning must be confirmed for the approved IT and cooling load.',
+  laterPhase: 'Solar and BESS are a separate later investment, to be installed in phases after launch as the hybrid design and economics are validated.',
   service: '3,000 A at 208 V, three-phase',
   voltage: '208 V three-phase',
   serviceOrigin: 'Shared campus electrical service',
@@ -172,16 +175,16 @@ export const power = {
   /** The approved wording for what capacity is actually on offer. */
   allocation: 'Usable IT capacity will be allocated following electrical, cooling and commissioning review',
 
-  transformerNameplate: 'An on-site 3,000 A, 208 V, three-phase transformer is reported through OG&E. Final IT allocation follows electrical design and commissioning.',
+  transformerNameplate: 'Management reports an on-site transformer and a shared 3,000 A, 208 V three-phase service. The transformer nameplate and final IT allocation require electrical verification and commissioning.',
 
   rate: 'a contracted rate and demand-charge schedule to be agreed before an offer',
 
   behindMeter: {
-    sources: 'Solar, batteries and gas generators',
-    agreement: 'Supply agreement reported by management',
-    rate: 'Below $0.07/kWh, reported by management',
-    note: 'Reserved continuous capacity, service date and complete fuel, maintenance, loss, replacement and equipment costs await confirmation. This is not a verified all-in tariff or a customer electricity offer.',
-    evidence: 'owner-reported' as Evidence,
+    sources: 'Later solar and battery storage; any gas generation requires a separate design',
+    agreement: 'Earlier supply discussions do not establish the grid-first launch tariff',
+    rate: 'Future delivered cost to be validated',
+    note: 'The launch plan uses grid power. Future generation and storage require separate capital, a complete operating-cost case, utility approvals and commissioning; no future savings or backup duration are credited as established performance.',
+    evidence: 'planned' as Evidence,
   },
 
   /**
@@ -189,14 +192,14 @@ export const power = {
    * in one building with no working air conditioning. No old HVAC capacity
    * is credited. The exact building, equipment and mechanical yard are open.
    */
-  hvac: 'All cooling is new for the proposed eight-system deployment in one building. Direct liquid cooling serves the servers; residual-air and room cooling require a separate costed provision.',
-  hvacUnresolved: 'New and warranted refurbished plant are being compared. Rear-door versus conventional room cooling, optional economizer dry coolers, fluid temperatures, siting and redundancy require quotes and engineering acceptance.',
+  hvac: 'All cooling is new for the proposed eight-system deployment in one building. The current budget assumes air-cooled servers with room or in-row cooling; the exact Supermicro SKU and OEM requirements remain to be confirmed.',
+  hvacUnresolved: 'New and warranted refurbished plant are being compared. The room/in-row design, site-weather derating, airflow, fluid temperatures, electrical loads and capacity during a unit failure require quotes and engineering acceptance.',
   hvacEvidence: 'unresolved' as Evidence,
 
   /** Storage. A power rating; the usable energy and status are not known. */
   storage: 'Z1Power LFP battery cabinets',
-  storageRating: '2 MW reported',
-  storageNote: 'Z1Power storage is planned alongside solar. Cabinet quantity, usable MWh and backup design will be sized to the approved load.',
+  storageRating: 'Capacity subject to design',
+  storageNote: 'Z1Power storage is planned as a later phase alongside solar. Cabinet quantity, usable MWh, usable kW and backup design will be sized to the approved load.',
   storageSiting: 'Concrete pads behind Building B are a candidate location only',
   storageEvidence: 'unresolved' as Evidence,
 
@@ -223,7 +226,7 @@ export const power = {
 export const solar = {
   tractAcres: 18.2,
   range: 'approximately 2.6–5.1 MWdc',
-  status: 'Preliminary layout study',
+  status: 'Later-phase preliminary layout study',
   evidence: 'calculated' as Evidence,
   source: 'Berkeley Lab, Land Requirements for Utility-Scale PV (2022), pp. 7 and 13',
   sourceUrl: 'https://emp.lbl.gov/sites/default/files/emp-files/land_requirements_for_utility-scale_pv.pdf',
@@ -233,7 +236,7 @@ export const solar = {
     { name: 'Higher / fixed tilt', fraction: 0.8, arrayAcres: 14.56, density: 0.35, mwdc: 5.1, mwac: 3.92, modules: 7800 },
   ],
   caveat: 'Final layout must account for panel dimensions, row spacing, roads, setbacks, drainage, topography, shading, easements, equipment and emergency access. The 650 W module rating is an illustrative input, not a selected product.',
-  publicCopy: 'Tract 3 provides 18.20 acres for planned solar and energy-storage development. Preliminary screening indicates potential for a multi-megawatt solar installation, subject to site layout, electrical design, permitting and utility approval.',
+  publicCopy: 'Tract 3 is the planned area for later solar and energy-storage development. Its 18.20-acre planning estimate is not a buildable-area survey. Generation capacity will follow site layout, electrical design, permitting and utility approval.',
 } as const;
 
 /**
@@ -246,27 +249,23 @@ export const solar = {
  */
 export const network = {
   provider: 'Dobson Telephone Company',
-  service: '100 Gbps asymmetrical',
+  service: '100 Gbps asymmetrical option',
   leadTime: '4–8 weeks',
   deliveryTarget: '8 October–5 November 2026 target window',
   leadTimeNote: 'Management estimate supplied 10 September 2026; subject to carrier installation and acceptance.',
-  secondCircuit: 'A second 100 Gbps circuit can be evaluated',
+  secondCircuit: 'An additional circuit requires a separate carrier scope and commercial review',
   diversityNote: 'Two circuits from one carrier do not establish route diversity, independent upstream failure domains or an aggregate rate to a single customer.',
   status: 'Planned — subject to carrier confirmation',
   evidence: 'planned' as Evidence,
 
-  cost: '$8,075 / month',
-  costStatus: 'Unverified commercial input, not a confirmed quote',
-  term: '60 months',
-  /** $8,075 × 12 and × 60. Before any other contractual charges. */
-  costAnnual: '$96,900',
-  costFullTerm: '$484,500',
-  costEvidence: 'calculated' as Evidence,
+  /** Commercial allowances belong to the versioned investor model. An earlier
+   * carrier option does not establish an accepted quote or the model's scope. */
+  commercialStatus: 'Carrier scope, recurring charges, installation and minimum term require confirmation',
 
-  profile: 'Committed bandwidth, circuit type, order status, delivery terms, IP arrangements, egress and service levels await carrier confirmation',
+  profile: 'Committed bandwidth, upstream and downstream rates, circuit type, order status, installation, IP arrangements, egress and service levels await carrier confirmation. Internet service is distinct from the internal GPU fabric and server network interfaces.',
 
   /** The approved interim wording, verbatim. */
-  publicCopy: 'Dobson fiber is planned, with a management delivery estimate of 4–8 weeks from 10 September 2026. The reported 100 Gbps option, final service levels and resilience design remain subject to carrier confirmation.',
+  publicCopy: 'A Dobson fiber option is under review. The management delivery estimate was 4–8 weeks from 10 September 2026 and requires carrier confirmation. The reported 100 Gbps asymmetrical option is not an ordered, commissioned or included service commitment.',
 } as const;
 
 /** Current proposed deployment, separate from the legacy RTX estimator below. */
@@ -280,11 +279,13 @@ export const publicDeployment = {
   reserveGpus: 4,
   label: '64 B300 GPUs · proposed',
   systemLabel: '8 complete Supermicro systems',
-  building: 'One building; A or C allocation pending',
-  cooling: 'Direct liquid cooling required; all cooling is new',
+  building: 'One building; full-fleet layout and location require validation',
+  buildingNote: 'Gross building area is not usable rack space. The complete fleet, cooling equipment, aisles, service access and electrical systems require a measured layout before a building is selected.',
+  cooling: 'Air-cooled server budgeting basis; exact OEM SKU and all-new cooling design pending',
   scope: 'Management describes complete systems with CPUs, NVSwitch fabric, networking, storage, software and support. Exact configuration, included cluster infrastructure and support terms remain subject to supplier verification.',
   reserveNote: 'The four-GPU reserve is a financial allocation within eight complete systems. It is not a complete standby server or a validated failover design.',
   status: 'Proposed — procurement and commissioning ahead',
+  ownership: 'Planned SmartTec-owned and operated systems; not a purchased or commissioned fleet',
   demand: 'Active customer discussions; no signed customer contracts or guaranteed minimum receipts have been established.',
   evidence: 'owner-reported' as Evidence,
 } as const;
@@ -333,28 +334,28 @@ export const compute = {
    */
   cooling: 'Cooling will follow the selected OEM configuration and facility review; the GPU supports air or liquid options',
 
-  target: 'Q4 2026 target',
+  target: 'Historical comparison only; no procurement or service date',
 
   /** Future evaluations, each needing its own OEM design, benchmark and order. */
   futurePlatforms: 'The current proposal uses B300 systems. RTX, AMD and Cerebras require separate workload and procurement cases.',
 } as const;
 
-/** The three things actually on offer. */
+/** Planned services. Inquiry categories do not establish commissioned capacity. */
 export const offers = [
   {
+    id: 'inference',
+    name: 'Shared inference capacity',
+    summary: 'Planned inference on SmartTec-owned GPU nodes shared by multiple customers. Scheduling, tenant controls, supported models and performance targets will be validated before service.',
+  },
+  {
     id: 'dedicated',
-    name: 'Dedicated B300 compute',
-    summary: 'Proposed B300 capacity, with allocations assessed against workload and service requirements.',
+    name: 'Dedicated GPU servers',
+    summary: 'Planned SmartTec-owned GPU servers for one tenant per node. The proposal will define isolation, GPU allocation, software access and support.',
   },
   {
     id: 'hosting',
-    name: 'Customer-owned hosting',
-    summary: 'Colocation for hardware you own, with reserved IT kW and rack allocation.',
-  },
-  {
-    id: 'expansion',
-    name: 'Customer-funded expansion',
-    summary: 'Larger deployments built against a funded commitment.',
+    name: 'Colocation',
+    summary: 'Planned space, power, cooling and connectivity for servers you own, subject to a separate equipment and facility allocation review.',
   },
 ] as const;
 
@@ -371,7 +372,7 @@ export const offers = [
 export const region = {
   origin: { lat: 33.998121, lon: -96.475238 },
   originNote: 'US Census Geocoder address-range interpolation, not a surveyed gate or boundary',
-  checked: REVIEWED,
+  checked: '9 September 2026',
   method: 'Preliminary OSRM road routing, no live traffic',
   destinations: [
     { name: 'Choctaw Casino & Resort — Durant', address: '4216 S. Highway 69/75', miles: 8.8, minutes: 12 },
@@ -430,9 +431,9 @@ export const stages = [
     scene: 'power' as const,
     ground: '#1a1204',
     ruler: '03 / POWER',
-    kicker: 'On the ground',
-    title: 'Power strategy.\nReadiness next.',
-    lede: `Management reports a solar, battery and gas supply agreement, alongside a shared ${power.service} service awaiting OG&E commissioning. Reserved capacity and complete energy costs are still being confirmed.`,
+    kicker: 'Grid first · hybrid in phases',
+    title: 'Grid first.\nHybrid next.',
+    lede: `The initial deployment is planned on ${power.utility} grid power, with shared service and commissioning to validate. Solar and BESS follow as a separate investment. The energy scene illustrates the future hybrid concept.`,
     chrome: 'light' as const,
     scrollVh: 300,
     hold: { label: 'Hold to energise', holdLabel: 'Energising', duration: 2.0 },
@@ -449,7 +450,7 @@ export const stages = [
     ruler: '04 / COMPUTE',
     kicker: 'First phase · planned',
     title: '64 B300 GPUs.\nOne focused start.',
-    lede: `${publicDeployment.systemLabel}, proposed together in one building with new direct liquid cooling. Procurement follows customer commitments, complete costs and engineering acceptance. The scene is an illustrative hall, not inventory.`,
+    lede: `${publicDeployment.systemLabel}, proposed together in one building with all-new room/in-row cooling on the current air-cooled budgeting basis. Procurement follows customer commitments, complete costs and engineering acceptance. The scene is an illustrative hall, not inventory.`,
     chrome: 'light' as const,
     scrollVh: 300,
     hold: { label: 'Hold to power on', holdLabel: 'Powering on', duration: 2.2 },

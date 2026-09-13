@@ -8,15 +8,20 @@ const sha=b=>createHash('sha256').update(b).digest('hex');
 test('protected download matches the reviewed PDF and fits the function response limit',()=>{
  const bytes=Buffer.from(investorDeckBase64,'base64');
  assert.deepEqual(bytes,readFileSync('output/pdf/'+metadata.filename));
+ assert.deepEqual(bytes,readFileSync('output/pdf/SmartTec-Investor-Presentation.pdf'));
  assert.equal(bytes.subarray(0,5).toString(),'%PDF-');
  assert.ok(bytes.subarray(-30).toString().includes('%%EOF'));
  assert.equal(bytes.length,metadata.bytes);assert.equal(sha(bytes),metadata.sha256);
  assert.ok(bytes.length<4_000_000);assert.equal(metadata.pages,26);
  assert.equal(existsSync('public/'+metadata.filename),false);
 });
-test('published PDF cannot drift from current readiness or its explicitly historical comparison',()=>{
- assert.equal(metadata.currentReturnStatus,'not-established');
- for(const [path,expected] of [['src/smarttec-investor/investment-readiness.mjs',metadata.readinessSourceSha256],['src/smarttec-investor/data/owner-deployment-study.json',metadata.ownerStudySha256],['src/smarttec-investor/roi-engine.mjs',metadata.engineSha256]]){
+test('published PDF is bound to the canonical reviewed model and its generating code',()=>{
+ const model=JSON.parse(readFileSync('src/data/investor-model-v6-1.json','utf8'));
+ assert.equal(metadata.currentReturnStatus,'conditional-scenarios');
+ assert.equal(metadata.primaryReturnMetric,'dated-funded-project-irr');
+ assert.equal(metadata.modelVersion,model.version);
+ assert.deepEqual(metadata.financialSource,model.source);
+ for(const [path,expected] of [['src/data/investor-model-v6-1.json',metadata.modelSourceSha256],['tools/build-investor-deck.py',metadata.builderSourceSha256],['tools/export-investor-deck-data.mjs',metadata.exporterSourceSha256]]){
   assert.equal(sha(readFileSync(path,'utf8').replaceAll('\r\n','\n')),expected,'Rebuild and review the investor PDF after economic changes');
  }
 });

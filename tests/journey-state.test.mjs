@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {journey} from '../src/smarttec-investor/data/journey.mjs';
 import {mountJourney} from '../src/smarttec-investor/client/journey.mjs';
 
-test('chapter tracking survives a tall calculator, short viewport and browser restore',()=>{
+test('chapter tracking survives a tall financial section, short viewport and browser restore',()=>{
   const keys=['document','window','innerHeight','requestAnimationFrame','cancelAnimationFrame','ResizeObserver'];
   const saved=Object.fromEntries(keys.map(key=>[key,globalThis[key]]));
   class Node extends EventTarget{
@@ -25,7 +25,7 @@ test('chapter tracking survives a tall calculator, short viewport and browser re
   const selectors=['.inv-journey-dock','#inv-journey-prev','#inv-journey-next','#inv-ruler-label','#inv-journey-count','#inv-journey-title'];
   const nodes=Object.fromEntries(selectors.map(selector=>[selector,new Node()]));
   nodes['#inv-journey-next'].child=new Node();
-  const positions=[0,450,900,2000,3000,4000,14000,15000];
+  const positions=[0,450,900,2000,3000,13000,14000,15000];
   const sections=journey.map((chapter,index)=>{const section=new Node();section.child=new Node();section.getBoundingClientRect=()=>({top:positions[index]-scroll});nodes['#'+chapter.id]=section;return section;});
   const links=journey.map(chapter=>{const link=new Node();link.dataset.invChapter=chapter.id;link.attributes.href='#'+chapter.id;return link;});
   globalThis.document={querySelector:s=>nodes[s],getElementById:id=>nodes['#'+id],querySelectorAll:()=>links};
@@ -43,10 +43,10 @@ test('chapter tracking survives a tall calculator, short viewport and browser re
     assert.equal(nodes['#inv-journey-next'].getAttribute('aria-label'),'Next chapter: Immersive pitch & PDF');
     move(450);assert.equal(nodes['#inv-journey-title'].textContent,'Immersive pitch & PDF');
     assert.equal(nodes['#inv-journey-prev'].href,'#opportunity');
+    assert.equal(nodes['#inv-journey-next'].href,'#deployment');
+    move(4100);assert.equal(nodes['#inv-journey-title'].textContent,'Review the economics');
+    move(11000);assert.equal(nodes['#inv-journey-title'].textContent,'Review the economics');
     assert.equal(nodes['#inv-journey-next'].href,'#campus');
-    move(4100);assert.equal(nodes['#inv-journey-title'].textContent,'Test the economics');
-    move(11000);assert.equal(nodes['#inv-journey-title'].textContent,'Test the economics');
-    assert.equal(nodes['#inv-journey-next'].href,'#evidence');
     // Anchor positioning includes the fixed header clearance, even landscape.
     globalThis.innerHeight=340;move(14000-190);
     assert.equal(nodes['#inv-journey-title'].textContent,'Review the evidence');

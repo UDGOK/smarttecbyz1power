@@ -21,6 +21,7 @@ for(const route of routes){
  }
  assert.doesNotMatch(doc.body.textContent,/two existing (?:four-GPU |RTX)|whole planned first phase|One planned here|Refreshed every 15 minutes/i);checks++;
  assert.equal(doc.querySelectorAll('.todo').length,0,`${route}: public placeholder styling remains`);checks++;
+ assert.equal(doc.querySelectorAll('[data-configurator], [data-planner]').length,0,`${route}: retired public calculator is rendered`);checks++;
  if(route && route!=='brand') { assert.match(doc.querySelector('footer').textContent,/39\.39 acres/);assert.match(doc.querySelector('footer').textContent,/64 B300 GPUs · proposed/);checks+=2; }
  if(route==='about'){
    for(const name of ['Syed Hussain','Yasir Jahangir','Muhammad Siddiqui','Ryan','Javed Iqbal, PhD','Shahab Kazmi','Ali Askari','Ken','Daniel']){assert.ok(doc.querySelector('#people').closest('section').textContent.includes(name),`Missing supplied team member ${name}`);checks++;}
@@ -36,10 +37,23 @@ for(const route of routes){
    assert.match(doc.body.textContent,/8 complete Supermicro systems/);
    assert.match(doc.body.textContent,/financial allocation within eight complete systems/);
    assert.match(doc.body.textContent,/no signed customer contracts/i);
-   assert.match(doc.body.textContent,/RTX.only/i);checks+=5;
+   assert.match(doc.body.textContent,/air-cooled server/i);checks+=5;
+ }
+ if(['','compute','model-planner'].includes(route)){
+   for(const service of ['Shared inference capacity','Dedicated GPU servers','Colocation']){
+     assert.ok(doc.body.textContent.includes(service),`${route}: missing planned service ${service}`);checks++;
+   }
+   assert.match(doc.body.textContent,/SmartTec-owned/);assert.match(doc.body.textContent,/servers you own|equipment you own|customer-owned/i);checks+=2;
+ }
+ if(['','power','about','compute','colocation','model-planner','contact'].includes(route)){
+   assert.match(doc.body.textContent,/grid(?:[- ]first| power first| power)/i,`${route}: missing grid-first launch context`);checks++;
+   assert.doesNotMatch(doc.body.textContent,/requires? direct liquid cooling|systems require direct liquid|supply below \$0\.07|supply.*at below \$0\.07/i,`${route}: superseded launch or cooling claim`);checks++;
  }
  if(route==='contact'||route===''){
    assert.equal(doc.querySelector('form[id^="reserve-"]').action,'https://formsubmit.co/yasir@futonix.com');checks++;
+ }
+ if(route==='contact'){
+   for(const value of ['inference','dedicated','hosting']){assert.ok(doc.querySelector(`#offering option[value="${value}"]`),`Missing inquiry offering ${value}`);checks++;}
  }
  if(route===''){
    for(const img of doc.querySelectorAll('#loader img')){await stat(join(root,img.getAttribute('src')));checks++;}

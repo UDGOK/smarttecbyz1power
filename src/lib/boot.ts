@@ -13,7 +13,6 @@ import { loadScene, warmScene } from './scene/registry';
 import type { CampusScene } from './scene/stage-campus';
 import { prefersReducedMotion } from './hold-button';
 import { initCursor } from './cursor';
-import { initConfigurator } from './configurator';
 import { revealLines, scramble } from './type-motion';
 import { ScrollManager, CameraRig, SCROLL_CONFIG, DELTA_SCALE } from './scroll';
 import { audio } from './audio';
@@ -1038,7 +1037,6 @@ function run(): void {
 
   // --- Go ----------------------------------------------------------------
   initCursor();
-  initConfigurator();
   applyChrome(0);
   showPanel(0);
   setPower(0);

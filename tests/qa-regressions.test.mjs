@@ -5,76 +5,13 @@ import vm from 'node:vm';
 import {JSDOM} from 'jsdom';
 import {loadTS} from './helpers/load-ts.mjs';
 
-const source=readFileSync('src/smarttec-investor/client/app.mjs','utf8');
-function investor(){
-  const requests=[],elements=new Map();
-  const context=vm.createContext({structuredClone,requestRevision:0,scenario:{rate:10},result:null,lastScenario:null,illustration:false,
-    $:s=>{if(!elements.has(s))elements.set(s,{hidden:true,reportValidity:()=>true,replaceChildren(){},scrollIntoView(){}});return elements.get(s);},
-    status(){},cards(){},chart(){},table(){},printAssumptions(){},matchMedia:()=>({matches:true}),
-    api:async(action,payload)=>({json:()=>new Promise((resolve,reject)=>requests.push({payload,resolve,reject}))})});
-  vm.runInContext(source.slice(source.indexOf('function stale()'),source.indexOf('function field(')),context);
-  vm.runInContext(source.slice(source.indexOf('async function calculate('),source.indexOf('async function answer(')),context);
-  return {context,requests,calculate:()=>vm.runInContext('calculate()',context),stale:()=>vm.runInContext('stale()',context)};
-}
-const tick=()=>new Promise(r=>setImmediate(r));
-function imports(){
-  const requests=[],messages=[];
-  const context=vm.createContext({requestRevision:0,scenario:{rate:10},illustration:false,
-    renderForm(){},stale(){context.requestRevision++;},status:m=>messages.push(m),
-    api:(action,payload)=>new Promise((resolve,reject)=>requests.push({payload,resolve,reject}))});
-  vm.runInContext(source.slice(source.indexOf('async function importScenario('),source.indexOf('async function answer(')),context);
-  return {context,requests,messages,run:file=>context.importScenario({target:{files:[file],value:'selected.json'}})};
-}
-test('a file still being read cannot replace newer calculator edits',async()=>{
-  const f=imports();let resolve;
-  const pending=f.run({size:20,text:()=>new Promise(r=>resolve=r)});
-  f.context.scenario={rate:99};f.context.stale();resolve('{"rate":20}');await pending;
-  assert.equal(f.context.scenario.rate,99);assert.equal(f.requests.length,0);
-});
-test('an import awaiting validation cannot replace newer edits or report stale errors',async()=>{
-  for(const fail of [false,true]){
-    const f=imports(),pending=f.run({size:20,text:async()=>'{"rate":20}'});await tick();
-    f.context.scenario={rate:99};f.context.stale();
-    if(fail)f.requests[0].reject(new Error('old validation failed'));else f.requests[0].resolve({});
-    await pending;assert.equal(f.context.scenario.rate,99);assert.equal(f.messages.length,0);
-  }
-});
-test('overlapping file imports retain the latest scenario without clearing a newer picker selection',async()=>{
-  const f=imports(),input={files:[{size:20,text:async()=>'{"scenario":{"rate":20}}'}],value:'first.json'};
-  const first=f.context.importScenario({target:input});assert.equal(input.value,'');await tick();
-  input.files=[{size:20,text:async()=>'{"rate":30}'}];input.value='second.json';
-  const second=f.context.importScenario({target:input});await tick();input.value='newer-selection.json';
-  f.requests[1].resolve({});await second;f.requests[0].resolve({});await first;
-  assert.equal(f.context.scenario.rate,30);assert.equal(input.value,'newer-selection.json');
-});
-test('revenue segment button starts at operations and follows the latest end in an unsorted import',()=>{
-  const dom=new JSDOM('<div id="inv-equipment-rows"></div>'),{document}=dom.window;
-  const row={profileId:'rtx-pro-6000-blackwell-server',ownership:'owned',operatingStartMonth:4,operatingEndMonth:60,contracts:[]};
-  const context=vm.createContext({document,scenario:{rows:[row]},boot:{catalog:{profiles:[]}},
-    $:s=>document.querySelector(s),make:(tag,text,cls)=>{const el=document.createElement(tag);if(text)el.textContent=text;if(cls)el.className=cls;return el;},
-    field:()=>document.createElement('input'),stale(){},status(){}});
-  vm.runInContext(source.slice(source.indexOf('function contract('),source.indexOf('function row(')),context);
-  vm.runInContext(source.slice(source.indexOf('function renderRows('),source.indexOf('function renderCapex(')),context);
-  const add=()=>{context.renderRows();[...document.querySelectorAll('button')].find(b=>b.textContent==='Add explicit renewal / revenue segment').click();};
-  add();assert.equal(row.contracts[0].startMonth,4);assert.equal(row.contracts[0].endMonth,60);
-  row.contracts=[{endMonth:36},{endMonth:12}];add();assert.equal(row.contracts[2].startMonth,37);
-  add();assert.equal(row.contracts.length,3);dom.window.close();
-});
-test('editing while calculating cannot display or export an obsolete scenario',async()=>{
-  const f=investor(),pending=f.calculate();await tick();
-  f.context.scenario.rate=20;f.stale();f.requests[0].resolve({rate:10});await pending;
-  assert.equal(f.context.result,null);assert.equal(f.context.lastScenario,null);
-  assert.equal(f.requests[0].payload.scenario.rate,10);
-});
-test('overlapping calculations retain the latest result and matching export snapshot',async()=>{
-  const f=investor(),first=f.calculate();await tick();
-  f.context.scenario.rate=20;f.stale();const second=f.calculate();await tick();
-  f.requests[1].resolve({rate:20});await second;f.requests[0].resolve({rate:10});await first;
-  assert.equal(f.context.result.rate,20);assert.equal(f.context.lastScenario.rate,20);
-});
-test('failed latest calculation keeps previous result unavailable',async()=>{
-  const f=investor(),pending=f.calculate();await tick();f.requests[0].reject(new Error('offline'));await pending;
-  assert.equal(f.context.result,null);assert.equal(f.context.lastScenario,null);
+test('investor room cannot revive retired editable financial engines',()=>{
+ const page=readFileSync('src/pages/investors/index.astro','utf8');
+ const client=readFileSync('src/smarttec-investor/client/app.mjs','utf8');
+ assert.doesNotMatch(page,/inv-calculator|data-underwriting-option|inv-import|inv-equipment-rows/);
+ assert.doesNotMatch(client,/importScenario|calculateScenario|roi-engine|inv-price-floor/);
+ assert.match(page,/data-model-source=\{model.source.sha256\}/);
+ assert.match(page,/currentInvestmentFacts.map/,'Curated FAQ remains readable without JavaScript');
 });
 
 test('planner clears stale results for empty searches and invalid numeric input, and recovers',()=>{

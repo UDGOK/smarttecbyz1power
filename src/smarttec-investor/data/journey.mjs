@@ -2,10 +2,11 @@
 export const journey = Object.freeze([
   {id:'opportunity', label:'The opportunity', note:'A measured beginning'},
   {id:'investor-presentation', label:'Immersive pitch & PDF', note:'Watch the presentation or download the deck'},
-  {id:'campus', label:'Explore the campus', note:'Concepts, models and the survey'},
-  {id:'deployment', label:'Deployment under review', note:'Match the fleet to paid demand.'},
+
+  {id:'deployment', label:'Services and deployment', note:'The proposed fleet and its customers'},
   {id:'capital', label:'The capital plan', note:'Existing assets and new funding'},
-  {id:'returns', label:'Test the economics', note:'Your assumptions. Conditional results.'},
+  {id:'returns', label:'Review the economics', note:'Model v6.1: conditional scenarios'},
+  {id:'campus', label:'Explore the campus', note:'Concepts, models and the survey'},
   {id:'evidence', label:'Review the evidence', note:'Readiness, diligence and risk'},
   {id:'questions', label:'Your questions', note:'Answers from project records'},
 ]);

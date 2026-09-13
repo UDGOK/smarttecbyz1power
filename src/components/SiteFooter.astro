@@ -22,7 +22,7 @@ const year = new Date().getFullYear();
 const ledger = [
   { label: 'Campus', value: `${site.acres} acres · three tracts` },
   { label: 'Data centers', value: `A + C · ${site.dataCenterArea.toLocaleString()} sq ft gross` },
-  { label: 'Service', value: `${power.service} · shared` },
+  { label: 'Power plan', value: `${power.launchSource} · allocation pending` },
   { label: 'Network', value: `${network.service} · planned` },
   { label: 'Compute proposal', value: deployment.label },
 ] as const;
@@ -36,10 +36,10 @@ const groups = [
     ],
   },
   {
-    heading: 'What you can buy',
+    heading: 'Planned services',
     links: [
-      { href: '/colocation', label: 'Colocation' },
-      { href: '/compute', label: 'GPU capacity' },
+      { href: '/colocation', label: 'Colocation and hosting' },
+      { href: '/compute', label: 'Shared and dedicated GPUs' },
     ],
   },
   {

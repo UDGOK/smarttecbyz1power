@@ -1,36 +1,15 @@
+import {model} from '../financial-model.mjs';
 import {config,RedisStore,authenticate,createSession,revoke,sameOrigin,csrfValid,loginLimit,actionLimit,verifyPassword,cookieHeader,json,readJson,privateHeaders} from './auth.mjs';
 import {architectureAsset} from '../../smarttec-architecture/server/architecture-assets.mjs';
 import {thermalAsset} from '../../smarttec-architecture/server/thermal-assets.mjs';
-import {calculateScenario,requiredRateForNPV} from '../roi-engine.mjs';
-import {makeScenario,requiredRevenueMultiplier} from '../underwriting.mjs';
 import {investorDeckBase64} from './investor-deck.mjs';
 import {pitchMediaResponse} from './pitch-media-response.mjs';
 import deckMetadata from '../data/investor-deck.json' with {type:'json'};
-import {makePowerScenario} from '../power-sensitivity.mjs';
 import {answerQuestion,faqList} from './faq.mjs';
-import {investmentReadiness} from '../investment-readiness.mjs';
-import ownerStudy from '../data/owner-deployment-study.json' with {type:'json'};
-import sample from '../data/illustrative-scenario.json' with {type:'json'};
-import provenance from '../data/illustration-provenance.json' with {type:'json'};
-import catalog from '../data/hardware_catalog.json' with {type:'json'};
 import mapData from '../data/campus-map.json' with {type:'json'};
 import {markedPdf} from './marked-assets.mjs';
 import campus from '../data/campus.json' with {type:'json'};
 import {surveyPdf,surveyImage} from './survey-assets.mjs';
-function bounded(s){if(!s||!Array.isArray(s.rows)||s.rows.length>12||s.rows.some(r=>!Array.isArray(r.contracts)||r.contracts.length>12)||!Array.isArray(s.capexEvents)||s.capexEvents.length>60)throw new Error('Scenario exceeds supported bounds');return s;}
-const csvCell=x=>'"'+String(x??'').replaceAll('"','""')+'"';
-const currentCostDisclosure='Current project costs remain incomplete: cooling and non-cooling site work, energy and service coverage, revised reserves, later capital needs and the BC LLC annual payment definition require reconciliation. No definitive updated project ROI, NPV or payback is established.';
-function scenarioProvenance(s,illustration=false){
- return {
-  ...(illustration?provenance:{}),
-  status:illustration?'historical-illustration':s.underwriting?'historical-preset-or-edited-sensitivity':'user-entered-sensitivity',
-  reviewedAt:investmentReadiness.reviewedAt,
-  presetSourceReviewedAt:illustration||s.underwriting?investmentReadiness.historicalModel.reviewedAt:null,
-  currentProjectStatus:investmentReadiness.status,
-  basis:illustration?'Historical RTX-only illustration with synthetic prices and earlier site/operating assumptions; excludes the current B300 deployment and updated costs.':s.underwriting?'Historical preset or edited sensitivity; earlier site and operating allowances do not represent the updated complete Supermicro deployment. Numerical results apply only to entered assumptions.':'Results apply only to entered assumptions; they are not a verified current SmartTec budget or investor return.',
-  currentCostDisclosure
- };
-}
 export async function handle(request,action,dependencies={}){
  let cfg,store,session;
  try{cfg=dependencies.cfg||config();store=dependencies.store||new RedisStore(cfg);}catch{return json({error:'Private access is not configured.'},503);}
@@ -54,9 +33,11 @@ export async function handle(request,action,dependencies={}){
   const architecture=thermalAsset(action,request.method)||architectureAsset(action,request.method);
   if(architecture)return new Response(architecture.bytes,{headers:{...privateHeaders,'Content-Type':architecture.mime}});
   if(action==='logout'&&request.method==='POST'){await revoke(store,session);return json({ok:true},200,{'Set-Cookie':cookieHeader(cfg,'',0)});}
-  if(action==='bootstrap'&&request.method==='GET')return json({csrf:session.csrf,sample,provenance,catalog,campus,mapData,mapConfig:{satelliteKey:cfg.mapKey||''},faqs:faqList()});
-  if(action==='underwriting-scenario'&&request.method==='POST'){
-   const b=await readJson(request,2048);if(b.ownerPricing===true){const selected=ownerStudy.cases.find(c=>c.id===b.id);if(!selected)throw new Error('Unknown owner deployment');return json({scenario:selected.scenario,provenance:scenarioProvenance(selected.scenario)});}if(b.powerBasis!==undefined&&b.powerBasis!=='reported')throw new Error('Unknown power basis');const scenario=b.powerBasis==='reported'?makePowerScenario(b.id,b.kind):makeScenario(b.id,b.kind);return json({scenario,provenance:scenarioProvenance(scenario)});
+  if(action==='bootstrap'&&request.method==='GET')return json({csrf:session.csrf,model,campus,mapData,mapConfig:{satelliteKey:cfg.mapKey||''},faqs:faqList()});
+  if(['underwriting-scenario','calculate','compare','price-floor','export'].includes(action))return json({error:'This historical calculator has been retired. Use the reviewed v6.1 scenarios in the investor room.',modelVersion:model.version,url:'/investors#returns'},410);
+  if(action==='model'&&['GET','HEAD'].includes(request.method)){
+   const headers={...privateHeaders,'Content-Type':'application/json; charset=utf-8','Content-Disposition':'attachment; filename="SmartTec_Model_v6.1_Verified_Scenarios.json"'};
+   return new Response(request.method==='HEAD'?null:JSON.stringify(model,null,2),{headers});
   }
   if(action==='presentation'&&['GET','HEAD'].includes(request.method)){
    const bytes=Buffer.from(investorDeckBase64,'base64');
@@ -69,24 +50,6 @@ export async function handle(request,action,dependencies={}){
   if(action==='survey'&&request.method==='GET')return new Response(Buffer.from(surveyPdf,'base64'),{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="SmartTec_Boundary_Survey.pdf"'}});
   if(action==='survey-image'&&request.method==='GET')return new Response(Buffer.from(surveyImage,'base64'),{headers:{...privateHeaders,'Content-Type':'image/png'}});
   if(action==='faq'&&request.method==='POST'){const b=await readJson(request,4096);return json(answerQuestion(b.question));}
-  if(action==='compare'&&request.method==='POST'){
-   const b=await readJson(request);const base=bounded(b.scenario);calculateScenario(base);
-   const matrix=[];for(const occupancyFactor of [.5,.75,1,1.1,1.25])for(const priceFactor of [.75,.9,1,1.1,1.25]){const s=structuredClone(base);s.rows.forEach(r=>r.contracts.forEach(c=>{c.paidOccupancy=Math.min(1,c.paidOccupancy*occupancyFactor);c.rate*=priceFactor;}));const r=calculateScenario(s);matrix.push({occupancyFactor,priceFactor,projectROI:r.project.totalROI,additionalEquity:r.equity.additionalContributions});}
-   return json({matrix,basis:'Multipliers of entered paid occupancy and rate; occupancy capped at 100%. Other assumptions unchanged.'});
-  }
-  if(action==='price-floor'&&request.method==='POST'){
-   const b=await readJson(request);const s=bounded(b.scenario);const row=s.rows[0];if(!row?.contracts?.length)return json({error:'First equipment row needs a revenue segment.'},400);
-   const multiplier=requiredRevenueMultiplier(s);
-   return json({requiredRate:requiredRateForNPV(s,row.id,0),billing:row.contracts[0].billing,discountRate:s.annualDiscountRate,revenueMultiplier:multiplier,ratePaths:s.rows.map(r=>({model:r.model||r.id,rates:r.contracts.map(c=>({startMonth:c.startMonth,endMonth:c.endMonth,billing:c.billing,requiredRate:multiplier===null?null:c.rate*multiplier}))})),basis:'Multiplies every entered rate on every row and revenue segment together, preserving occupancy and the entered price path. All costs stay fixed. Project NPV target zero; not a market price or promised investor yield.'});
-  }
-  if(['calculate','export'].includes(action)&&request.method==='POST'){
-   const b=await readJson(request);const scenario=bounded(b.scenario);const result=calculateScenario(scenario);
-   if(action==='calculate')return json(result);
-   const exportProvenance=scenarioProvenance(scenario,b.illustration===true);
-   const bundle={title:'SmartTec conditional investment scenario',generatedAt:new Date().toISOString(),scenario,result,disclosures:['Pre-tax scenario; no guaranteed return or engineering approval.','Property, manufacturing, solar and storage value/revenue excluded.','Price and occupancy inputs are assumptions unless separately evidenced.','Pro-rata investor results do not represent agreed legal terms.','All hardware is purchased at time zero; contract expiry and remaining debt matter.',exportProvenance.basis,currentCostDisclosure],provenance:exportProvenance};
-   if(b.format==='csv'){const keys=['month','billed','collectedNetFees','peakITkw','averageITkw','facilityKwh','energyCost','nonEnergyCost','operatingCash','capex','debtPayment','debtBalloon'];const lines=[csvCell('SmartTec conditional monthly ledger; all assumptions in scenario JSON. '+exportProvenance.status+'. '+exportProvenance.basis+' '+currentCostDisclosure),keys.map(csvCell).join(','),...result.schedule.map(r=>keys.map(k=>csvCell(r[k])).join(','))];return new Response(lines.join('\r\n'),{headers:{...privateHeaders,'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="SmartTec_monthly_ledger.csv"'}});}
-   return json(bundle,200,{'Content-Disposition':'attachment; filename="SmartTec_investor_scenario.json"'});
-  }
   return json({error:'Route or method not supported.'},405);
  }catch(e){if(e.message?.includes('Session')||e.message?.includes('fetch')||e.name==='TimeoutError')return json({error:'Private access is temporarily unavailable.'},503);return json({error:e.message==='Trusted client address unavailable'?'Request cannot be verified.':String(e.message).slice(0,220)},400);}
 }

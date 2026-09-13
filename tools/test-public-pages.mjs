@@ -15,6 +15,8 @@ let checks=0,entry;
 const home=await readFile(join(root,'index.html'),'utf8');
 const homeHeader=headerSignature(home);checks++;
 assert.match(home,/<body[^>]*data-entry-pending/);assert.match(home,/<main[^>]*inert/);assert.match(home,/<a[^>]*id="loader-skip"[^>]*href="\/site"/);assert.ok(!home.includes('loader-particles'));checks+=4;
+assert.ok(home.includes('id="services-title"'),'homepage: planned services are discoverable after the campus');
+assert.doesNotMatch(home,/\bdata-configurator\b/,'homepage: retired RTX calculator rendered');checks+=2;
 for(const[route,kind,anchor,compact]of routes){
   const html=await readFile(join(root,route,'index.html'),'utf8');
   assert.deepEqual(headerSignature(html),homeHeader,`${route}: same logo and menu as home`);checks++;
@@ -37,6 +39,10 @@ for(const[route,kind,anchor,compact]of routes){
   if(compact){assert.match(html,/<details class="page-scene-fold">/);checks++;}
   else{assert.ok(html.includes('page-scene--backdrop'));checks++;}
   if(route==='contact'){assert.match(html,/<form\b/);checks++;}
+  if(route==='model-planner'){
+    assert.doesNotMatch(html,/\bdata-planner\b|\bdata-accel-count\b/,'workload planner: legacy numerical outputs rendered');
+    assert.ok(html.includes('id="brief"')&&html.includes('id="validation"'),'workload planner: requirements and validation sections missing');checks+=2;
+  }
 }
 
 // Follow only static imports from the public controller. Three and scene code

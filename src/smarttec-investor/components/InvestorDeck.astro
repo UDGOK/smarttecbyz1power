@@ -20,8 +20,8 @@ const reviewed=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:
     <p class="inv-deck-format">PDF <span>{deck.pages} pages / {size} MB</span></p>
     <a class="inv-button" href="/investors/presentation" target="_blank" rel="noopener noreferrer">Open investor presentation ↗</a>
     <p class="inv-note">Opens in a new tab with full-screen and download controls. <a href="/api/investor/presentation" download={deck.filename}>Download PDF only</a></p>
-    <p class="inv-note">{reviewed} edition. Complete funding and updated returns remain open pending customer terms, installed quotes, operating costs and usable power.</p>
-    <a href="#owner-deployment">Explore the editable financial scenarios</a>
+    <p class="inv-note">{reviewed} edition. Model v6.1: grid-first costs, capital, cash timing and conditional returns. Customer contracts and final installed costs require verification.</p>
+    <a href="#returns">Compare the reviewed v6.1 scenarios</a>
     <a class="inv-deck-contact" href="mailto:yasir@smarttec.dev?subject=SmartTec%20investment%20diligence">Arrange an investment discussion <span aria-hidden="true">↗</span></a>
   </div>
   <figure class="inv-deck-hero">
@@ -32,7 +32,7 @@ const reviewed=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:
   <div class="inv-deck-gallery">
     <figure>
       <img src="/assets/investor/power-supply-concept.webp" alt="Concept arrangement of solar panels, battery cabinets and a gas generator near a compute building" width="2752" height="1536" loading="lazy" decoding="async" />
-      <figcaption><span>02 / ENERGY STRATEGY</span> Solar, storage and gas supply concept. Capacity, cost scope and commissioning require verification.</figcaption>
+      <figcaption><span>02 / ENERGY STRATEGY</span> Future energy concept. The current model starts on grid power; solar and BESS investment and savings are excluded.</figcaption>
     </figure>
     <figure>
       <img src="/assets/investor/campus-dusk.webp" alt="Runway architectural concept of a low-rise SmartTec campus at dusk" width="2752" height="1536" loading="lazy" decoding="async" />

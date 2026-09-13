@@ -1,17 +1,17 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power, network, compute, publicDeployment as deployment } from '../data/site';
+import { company, site, power, network, offers, publicDeployment as deployment } from '../data/site';
 ---
 <Content
   title={`B300 compute in Mead, Oklahoma | ${company.full}`}
-  description={`SmartTec proposes ${deployment.gpus} B300 GPUs in ${deployment.systems} complete Supermicro systems at ${site.designation}. Explore the workload, liquid-cooling and commissioning plan.`}
+  description={`SmartTec proposes ${deployment.gpus} B300 GPUs in ${deployment.systems} complete Supermicro systems at ${site.designation}. Explore the workload, air-cooled budgeting basis and commissioning plan.`}
   kicker="B300 compute / Proposed deployment"
   heading="Build around the workload."
-  lede={`Our proposed initial fleet brings ${deployment.gpus} B300 GPUs together in ${deployment.systems} complete Supermicro systems, in one building at ${site.name}. Direct liquid cooling is required, and all cooling will be new. Customer commitments, complete costs and engineering acceptance determine procurement and service availability.`}
+  lede={`Our proposed initial fleet brings ${deployment.gpus} B300 GPUs together in ${deployment.systems} complete Supermicro systems, in one building at ${site.name}. The current budget uses an air-cooled server basis with all-new room or in-row cooling; the exact OEM SKU remains to be confirmed. Customer commitments, complete costs and engineering acceptance determine procurement and service availability.`}
   meta={[
     { label: 'Proposed B300 GPUs', value: String(deployment.gpus), note: 'Planning count, not available inventory', count: true, tone: 'signal' },
     { label: 'Complete systems', value: String(deployment.systems), note: `${deployment.gpusPerSystem} B300 GPUs per Supermicro system`, count: true },
-    { label: 'Location', value: 'One building', note: 'Final A or C allocation pending' },
+    { label: 'Location', value: 'One building', note: 'Full-fleet layout and location pending' },
     { label: 'Deployment status', value: 'Proposed', note: 'Procurement and commissioning ahead', tone: 'gold' },
   ]}
 >
@@ -27,46 +27,50 @@ import { company, site, power, network, compute, publicDeployment as deployment 
       </article>
       <article class="card">
         <p class="card__tag mono-label">Proposed allocation</p>
-        <h3>{deployment.saleableGpus} saleable + {deployment.reserveGpus} reserve</h3>
+        <h3>{deployment.saleableGpus} modeled saleable + {deployment.reserveGpus} held back</h3>
         <p>{deployment.reserveNote}</p>
         <p>Scheduling, maintenance and node-failure recovery need validation before we offer a service level. These GPUs are not currently bookable inventory.</p>
       </article>
     </div>
     <div class="callout" style="margin-top: var(--s-6);">
-      <p><strong>Commercial stage.</strong> {deployment.demand} Customer availability follows procurement, workload validation and facility and network acceptance.</p>
+      <p><strong>Commercial stage.</strong> {deployment.ownership}. {deployment.demand} Customer availability follows procurement, workload validation and facility and network acceptance.</p>
     </div>
   </section>
   <section aria-labelledby="configuration" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">02</span><span class="eyebrow__t">Match the workload</span></p>
     <h2 id="configuration">Choose capacity around the job.</h2>
+    <div class="cards">
+      {offers.map(offer => <article class="card" id={offer.id}><p class="card__tag mono-label">Planned service</p><h3>{offer.name}</h3><p>{offer.summary}</p></article>)}
+    </div>
+    <p>SmartTec-owned hosting has two service modes: shared inference on nodes serving multiple customers, and dedicated GPU servers intended for one tenant per node. Both use the same proposed fleet. The 60-GPU financial allocation does not itself establish how complete eight-GPU servers will be divided between them; deployment design and customer terms must settle that allocation before service.</p>
     <div class="split">
       <div>
         <p>Tell us the application, model size, memory needs, storage throughput and intended software stack. We assess the required GPU allocation, networking, security, support and service targets against a representative workload.</p>
         <p>Inference, rendering and suitable fine-tuning require different software and performance tests. A GPU count alone does not establish throughput, latency or a customer outcome.</p>
-        <p>The model planner compares hardware reference configurations. Its memory and power estimates do not certify the proposed fleet or the facility design.</p>
+        <p>The workload planner helps you prepare the model, tenancy, storage and service requirements for a deployment review. Hardware allocation and performance follow validation of that brief.</p>
       </div>
       <dl class="spec">
         <div><dt>Initial proposal</dt><dd>{deployment.systems} systems × {deployment.gpusPerSystem} B300 GPUs<span class="note">{deployment.gpus} GPUs in total; planning status.</span></dd></div>
-        <div><dt>Cooling requirement</dt><dd>Direct liquid cooling<span class="note">Confirmed by management for the selected server requirement; plant design and acceptance remain open.</span></dd></div>
-        <div><dt>Building allocation</dt><dd>One building<span class="note">The eight systems will be together. Which building and final rack layout remain to be established.</span></dd></div>
+        <div><dt>Cooling budget basis</dt><dd>Air-cooled servers; room/in-row cooling<span class="note">Exact Supermicro SKU and supported environment require supplier confirmation. This is a planning basis, not an approved cooling design.</span></dd></div>
+        <div><dt>Building allocation</dt><dd>One building proposed<span class="note">{deployment.buildingNote}</span></dd></div>
         <div><dt>Power allocation</dt><dd>Engineering review pending<span class="note">No measured OEM load or exclusive continuous site capacity is established by this proposal.</span></dd></div>
       </dl>
     </div>
     <div class="actions"><a class="btn btn--ghost" href="/model-planner">Explore model requirements</a></div>
-    <p class="form-note">RTX remains an alternative requiring its own workload and commercial case. The homepage's RTX-only estimator retains the earlier {compute.servers}-node, {compute.gpus}-GPU example; it does not size the current B300 proposal.</p>
+    <p class="form-note">Alternative accelerators require a separate workload, procurement and commercial case. Published financial scenarios are available in the protected investor area.</p>
   </section>
   <section aria-labelledby="cooling" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">03</span><span class="eyebrow__t">Campus integration</span></p>
     <h2 id="cooling">Designed with power and cooling.</h2>
     <div class="split">
       <div>
-        <p>{power.hvac} We are comparing new and warranted refurbished cooling plant, conventional room cooling and rear-door heat exchangers. Separate dry coolers are an optional later economizer investment, subject to design and operating economics.</p>
-        <p>The two-duty cooling concept can use a shared plant with separately controlled circuits. Final equipment count, temperatures, residual-air capacity and redundancy require mechanical and OEM acceptance.</p>
+        <p>{power.hvac} We are comparing new and warranted refurbished cooling plant against the complete installed scope. Any alternate server cooling architecture requires a revised OEM-compatible design and budget.</p>
+        <p>Airflow, containment, terminal units and heat rejection must work as one system. Peak-weather capacity and service during maintenance or a unit failure require mechanical and OEM acceptance.</p>
         <p>The campus electrical commissioning milestone is an {power.commissioningTarget}. Planned {network.provider} fiber has an {network.deliveryTarget}. These management targets are distinct from completed customer service acceptance.</p>
       </div>
       <div class="card">
         <h3>Explore the infrastructure</h3>
-        <p>Review the behind-the-meter supply strategy, shared electrical service and cooling options. Detailed funding and operating assumptions are in the investor room.</p>
+        <p>Review the grid-first launch plan, later solar and BESS investment, shared electrical service and cooling options. Detailed funding and operating assumptions are in the protected investor room.</p>
         <div class="actions"><a href="/power#thermal">Power and cooling →</a><a href="/investors">Investor room →</a></div>
       </div>
     </div>

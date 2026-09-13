@@ -1,8 +1,8 @@
 """Rebuild the branded investor PDF and its authenticated server download.
 
 Run from the repository root using Python with reportlab and Pillow installed.
-The JavaScript export supplies the current readiness record and an explicitly
-historical comparison calculated by the monthly ROI engine.
+The JavaScript export supplies the canonical reviewed v6.1 financial snapshot.
+No legacy scenario engine or superseded cost comparison is used.
 """
 from pathlib import Path
 import base64, hashlib, json, re, subprocess, xml.etree.ElementTree as ET
@@ -20,10 +20,12 @@ from PIL import Image
 ROOT=Path(__file__).resolve().parent.parent
 subprocess.run(['node','tools/export-investor-deck-data.mjs'],cwd=ROOT,check=True)
 D=json.loads((ROOT/'tmp/pdfs/deck-financials.json').read_text(encoding='utf-8'))
-R=D['result']
-Q=D['readiness']
+M=D['model']; A=M['assumptions']
+S={item['id']:item for item in M['scenarios']}
+B=S['base']; MAXIMUM=S['maximum-base']; C36=S['contracted-36']; C60=S['contracted-60']
+B2=next(row for row in B['annual'] if row['year']==2)
 CREDENTIALS=json.loads((ROOT/'src/data/yasir-credentials.json').read_text(encoding='utf-8'))
-EDITION_DATE=max(Q['reviewedAt'],CREDENTIALS['verifiedAt'])
+EDITION_DATE=M.get('reviewedAt',M['source'].get('reviewedAt','2026-09-13'))
 OUT=ROOT/'output/pdf/SmartTec-Investor-Presentation-2026-09.pdf'
 OUT.parent.mkdir(parents=True,exist_ok=True)
 for name,path in [('Space','public/investor-assets/space-grotesk-0.ttf'),('Medium','public/investor-assets/space-grotesk-1.ttf'),('Bold','public/investor-assets/space-grotesk-3.ttf'),('Mono','public/assets/fonts/GoogleSansCode-Regular.ttf')]:
@@ -35,9 +37,9 @@ pdf_buffer=BytesIO()
 c=canvas.Canvas(pdf_buffer,pagesize=(W,H),pageCompression=1,invariant=1)
 c.setTitle('SmartTec by Z1Power | Investor Presentation | September 2026')
 c.setAuthor('SmartTec.dev LLC')
-c.setSubject('Founder-backed B300 deployment, staged capital release and investment-readiness evidence')
+c.setSubject('Grid-first B300 compute, shared inference and dedicated servers; conditional project economics from the reviewed v6.1 model')
 c.setViewerPreference('DisplayDocTitle','true')
-PAGE=0; LIGHT=False; TITLES=[]; BOXES=[]
+PAGE=0; LIGHT=False; TITLES=[]; BOXES=[]; RULES=[]
 usd=lambda n:'-'+usd(-n) if n<0 else '${:,.0f}'.format(n)
 million=lambda n:('-' if n<0 else '')+'${:.2f}m'.format(abs(n)/1e6)
 def color(value):return HexColor(value)
@@ -45,6 +47,7 @@ def rect(x,y,w,h,fill,alpha=1):
  c.setFillColor(color(fill),alpha=alpha);c.rect(x,H-y-h,w,h,fill=1,stroke=0)
 def line(x,y,x2,y2,fill=None,width=1):
  c.setStrokeColor(color(fill or ('#B5C8BC' if LIGHT else '#446454')));c.setLineWidth(width);c.line(x,H-y,x2,H-y2)
+ if y==y2:RULES.append({'page':PAGE,'x':[x,x2],'y':y})
 def text(s,x,y,size=20,font='Space',fill=None,w=1024,leading=None):
  fill=fill or (FOREST if LIGHT else PAPER)
  style=ParagraphStyle('p',fontName=font,fontSize=size,leading=leading or size*1.25,textColor=color(fill),spaceAfter=0,allowWidows=0,allowOrphans=0)
@@ -107,207 +110,200 @@ def table(headers,rows,widths,y=225,rowh=52,size=18,x0=64):
  for i,row in enumerate(rows):
   yy=y+52+i*rowh;x=x0
   if i%2==0:
-   c.saveState();rect(x0,yy-8,sum(widths),rowh-5,'#FFFFFF',alpha=.28 if LIGHT else .06);c.restoreState()
+   c.saveState();rect(x0,yy-8,sum(widths),rowh-2,'#FFFFFF',alpha=.28 if LIGHT else .06);c.restoreState()
   for j,(v,w) in enumerate(zip(row,widths)):
    text(str(v),x+10,yy,size,'Medium' if j==0 else 'Space',w=w-20);x+=w
-  line(x0,yy+rowh-13,x0+sum(widths),yy+rowh-13,width=.5)
+  line(x0,yy+rowh-5,x0+sum(widths),yy+rowh-5,width=.5)
 
-# 01 / cinematic cover
-page('AI infrastructure, built in phases','Investment presentation')
-img('public/assets/investor/b300-studio.webp',0,0,W,H)
-scrim(.68,.12)
+
+pct=lambda n: 'Not resolved' if n is None else f'{n*100:.2f}%'
+num=lambda n: f'{n:,.0f}'
+fleet=B['capacity']; cap=B['capital']; tech=B['technical']; comm=B['commercial']
+FUND=A.get('initialFounderCapitalUsd',6000000)
+def metric(value,label,x,y=221,w=475,light=False):
+ text(value,x,y,57,'Medium',fill=FOREST if LIGHT else SIGNAL,w=w)
+ text(label,x,y+82,21,w=w)
+def callout(heading,body,y=440):
+ line(64,y-20,1088,y-20)
+ text(heading,64,y,25,'Medium',w=470)
+ text(body,592,y,20,w=496,leading=25)
+def project_note():
+ foot('Conditional and unsigned. Includes modeled resale and reserve release. Unlevered project return before any investor ownership, preference or distribution waterfall; not a promised return.')
+
+# 01 / cinematic opening, original supplied brand and existing Runway artwork
+page('Compute with a place to grow','Investor presentation')
+img('public/assets/investor/b300-studio.webp',0,0,W,H);scrim(.78,.32)
 BOXES[:]=[b for b in BOXES if b['page']!=1]
+RULES[:]=[r for r in RULES if r['page']!=1]
 logo(64,55,275)
-text('AI infrastructure,<br/>built in phases',64,230,56,'Medium',w=590,leading=63)
-text('Mead, Oklahoma',67,401,25,w=520)
-text('A proposed founder-backed B300 deployment.<br/>A customer-led strategy for staged growth.',67,453,21,w=565)
-text('INVESTOR DISCUSSION / SEPTEMBER 2026',67,573,11,'Mono',w=700)
-text('<link href="https://docs.nvidia.com/dgx/dgxb300-user-guide/introduction-to-dgxb300.html" color="#EEF1EF">RUNWAY PRODUCT CONCEPT / NVIDIA REFERENCE / NOT THE SELECTED SUPERMICRO SYSTEM</link>',574,620,8,'Mono',w=545)
+text('Compute with<br/>a place to grow',64,218,61,'Medium',w=680,leading=66)
+text('SMARTTEC  /  MEAD, OKLAHOMA',67,399,16,'Mono',w=600)
+text('Shared AI inference. Dedicated GPU servers.<br/>A grid-first deployment, built around customer commitments.',67,449,23,w=745,leading=30)
+text('INVESTOR PRESENTATION  /  MODEL '+str(M['version']),67,566,12,'Mono',w=700)
+text('RUNWAY PRODUCT CONCEPT / NOT A PHOTO OF THE SELECTED SUPERMICRO SYSTEM',574,620,8,'Mono',w=545)
 
-# 02 / the actual investment proposition
-page('Founder-backed AI infrastructure in Mead','Investment thesis')
-text(million(Q['founderCapital']['initialAvailable']),64,215,82,'Medium',fill=SIGNAL,w=460)
-text('initial founder capital, owner-reported',68,317,23,w=468)
-text('Management also intends to fund the overage. The proposal can be developed without treating $6m as a fixed funding ceiling.',64,382,23,w=470)
-text('Three sources of potential value',592,220,27,'Medium',w=496)
-text('Long-term site access<br/>Behind-the-meter power strategy<br/>Dedicated B300 compute capacity',592,281,25,w=496,leading=42)
-text('The investment decision depends on complete delivery costs, binding customer payments and agreed investor rights.',592,455,22,w=496)
-foot('Founder availability and willingness are reported, not verified transfers. Customer discussions are active; no signed revenue or definitive updated return is established.')
+# 02 / thesis with no promised return
+page('A focused first deployment','Investment thesis')
+metric(million(FUND),'initial founder capital, owner-reported',64)
+text('Management intends to fund the overage. Contribution timing, form and transfers require documentation.',64,355,22,w=470)
+text('A tangible starting point',592,222,28,'Medium',w=496)
+text('Long-term site access in Oklahoma<br/>Eight proposed Supermicro systems<br/>Two ways to sell owned GPU capacity<br/>Growth linked to paying customers',592,278,23,w=496,leading=39)
+callout('The economic discipline','The unsigned Base case is below the hurdle. Contract terms and delivered cost determine whether the investment is attractive.',y=472)
+foot('Founder capital is reported, not independently verified. The current proposal is a development-stage investment discussion.')
 
-# 03 / sources of capital, not a fictional raise
-page('Founder funding position','Capital position',True)
-table(['CURRENT BASIS','WHAT IT MEANS'],[
- [usd(Q['founderCapital']['initialAvailable'])+' initially','Management reports funds available. Contribution form, timing and transfers into the project remain unverified.'],
- ['Overage willingness','Management intends to personally fund additional costs. The amount depends on the completed project budget.'],
- ['Existing property and buildings','Reported paid off and held by BC LLC. Property value is separate from spendable project cash.'],
- ['Outside investment','Optional structure remains open. No fixed raise, valuation, equity percentage or return entitlement is offered here.']
- ],[295,729],y=209,rowh=77,size=20)
-foot('Management-reported funding availability and overage intent, 11 Sep 2026. Funds and transfers have not been independently verified; investment economics remain open.')
+# 03 / two own-hosted offerings
+page('Two offerings. One owned compute fleet.','Proposed service portfolio',True)
+two_blocks([
+ ('Shared AI inference','A multi-tenant service using SmartTec-owned GPUs. Planned customer access is through managed inference endpoints, with workload isolation, metering and support.'),
+ ('Dedicated GPU servers','Single-tenant access to agreed SmartTec-owned server capacity. Reserved compute for inference, model development, rendering and other validated GPU workloads.')
+ ],y=216)
+callout('One capacity and revenue budget','The same GPUs cannot earn twice at the same time. The financial model uses GPU-hours; it assumes no additional token-sales or platform-margin uplift.',y=458)
+foot('Proposed offerings, not a claim of an operating service. The shared/dedicated allocation, product pricing, security controls and customer SLAs remain to be validated.')
 
-# 04 / commercial status
-page('Commercial pipeline and current commitments','Commercial evidence')
+# 04 / what belongs in the model
+page('Clear ownership. Clear revenue boundaries.','Commercial model',True)
+table(['SERVICE','WHO OWNS THE HARDWARE','TREATMENT IN THIS MODEL'],[
+ ['Shared AI inference','SmartTec','Part of the same owned fleet; no separate per-token revenue forecast.'],
+ ['Dedicated GPU servers','SmartTec','Capacity monetized as GPU-hours; contract cases reserve a defined paid allocation.'],
+ ['Colocation / hosting','Customer','Separate potential business. Customer-owned hardware and hosting revenue are excluded.'],
+ ['Solar and BESS','Separate project scope','Future hybrid power investment; no savings or revenue in the grid-only Base.']
+ ],[235,277,512],y=208,rowh=78,size=20)
+foot('Dedicated server configurations and service commitments must match whole-node scheduling and recovery capabilities. Service mix is not an additional revenue multiplier.')
+
+# 05 / commercial evidence
+page('A pipeline to convert into paid capacity','Commercial position')
 text('Active discussions',64,219,40,'Medium',fill=SIGNAL,w=510)
-text('Two commercial channels are under discussion. Management reports a potential 180-B300 requirement and a separate resale/offtake opportunity.',64,289,23,w=475)
-text('The current commitment level',592,221,28,'Medium',w=496)
-text('0 signed customer contracts<br/>0 paid pilots established<br/>No agreed minimum receipts',592,291,25,w=496,leading=44)
-text('The proposed procurement strategy links capacity<br/>to contracted workloads and payment terms.',64,480,27,'Medium',w=1010)
-foot('Customer reports have not been independently verified. Identities and private discussions are omitted. A potential 180-GPU request is not an order or an expansion commitment.')
+text('Management reports marketplace discussions and a separate potential offtake channel. Interest includes a possible 180-B300 requirement.',64,289,23,w=475)
+text('Current commitment level',592,221,28,'Medium',w=496)
+text('0 signed customer contracts<br/>0 paid pilots established<br/>No agreed minimum customer receipts',592,291,25,w=496,leading=44)
+callout('Contract the customer payment','The proposed buyer pays for compliant reserved capacity under enforceable terms. Downstream token or resale demand is not a substitute for that obligation.',y=472)
+foot('Owner-reported discussions, not verified orders. Marketplace access does not guarantee utilization. No expansion decision is supported solely by the 180-GPU inquiry.')
 
-# 05
-page('Proposed customer agreement structure','Commercial terms for discussion',True)
-table(['AGREEMENT AREA','PROPOSED SCOPE'],[
- ['Payment counterparty','The paying legal entity, its payment obligations and the credit support available to SmartTec.'],
- ['Minimum receipts','Minimum payments for compliant reserved capacity, including periods of lower resale or workload demand.'],
- ['Net realized price','The distinction between net host receipts, customer pricing and fees at the proposed $6.50/GPU-hour rate.'],
- ['Acceptance and exit','Workload acceptance, service start, contract duration, deposits, service credits, remedies and termination.']
- ],[287,737],y=215,rowh=77,size=21)
-foot('Proposed agreement scope. No deposit, minimum payment or take-or-pay commitment is established. Marketplace access does not guarantee customer receipts.')
+# 06 / site rights rather than ownership
+page('A long-term operating location','Site and founder position')
+metric('50 years','site commitment; signed status owner-reported',64)
+text('BC LLC owns the property and has an ownership connection to the CEO. SmartTec holds site rights; land value is not included as SmartTec cash equity.',64,367,23,w=475)
+metric('1% annually','BC LLC share of the agreed profit base',592)
+text('Management describes profit after expenses. The model uses its selected accounting-profit basis; the operative agreement, consent rights and payment definition remain unreviewed.',592,367,23,w=496)
+foot('Property is reported paid off. Premises, assignment, improvements, termination and financing rights require document review. Runway campus concept, not proof of installed capacity.')
 
-# 06 / property, accurately held outside SmartTec
-page('A long-term home for the operation','Site rights')
-text('50 years',64,215,70,'Medium',fill=SIGNAL,w=470)
-text('site-use agreement, signed status<br/>confirmed by management',68,308,23,w=470)
-text('Management identifies BC LLC as landholder, with an ownership connection to the CEO. The property is reported paid off.',64,398,23,w=470)
-text('39.39 acres / 5,035 sq ft gross A + C area',64,529,18,'Medium',w=485)
-text('1% annually',592,220,47,'Medium',w=496)
-text('Management describes a payment to BC LLC of 1% of profit remaining after expenses.',592,296,23,w=496)
-text('The written profit definition, premises, termination, improvements and financing rights remain unreviewed.',592,422,23,w=496)
-foot('Owner record: agreement signed, document and title unreviewed. Site access does not imply SmartTec property ownership or investor collateral. Runway campus concept.')
+# 07 / grid first, future hybrid separate
+page('Grid first. Hybrid power in a later phase.','Power strategy')
+metric(f"{A['energyUsdPerKwh']*100:g} cents",'per kWh energy planning assumption',64)
+metric(usd(A['demandUsdPerKwMonth'])+'/kW','monthly demand-charge assumption',592)
+text('Launch uses grid power. The model includes energy and demand charges separately, with demand based on the estimated billed peak.',64,381,23,w=475)
+text('Solar and battery storage are future additions. They require their own installed budget, tariff analysis, interconnection and measured savings.',592,381,23,w=496)
+foot('Neither tariff component is verified. The billed peak is '+pct(A['demandPeakFactor'])+' of the design-day peak. No behind-the-meter discount or solar savings is included in Base. Runway hybrid-power concept.')
 
-# 07
-page('Power is a potential operating advantage','Behind-the-meter strategy')
-text('&lt;7 cents',64,216,68,'Medium',fill=SIGNAL,w=490)
-text('per kWh, reported by management',68,306,23,w=475)
-text('Solar + batteries + gas generation',64,377,28,'Medium',w=476)
-text('Management reports a supply agreement. Its delivered cost advantage remains subject to firm capacity, reliability and complete operating costs.',64,443,22,w=473)
-text('Outstanding supply terms',592,222,29,'Medium',w=496)
-text('Exclusive continuous kW<br/>Service availability date<br/>Fuel and maintenance obligations<br/>Losses, replacements and equipment costs<br/>Interruption and recovery terms',592,283,22,w=496,leading=40)
-foot('The rate is not a verified all-in tariff. Shared OG&E service is recorded separately; it does not establish exclusive capacity. Runway power concept, not installed equipment.')
+# 08 / hardware correctly air cooled
+page('Eight complete B300 systems','Compute platform',True)
+metric(million(cap['serverHardwareUsd']),str(fleet['nodes'])+' systems x '+usd(cap['serverHardwareUsd']/fleet['nodes']),64)
+text(f"{fleet['installedGpus']} GPUs installed<br/>{fleet['saleableGpus']} revenue-producing GPU allocation<br/>{fleet['heldBackGpus']} installed GPUs held uncommitted",64,375,26,'Medium',w=478,leading=38)
+text('Supermicro HGX B300 platform',592,220,26,'Medium',w=496)
+text('Eight GPUs per complete system<br/>Dual CPUs and NVSwitch fabric<br/>Networking and local storage<br/>NVIDIA software and support<br/>Air-cooled server planning basis',592,272,22,w=496,leading=37)
+text('Support: '+str(A['includedSupportMonths'])+' operating months included; then '+pct(A['postWarrantySupportRate'])+' of complete-system purchase cost/year before '+pct(A['annualCostInflation'])+' annual cost escalation. Supplier terms are unverified.',64,517,17,w=1024)
+foot('Complete-system price and inclusions are owner-reported. Exact quoted SKU, inter-node fabric, support coverage and delivery terms require confirmation. This model uses air cooling, not a direct-liquid server loop.')
 
-# 08 / hardware scope owner has actually supplied
-page('Eight complete Supermicro B300 systems','Management-supplied system basis',True)
-text(million(Q['hardware']['totalCost']),64,216,76,'Medium',w=460)
-text('8 systems x '+usd(Q['hardware']['systemPrice']),68,326,26,w=470)
-text('64 proposed GPUs<br/>60 saleable + 4 financial reserves',64,381,27,'Medium',w=475,leading=39)
-text('Direct liquid cooling',64,489,24,'Medium',w=470)
-text('Owner-reported complete-system scope',592,217,25,'Medium',w=496)
-text('Eight B300 GPUs<br/>Dual Intel Xeon 6776P CPUs<br/>NVSwitch fabric<br/>Networking and storage<br/>NVIDIA software stack and support',592,274,22,w=496,leading=38)
-foot('Supplier price and scope are management inputs. Exact configuration is private and unreviewed. Support term, external fabric, taxes, freight and installation remain unreconciled.')
-
-# 09 / reserve GPU semantics
-page('60 saleable GPUs. Four financial reserves.','Capacity allocation',True)
+# 09 / fleet allocation illustration
+page('Capacity allocation is not full redundancy','Service availability',True)
 text('EIGHT SYSTEMS / EIGHT GPUS EACH',64,198,13,'Mono',w=620)
 for node in range(8):
  y=235+node*35;text(f'Node {node+1}',64,y+2,17,'Medium',w=130)
- for gpu in range(8):
-  reserve=node==7 and gpu>=4
-  rect(201+gpu*46,y,34,25,'#C7D1CB' if reserve else '#31804B')
-text('60 saleable',650,222,34,'Medium',w=430)
-text('Revenue uses the 60 saleable GPUs.<br/>All 64 are in the proposed purchase.',650,276,21,w=430)
-text('Reserve is not full redundancy',650,367,28,'Medium',w=430)
-text('Four GPUs cannot replace one complete eight-GPU node. Whole-node scheduling and recovery capabilities remain unvalidated.',650,415,21,w=430)
-foot('Illustrative financial allocation, not an approved scheduling or spare-parts topology. Heat and electrical design must account for the complete proposed fleet.')
+ for gpu in range(8):rect(201+gpu*46,y,34,25,'#C7D1CB' if node==7 and gpu>=4 else '#31804B')
+text('60 modeled earning GPUs',650,222,32,'Medium',w=430)
+text('All 64 GPUs are purchased. The four held-back GPUs are installed but unsold, not loose spare cards.',650,278,21,w=430)
+text('A whole node contains eight GPUs',650,389,25,'Medium',w=430)
+text('One failed node leaves 56 installed GPUs. Maintaining a 60-GPU customer commitment needs a separately designed recovery plan.',650,441,21,w=430)
+foot('Illustrative capacity allocation, not an approved tenant layout or guaranteed uptime. Customer SLAs, service credits, standby capacity and recovery time must be agreed before commitments.')
 
-# 10 / cooling concept
-page('One building. Two controlled cooling loops.','Proposed thermal design')
-text(str(Q['cooling']['screeningDutyPerChillerKW'])+' kW',64,212,72,'Medium',fill=SIGNAL,w=468)
-text('net cooling-duty screening target<br/>per full-duty chiller',68,307,23,w=470)
-text('Two full-duty chillers and two CDUs are retained in the initial comparison. The proposed duty criterion retains required cooling with one unit unavailable.',64,398,23,w=469)
-text('Warm server-coolant circuit',592,217,26,'Medium',w=496)
-text('CDUs isolate and control the compatible direct-liquid-cooled server loop.',592,263,22,w=496)
-text('Separate residual-air cooling',592,365,26,'Medium',w=496)
-text('The residual-air design compares rear-door cooling with complete new room cooling. The building has no working air conditioning.',592,411,22,w=496)
-foot('225 kW is an engineering allowance, not confirmed OEM load: (8 x 20 + 20 ancillary + 5 pump) kW x 1.20 = 222 kW, rounded up. Component redundancy is not facility certification.')
+# 10 / engineering model
+page('Power and cooling sized together','Preliminary engineering')
+metric(f"{tech['itKw']:,.1f} kW",'IT load at full modeled draw',64)
+metric(f"{tech['facilityPeakKw']:,.1f} kW",'estimated whole-site design-day load',592)
+text(f"{tech['chillerCount']} x {tech['chillerUnitTons']:g}-ton chillers<br/>{tech['inRowCoolerCount']} x {tech['inRowUnitKw']:g} kW in-row coolers",64,383,28,'Medium',w=475,leading=40)
+text(f"{tech['coolingLoadTons']:.1f} tons of design cooling duty. In-row units transfer server exhaust heat to a closed chilled-water/glycol loop. Modeled quantities include spare units.",592,381,23,w=496)
+foot('Node load '+str(tech['nodeKw'])+' kW is an estimate. Chiller ambient/glycol derate, electrical ratings, pumps, controls, transfer, fire/egress and layout need engineer/vendor approval. N+1 arithmetic is not facility certification.')
 
-# 11 / budget levels do not pretend to be quotes
-FULL=next(v for v in Q['cooling']['cases'] if v['id']=='full-scope')
-LOW=next(v for v in Q['cooling']['cases'] if v['id']=='lower-cost')
-page('Cooling: complete installed cost scenarios','Preliminary cost comparison',True)
-two_blocks([
- (usd(FULL['installedCoolingAllowance']),'Full-scope analyst comparison. Two chillers, two CDUs, dry coolers, four active rear doors and installation allowances. Includes 20% contingency.'),
- (usd(LOW['installedCoolingAllowance']),'Lower-cost sensitivity. Assumes a $100,000 chiller pair and defers $70,000 of separate dry coolers. Other allowances and 20% contingency remain.')
- ],y=218)
-line(64,458,1088,458)
-text('Neither amount is minimum pricing<br/>or an approved contractor bid.',64,481,24,'Medium',w=472)
-text('New and warranted refurbished equipment are options under assessment. Both require summer duty, residual-air cooling, controls, installation and commissioning.',592,474,19,w=496,leading=23)
-foot('Savings are arithmetic, not verified quotations. Deferred dry cooling changes seasonal energy use. The team reports a mechanical contractor, electrician and plumber are available.')
+# 11 / replace all obsolete funding bridges
+page('The initial capital requirement','Base uses of funds',True)
+table(['USE','AMOUNT','BASIS'],[
+ ['Complete GPU systems',usd(cap['serverHardwareUsd']),'Owner-reported complete-system price'],
+ ['Storage / management / spares',usd(cap['storageAndSparesUsd']),'Additional allowance; quote overlap unresolved'],
+ ['Freight / rigging / sales tax',usd(cap['freightAndTaxUsd']),'Planning allowance; exemptions unverified'],
+ ['Power / cooling / site infrastructure',usd(cap['infrastructureUsd']),'Includes engineering and contingency'],
+ ['Cash reserve and launch top-up',usd(cap['cashReserveUsd']+cap['launchTopUpUsd']),'Includes receivables funding'],
+ ['TOTAL INITIAL FUNDING',usd(cap['totalUsd']),'Model v6.1 Base; not a contractor quotation']
+ ],[441,220,363],y=190,rowh=55,size=17)
+foot('Above the initial owner-reported '+million(FUND)+' is '+usd(max(0,cap['totalUsd']-FUND))+'. Management intends to cover the overage. Capital availability and terms remain unverified.')
 
-# 12 / partial means partial
-page('Partial initial capital requirements','Partial initial funding',True)
-table(['CURRENT PLANNING INPUT','FULL-SCOPE','LOWER-COST'],[
- ['Eight complete B300 systems',usd(Q['hardware']['totalCost']),usd(Q['hardware']['totalCost'])],
- ['Cooling allowance',usd(FULL['installedCoolingAllowance']),usd(LOW['installedCoolingAllowance'])],
- ['Retained startup/acquisition allowance',usd(Q['budget']['startupAllowance']),usd(Q['budget']['startupAllowance'])],
- ['Retained opening operating reserve',usd(Q['budget']['openingReserve']),usd(Q['budget']['openingReserve'])],
- ['PARTIAL INITIAL FUNDING',usd(FULL['partialInitialFunding']),usd(LOW['partialInitialFunding'])],
- ['Above initial $6m founder funding',usd(FULL['additionalFounderContribution']),usd(LOW['additionalFounderContribution'])]
- ],[552,236,236],y=195,rowh=45,size=20)
-foot('Excludes remaining non-cooling site work, reserve revisions and later capital calls. The cooling scenarios replace the earlier $652,800 combined site allowance; scope overlaps remain unresolved.')
+# 12 / unit economics transparent
+page('Operating profit and capital return differ','Base operating economics')
+metric(million(B2['revenueUsd']),'Year 2 modeled revenue',64)
+metric(million(B2['ebitdaUsd']),'Year 2 EBITDA / before tax and depreciation',592)
+text(f"{fleet['saleableGpus']} earning GPUs x {num(A['annualHours'])} hours<br/>x {pct(comm['merchantUtilizationYear2Plus'])} paid utilization<br/>x ${comm['merchantRateYear1Usd']*(1+comm['annualMerchantRateChange']):.2f}/GPU-hour in Year 2",64,382,24,w=475,leading=36)
+text('The Base starts at $'+f"{comm['merchantRateYear1Usd']:.2f}"+' per GPU-hour. Merchant pricing declines '+pct(-comm['annualMerchantRateChange'])+' annually; cash costs include staff, support, fees, power, tax and site payments.',592,381,23,w=496)
+foot('Utilization and price are assumptions, not customer commitments. Positive EBITDA does not establish investment payback or cash available to an outside investor.')
 
-# 13 / arithmetic without a fabricated profitability claim
-page('GPU rental revenue illustration','Illustrative revenue model')
-text(million(Q['commercial']['grossAnnualAtIllustrativePaidHours']),64,211,84,'Medium',fill=SIGNAL,w=490)
-text('illustrative annual gross billings',68,335,25,w=475)
-text('60 saleable GPUs x 20 paid hours/day<br/>x $6.50/GPU-hour x 365 days',64,386,25,'Medium',w=480,leading=37)
-text('From gross billings to project cash',592,222,28,'Medium',w=496)
-text('Unpaid hours and customer collections<br/>Platform or sales charges<br/>Power, cooling and connectivity<br/>People, support and maintenance<br/>BC LLC payment, taxes and reserves',592,282,22,w=496,leading=40)
-foot('Uncontracted billing arithmetic, not a forecast or investor profit. 20 paid hours/day equals 83.3% utilization of saleable capacity. Actual utilization, collections, fees and net receipts remain unresolved.')
+# 13 / full annual operating path
+page('Five years of Base operating performance','Base forecast',True)
+table(['YEAR','REVENUE','OPERATING COST','EBITDA','OPERATING CASH'],[
+ [str(r['year']),million(r['revenueUsd']),million(r['opexUsd']),million(r['ebitdaUsd']),million(r['operatingCashUsd'])] for r in B['annual'] if r['year']<=B['horizonYears']
+ ],[115,227,227,227,228],y=212,rowh=56,size=21)
+text('Operating cash is after modeled operating tax and the BC LLC payment. It excludes asset sale proceeds and reserve release.',64,541,17,w=1024)
+foot('The launch period is '+str(comm['buildMonths'])+' months. Receivables, funded reserves and actual distribution timing are handled separately in the dated project-cash schedule.')
 
-# 14 / limits and next model specification
-page('Current return model status','Project economics')
-text('Updated ROI: not established',64,218,39,'Medium',fill=SIGNAL,w=1000)
-text('The updated capital and operating cost basis remains incomplete. New cooling scope, remaining site work and the BC LLC payment are not yet reconciled into a definitive return model.',64,292,25,w=1015)
-line(64,399,1088,399)
-two_blocks([
- ('Capital inputs under review','Non-cooling site work, taxes, freight, installation, working capital and future reserves.'),
- ('Operating inputs under review','Net receipts, seasonal power, maintenance, site payments, taxes and hardware-life costs.')
- ],y=431)
-foot('Founder funding intent supports capital availability. Updated NPV, payback and investor distributions remain unestablished pending complete costs and commercial terms.')
+# 14 / use dated cash as primary
+page('The unsigned Base does not clear the hurdle','Base capital recovery')
+metric(pct(B['returns']['datedFundedIrr']),'dated funded project IRR',64)
+metric(pct(A['hurdleRate']),'modeled project-return hurdle',592)
+text(million(B['returns']['unrecoveredOperatingCapitalUsd'])+' remains unrecovered',64,386,29,'Medium',w=1010)
+text('after the modeled operating cash over the horizon. Asset-sale assumptions and the timing of reserve release matter; neither is recurring operating income.',64,441,23,w=970)
+text('Dated NPV at '+pct(A['hurdleRate'])+': '+million(B['returns']['datedFundedNpvUsd'])+'  /  Funded cash multiple: '+f"{B['returns']['fundedMoic']:.3f}x"+' including modeled resale',64,527,17,w=1024)
+foot('Five-year hold; resale assumes '+pct(A['hardwareResaleYear5'])+' of hardware cost and '+pct(A['infrastructureResale'])+' of infrastructure, with no guaranteed buyer. Headline annual IRR '+pct(B['returns']['headlineIrr'])+'; annual funded IRR '+pct(B['returns']['annualFundedIrr'])+'. Dated returns follow modeled cash dates, before investor allocation.')
 
-# 15 / explain old numbers once rather than silently retain
-page('Historical model context','Superseded model',True)
-text('Previous model result',64,215,27,'Medium',w=492)
-text(million(R['project']['npv']),64,299,59,'Medium',w=485)
-text('NPV at an assumed 15% annual hurdle',68,390,21,w=475)
-text('Positive operating cash did not compensate for the previous modeled capital cost and timing.',64,449,22,w=470)
-text('A superseded cost basis',592,215,28,'Medium',w=496)
-text('The earlier model used a $652,800 combined site allowance. It did not include the newly itemized cooling comparison, unresolved non-cooling scope or BC LLC payment.',592,280,23,w=496)
-text('Its ROI, payback and price thresholds<br/>describe the superseded case only.',592,465,23,'Medium',w=496)
-foot('Historical comparison only, reproduced by the monthly engine. The earlier 28.7% ROI is not a current project return.')
+# 15 / comparable scenarios from the canonical data
+page('Customer economics change the result','Conditional scenario comparison',True)
+table(['CASE','INITIAL CAPITAL','HORIZON','DATED PROJECT IRR'],[
+ ['Unsigned Base',million(B['capital']['totalUsd']),str(B['horizonYears'])+' years',pct(B['returns']['datedFundedIrr'])],
+ ['60 GPUs / $7.50 / 36 months',million(C36['capital']['totalUsd']),str(C36['horizonYears'])+' years',pct(C36['returns']['datedFundedIrr'])],
+ ['60 GPUs / $7.50 / 60 months',million(C60['capital']['totalUsd']),str(C60['horizonYears'])+' years',pct(C60['returns']['datedFundedIrr'])],
+ ['60 GPUs / $6.50 / 60 months',million(S['contracted-60-at-650']['capital']['totalUsd']),str(S['contracted-60-at-650']['horizonYears'])+' years',pct(S['contracted-60-at-650']['returns']['datedFundedIrr'])],
+ [str(S['delayed']['commercial']['buildMonths'])+'-month launch delay',million(S['delayed']['capital']['totalUsd']),str(S['delayed']['horizonYears'])+' years',pct(S['delayed']['returns']['datedFundedIrr'])],
+ ['Maximum build / unsigned',million(MAXIMUM['capital']['totalUsd']),str(MAXIMUM['horizonYears'])+' years',pct(MAXIMUM['returns']['datedFundedIrr'])]
+ ],[415,228,166,215],y=201,rowh=48,size=19)
+foot('Contract cases: '+pct(C60['commercial']['contractPaidShare'])+' paid share, '+pct(A['contractCommission'])+' fees, no renewal; none is signed. Merchant fallback: $'+f"{C60['commercial']['merchantRateYear1Usd']:.2f}"+' initial rate, '+pct(-C60['commercial']['annualMerchantRateChange'])+' annual decline, '+pct(C60['commercial']['merchantUtilizationYear2Plus'])+' utilization and '+pct(A['blendedMerchantCommission'])+' fees, including the $6.50 contract case.')
 
-# 16
-page('Planned return sensitivities','Proposed analysis framework',True)
-table(['SCENARIO','ANALYSIS SCOPE'],[
- ['Supported operating case','Signed net price and payment terms; validated cost scope; realistic commissioning and collection timing.'],
- ['Lower demand and pricing','Fewer paid hours, rate pressure, customer concentration, churn and nonpayment.'],
- ['Delivery and operating stress','Delayed launch, higher power/demand costs, repair events, outage credits and added working capital.'],
- ['Hardware-life and exit stress','Overhaul versus replacement, funded reserves, resale downside, wind-down costs and investor cash rights.']
- ],[310,714],y=211,rowh=77,size=20)
-foot('These analyses are proposed for the completed model and agreed investor structure. Updated outcomes have not been established.')
+# 16 / contracts commercial not theoretical guarantee
+page('A contract must survive its own assumptions','36-month reserved-capacity case')
+metric(pct(C36['returns']['datedFundedIrr']),'dated funded project IRR / '+str(C36['horizonYears'])+' years',64)
+text(f"{C36['commercial']['contractedGpus']} GPUs at ${C36['commercial']['contractRateUsd']:.2f}/hour<br/>{pct(C36['commercial']['contractPaidShare'])} paid share / {C36['commercial']['contractTermMonths']} months",64,379,27,'Medium',w=475,leading=39)
+text('Merchant economics after expiry',592,218,28,'Medium',w=496)
+text('The case uses merchant price, utilization and fees after the contract ends. It does not silently renew the customer or preserve the contracted paid share.',592,285,23,w=496)
+text('Credit support, acceptance, deposit, service credits and termination provisions determine whether the minimum payment is dependable.',592,417,22,w=496)
+project_note()
 
-# 17 / practical actionable staged path
-page('Proposed capital-release milestones','Proposed purchase gates')
-table(['GATE','EVIDENCE','CAPITAL CONSEQUENCE'],[
- ['1  Commercial','Paid validation and enforceable payment terms from a creditworthy counterparty','Order size linked to supported demand.'],
- ['2  Technical','Exact load/flow requirements, full installed budget and deliverable power/network','Delivery scope and reserves ready for approval.'],
- ['3  Procurement','Final price, payment milestones, warranty, delivery and acceptance terms','Orders subject to documented release controls.'],
- ['4  Service acceptance','Load tests, failure tests, customer acceptance and operating readiness','Service commencement, then receipt-led expansion.']
- ],[220,464,340],y=210,rowh=77,size=20)
-foot('A proposed control framework, not completed milestones or an approved procurement commitment. Staged orders remain subject to supplier and customer agreement.')
+# 17 / term inside real exit horizon
+page('A longer contract needs a longer cash horizon','60-month reserved-capacity case')
+metric(pct(C60['returns']['datedFundedIrr']),'dated funded project IRR / '+str(C60['horizonYears'])+' years',64)
+text(f"{C60['commercial']['contractedGpus']} GPUs / ${C60['commercial']['contractRateUsd']:.2f} per hour<br/>{pct(C60['commercial']['contractPaidShare'])} paid share<br/>{C60['commercial']['contractTermMonths']}-month commitment",64,379,26,'Medium',w=475,leading=37)
+text('Complete the service obligation',592,218,28,'Medium',w=496)
+text('The contract starts after launch and finishes inside the six-year forecast. Remaining operating months revert to merchant terms before the modeled exit.',592,282,23,w=496)
+text('Year-6 hardware resale: '+pct(A['hardwareResaleYear6'])+' of modeled hardware cost. This is an assumption, not a buyer offer or a market valuation.',592,418,22,w=496)
+project_note()
 
-# 18 / timeline no false turnkey
-page('Phased delivery to customer acceptance','Delivery sequence',True)
-table(['WORKSTREAM','CURRENT BASIS','PROGRESSION MILESTONE'],[
- ['Building preparation','Single-building deployment planned; new cooling required','Survey, layout, permits and contractor scope.'],
- ['Power','Owner-reported agreement and shared electrical service','Exclusive continuous kW and commissioning.'],
- ['Cooling and network','Design concepts and contractor resources identified','Installed systems, measured duty and throughput.'],
- ['Compute service','64-GPU planning fleet; customer discussions active','Workload proof, signed terms and customer acceptance.'],
- ['Expansion','Potential demand under discussion','Evidence-backed next order and available capacity.']
- ],[255,400,369],y=199,rowh=65,size=18)
-foot('Earlier construction, utility and fiber dates remain unconfirmed targets, not completed work. No updated service launch date is committed in this presentation.')
+# 18 / launch measured milestones
+page('Release capital against delivery milestones','Execution sequence',True)
+table(['STAGE','DELIVERABLE','DECISION BASIS'],[
+ ['Commercial validation','Paid workload evidence and enforceable reserved-capacity terms','Customer economics, credit support and service acceptance'],
+ ['Engineering and site','Utility capacity, layout, electrical and cooling selections','Complete installed scope and commissioning criteria'],
+ ['Procurement','Confirmed system specification and supplier milestones','Price validity, support dates, delivery and acceptance'],
+ ['Commissioning','Load, cooling, network and recovery tests','Measured service performance before customer acceptance'],
+ ['Operating growth','Utilization, receipts, support and reserve reporting','Further purchases linked to supported demand']
+ ],[220,403,401],y=196,rowh=65,size=18)
+foot('The Base assumes '+str(comm['buildMonths'])+' months before billing, not an approved construction schedule. Vendor milestones and contractor commitments remain to be documented.')
 
-# 19 / preserve actual team named facts
-page('The team carrying the project forward','Management and advisors')
+# 19 / shared real team, no invented biography
+page('The team carrying the project forward','Leadership, operations and advisors')
 team=json.loads((ROOT/'src/data/team.json').read_text(encoding='utf-8'))
 for i,person in enumerate(team):
  x=64+(i%3)*352;y=212+(i//3)*116
@@ -319,98 +315,98 @@ for i,person in enumerate(team):
  if person.get('credly'):text(f'<link href="{person["credly"]}" color="{SIGNAL}"><u>Credentials</u></link>',x+212,y+63,13,w=108)
  line(x,y+94,x+314,y+94)
 credential_links=' / '.join(f'<link href="{item["verificationUrl"]}"><u>{item["shortLabel"]}</u></link>' for item in CREDENTIALS['certifications'])
-foot('Yasir Jahangir: '+credential_links+'. Credly verified, '+date.fromisoformat(CREDENTIALS['verifiedAt']).strftime('%d %b %Y')+'. Personal credentials; project experience and commitment levels remain unreviewed.')
+foot('Yasir Jahangir: '+credential_links+'. Credly verified '+date.fromisoformat(CREDENTIALS['verifiedAt']).strftime('%d %b %Y')+'. Personal credentials, not SmartTec corporate certification.')
 
-# 20 / investment terms
-page('Investor participation and governance','Terms for discussion',True)
+# 20 / disciplined customer economics
+page('Price the risk as well as the GPU','Commercial underwriting',True)
 two_blocks([
- ('Capital and economic rights','Potential terms cover the funded entity, founder equity or loan treatment, valuation, ownership, distributions and capital calls. No terms are fixed.'),
- ('Site and related-party protections','BC LLC site rights and the annual profit payment are material to the structure. Improvements, termination, assignment and financing rights remain unreviewed.')
- ],y=217)
-line(64,461,1088,461)
-text('Reporting and oversight',64,483,25,'Medium',w=465)
-text('Proposed reporting covers receipts, utilization, outages, costs and reserves. Milestone approvals and related-party protections remain subject to agreement.',592,473,19,w=496,leading=23)
-foot('Governance proposals require agreement and documentation. Paid-off property is not automatically SmartTec equity or investor collateral. No preferred return or waterfall is promised.')
+ ('Reserved customer capacity','Contracted price, minimum paid hours, service start, payment dates and counterparty support define the revenue commitment. Dedicated server shape must match the hardware allocation.'),
+ ('Merchant and shared inference','Usage, realized price, platform fees and workload mix determine receipts. Retail GPU list prices are context; they are not SmartTec net receipts or long-term customer contracts.')
+ ],y=216)
+callout('A passing scenario is not an offer','Pricing needs margin for launch delay, outages, service credits, cost overruns and customer credit exposure. These terms require commercial negotiation.',y=463)
+foot('Initial connectivity allowance: '+usd(A['phase1InternetAnnualUsd']/12)+'/month; bandwidth, route diversity and SLA scope are unconfirmed. No extra token revenue is modeled. Customer resale requires an enforceable buyer payment obligation.')
 
-# 21
-page('Proposed execution responsibilities','Delivery and oversight',True)
-table(['PROPOSED LEAD','RESPONSIBILITY SCOPE'],[
- ['CEO / COO','Customer counterparty, paid workload evidence, minimum payments and staged capacity commitments.'],
- ['CTO / Operations','Supplier interfaces, liquid-cooling requirements, network design, service tests and operating procedures.'],
- ['Mechanical / Electrical / Plumbing','Complete installed pricing, design coordination, site scope and tested commissioning.'],
- ['CFO / Legal','Founder contribution documents, BC agreement review, full model, reserves and investor terms.']
- ],[305,719],y=215,rowh=77,size=21)
-foot('Proposed responsibilities; assignments are not yet confirmed. Contractor availability is owner-reported; qualifications, scope, prices and acceptance remain to be established.')
-
-# 22
-page('Customer-led growth options','Growth options')
-text('64 GPUs under review',64,218,39,'Medium',fill=SIGNAL,w=490)
-text('Eight systems form the current planning case. Customer commitments and the completed cost model determine what is purchased and when.',64,288,23,w=475)
-text('180 GPUs discussed',592,218,39,'Medium',w=496)
-text('Management reports potential customer interest at this scale. It is not signed demand, funded expansion or approved site capacity.',592,288,23,w=496)
-line(64,435,1088,435)
-text('Owned compute or customer-owned hosting',64,465,28,'Medium',w=1010)
-text('The two routes carry different capital needs, customer credit exposure and service obligations. Current revenue arithmetic excludes hosting and manufacturing income.',64,516,20,w=1010)
-foot('Runway campus concept, not installed buildings or approved expansion plans. Future manufacturing and energy development require separate budgets and decisions.')
-
-# 23
-page('Principal risks and dependencies','Investment considerations')
-table(['EXPOSURE','CURRENT DEPENDENCY'],[
- ['Commercial','No signed payment obligations. Credit support, workload requirements and acceptance remain open.'],
- ['Power and cooling','Delivered capacity, all-in tariff scope, summer duty and failure performance remain unverified.'],
- ['Equipment and operations','External fabric, support term, staffing, security and replacement funding remain unreconciled.'],
- ['Property and governance','BC agreement and title unreviewed; payment base, contributions and investor rights remain unresolved.'],
- ['Financial information','Incomplete costs and no definitive updated return. Audited company statements have not been reviewed.']
- ],[300,724],y=204,rowh=62,size=20)
-foot('Development-stage discussion material. Capital remains at risk. No audited SmartTec financial statements, investment approval or funding guarantee is represented.')
-
-# 24 / stop energy and fee double counting
-page('Financial assumptions and cost boundaries','Cost model basis',True)
+# 21 / grid remains base, future hybrid opportunity not false savings
+page('Solar and storage are a separate investment','Future hybrid phase')
+text('Add resilience and power options in stages',64,218,37,'Medium',fill=SIGNAL,w=1015)
 two_blocks([
- ('Energy and maintenance','The historical model included facility overhead energy through PUE 1.4 at 7 cents/kWh. Seasonal cooling energy and site charges remain unreconciled within that cost basis.'),
- ('Commercial and property costs','Net host receipts, customer fees, collections and the BC LLC profit-payment definition remain open. Tax, reserve and distribution treatment are unresolved.')
- ],y=217)
-line(64,456,1088,456)
-text('Reserves and service coverage',64,481,24,'Medium',w=470)
-text('The $264,501 opening reserve and $25,000/year cooling-service allowance are planning inputs. Supplier-covered and incremental costs remain unreconciled.',592,478,18,w=496,leading=22)
-foot('No revised operating-expense total or five-year cash schedule is asserted. Exact supplier support coverage, other site work and later capital requirements remain open.')
+ ('Solar generation','Potential on-site production requires an EPC scope, interconnection review, credible production profile and tariff-based self-consumption value.'),
+ ('Battery storage','Capacity, dispatch, degradation, replacement and the actual demand tariff determine savings. A battery is not automatically a firm alternate source for the full cooling load.')
+ ],y=300)
+foot('No solar/BESS capex, incentive, savings or revenue is credited to the GPU Base case. The future hybrid system requires its own approved investment case; grid supply supports launch.')
 
-# 25 / honest evidence, clickable links
-page('Information basis and sources','Sources and status',True)
-text('Management inputs / 11 Sep 2026',64,210,26,'Medium',w=480)
-text('Founder capital and overage willingness<br/>Supermicro complete-system price and scope<br/>BC LLC signed-site-agreement status<br/>One-building deployment; no working HVAC<br/>Active customer discussions; no signed terms',64,263,20,w=482,leading=36)
-text('Analyst work / preliminary',64,463,24,'Medium',w=480)
-text('Itemized cooling comparison, arithmetic funding bridge and historical monthly cash model. No contractor bids.',64,503,18,w=480,leading=22)
+# 22 / preliminary scale notexcitementguarantee
+page('Scale follows commitments and engineering','Expansion case')
+metric(str(MAXIMUM['capacity']['installedGpus'])+' GPUs','preliminary service-capacity ceiling',64)
+metric(million(MAXIMUM['capital']['totalUsd']),'maximum-build modeled funding',592)
+text(str(MAXIMUM['capacity']['nodes'])+' systems / '+str(MAXIMUM['capacity']['saleableGpus'])+' earning GPUs. The electrical screen includes cooling, support loads and design margin.',64,384,23,w=475)
+text('Unsigned maximum-build dated project IRR: '+pct(MAXIMUM['returns']['datedFundedIrr'])+'. More GPUs spread fixed costs, but do not create signed demand or guarantee capital recovery.',592,384,23,w=496)
+foot('Maximum is a preliminary screen, not utility or engineer approval. A 60-GPU customer contract does not support the rest of a 225-GPU saleable fleet. Runway campus concept.')
+
+# 23 / distinction investor projectreturns
+page('Project returns precede investor economics','Participation and governance',True)
+two_blocks([
+ ('Capital and ownership','Founder equity or loan treatment, outside capital, valuation, ownership and future capital calls remain open. The available founder funding is reported; it is not a verified bank transfer.'),
+ ('Distribution and protections','Preferences, cash distributions, investor controls, exit rights and related-party protections require documentation. The BC LLC site commitment and payment basis are material to that structure.')
+ ],y=216)
+callout('No investor waterfall is modeled','The quoted project IRRs do not establish an investor\'s return after ownership dilution, preferences, fees or distributions. Financing scenarios also carry repayment obligations.',y=463)
+foot('No fixed raise, ownership percentage, preferred return or investor entitlement is offered in this presentation. Definitive terms require agreement.')
+
+# 24 / credible investor-facing risks
+page('Evidence that governs the investment decision','Readiness and risk controls',True)
+table(['DEPENDENCY','REQUIRED EVIDENCE'],[
+ ['Customer payments','Executed customer terms, credit support, paid capacity and acceptance; no reliance on unsigned resale demand.'],
+ ['Hardware and installed cost','Final configuration, scope, support dates, delivered cost and complete contractor budget.'],
+ ['Grid, cooling and service','Verified tariff/capacity, engineering selections, permits and tested recovery performance.'],
+ ['Site and capital rights','BC LLC agreement definition and consent rights; contribution, overage and investor documents.'],
+ ['Cash and exit','Collections, taxes, reserves, repayment and dated distributions; supportable resale and completed customer obligations.']
+ ],[293,731],y=194,rowh=65,size=19)
+foot('Development-stage risks remain. The model is an auditable planning case; forecasts and check cells do not verify customers, bank balances, installed equipment or future sale proceeds.')
+
+# 25 / model provenance and precise methods
+page('A traceable financial and technical basis','Model and sources',True)
+text('Reviewed model '+str(M['version']),64,210,28,'Medium',w=480)
+text('Native Excel recalculation and independent cash checks support this snapshot. The website and PDF use the same USD project values.',64,267,22,w=480)
+text('Dated funded IRR is the primary return shown. Headline accrual IRR and annual funded IRR use different timing conventions and are labeled separately.',64,387,21,w=480)
+text('Workbook stays private',64,496,23,'Medium',w=480)
+text('Source identity and values are retained in the protected model.',64,531,16,w=480)
 text('External context, not project verification',592,211,23,'Medium',w=496)
 sources=[
- ('Supermicro liquid-cooled Blackwell portfolio',Q['sources'][2]['url']),
- ('Vast.ai hosting and marketplace context','https://docs.vast.ai/host/hosting-overview'),
- ('New chiller manufacturer pricing context','https://waterchillers.com/60-ton-chillers-air-cooled-water-cooled/'),
- ('Refurbished chiller testing and warranty','https://powermechanical.com/sales/used-chillers-for-sale/'),
- ('SmartTec investor room and planning basis','https://www.smarttec.dev/investors#owner-deployment')]
-for i,(label,url) in enumerate(sources):
- text(f'<link href="{url}" color="{FOREST}"><u>{label}</u></link>',592,267+i*57,18,w=496)
-foot('External sources provide product or market context only. Owner facts are reported; private contracts, quote terms and funding have not been independently reviewed.')
+ ('Supermicro HGX B300 platform','https://www.supermicro.com/en/products/system/gpu/8u/sys-822gs-nb3rt'),
+ ('NVIDIA DGX B300 reference specifications','https://docs.nvidia.com/dgx/dgxb300-user-guide/introduction-to-dgxb300.html'),
+ ('Daikin Trailblazer chiller range','https://www.daikinapplied.com/products/chiller-products/trailblazer'),
+ ('Runpod on-demand pricing','https://www.runpod.io/pricing'),
+ ('Nebius on-demand pricing','https://nebius.com/prices'),
+ ('SmartTec protected investor area','https://www.smarttec.dev/investors')]
+for i,(label,url) in enumerate(sources):text(f'<link href="{url}" color="{FOREST}"><u>{label}</u></link>',592,268+i*47,18,w=496)
+foot('Supplier specifications and market prices provide context only. The system quote, utility tariff, customer obligations, funding and BC LLC documents have not been independently verified.')
 
-# 26 / close on the decision and next evidence
-page('Discuss the first SmartTec deployment','Investor discussion')
-text('A proposed founder-backed B300 deployment',64,215,37,'Medium',w=1024)
-text('SmartTec invites prospective investors to discuss its B300 proposal, customer pipeline and participation structure. The discussion brings together commercial terms, installed costs and investor rights.',64,282,26,w=945)
-text('Participation structure and investment terms remain open.',64,396,24,'Medium',fill=SIGNAL,w=1024)
-text('Yasir Jahangir',64,453,30,'Medium',fill=SIGNAL,w=520)
-text('Chief Technology Officer',64,497,21,w=520)
-text('<link href="mailto:yasir@smarttec.dev" color="#EEF1EF">yasir@smarttec.dev</link><br/><link href="tel:+19185203823" color="#EEF1EF">918-520-3823</link>',592,452,23,w=496)
-text('<link href="https://www.smarttec.dev/investors" color="#7BE88A"><u>smarttec.dev/investors</u></link>',592,521,23,w=496)
-foot('8460 US 70, Mead, Oklahoma 73449. Discussion material; no definitive investment terms or return are offered. Background: Runway campus concept.')
+# 26 / close confidentaboutprocessaccurateaboutstage
+page('Build the first deployment with SmartTec','Investor discussion')
+text('A place. A fleet. A customer-led plan.',64,215,40,'Medium',w=1024)
+text('SmartTec is developing owned compute for shared AI inference and dedicated GPU customers. The next step is to align binding customer economics, installed delivery scope and investor rights.',64,284,27,w=976,leading=35)
+text('Grid first. Customer commitments. Evidence before expansion.',64,402,24,'Medium',fill=SIGNAL,w=1024)
+text('Yasir Jahangir',64,457,30,'Medium',fill=SIGNAL,w=520)
+text('Chief Technology Officer',64,501,21,w=520)
+text('<link href="mailto:yasir@smarttec.dev" color="#EEF1EF">yasir@smarttec.dev</link><br/><link href="tel:+19185203823" color="#EEF1EF">918-520-3823</link>',592,456,23,w=496)
+text('<link href="https://www.smarttec.dev/investors" color="#7BE88A"><u>smarttec.dev/investors</u></link>',592,523,23,w=496)
+foot('8460 US 70, Mead, Oklahoma 73449. Conditional project scenarios, not signed revenue or promised investor returns. Runway campus concept.')
 c.save()
 
 data=pdf_buffer.getvalue()
-pending=OUT.with_suffix('.pending.pdf')
-pending.write_bytes(data)
-pending.replace(OUT)
-digest=hashlib.sha256(data).hexdigest()
-meta={'title':'SmartTec Investor Presentation','filename':OUT.name,'reviewedAt':EDITION_DATE,'financialBasisReviewedAt':Q['reviewedAt'],'credentialsSourceSha256':hashlib.sha256((ROOT/'src/data/yasir-credentials.json').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'edition':'Founder-backed B300 proposal and investor participation','pages':PAGE,'bytes':len(data),'sha256':digest,'modelVersion':R.get('modelVersion','1.1.0'),'ownerStudySha256':hashlib.sha256((ROOT/'src/smarttec-investor/data/owner-deployment-study.json').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'engineSha256':hashlib.sha256((ROOT/'src/smarttec-investor/roi-engine.mjs').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'readinessSourceSha256':hashlib.sha256((ROOT/'src/smarttec-investor/investment-readiness.mjs').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'teamSourceSha256':hashlib.sha256((ROOT/'src/data/team.json').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),'currentReturnStatus':'not-established'}
+pending=OUT.with_suffix('.pending.pdf');pending.write_bytes(data);pending.replace(OUT)
+(ROOT/'output/pdf/SmartTec-Investor-Presentation.pdf').write_bytes(data)
+meta={
+ 'title':'SmartTec Investor Presentation','filename':OUT.name,'reviewedAt':EDITION_DATE,
+ 'financialBasisReviewedAt':EDITION_DATE,'edition':'Grid-first shared inference and dedicated GPU compute',
+ 'pages':PAGE,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),
+ 'modelVersion':M['version'],'modelSourceSha256':D['modelSourceSha256'],'financialSource':M['source'],
+ 'teamSourceSha256':D['teamSourceSha256'],'credentialsSourceSha256':D['credentialsSourceSha256'],
+ 'currentReturnStatus':'conditional-scenarios','primaryReturnMetric':'dated-funded-project-irr',
+ 'builderSourceSha256':hashlib.sha256(Path(__file__).read_bytes().replace(b'\r\n',b'\n')).hexdigest(),
+ 'exporterSourceSha256':hashlib.sha256((ROOT/'tools/export-investor-deck-data.mjs').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),
+}
 (ROOT/'src/smarttec-investor/data/investor-deck.json').write_text(json.dumps(meta,indent=2)+'\n',encoding='utf-8')
 (ROOT/'src/smarttec-investor/server/investor-deck.mjs').write_text('// Generated by tools/build-investor-deck.py. Server-only authenticated download.\nexport const investorDeckBase64='+json.dumps(base64.b64encode(data).decode())+';\n',encoding='utf-8')
-(ROOT/'tmp/pdfs/deck-layout.json').write_text(json.dumps({'titles':TITLES,'boxes':BOXES},indent=2),encoding='utf-8')
+(ROOT/'tmp/pdfs/deck-layout.json').write_text(json.dumps({'titles':TITLES,'boxes':BOXES,'rules':RULES},indent=2),encoding='utf-8')
 print(json.dumps(meta,indent=2))

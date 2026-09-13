@@ -1,0 +1,28 @@
+---
+import { offers, publicDeployment as deployment } from '../data/site';
+---
+<div class="service-overview" aria-labelledby="services-title">
+  <p class="service-overview__eyebrow">The next step / Planned services</p>
+  <h2 id="services-title">Start with<br /><em>the workload.</em></h2>
+  <p class="service-overview__intro">A proposed {deployment.gpus}-GPU B300 fleet, with grid power first and solar and BESS in a later phase. SmartTec-owned hosting offers shared inference or dedicated GPU servers. Colocation supports equipment you own.</p>
+  <div class="service-overview__grid">
+    {offers.map((offer, index) => <article>
+      <span class="service-overview__number">0{index + 1} / Planned</span>
+      <h3>{offer.name}</h3>
+      <p>{offer.summary}</p>
+      <a href={offer.id === 'hosting' ? '/colocation' : `/compute#${offer.id}`}>Explore the plan <span aria-hidden="true">↗</span></a>
+    </article>)}
+  </div>
+  <div class="service-overview__next"><p>Procurement and commissioning are ahead. An inquiry begins a technical and commercial review.</p><a href="/model-planner">Plan your workload <span aria-hidden="true">→</span></a><a href="/contact">Talk to SmartTec <span aria-hidden="true">→</span></a></div>
+</div>
+<style>
+  .service-overview{padding:clamp(64px,10vw,140px) clamp(24px,6vw,100px);background:radial-gradient(ellipse at 90% 0%,#245941 0,transparent 55%),#102b20;color:#eef1ef}
+  .service-overview__eyebrow,.service-overview__number{font:12px/1.6 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:#9fdbac}
+  h2{margin:24px 0;font:400 clamp(3rem,7vw,7rem)/1.03 var(--f-display);letter-spacing:-.04em}h2 em{font-style:normal;color:#a6e7b2}
+  .service-overview__intro{max-width:70ch;font:400 clamp(1rem,1.4vw,1.2rem)/1.7 var(--f-sans);color:#c5dacf}
+  .service-overview__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 32px;margin-top:48px}
+  article{padding:32px 0;border-top:1px solid #a6d8b640}h3{margin:14px 0;font:400 clamp(1.5rem,2.7vw,2.4rem)/1.15 var(--f-display);letter-spacing:-.025em}article p{max-width:52ch;line-height:1.7;color:#c5dacf}
+  a{display:inline-flex;align-items:center;gap:16px;min-height:44px;color:#b0f0bd;text-underline-offset:6px}a:focus-visible{outline:2px solid #b0f0bd;outline-offset:5px}
+  .service-overview__next{display:flex;flex-wrap:wrap;gap:20px 32px;align-items:center;border-top:1px solid #a6d8b640;padding-top:28px}.service-overview__next p{flex:1 1 400px;max-width:60ch;color:#c5dacf;line-height:1.6}
+  @media(max-width:900px){.service-overview__grid{grid-template-columns:1fr}.service-overview__next{align-items:flex-start}}
+</style>

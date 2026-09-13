@@ -51,19 +51,6 @@ test('revenue illustration bills only saleable GPUs and establishes no customer 
   assert.equal(r.cooling.existingWorkingAirConditioning,false);
 });
 
-test('historical presets and custom inputs both retain the unresolved current-cost warning',()=>{
-  const source=readFileSync('src/smarttec-investor/client/app.mjs','utf8');
-  const start=source.indexOf('function scenarioWarning(');
-  const end=source.indexOf('\nfunction field(',start);
-  const context=vm.createContext({});
-  vm.runInContext(source.slice(start,end),context);
-  for(const scenario of [{underwriting:{status:'old'}},{}]){
-    context.scenario=scenario;
-    const warning=vm.runInContext('scenarioWarning(scenario)',context);
-    assert.match(warning,/BC LLC/);
-    assert.match(warning,/non-cooling/);
-    assert.match(warning,/No definitive updated project return/);
-    if(scenario.underwriting)assert.match(warning,/historical/);
-  }
-  assert.equal(r.historicalModel.status,'superseded-cost-basis');
+test('historical planning libraries are not imported by live investor surfaces',()=>{
+ for(const file of ['src/pages/investors/index.astro','src/pages/investors/pitch.astro','src/smarttec-investor/server/handlers.mjs','src/smarttec-investor/current-facts.mjs','src/smarttec-investor/data/immersive-pitch.mjs'])assert.doesNotMatch(readFileSync(file,'utf8'),/investment-readiness\.mjs|roi-engine\.mjs|owner-deployment-study\.json/);
 });

@@ -33,6 +33,7 @@ export default defineConfig({
             // and an inlined login handler is a blocked script — which
             // presents as the form doing a native GET with the password in
             // the query string. See client/login.mjs.
+            if (id.endsWith('/smarttec-investor/client/app.mjs')) return 'investor-room';
             if (id.includes('smarttec-investor/client/login')) return 'investor-login';
             // The small chapter controller must also remain external under
             // the private room's same-origin-only script policy.

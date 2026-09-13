@@ -1,16 +1,16 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power, network, publicDeployment as deployment } from '../data/site';
+import { company, site, power, network, offers, publicDeployment as deployment } from '../data/site';
 import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
 
 ---
 
 <Content
   title={`Discuss a deployment at ${site.designation} | ${company.full}`}
-  description={`Talk to ${company.full} about dedicated compute or customer-owned hosting at ${site.name}. A submission is an inquiry — it starts a deployment review, and does not reserve capacity.`}
+  description={`Discuss planned shared inference and dedicated GPU servers on SmartTec-owned hardware, or customer-owned colocation at ${site.name}. An inquiry starts a deployment review and does not reserve capacity.`}
   kicker="Contact"
   heading="Let’s plan your workload."
-  lede={`Discuss our proposed B300 deployment or colocation for your own hardware at ${site.name}. Share your workload, service requirements and target date so we can assess the deployment together.`}
+  lede={`Explore SmartTec-owned hosting through shared inference or dedicated GPU servers, or colocation for your own hardware at ${site.name}. Share your workload, service requirements and target date so we can assess the planned deployment together.`}
   meta={[
     { label: 'Compute proposal', value: deployment.label, note: 'Eight systems; procurement and acceptance ahead', tone: 'signal' },
     { label: 'Electrical commissioning', value: power.commissioningTarget, note: 'Management target' },
@@ -74,8 +74,7 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
             <label class="field__label" for="offering">What you are looking for <span class="field__req" aria-hidden="true">*</span></label>
             <select class="field__input" id="offering" name="offering" required>
               <option value="">Choose one</option>
-              <option value="dedicated">Dedicated compute — I use your GPUs</option>
-              <option value="hosting">Customer-owned hosting — I bring the hardware</option>
+              {offers.map(offer => <option value={offer.id}>{offer.name}</option>)}
               <option value="expansion">A larger future deployment</option>
               <option value="unsure">Not sure yet</option>
             </select>
@@ -171,7 +170,7 @@ import { CONTACT_EMAIL, FORM_ACTION } from '../data/contact';
       <div class="stack">
         <div class="callout">
           <p>
-            <strong>One campus, two ways to deploy.</strong> Bring your equipment or discuss dedicated GPU capacity sized around your workload. Buildings A and C provide {site.dataCenterArea.toLocaleString()} gross sq ft for data-center development, with Building B supporting batteries, utilities and storage.
+            <strong>Start with the service you need.</strong> Bring your equipment for colocation, or discuss shared inference and dedicated GPU nodes on SmartTec-owned hardware. Launch is planned on grid power; solar and BESS follow as a separate investment. Capacity remains subject to procurement and facility acceptance.
           </p>
         </div>
 

@@ -13,9 +13,10 @@ import {chapters as pitchChapters} from '../src/smarttec-investor/data/immersive
 import {JSDOM} from 'jsdom';
 import {hashPassword} from '../src/smarttec-investor/server/auth.mjs';
 import {headerSignature} from './header-contract.mjs';
+import {model,base,contracted,usd} from '../src/smarttec-investor/financial-model.mjs';
 const dir=await mkdtemp(join(tmpdir(),'smarttec-http-'));let app,redis;let checks=0;
 try{
-execFileSync('openssl',['req','-x509','-newkey','rsa:2048','-nodes','-keyout',join(dir,'key.pem'),'-out',join(dir,'cert.pem'),'-subj','/CN=localhost','-addext','subjectAltName=DNS:localhost,IP:127.0.0.1','-days','1'],{stdio:'ignore'});
+execFileSync(process.env.OPENSSL_BINARY||'openssl',['req','-x509','-newkey','rsa:2048','-nodes','-keyout',join(dir,'key.pem'),'-out',join(dir,'cert.pem'),'-subj','/CN=localhost','-addext','subjectAltName=DNS:localhost,IP:127.0.0.1','-days','1'],{stdio:'ignore'});
 const data=new Map(),counts=new Map();
 redis=httpsServer({key:await readFile(join(dir,'key.pem')),cert:await readFile(join(dir,'cert.pem'))},async(req,res)=>{let body='';for await(const c of req)body+=c;try{assert.equal(req.headers.authorization,'Bearer fixture-token');const [cmd,key,...rest]=JSON.parse(body);let result;if(cmd==='GET')result=data.get(key)||null;if(cmd==='SET'){data.set(key,rest[0]);result='OK';}if(cmd==='DEL'){data.delete(key);result=1;}if(cmd==='EVAL'){const k=rest[1];result=(counts.get(k)||0)+1;counts.set(k,result);}res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({result}));}catch{res.writeHead(400);res.end('{}');}});
 await new Promise(r=>redis.listen(0,'127.0.0.1',r));
@@ -28,9 +29,9 @@ r=await fetch(origin+'/investors/pitch',{redirect:'manual'});assert.equal(r.stat
 r=await fetch(origin+'/investors/presentation',{redirect:'manual'});assert.equal(r.status,303);assert.equal(r.headers.get('location'),'/investors/login#investor-presentation');assert.match(r.headers.get('cache-control'),/no-store/);assert.equal(r.headers.get('x-frame-options'),'DENY');checks++;
 for(const method of ['GET','HEAD']){r=await fetch(origin+'/api/investor/presentation?view=inline',{method});assert.equal(r.status,401);assert.match(r.headers.get('cache-control'),/no-store/);checks++;}
 r=await fetch(origin+'/investors/login');const login=await r.text();assert.equal(r.status,200);assert.ok(!login.includes('39.21'));assert.ok(!login.includes('scrypt$'));checks++;
-for(const path of ['presentation','bootstrap','survey','survey-image','concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy',...pitchMedia.assets.map(asset=>asset.action)]){r=await fetch(origin+'/api/investor/'+path);assert.equal(r.status,401);checks++;}
+for(const path of ['presentation','bootstrap','model','survey','survey-image','concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy',...pitchMedia.assets.map(asset=>asset.action)]){r=await fetch(origin+'/api/investor/'+path);assert.equal(r.status,401);checks++;}
 r=await fetch(origin+'/api/investor/login',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({password:'integration-password'})});assert.equal(r.status,200,await r.clone().text());const cookie=r.headers.get('set-cookie').split(';')[0];checks++;
-r=await fetch(origin+'/investors',{headers:{Cookie:cookie}});const page=await r.text();assert.equal(r.status,200);assert.ok(page.includes('8460 US 70, Mead, OK 73449'));assert.ok(page.includes('inv-equipment-rows'));assert.ok(r.headers.get('cache-control').includes('no-store'));checks++;
+r=await fetch(origin+'/investors',{headers:{Cookie:cookie}});const page=await r.text();assert.equal(r.status,200);assert.ok(page.includes('8460 US 70, Mead, OK 73449'));assert.ok(page.includes('data-model-version="'+model.version+'"'));assert.ok(!page.includes('inv-equipment-rows'));assert.ok(!page.includes('id="inv-calculator"'));assert.ok(r.headers.get('cache-control').includes('no-store'));checks++;
 assert.equal(r.headers.get('x-frame-options'),'DENY');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);checks++;
 r=await fetch(origin+'/investors/presentation',{headers:{Cookie:cookie}});const readerPage=await r.text();assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.equal(r.headers.get('x-frame-options'),'DENY');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);assert.equal(r.headers.get('x-robots-tag'),'noindex, nofollow');
 const readerDOM=new JSDOM(readerPage),readerDoc=readerDOM.window.document;
@@ -40,7 +41,7 @@ for(const script of readerDoc.querySelectorAll('script')){assert.ok(script.src,'
 readerDOM.window.close();checks++;
 r=await fetch(origin+'/investors/pitch',{headers:{Cookie:cookie}});const pitchPage=await r.text();assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.equal(r.headers.get('x-frame-options'),'SAMEORIGIN');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'self'/);assert.equal(r.headers.get('x-robots-tag'),'noindex, nofollow');checks++;
 const pitchDOM=new JSDOM(pitchPage),pitchDoc=pitchDOM.window.document;
-assert.equal(pitchDoc.querySelectorAll('#pitch-stage [data-chapter]').length,13);
+assert.equal(pitchDoc.querySelectorAll('#pitch-stage [data-chapter]').length,pitchChapters.length);
 assert.deepEqual([...pitchDoc.querySelectorAll('[data-chapter]')].map(slide=>slide.dataset.chapter),pitchChapters.map(chapter=>chapter.id));
 for(const script of pitchDoc.querySelectorAll('script')){assert.ok(script.src,'Pitch controller must stay external under the private CSP');assert.equal(script.textContent.trim(),'');}
 for(const chapter of pitchChapters){const slide=pitchDoc.querySelector(`[data-chapter="${chapter.id}"]`);for(const metric of chapter.metrics)assert.ok(slide.textContent.includes(metric.value),`${chapter.id}: missing financial or project metric ${metric.value}`);}
@@ -86,63 +87,47 @@ checks++;
 for(const asset of ['/investor-assets/fonts.css','/assets/fonts/GoogleSansCode-Regular.ttf','/assets/fonts/GoogleSansCode-Bold.ttf','/assets/brand/smarttec-lockup-offwhite-green.svg']){r=await fetch(origin+asset);assert.equal(r.status,200);checks++;}
 const bootstrap=await(await fetch(origin+'/api/investor/bootstrap',{headers:{Cookie:cookie}})).json();const headers={Cookie:cookie,Origin:origin,'Content-Type':'application/json','X-CSRF-Token':bootstrap.csrf};
 for(const path of ['concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy']){r=await fetch(origin+'/api/investor/'+path,{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.ok((await r.arrayBuffer()).byteLength>10000);checks++;}
-r=await fetch(origin+'/api/investor/calculate',{method:'POST',headers,body:JSON.stringify({scenario:bootstrap.sample})});assert.equal(r.status,200);const result=await r.json();assert.equal(result.requiredInitialFunding,330000);assert.ok(result.project.totalROI<0);checks++;
-assert.ok(page.includes('Profitability is not yet established'));assert.equal((page.match(/data-underwriting-option=/g)||[]).length,26);checks++;
-for(const currentAmount of ['$7,274,101','$7,022,101','$1,083,600','$831,600'])assert.ok(page.includes(currentAmount),currentAmount+' current comparison must be present');
-assert.ok(page.includes('BC LLC'));assert.ok(page.includes('non-cooling'));checks++;
+assert.deepEqual(bootstrap.model,model);assert.equal(bootstrap.sample,undefined);checks++;
+for(const method of ['GET','HEAD']){
+ r=await fetch(origin+'/api/investor/model',{method,headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('content-type'),/application\/json/);assert.match(r.headers.get('content-disposition'),/SmartTec_Model_v6\.1_Verified_Scenarios\.json/);
+ for(const key of ['cache-control','cdn-cache-control','vercel-cdn-cache-control'])assert.match(r.headers.get(key),/no-store/);
+ if(method==='HEAD')assert.equal((await r.arrayBuffer()).byteLength,0);else assert.deepEqual(await r.json(),model);checks++;
+}
+for(const action of ['underwriting-scenario','calculate','compare','price-floor','export']){
+ r=await fetch(origin+'/api/investor/'+action,{method:'POST',headers:{...headers,'X-CSRF-Token':'invalid'},body:'{}'});assert.equal(r.status,403,action+' CSRF guard');checks++;
+ r=await fetch(origin+'/api/investor/'+action,{method:'POST',headers:{...headers,Origin:'https://evil.example'},body:'{}'});assert.equal(r.status,403,action+' origin guard');checks++;
+ r=await fetch(origin+'/api/investor/'+action,{method:'POST',headers,body:JSON.stringify({scenario:{rate:999},id:'invented',format:'csv'})});assert.equal(r.status,410,action+' retired');const gone=await r.json();assert.equal(gone.modelVersion,model.version);assert.equal(gone.url,'/investors#returns');assert.equal(gone.result,undefined);checks++;
+}
+r=await fetch(origin+'/api/investor/model',{method:'POST',headers,body:JSON.stringify({scenario:{rate:999}})});assert.equal(r.status,405);checks++;
+const reviewedDOM=new JSDOM(page),reviewedDoc=reviewedDOM.window.document;
+assert.equal(reviewedDoc.querySelector('#inv-main').dataset.modelSource,model.source.sha256);
+assert.equal(reviewedDoc.querySelectorAll('[data-underwriting-option],#inv-scenario-form,#inv-equipment-rows').length,0);
+for(const amount of [usd(base.capital.totalUsd),usd(contracted.capital.totalUsd)])assert.ok(reviewedDoc.body.textContent.includes(amount),amount+' reviewed funding must be present');
+assert.ok(reviewedDoc.body.textContent.includes('BC LLC'));assert.ok(reviewedDoc.querySelector('a[href="/api/investor/model"]'));reviewedDOM.window.close();checks++;
 const fundingFAQ=await(await fetch(origin+'/api/investor/faq',{method:'POST',headers,body:JSON.stringify({question:'How much funding is required?'})})).json();
-assert.ok(fundingFAQ.matches.some(f=>f.id==='F17'&&f.answer.includes('$7,274,101')&&f.answer.includes('exclude unknown non-cooling')));checks++;
-// Exercise the real editor against the compiled API using a DOM, without live credentials.
+assert.ok(fundingFAQ.matches.some(f=>f.id==='F17'&&f.answer.includes(usd(base.capital.totalUsd))&&f.answer.includes(usd(contracted.capital.totalUsd))&&f.sourceIds.includes('model-v6.1')));checks++;
+// Exercise the read-only enhancement and FAQ against the compiled API without live credentials.
 const dom=new JSDOM(page,{url:origin+'/investors',runScripts:'outside-only'}),win=dom.window;
-win.structuredClone=structuredClone;win.matchMedia=()=>({matches:true});win.gsap={from(){}};
-win.HTMLElement.prototype.scrollIntoView=function(){};
+win.structuredClone=structuredClone;win.matchMedia=()=>({matches:true});win.HTMLElement.prototype.scrollIntoView=function(){};
 win.fetch=(url,options={})=>fetch(new URL(url,origin),{...options,headers:{Cookie:cookie,Origin:origin,...options.headers}});
 const reference=win.document.querySelector('#sta-reference');if(reference)reference.open=false;
-win.eval((await readFile('src/smarttec-investor/client/app.mjs','utf8')).replace("import {gsap} from 'gsap';",''));
-const until=async check=>{for(let i=0;i<100;i++){if(check())return;await new Promise(r=>setTimeout(r,20));}throw new Error('Editor did not reach expected state: '+win.document.querySelector('#inv-app-status').textContent);};
-await until(()=>!win.document.querySelector('#inv-calculator').hidden);checks++;
-win.document.querySelector('[data-underwriting-option="planned-mix"][data-underwriting-case="base"]').click();
-await until(()=>win.document.querySelectorAll('.inv-equipment-row').length===2);
-assert.equal(win.document.querySelector('[data-field="completeSystemCost"]').value,'80000');
-assert.equal(win.document.querySelector('#inv-underwriting-note').hidden,false);checks++;
-win.document.querySelector('#inv-acknowledge').checked=true;
-win.document.querySelector('#inv-scenario-form').dispatchEvent(new win.Event('submit',{bubbles:true,cancelable:true}));
-await until(()=>!win.document.querySelector('#inv-results').hidden);
-assert.match(win.document.querySelector('#inv-result-cards').textContent,/-\$1,077,455/);checks++;
-win.document.querySelector('#inv-price-floor').click();
-await until(()=>win.document.querySelector('#inv-price-result').textContent.includes('Required revenue multiplier'));
-assert.match(win.document.querySelector('#inv-price-result').textContent,/2\.006×/);
-assert.match(win.document.querySelector('#inv-price-result').textContent,/\$4\.19 per gpu hour/);checks++;
-const priceChange=win.document.querySelector('[data-field="annualRateEscalation"]');priceChange.value='-10';
-assert.equal(priceChange.checkValidity(),true);priceChange.dispatchEvent(new win.Event('input',{bubbles:true}));
-assert.equal(win.document.querySelector('#inv-results').hidden,true);assert.equal(win.document.querySelector('#inv-acknowledge').checked,false);checks++;
-win.document.querySelector('[data-underwriting-option="b200-scale"][data-underwriting-case="favorable"]').click();
-await until(()=>win.document.querySelectorAll('[data-field="profileId"]')[1]?.value==='hgx-b200-reference');
-assert.equal(win.document.querySelectorAll('[data-field="systems"]')[1].value,'2');
-win.document.querySelector('#inv-acknowledge').checked=true;
-win.document.querySelector('#inv-scenario-form').dispatchEvent(new win.Event('submit',{bubbles:true,cancelable:true}));
-await until(()=>!win.document.querySelector('#inv-results').hidden);
-assert.match(win.document.querySelector('#inv-result-cards').textContent,/17\.1%/);checks++;
-win.document.querySelector('[data-underwriting-power="reported"][data-underwriting-option="planned-mix"]').click();
-await until(()=>win.document.querySelector('[data-field="energyRatePerKwh"]').value==='0.07');
-assert.equal(win.document.querySelector('#inv-results').hidden,true);
-assert.equal(win.document.querySelector('#inv-acknowledge').checked,false);checks++;
-win.document.querySelector('[data-underwriting-option="proposed-60-20"]').click();
-await until(()=>win.document.querySelector('[data-field="siteCapex"]').value==='652800');
-assert.equal(win.document.querySelector('#inv-results').hidden,true);
-assert.equal(win.document.querySelector('#inv-acknowledge').checked,false);checks++;
-const owner=await (await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers,body:JSON.stringify({id:'proposed-60-20',ownerPricing:true})})).json();
-assert.equal(owner.scenario.rows.reduce((n,r)=>n+r.systems*r.completeSystemCost,0),5360000);checks++;
-r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers:{...headers,'X-CSRF-Token':'invalid'},body:JSON.stringify({id:'proposed-60-20',ownerPricing:true})});assert.equal(r.status,403);checks++;
-r=await fetch(origin+'/api/investor/underwriting-scenario',{method:'POST',headers,body:JSON.stringify({id:'invented',ownerPricing:true})});assert.equal(r.status,400);checks++;
+win.eval(await readFile('src/smarttec-investor/client/app.mjs','utf8'));
+const until=async check=>{for(let i=0;i<100;i++){if(check())return;await new Promise(r=>setTimeout(r,20));}throw new Error('Investor enhancement did not reach expected state: '+win.document.querySelector('#inv-app-status').textContent);};
+await until(()=>win.document.querySelector('#inv-app-status').textContent.includes('Model v'+model.version));
+assert.equal(win.document.querySelector('#inv-question-form button').disabled,false);checks++;
+win.document.querySelector('#inv-question').value='How much funding is required?';
+win.document.querySelector('#inv-question-form').dispatchEvent(new win.Event('submit',{bubbles:true,cancelable:true}));
+await until(()=>win.document.querySelector('#inv-answer').textContent.includes(usd(base.capital.totalUsd)));
+assert.ok(win.document.querySelector('#inv-answer').textContent.includes(model.source.sha256));
+assert.equal(win.document.querySelector('#inv-scenario-form'),null);assert.equal(win.document.querySelector('#inv-calculator'),null);checks++;
 dom.window.close();
-assert.ok(page.includes('Open investor presentation'));assert.ok(page.includes('href="/api/investor/presentation"'));checks++;
+assert.ok(page.includes('href="/investors/presentation"'));assert.ok(page.includes('href="/api/investor/presentation"'));checks++;
 for(const key of ['b300-studio','power-supply-concept','campus-dusk']){
  const asset='/assets/investor/'+key+'.webp';assert.ok(page.includes('src="'+asset+'"'));
  const response=await fetch(origin+asset);assert.equal(response.status,200);assert.ok(response.headers.get('content-type').includes('image/webp'));
  assert.deepEqual(Buffer.from(await response.arrayBuffer()),await readFile('public'+asset));checks++;
 }
-assert.ok(page.includes('These AI-generated visuals illustrate the strategy'));checks++;
+assert.match(page,/AI[- ]generated|AI concept|concept illustration/i);checks++;
 if(process.env.INVESTOR_VISUAL_QA==='1'){
  const {chromium}=await import('playwright');const browser=await chromium.launch({headless:true,channel:process.env.INVESTOR_QA_BROWSER||undefined});
  try{
@@ -184,7 +169,7 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
    await tab.setViewportSize({width,height});await tab.goto(origin+'/investors');
    await tab.waitForFunction(()=>document.querySelector('#investor-pitch-dialog')?.dataset.mounted==='true'&&!document.querySelector('.inv-journey-dock').hidden);
    await tab.evaluate(()=>document.fonts.ready);
-   await tab.waitForFunction(()=>!document.querySelector('#inv-calculator').hidden&&Number(getComputedStyle(document.querySelector('.inv-hero-copy')).opacity)>.99);
+   await tab.waitForFunction(()=>document.querySelector('#inv-app-status').textContent.includes('Reviewed scenarios')&&Number(getComputedStyle(document.querySelector('.inv-hero-copy')).opacity)>.99);
    assert.equal(await tab.evaluate(()=>scrollY),0,'Do not scroll to manufacture initial pitch-link visibility');
    for(const selector of ['.site-header [data-pitch-launch]','#opportunity [data-pitch-launch]']){
     const entry=tab.locator(selector),bounds=await entry.boundingBox();
@@ -199,12 +184,19 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
    await section.locator('img').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
    assert.equal(await tab.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
    await section.screenshot({path:`tmp/pdfs/investor-page-${width}.png`});
-   for(const id of ['opportunity','deployment','capital','returns','evidence','questions']){
-    const target=tab.locator('#'+id);await target.scrollIntoViewIfNeeded();
-    await target.screenshot({path:`tmp/pdfs/investor-${id}-${width}.png`});
+    for(const id of ['opportunity','deployment','capital','returns','evidence','questions']){
+     const target=tab.locator('#'+id);await target.scrollIntoViewIfNeeded();
+     await target.locator('img[src]').evaluateAll(images=>Promise.all(images.map(image=>image.decode())));
+     assert.equal(await target.evaluate(element=>element.scrollWidth<=element.clientWidth+1),true,`${width} #${id}: section must fit horizontally`);
+     assert.equal(await tab.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,`${width} #${id}: page must fit horizontally`);
+     await target.screenshot({path:`tmp/pdfs/investor-${id}-${width}.png`});
    }
    assert.equal(await tab.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'Private page must fit after all current sections render');
-   assert.equal(await tab.locator('.inv-current-budget .inv-table-scroll').evaluate(el=>el.scrollHeight<=el.clientHeight+1),true,'Current funding rows must not hide in a capped scroll area');
+    assert.equal(await tab.locator('#capital .inv-table-scroll').first().evaluate(el=>el.scrollHeight<=el.clientHeight+1),true,'Current funding rows must not hide in a capped scroll area');
+    if(width===390){
+     assert.equal(await tab.locator('#capital .inv-table-scroll').first().evaluate(element=>{const box=element.getBoundingClientRect();return [...element.querySelectorAll('td')].every(cell=>{const rect=cell.getBoundingClientRect();return rect.left>=box.left-1&&rect.right<=box.right+1&&cell.textContent.trim().length>0;});}),true,'Mobile capital amounts must be visible without horizontal scrolling');
+     assert.match(await tab.locator('#returns .inv-table-scroll').first().evaluate(element=>getComputedStyle(element,'::before').content),/Swipe horizontally/,'Wide mobile scenario tables need a visible scroll cue');checks+=2;
+    }
    assert.deepEqual(await tab.locator('img').evaluateAll(images=>images.filter(i=>i.complete&&i.currentSrc&&!i.naturalWidth).map(i=>i.currentSrc)),[],'Loaded private images must decode');
   }
   await tab.setViewportSize({width:1440,height:1000});await tab.goto(origin+'/investors/pitch');
@@ -276,7 +268,8 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
   assert.equal(await tab.locator('#pitch-next').isDisabled(),true);await tab.keyboard.press('ArrowLeft');
   await tab.waitForFunction(()=>document.body.dataset.chapter==='investment');await tab.keyboard.press('End');await tab.waitForFunction(()=>document.body.dataset.chapter==='next-steps');checks++;
   // Real H.264 decoding for every film, not just HTTP success or a loaded poster.
-  for(const [index,visual] of [[0,'fiber'],[1,'campus'],[2,'compute']]){
+  for(const visual of ['fiber','campus','compute']){
+   const index=pitchChapters.findIndex(chapter=>chapter.visual===visual);assert.ok(index>=0,`A ${visual} film must be represented in the current chapter sequence`);
    await jump(index);if(await tab.locator('#pitch-play').getAttribute('aria-label')==='Play slides')await tab.locator('#pitch-play').click();
    await tab.waitForFunction(visual=>{const video=document.querySelector('#pitch-film');return video.dataset.visual===visual&&video.readyState>=2&&video.videoWidth===1920&&video.currentTime>0&&video.classList.contains('is-ready');},visual);
    assert.equal(await tab.locator('#pitch-film').evaluate(video=>video.error),null);await tab.locator('#pitch-play').click();checks++;

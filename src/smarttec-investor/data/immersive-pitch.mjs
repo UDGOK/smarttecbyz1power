@@ -1,187 +1,21 @@
-import {investmentReadiness as r} from '../investment-readiness.mjs';
-
-const money=value=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(value);
-const millions=value=>'$'+(value/1e6).toFixed(2)+'m';
-const rate=value=>'$'+value.toFixed(2);
-const full=r.cooling.cases.find(c=>c.id==='full-scope');
-const lower=r.cooling.cases.find(c=>c.id==='lower-cost');
-const metric=(label,value,note)=>({label,value:String(value),note});
-
-// Both investor editions and the public team section use the same owner-supplied roster.
+import {model,base,contracted,scenario,assumptions as a,usd,rate,pct,millions} from '../financial-model.mjs';
 import roster from '../../data/team.json' with {type:'json'};
-import credentials from '../../data/yasir-credentials.json' with {type:'json'};
 export const teamMembers=roster;
-
-export const pitchContact={
-  name:'Yasir Jahangir',role:'Chief Technology Officer',
-  email:'yasir@smarttec.dev',phone:'918-520-3823',
-  emailHref:'mailto:yasir@smarttec.dev',phoneHref:'tel:+19185203823'
-};
-
+export const pitchContact={name:'Yasir Jahangir',role:'Chief Technology Officer',email:'yasir@smarttec.dev',phone:'918-520-3823',emailHref:'mailto:yasir@smarttec.dev',phoneHref:'tel:+19185203823'};
+const metric=(label,value,note)=>({label,value:String(value),note});
+const note='Model v'+model.version+' · Conditional planning assumptions; no signed customer contract or paid pilot established.';
 export const chapters=[
-  {
-    id:'opening',kind:'hero',visual:'fiber',duration:18,
-    eyebrow:'SMARTTEC / MEAD, OKLAHOMA',
-    title:'Power. Compute. Disciplined growth.',
-    lede:'A proposed liquid-cooled B300 deployment, supported by founder funding intent and a plan to commission capacity against paid demand.',
-    metrics:[
-      metric('B300 GPUs',r.hardware.installedGPUs,'Proposed first deployment'),
-      metric('Complete systems',r.hardware.systems,r.hardware.supplier+' · owner-reported scope')
-    ],
-    keypoints:['Founder-backed first deployment.','Customer-led expansion strategy.'],
-    footnote:'Development-stage investment discussion. Procurement and commissioning remain ahead.'
-  },
-  {
-    id:'thesis',kind:'metrics',visual:'campus',duration:20,
-    eyebrow:'THE INVESTMENT THESIS',
-    title:'Local power. Dedicated AI compute.',
-    lede:'SmartTec proposes dedicated AI compute in Mead, combining reported local power access, complete GPU systems and a staged delivery strategy. Customer commitments are central to the proposed deployment.',
-    metrics:[
-      metric('Power strategy','Behind the meter','Solar, batteries and gas generation'),
-      metric('Deployment','One building','Consolidated first-fleet plan')
-    ],
-    keypoints:['Proposed capacity is linked to supported customer demand.','Complete installed pricing is a proposed purchase milestone.','Expansion is proposed against collections and operating performance.'],
-    footnote:'The delivered power advantage and complete project return remain to be established.'
-  },
-  {
-    id:'fleet',kind:'fleet',visual:'compute',duration:22,
-    eyebrow:'THE PROPOSED FIRST FLEET',
-    title:'A focused B300 deployment.',
-    lede:`${r.hardware.systems} complete liquid-cooled ${r.hardware.supplier} systems bring the first fleet into one building. The proposed configuration targets customer workloads, with final delivery and acceptance terms still open.`,
-    metrics:[
-      metric('GPUs proposed',r.hardware.installedGPUs,`${r.hardware.systems} systems × ${r.hardware.gpusPerSystem} GPUs`),
-      metric('Saleable GPUs',r.hardware.saleableGPUs,'Used in revenue arithmetic'),
-      metric('Financial reserves',r.hardware.reserveGPUs,'Purchased equipment still requires cooling'),
-      metric('Per complete system',money(r.hardware.systemPrice),'Owner-reported price')
-    ],
-    keypoints:['Reported scope includes CPUs, NVSwitch, networking, storage, NVIDIA software and support.','Exact configuration, external cluster scope and support term remain unreviewed.'],
-    footnote:'Financial reserve GPUs do not establish full-node redundancy or commissioned inventory.'
-  },
-  {
-    id:'power',kind:'power',visual:'fiber',duration:22,
-    eyebrow:'THE POWER STRATEGY',
-    title:'Behind-the-meter power for AI compute.',
-    lede:'Management reports a supply agreement combining solar, batteries and gas generation at below 7 cents per kWh. Exclusive capacity, service availability and the all-in cost scope remain unconfirmed.',
-    metrics:[
-      metric('Reported energy price','<'+(r.power.ownerReportedRateBelow*100).toFixed(0)+'¢/kWh','All-in scope remains unverified'),
-      metric('Exclusive continuous capacity','Unconfirmed','Firm supply allocation not yet established'),
-      metric('Service availability','Unconfirmed','Operating date and commissioning not established')
-    ],
-    keypoints:['Fuel, maintenance, losses, replacement and equipment obligations remain unresolved.','Usable customer load, power quality and outage operation await validation.'],
-    footnote:'A reported supply agreement is not certified usable power or a guaranteed cost advantage.'
-  },
-  {
-    id:'site-rights',kind:'site',visual:'campus',duration:22,
-    eyebrow:'LONG-TERM SITE ACCESS',
-    title:'A home for the operation.',
-    lede:'Management identifies BC LLC, associated with the CEO, as the landholder. Existing buildings and a reported signed site-use agreement provide the proposed operating location.',
-    metrics:[
-      metric('Reported agreement',r.property.siteAgreementYears+' years','Both signatures owner-confirmed'),
-      metric('Annual BC LLC payment',(r.property.annualPaymentFraction*100).toFixed(0)+'%','Of profit after expenses; definition unreviewed'),
-      metric('Property debt','Reported paid off','Title and other obligations unreviewed')
-    ],
-    keypoints:['Premises, improvements, termination and financing rights remain unreviewed.','The site payment depends on the agreement’s unreviewed profit definition.'],
-    footnote:'Site access does not establish SmartTec ownership of the land or investor collateral.'
-  },
-  {
-    id:'commercial',kind:'revenue',visual:'compute',duration:24,
-    eyebrow:'FROM CAPACITY TO CUSTOMERS',
-    title:'The GPU rental revenue model.',
-    lede:'The proposed GPU-hour rate and illustrative utilization show the gross billing opportunity. Customer discussions are active; signed contracts and minimum receipts remain unestablished.',
-    metrics:[
-      metric('Illustrative annual gross',money(r.commercial.grossAnnualAtIllustrativePaidHours),'Uncontracted billing arithmetic'),
-      metric('Proposed GPU-hour rate',rate(r.commercial.proposedGrossRatePerGPUHour),'Host receipts versus customer price unresolved'),
-      metric('Paid hours per GPU/day',r.commercial.illustrativePaidHoursPerDay,'Illustration, not guaranteed occupancy'),
-      metric('Signed customer contracts',r.commercial.signedCustomerContracts,'Active discussions; no paid pilot established')
-    ],
-    keypoints:[`${r.hardware.saleableGPUs} saleable GPUs × ${r.commercial.illustrativePaidHoursPerDay} paid hours × ${rate(r.commercial.proposedGrossRatePerGPUHour)} × ${r.commercial.daysPerYear} days.`,
-      'Payment responsibility, minimum receipts, duration and acceptance remain open.','Fees, collections and service credits affect net receipts.'],
-    footnote:'Gross billings are neither collected cash nor profit. No binding minimum receipts are established.'
-  },
-  {
-    id:'founder-capital',kind:'budget',visual:'campus',duration:22,
-    eyebrow:'FOUNDER FUNDING INTENT',
-    title:'Founder funding for the first phase.',
-    lede:'Management reports funds available for the initial deployment and willingness to personally cover additional project costs. The proposed hardware, cooling and remaining site work define the initial capital requirement.',
-    metrics:[
-      metric('Initial founder funds',millions(r.founderCapital.initialAvailable),'Owner-reported availability'),
-      metric('GPU hardware',millions(r.hardware.totalCost),`${r.hardware.systems} complete systems at ${money(r.hardware.systemPrice)}`),
-      metric('Additional costs','Founder overage','Willingness indicated; amount and timing unverified')
-    ],
-    keypoints:['Cooling and remaining site work require separate scope reconciliation.','Contribution form, timing and capital-release controls have not been independently reviewed.'],
-    footnote:'Funds and transfers have not been independently verified. Founder funding does not itself improve project returns.'
-  },
-  {
-    id:'cooling',kind:'cooling',visual:'compute',duration:24,
-    eyebrow:'THE COOLING STRATEGY',
-    title:'Liquid cooling, with complete installed scope.',
-    lede:'The first deployment requires new cooling throughout. Two preliminary cost scenarios include compatible liquid cooling, residual-air cooling and installation allowances; engineering and contractor pricing remain open.',
-    metrics:[
-      metric('Full-scope comparison',money(full.installedCoolingAllowance),'Analyst allowance, not minimum pricing'),
-      metric('Lower-cost sensitivity',money(lower.installedCoolingAllowance),'Hypothetical equipment savings; no bid'),
-      metric('Net duty per chiller',r.cooling.screeningDutyPerChillerKW+' kW','Screening target; engineering to confirm'),
-      metric('Working building HVAC','None','No existing air-conditioning reuse credit')
-    ],
-    keypoints:['The lower-cost option reduces the chiller-pair allowance and defers separate dry coolers.','New and warranted refurbished equipment are options under assessment.','Seasonal energy and maintenance coverage remain unresolved operating inputs.'],
-    footnote:'Both comparisons retain contingency and required residual-air cooling. Neither is an approved design or contractor quotation.'
-  },
-  {
-    id:'funding-bridge',kind:'budget',visual:'fiber',duration:24,
-    eyebrow:'THE PARTIAL FUNDING BRIDGE',
-    title:'Two scenarios for partial initial funding.',
-    lede:'The cooling scenarios produce two partial initial funding requirements, including hardware, retained startup costs and an opening reserve. Remaining site work, reserve revisions and later capital needs are excluded.',
-    metrics:[
-      metric('Full-scope partial funding',money(full.partialInitialFunding),'Before remaining site scope and adjustments'),
-      metric('Lower-cost partial funding',money(lower.partialInitialFunding),'Before remaining site scope and adjustments'),
-      metric('Full-scope founder overage',money(full.additionalFounderContribution),'Above initial reported founder funds'),
-      metric('Lower-cost founder overage',money(lower.additionalFounderContribution),'Above initial reported founder funds')
-    ],
-    keypoints:[`Both retain ${money(r.budget.startupAllowance)} startup/acquisition and ${money(r.budget.openingReserve)} opening reserve.`,
-      `These comparisons replace the earlier ${money(r.budget.oldCombinedSiteAllowance)} combined site allowance.`,
-      'Taxes, freight, installation and service overlaps remain unreconciled.'],
-    footnote:'Excludes unknown non-cooling site work, reserve revisions and later capital calls. These are not final funding totals.'
-  },
-  {
-    id:'delivery',kind:'roadmap',visual:'campus',duration:22,
-    eyebrow:'THE PROPOSED DELIVERY STRATEGY',
-    title:'A staged path to customer service.',
-    lede:'The proposed delivery framework links capital releases to commercial agreements, complete engineering scope and service acceptance. Expansion is proposed after collections and operating performance demonstrate readiness.',
-    metrics:[],
-    keypoints:['Commercial milestone: paid demand, acceptance terms and complete installed pricing.','Commissioning milestone: tested power, cooling, network, recovery and workloads.','Operating milestone: collections, service performance and reserve coverage.'],
-    footnote:'Proposed release gates, not completed milestones. Supplier and customer terms must support staged commitments.'
-  },
-  {
-    id:'team',kind:'team',visual:'campus',duration:24,
-    eyebrow:'THE PEOPLE BEHIND SMARTTEC',
-    title:'Accountability across every stage.',
-    lede:'Leadership, operations and advisors connect commercial commitments with technical delivery, financial controls and the development of the business.',
-    metrics:[],team:teamMembers,
-    keypoints:[credentials.investorSummary],
-    footnote:`Names and roles supplied by management. Yasir’s personal credentials checked on Credly ${credentials.verifiedAt}; project experience and commitment levels remain unreviewed.`
-  },
-  {
-    id:'investment',kind:'metrics',visual:'fiber',duration:22,
-    eyebrow:'INVESTOR PARTICIPATION',
-    title:'The investment framework.',
-    lede:'The proposed framework covers capital contributions, ownership, distributions and approval rights. Outside participation and economic terms remain open; current project returns are not yet established.',
-    metrics:[
-      metric('Updated project ROI',r.budget.updatedROI===null?'Not established':(r.budget.updatedROI*100).toFixed(1)+'%','Complete costs and commercial terms pending'),
-      metric('Final outside raise',r.budget.finalRaise===null?'Not fixed':money(r.budget.finalRaise),'Founder willingness includes the overage'),
-      metric('Investor cash rights','Open terms','No preferred return or waterfall promised')
-    ],
-    keypoints:['The return model depends on complete costs and the BC LLC payment definition.','Planned sensitivities cover demand, delays, repair costs and hardware replacement.','Reporting, reserve policy and approval rights are proposed terms for discussion.'],
-    footnote:'Earlier model returns use superseded costs. No definitive current NPV, payback or investor return is asserted.'
-  },
-  {
-    id:'next-steps',kind:'closing',visual:'compute',duration:20,
-    eyebrow:'AN INVITATION TO DISCUSS',
-    title:'SmartTec’s first deployment. Your next conversation.',
-    lede:'SmartTec invites prospective investors to discuss its founder-backed B300 proposal, customer pipeline and participation structure. The discussion brings together commercial terms, complete installed costs and investor rights.',
-    metrics:[
-      metric('Your contact',pitchContact.name,pitchContact.role),
-      metric('Email',pitchContact.email,pitchContact.phone)
-    ],
-    keypoints:['Customer commitments. Complete installed costs. Clear investor rights.'],
-    footnote:'Private investor discussion. This experience does not accept an investment or guarantee a capacity reservation.'
-  }
+ {id:'opening',kind:'hero',visual:'fiber',duration:22,eyebrow:'A disciplined beginning',title:'Compute with a plan.',lede:'A proposed B300 fleet in Mead, Oklahoma. Grid power at launch, customer-led deployment and a transparent capital model.',metrics:[metric('Proposed fleet',64,'B300 GPUs; not commissioned'),metric('Modeled base capital',millions(base.capital.totalUsd),'Hardware, infrastructure and working cash')],keypoints:['Shared inference capacity and dedicated GPU servers use SmartTec-owned equipment.','Colocation houses customer-owned equipment under a separate service agreement.'],footnote:'Runway films are concepts, not photographs of installed SmartTec equipment. '+note},
+ {id:'thesis',kind:'metrics',visual:'compute',duration:22,eyebrow:'The business model',title:'One platform. Clear service choices.',lede:'Different workloads need different deployment options. Each service has a clear equipment owner and a defined commercial scope.',metrics:[metric('Shared inference','Multi-tenant','SmartTec-owned GPU nodes'),metric('Dedicated servers','Single-tenant','SmartTec-owned servers; customer isolation'),metric('Colocation','Customer-owned','Facility, power, cooling and connectivity')],keypoints:['The B300 projections cover owned-equipment hosting; they do not add colocation revenue.','The same GPU inventory cannot be counted twice across shared and dedicated bookings.'],footnote:'Services are planned. Contracted GPU-hours are modeled revenue units; token output and per-token resale revenue are not forecast.'},
+ {id:'fleet',kind:'fleet',visual:'compute',duration:22,eyebrow:'The first deployment',title:'Eight systems. One building.',lede:'Eight complete Supermicro nodes form the proposed purchase plan. A financial holdback reduces modeled billing capacity while the exact configuration is confirmed.',metrics:[metric('Purchased GPUs',base.capacity.installedGpus,'Proposed fleet'),metric('Saleable GPUs',base.capacity.saleableGpus,'Revenue allocation'),metric('Held-back GPUs',base.capacity.heldBackGpus,'Not a complete spare node'),metric('Per eight-GPU system',usd(base.capital.nodePriceUsd),'Owner-reported planning price')],keypoints:['Exact SKU, electrical input, air/liquid configuration and support inclusions require supplier confirmation.','Dedicated full-node bookings must reconcile to the 60-GPU saleable budget.'],footnote:'Four GPUs held out of revenue do not establish failover capacity, full-node redundancy or a service-level guarantee.'},
+ {id:'power',kind:'power',visual:'campus',duration:22,eyebrow:'Grid first',title:'Launch on grid. Add hybrid later.',lede:'The first-phase economics use utility power. Solar and BESS remain a separate future investment, with no assumed behind-the-meter savings in these returns.',metrics:[metric('Grid energy',(a.energyUsdPerKwh*100).toFixed(1)+'¢/kWh','Model allowance, not a signed tariff'),metric('Demand charge',usd(a.demandUsdPerKwMonth),'/ billed peak kW / month'),metric('Average PUE',a.averagePue,'Annual energy model assumption')],keypoints:['Firm utility capacity, tariff and service readiness require confirmation.','Voltage compatibility and worst-day facility demand need engineered validation.'],footnote:'The generator budget covers a docking station, not an installed or fuelled standby generator. No operating energy independence is claimed.'},
+ {id:'site-rights',kind:'site',visual:'campus',duration:22,eyebrow:'The site relationship',title:'Long-term access. Defined obligations.',lede:'Management reports a paid-off property owned by BC LLC, associated with the CEO, and a signed 50-year site commitment to SmartTec.',metrics:[metric('Reported access','50 years','Agreement not independently reviewed'),metric('BC LLC model share',pct(a.bcLlcShare,0),'Positive after-tax accounting income'),metric('Current legal parcel','39.39 acres','Owner-supplied area')],keypoints:['The model includes an annual profit payment; legal wording and accounting treatment need reconciliation.','Site access does not give SmartTec title to the land or establish investor collateral.'],footnote:'Historical survey tract labels total 39.21 acres; the current owner-supplied legal parcel is 39.39 acres. Related-party terms require document review.'},
+ {id:'commercial',kind:'revenue',visual:'compute',duration:24,eyebrow:'Revenue and demand',title:'Model demand. Contract the receipts.',lede:'The merchant case and contracted cases have different economics. The stronger outcome requires enforceable minimum payments and a customer able to make them.',metrics:[metric('Base starting rate',rate(base.commercial.merchantRateYear1Usd),'/ B300 GPU-hour; modeled'),metric('Base Year-1 revenue',usd(base.annual[0].revenueUsd),'Six operating months; gross billing'),metric('Contract paid share',pct(contracted.commercial.contractPaidShare,0),'22.8 paid hours/day; hypothetical'),metric('Signed customer contracts',0,'Active discussions; no paid pilot')],keypoints:['Base utilization is 55% in Year 1, then 70%, with a 10% annual price decline.','Hypothetical full-fleet contracts cover 60 GPUs, with no automatic renewal or double-counted capacity.'],footnote:'Gross billing is not collected cash or profit. Customer credit, acceptance, minimum payments and availability terms remain to be documented.'},
+ {id:'founder-capital',kind:'budget',visual:'fiber',duration:22,eyebrow:'Funding the first phase',title:'Founder commitment. A priced plan.',lede:'Management reports $6 million available and willingness to cover additional costs. Modeled funding includes hardware, site infrastructure and working cash.',metrics:[metric('Founder funds reported',millions(a.initialFounderCapitalUsd),'Availability and transfer unverified'),metric('Complete GPU systems',millions(base.capital.serverHardwareUsd),'8 × '+usd(base.capital.nodePriceUsd)),metric('Base modeled overage',usd(base.capital.founderFundingGapUsd),'Above reported founder funds')],keypoints:['Supplier quotations and installed scopes must validate the planning allowances.','No fixed outside raise, valuation or investor allocation is established.'],footnote:'Owner statements are not bank verification or a binding contribution agreement. Investor rights and any contribution schedule remain to be agreed.'},
+ {id:'cooling',kind:'cooling',visual:'compute',duration:24,eyebrow:'Commissioning the infrastructure',title:'Design for the actual load.',lede:'The selected building needs new cooling. The updated model budgets an air-cooled planning arrangement with chilled-water in-row units and redundant nominal chiller capacity.',metrics:[metric('Modeled IT load',base.technical.itKw.toFixed(1)+' kW','Includes supporting IT'),metric('Thermal duty',base.technical.coolingLoadTons.toFixed(2)+' tons','Preliminary screen'),metric('Chillers','2 × 50 tons','Nominal; includes spare'),metric('In-row units','5 × 40 kW','Includes spare unit')],keypoints:['At 85% assumed chiller capacity, one-unit-out margin is only '+pct(base.technical.nPlusOneChillerMargin,1)+'; OEM derating must be checked.','Exact server SKU, voltage, fluid temperatures, room layout and commissioned performance remain open.'],footnote:'These are model quantities, not installed capacity or an engineered N+1 guarantee. Earlier two-loop images are conceptual and do not define this bill of quantities.'},
+ {id:'funding-bridge',kind:'budget',visual:'campus',duration:24,eyebrow:'The capital bridge',title:'All categories. One funding basis.',lede:'The base model totals hardware, infrastructure and working cash. Contracted revenue assumptions change the opening reserve and therefore the funding requirement.',metrics:[metric('Hardware total',usd(base.capital.hardwareUsd),'Includes storage/spares and freight/tax'),metric('Infrastructure',usd(base.capital.infrastructureUsd),'Includes engineering and contingency'),metric('Base working cash',usd(base.capital.cashReserveUsd),'Cost reserve plus receivables'),metric('Base initial funding',usd(base.capital.totalUsd),'Unlevered project funding')],keypoints:['Full-60-GPU $7.50 contract funding is '+usd(contracted.capital.totalUsd)+'; its larger receivables reserve explains the difference.','The retained-cash target is a distribution policy; a full monthly liquidity forecast is still required.'],footnote:'No sale, colocation, manufacturing, solar or BESS operating revenue is added. Model allowances require procurement and installed-cost validation.'},
+ {id:'delivery',kind:'roadmap',visual:'campus',duration:22,eyebrow:'Execution gates',title:'Commit. Build. Prove. Expand.',lede:'Capital release follows documented customer obligations, complete scopes and funding, then commissioning and customer acceptance.',metrics:[metric('Base construction period',base.commercial.buildMonths+' months','Model assumption; not a committed date'),metric('First service','After acceptance','Procurement, utility, cooling and network ready')],keypoints:['The 1 January 2027 model date exists for dated-return calculations only.','Expansion requires separate customer commitments, funding and engineering approval.'],footnote:'A mathematical capacity screen is not evidence of utility energization, usable space, planning consent or readiness to accept a workload.'},
+ {id:'team',kind:'team',visual:'fiber',duration:24,eyebrow:'Leadership and execution',title:'People responsible for the plan.',lede:'Leadership, operations and advisors connect the commercial plan, technical delivery and customer experience.',metrics:[],team:teamMembers,keypoints:[],footnote:'Roles and contact information supplied by management. Individual credentials describe the named professional; they do not certify the SmartTec facility or establish vendor endorsement.'},
+ {id:'investment',kind:'metrics',visual:'compute',duration:24,eyebrow:'The reviewed return cases',title:'Conditions determine the return.',lede:'The base merchant model misses the 15% hurdle. Longer customer commitments improve modeled recovery, with returns still exposed to delivery, credit and residual-value risk.',metrics:[metric('Base / five years',pct(base.returns.datedFundedIrr),'Dated funded project IRR'),metric('$7.50 / 36-month term',pct(scenario('contracted-36').returns.datedFundedIrr),'60 GPUs; five-year hold; unsigned'),metric('$6.50 / 60-month term',pct(scenario('contracted-60-at-650').returns.datedFundedIrr),'60 GPUs; six-year hold; unsigned'),metric('$7.50 / 60-month term',pct(contracted.returns.datedFundedIrr),'60 GPUs; six-year hold; unsigned')],keypoints:['Contract cases require 95% paid share; expiry reverts to 50% merchant utilization and a declining $7.50 Year-1 price reference.','Hardware resale is 20% in Year 5 / 15% in Year 6; infrastructure recovery is 50%. No buyback is agreed.'],footnote:'Dated funded project IRRs include modeled taxes, site payments, reserve timing and sale proceeds. They are not promised investor returns. Detailed cash schedules and all assumptions are in the PDF and room.'},
+ {id:'next-steps',kind:'closing',visual:'fiber',duration:22,eyebrow:'The investment conversation',title:'Build the evidence. Earn the capital.',lede:'Review the model, discuss the customer contract structure and examine the path from planning allowances to an accepted service.',metrics:[],keypoints:['Customer minimum payments and credit support. Supplier and contractor commitments. Firm utility capacity and tariff.','Documented founder funding, site rights and investor terms before commitment.'],footnote:'Model v'+model.version+' · Reviewed '+model.reviewedAt+' · Unlevered project scenarios; no investment recommendation or guarantee. Contact Yasir Jahangir for diligence.'}
 ];

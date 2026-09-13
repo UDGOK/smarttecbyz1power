@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chapters,teamMembers,pitchContact} from '../src/smarttec-investor/data/immersive-pitch.mjs';
-import {investmentReadiness as r} from '../src/smarttec-investor/investment-readiness.mjs';
+import {model,base,contracted,scenario,pct,usd,millions} from '../src/smarttec-investor/financial-model.mjs';
 import team from '../src/data/team.json' with {type:'json'};
 
 const chapter=id=>chapters.find(c=>c.id===id);
@@ -27,34 +27,24 @@ test('immersive story remains concise, complete and free of missing display valu
   assert.doesNotMatch(JSON.stringify(chapters),/\bundefined\b|\bNaN\b/);
 });
 
-test('immersive financial metrics reconcile to readiness without reviving historical returns',()=>{
-  const full=r.cooling.cases.find(c=>c.id==='full-scope'),lower=r.cooling.cases.find(c=>c.id==='lower-cost');
-  assert.deepEqual(chapter('fleet').metrics.map(m=>m.value),[String(r.hardware.installedGPUs),String(r.hardware.saleableGPUs),String(r.hardware.reserveGPUs),money(r.hardware.systemPrice)]);
-  assert.equal(chapter('founder-capital').metrics[0].value,'$'+(r.founderCapital.initialAvailable/1e6).toFixed(2)+'m');
-  assert.equal(chapter('founder-capital').metrics[1].value,'$'+(r.hardware.totalCost/1e6).toFixed(2)+'m');
-  assert.deepEqual(chapter('cooling').metrics.slice(0,2).map(m=>m.value),[money(full.installedCoolingAllowance),money(lower.installedCoolingAllowance)]);
-  assert.deepEqual(chapter('funding-bridge').metrics.map(m=>m.value),[money(full.partialInitialFunding),money(lower.partialInitialFunding),money(full.additionalFounderContribution),money(lower.additionalFounderContribution)]);
-  assert.match(chapter('funding-bridge').footnote,/unknown non-cooling site work, reserve revisions and later capital calls/);
-  for(const value of [r.budget.startupAllowance,r.budget.openingReserve,r.budget.oldCombinedSiteAllowance])assert.ok(chapter('funding-bridge').keypoints.join(' ').includes(money(value)));
-  assert.equal(chapter('site-rights').metrics[0].value,r.property.siteAgreementYears+' years');
-  assert.equal(chapter('site-rights').metrics[1].value,(r.property.annualPaymentFraction*100).toFixed(0)+'%');
-  assert.match(chapter('site-rights').metrics[1].note,/profit after expenses/);
-  assert.equal(r.budget.updatedROI,null);
-  assert.equal(chapter('investment').metrics[0].value,'Not established');
-  assert.doesNotMatch(JSON.stringify(chapters),/28\.7%|month-49|\$604,000|\$7\.03|guaranteed (?:profit|return)/i);
+test('immersive figures use the reviewed model with consistent return timing',()=>{
+ assert.deepEqual(chapter('fleet').metrics.map(m=>m.value),['64','60','4',usd(base.capital.nodePriceUsd)]);
+ assert.deepEqual(chapter('investment').metrics.map(m=>m.value),['base','contracted-36','contracted-60-at-650','contracted-60'].map(id=>pct(scenario(id).returns.datedFundedIrr)));
+ assert.equal(chapter('funding-bridge').metrics[3].value,usd(base.capital.totalUsd));
+ assert.equal(chapter('founder-capital').metrics[0].value,millions(model.assumptions.initialFounderCapitalUsd));
+ assert.ok(base.returns.datedFundedIrr<0);
+ assert.match(chapter('investment').footnote,/not promised investor returns/);
+ assert.doesNotMatch(JSON.stringify(chapters),/28\.7%|month-49|\$7,274,101|\$7,022,101|below.?7|\$2,847,000/i);
 });
-
-test('revenue chapter preserves reserve exclusion and uncontracted pricing and demand',()=>{
-  const c=chapter('commercial');
-  const expected=r.hardware.saleableGPUs*r.commercial.illustrativePaidHoursPerDay*r.commercial.proposedGrossRatePerGPUHour*r.commercial.daysPerYear;
-  assert.equal(c.metrics[0].value,money(expected));
-  assert.match(c.metrics[0].note,/Uncontracted/);
-  assert.match(c.metrics[1].note,/Host receipts versus customer price unresolved/);
-  assert.equal(c.metrics[3].value,String(r.commercial.signedCustomerContracts));
-  assert.equal(c.metrics[3].value,'0');
-  assert.match(c.footnote,/No binding minimum receipts/);
-  assert.match(chapter('cooling').metrics[0].note,/not minimum pricing/);
-  assert.match(chapter('cooling').metrics[1].note,/Hypothetical/);
+test('commercial and service chapters distinguish assumptions from contracted demand',()=>{
+ assert.equal(chapter('commercial').metrics[1].value,usd(base.annual[0].revenueUsd));
+ assert.equal(chapter('commercial').metrics[3].value,'0');
+ assert.match(chapter('commercial').footnote,/Gross billing is not collected cash or profit/);
+ assert.deepEqual(chapter('thesis').metrics.map(m=>m.value),['Multi-tenant','Single-tenant','Customer-owned']);
+ assert.match(chapter('thesis').keypoints.join(' '),/do not add colocation revenue/);
+ assert.match(chapter('investment').keypoints.join(' '),/95% paid share/);
+ assert.match(chapter('power').lede,/no assumed behind-the-meter savings/);
+ assert.match(chapter('cooling').footnote,/not installed capacity/);
 });
 
 test('immersive team roster matches the existing owner-supplied site roster',()=>{
