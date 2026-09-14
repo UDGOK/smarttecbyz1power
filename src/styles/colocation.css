@@ -1,0 +1,41 @@
+/* Loaded by /colocation only; the route marker also prevents palette leakage. */
+body[data-page-theme="colocation"] {
+  --c-signal: #edb6c8;
+  --c-gold: #e5bfd2;
+  --c-land-deep: #241f27;
+  --c-land-shadow: #211c25;
+  --c-forest: #633f50;
+  --c-carbon: #211c25;
+  background: radial-gradient(ellipse at 100% 35%, #68475655, transparent 55%), #241f27;
+}
+body[data-page-theme="colocation"] .doc .doc__opening {background:#211c25;}
+body[data-page-theme="colocation"] .page-scene--backdrop .page-scene__viewport:after {
+  background:linear-gradient(180deg,#251c269e,#392936a8 55%,#241f27f5);
+}
+body[data-page-theme="colocation"] .doc :is(.doc__lede,.doc__kicker,.doc__home-link,.doc__meta-note,.doc__meta dt,.page-trail small,.page-trail__index,.page-scene__caption p) {color:#deced6;}
+body[data-page-theme="colocation"] .doc :is(.page-scene__tools summary,.page-scene__tools-content) {background:#392936f5;}
+body[data-page-theme="colocation"] .doc .btn:not(.btn--ghost),
+body[data-page-theme="colocation"] .doc .page-scene__entry button {background:#edb6c8;color:#30212b;}
+body[data-page-theme="colocation"] .doc .btn:not(.btn--ghost):hover {background:#f4cfdd;}
+body[data-page-theme="colocation"] .doc .card {background:linear-gradient(135deg,#ffffff08,#edb6c80b);border-color:#edb6c833;}
+body[data-page-theme="colocation"] .doc .colo-packet {
+  display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(28px,4vw,64px);align-items:center;
+  padding:clamp(24px,4vw,54px);margin-block:64px;border:1px solid #e3c7d5;border-radius:24px;
+  background:linear-gradient(130deg,#fff9fb,#f3e9ee 60%,#e9d3df);color:#633f50;
+}
+body[data-page-theme="colocation"] .doc .colo-packet h2 {color:#633f50;font-size:clamp(2rem,3.5vw,3.7rem);margin:14px 0 20px;}
+body[data-page-theme="colocation"] .doc .colo-packet p {color:#633f50;}
+body[data-page-theme="colocation"] .doc .colo-packet .mono-label {color:#765064;}
+body[data-page-theme="colocation"] .doc .colo-packet .btn {background:#633f50;color:#fff9fb;}
+body[data-page-theme="colocation"] .doc .colo-packet .btn:hover {background:#4c2e3e;}
+body[data-page-theme="colocation"] .doc .colo-packet .btn--ghost {background:transparent;color:#633f50;border:1px solid #916778;}
+body[data-page-theme="colocation"] .doc .colo-packet__cover {display:block;text-decoration:none;background:#392936;border-radius:14px;overflow:hidden;box-shadow:0 24px 48px #4b2d3d26;color:#fff9fb;transition:transform .25s ease;}
+body[data-page-theme="colocation"] .colo-packet__cover:hover {transform:translateY(-4px);}
+body[data-page-theme="colocation"] .colo-packet__cover img {display:block;width:100%;height:auto;}
+body[data-page-theme="colocation"] .colo-packet__cover>span {display:flex;justify-content:space-between;padding:18px 22px;font:13px var(--f-mono);}
+body[data-page-theme="colocation"] .doc .colo-packet__note {font-size:12px;line-height:1.65;margin:22px 0 0;}
+body[data-page-theme="colocation"] .colo-packet :focus-visible {outline:3px solid #633f50;outline-offset:5px;}
+@media(max-width:760px){body[data-page-theme="colocation"] .doc .colo-packet{grid-template-columns:1fr;margin-block:32px;}body[data-page-theme="colocation"] .colo-packet .actions{align-items:stretch;}}
+@media(prefers-reduced-motion:reduce){body[data-page-theme="colocation"] .colo-packet__cover{transition:none;}}
+body[data-page-theme="colocation"] .doc .colo-packet>* {grid-column:auto;max-width:none;min-width:0;}
+body[data-page-theme="colocation"] :is(.site-header-context,.menu-toggle) {background:#392936ee;}

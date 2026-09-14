@@ -1,5 +1,6 @@
 ---
 import Content from '../layouts/Content.astro';
+import '../styles/colocation.css';
 import { company, site, power, network, publicDeployment as deployment, campusConcept } from '../data/site';
 ---
 <Content
@@ -15,6 +16,22 @@ import { company, site, power, network, publicDeployment as deployment, campusCo
     { label: 'Current stage', value: 'Development', note: 'Fit-out and commissioning ahead', tone: 'signal' },
   ]}
 >
+  <section class="colo-packet" aria-labelledby="colocation-packet" data-reveal>
+    <a class="colo-packet__cover" href="/downloads/SmartTec-Colocation-Customer-Packet-2026-09.pdf" target="_blank" rel="noopener" aria-label="Open the colocation customer packet PDF in a new tab">
+      <img src="/assets/colocation/customer-packet-cover.webp" alt="SmartTec colocation packet: Your infrastructure. A place to grow." width="1152" height="648" loading="lazy" decoding="async" />
+      <span>Preview the packet <span aria-hidden="true">↗</span></span>
+    </a>
+    <div class="colo-packet__copy">
+      <p class="card__tag mono-label">Your deployment guide / 14-page PDF</p>
+      <h2 id="colocation-packet">Plan your next rack with clarity.</h2>
+      <p>Explore proposed service options, an indicative rate card, a worked monthly budget and published regional pricing comparisons. See how power, liquid cooling, connectivity and deployment responsibilities fit together.</p>
+      <div class="actions">
+        <a class="btn" href="/downloads/SmartTec-Colocation-Customer-Packet-2026-09.pdf" target="_blank" rel="noopener">Open customer packet <span aria-hidden="true">↗</span></a>
+        <a class="btn btn--ghost" href="/downloads/SmartTec-Colocation-Customer-Packet-2026-09.pdf" download>Download PDF <span aria-hidden="true">↓</span></a>
+      </div>
+      <p class="colo-packet__note">September 2026 · Budgetary proposal. Rates and availability require engineering review, utility confirmation and a signed service order. Market packages differ in inclusions.</p>
+    </div>
+  </section>
   <section aria-labelledby="two-ways" data-reveal>
     <p class="eyebrow" aria-hidden="true"><span class="eyebrow__n">01</span><span class="eyebrow__t">Choose your approach</span></p>
     <h2 id="two-ways">Bring your servers or plan a hosted deployment.</h2>
