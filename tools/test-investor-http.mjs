@@ -266,8 +266,8 @@ if(process.env.INVESTOR_VISUAL_QA==='1'){
    await tab.locator('#pitch-chapters-open').click();await tab.locator(`#pitch-chapters [data-jump="${index}"]`).click();
    await tab.waitForFunction(id=>document.body.dataset.chapter===id,pitchChapters[index].id);
   };
-  await jump(8);assert.match(await tab.locator('#pitch-counter').textContent(),/09 \/ 13/);
-  assert.match(await tab.locator('#pitch-announcement').textContent(),/Chapter 9 of 13/);checks++;
+  await jump(8);assert.equal((await tab.locator('#pitch-counter').textContent()).trim(),`09 / ${pitchChapters.length}`);
+  assert.match(await tab.locator('#pitch-announcement').textContent(),new RegExp(`Chapter 9 of ${pitchChapters.length}`));checks++;
   await tab.keyboard.press('Home');await tab.waitForFunction(()=>document.body.dataset.chapter==='opening');
   for(let i=1;i<pitchChapters.length;i++){await tab.keyboard.press('ArrowRight');await tab.waitForFunction(id=>document.body.dataset.chapter===id,pitchChapters[i].id);}
   assert.equal(await tab.locator('#pitch-next').isDisabled(),true);await tab.keyboard.press('ArrowLeft');

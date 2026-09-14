@@ -356,12 +356,12 @@ two_blocks([
 foot('No solar/BESS capex, incentive, savings or revenue is credited to the GPU Base case. The future hybrid system requires its own approved investment case; grid supply supports launch.')
 
 # 22 / preliminary scale notexcitementguarantee
-page('Scale follows commitments and engineering','Expansion case')
-metric(str(MAXIMUM['capacity']['installedGpus'])+' GPUs','preliminary service-capacity ceiling',64)
-metric(million(MAXIMUM['capital']['totalUsd']),'maximum-build modeled funding',592)
-text(str(MAXIMUM['capacity']['nodes'])+' systems / '+str(MAXIMUM['capacity']['saleableGpus'])+' earning GPUs. The electrical screen includes cooling, support loads and design margin.',64,384,23,w=475)
-text('Unsigned maximum-build headline project IRR: '+pct(MAXIMUM['returns']['headlineIrr'])+'. More GPUs spread fixed costs, but do not create signed demand or guarantee capital recovery.',592,384,23,w=496)
-foot('Maximum is a preliminary screen, not utility or engineer approval. The unsigned 40-GPU Contracted case does not support the rest of a 225-GPU saleable fleet. Runway campus concept.')
+page('Start with 64. Plan for up to 240.','Capacity roadmap')
+metric(str(MAXIMUM['capacity']['installedGpus'])+' GPUs','management infrastructure design target',64)
+metric(million(MAXIMUM['capital']['totalUsd']),'workbook maximum Base funding',592)
+text('Initial: 8 systems / 64 GPUs / 60 saleable. Target: 30 systems / 240 GPUs / 225 saleable. Expansion adds 22 systems and 176 GPUs.',64,384,23,w=475)
+text('Workbook maximum Base IRR: '+pct(MAXIMUM['returns']['headlineIrr'])+'. Original assumptions; not the newer 90%-utilization target. Initial funding does not purchase the expansion fleet.',592,384,23,w=496)
+foot('Management design target, not commissioned capacity or engineering approval. Confirm power, liquid cooling, networking, customers and expansion funding. Reprice the liquid-cooled design; workbook maximum holds back 15 GPUs.')
 
 # 23 / distinction investor projectreturns
 page('Project returns precede investor economics','Participation and governance',True)

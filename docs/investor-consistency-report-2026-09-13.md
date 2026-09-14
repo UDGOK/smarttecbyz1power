@@ -144,8 +144,16 @@ The audited local investor content contains no known conflicting financial value
 | --- | --- |
 | Dated presentation | `output/pdf/SmartTec-Investor-Presentation-2026-09.pdf` |
 | Stable alias | `output/pdf/SmartTec-Investor-Presentation.pdf`; identical bytes |
-| PDF size/pages | 1,606,303 bytes; 26 pages |
-| PDF SHA-256 | `bd86c80f2e7d97eaae5038265fcbce8734ed3f1573021dc4a8334a8a561eb49f` |
+| PDF size/pages | 1,606,334 bytes; 26 pages |
+| PDF SHA-256 | `96badc020b53d5801c1a99e7c9e43f658127bd6ee54363739a70440b6b89bb7e` |
 | Provenance manifest | `src/smarttec-investor/data/investor-deck.json` binds the model version, source workbook, team, credentials and generation inputs |
 
 Live campus verification on 14 September 2026: all six browser groups passed, covering all 16 rendered views, decoded 3D materials, rapid controls, failed-load retry, render-exception recovery without refresh, browser-history restoration, and mobile/reduced-motion layout.
+
+## 11. Capacity roadmap clarification — 14 September 2026
+
+Investor page, immersive deck, project Q&A and PDF page 22 now prominently distinguish initial 8 systems / 64 installed / 60 saleable / 4 held back from the management infrastructure design target of 30 systems / 240 installed / 225 saleable / 15 held back. The increment is 22 systems / 176 installed GPUs. Holdbacks remain financial allocations, not complete spare systems.
+
+The 240-GPU statement is a management design target, not installed capacity, independent engineering approval or evidence that first-phase funding purchases the expansion fleet. Additional hardware funding, power, direct-liquid cooling, residual heat removal, networking and demand require confirmation. The original maximum Base funding and return remain explicitly tied to the unchanged workbook assumptions; the newer offline 90%-utilization target is not extrapolated to 240 GPUs. No financial model inputs were changed in this capacity clarification.
+
+Capacity update validation: 230 unit tests, TypeScript check, Vercel and Node builds, 505 static QA checks, 158 public-page checks, PDF integrity/text geometry checks and 176 compiled-server HTTP/Chrome checks passed. PDF page 22 and the new immersive chapter at desktop/mobile widths were visually inspected. Private production sessions were not used. Deployment status for this addendum is recorded by the release commit and provider checks.

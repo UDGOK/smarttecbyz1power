@@ -5,8 +5,8 @@
   "financialBasisReviewedAt": "2026-09-13",
   "edition": "Grid-first shared inference and dedicated GPU compute",
   "pages": 26,
-  "bytes": 1606303,
-  "sha256": "bd86c80f2e7d97eaae5038265fcbce8734ed3f1573021dc4a8334a8a561eb49f",
+  "bytes": 1606334,
+  "sha256": "96badc020b53d5801c1a99e7c9e43f658127bd6ee54363739a70440b6b89bb7e",
   "modelVersion": "6.1.1",
   "modelSourceSha256": "03824d8e4bc8584b1cf7a74095e50ba1fa21d1c2f68b0b930cbc1ea3f3ad10de",
   "financialSource": {
@@ -111,6 +111,6 @@
   "credentialsSourceSha256": "b9b4b4229b520cdd2f072de6b586a5a31a666d613942738ec9721559b437d45e",
   "currentReturnStatus": "conditional-scenarios",
   "primaryReturnMetric": "headline-project-irr",
-  "builderSourceSha256": "b4e393c89b284110db25bd251018701c2a494d1fae4597de0586e92466ecee9f",
+  "builderSourceSha256": "fd4d777ae60e46adb752c0f93819eaf88d962ab24e616751b72fe71532e6d2cf",
   "exporterSourceSha256": "c8437309e4f46ca049c79250e4a9d5107d93a38696654cbdfdb88d1b09395b8f"
 }

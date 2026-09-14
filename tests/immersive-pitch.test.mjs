@@ -8,7 +8,7 @@ const chapter=id=>chapters.find(c=>c.id===id);
 const wordCount=text=>text.trim().split(/\s+/).length;
 
 test('immersive story remains concise, complete and free of missing display values',()=>{
-  assert.equal(chapters.length,13);
+  assert.equal(chapters.length,14);
   assert.equal(new Set(chapters.map(c=>c.id)).size,chapters.length);
   const visuals=new Set(['fiber','compute','campus']);
   const kinds=new Set(['hero','metrics','fleet','power','site','revenue','budget','cooling','roadmap','team','closing']);
