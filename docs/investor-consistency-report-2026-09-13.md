@@ -4,7 +4,7 @@ Review date: 13 September 2026. Financial basis: upgraded model v6.1.1. All amou
 
 The protected investor page, immersive presentation and 26-page PDF now use the same reviewed financial record. The presentation describes SmartTec's two SmartTec-owned infrastructure offerings - shared inference capacity and dedicated GPU servers - plus customer-owned colocation as a separate business line. It does not add revenue from those service descriptions on top of the workbook's modeled GPU-hour revenue.
 
-**Current local release gate: PASS for the reviewed model, investor content, automated tests, compiled application, protected-route integration and PDF.** Production deployment and the live-site smoke test remain pending and are not claimed in this report.
+**Current local release gate: PASS for the reviewed model, investor content, automated tests, compiled application, protected-route integration and PDF.** Release 16afa42fb8d5e2514183da505dc441637dee7569 was deployed and verified live on 14 September 2026.
 
 This sign-off confirms that the prepared projections reproduce the reviewed workbook outputs and that the current investor materials state the model's limits. It does not promise a return, verify an unsigned customer commitment or conclude that the project is ready to fund without commercial, legal and engineering diligence.
 
@@ -125,8 +125,8 @@ Historical financial libraries may remain in the repository for recordkeeping an
 | PDF visual inspection | All 26 pages rendered at 100 DPI and inspected; the changed financial pages were also inspected individually at original detail. No overlap, clipping or material visual defect was found. |
 | Application build | Vercel-adapter and Node-adapter production builds passed. |
 | Compiled protected-route integration | 174/174 HTTP and Chrome checks passed against the compiled server, including anonymous denial, authenticated fixtures, model/PDF/media integrity, full-screen deck behavior, responsive PDF rendering and session recovery. Production credentials were not used. |
-| Production deployment | **Pending.** No GitHub/Vercel publication is claimed in this revision of the report. |
-| Live production smoke test | **Pending.** Public route, asset and access-control behavior still requires verification after deployment. |
+| Production deployment | GitHub main release 16afa42fb8d5e2514183da505dc441637dee7569 pushed successfully. Site QA run 34842591301 and Vercel deployment DKcsUwbTgXMXSZ36DwPxfFc3oBdo both succeeded on 14 September 2026. |
+| Live production smoke test | 22 Chrome page/viewport reviews passed at 1440px and 390px: no page errors, failed same-origin requests, broken images, horizontal overflow, or visible placeholders. Automatic entry completed. The compute page carries v6.1.1; anonymous investor pages redirect, and model/PDF/removed survey APIs deny access with no-store headers. |
 
 Protected production pages were not opened with a private investor session, consistent with the owner's earlier direction to review those pages through code and automated tests. This report therefore does not claim a manual review of private production account data.
 
@@ -136,7 +136,7 @@ The current materials consistently reproduce the upgraded workbook and do not po
 
 Before investors rely on any scenario, diligence still needs executed customer/offtaker terms, evidence of founder funds and overage support, hardware and support quotes, utility and carrier evidence, the BC LLC agreement and title review, a finalized direct-liquid design and installed-cost budget, a monthly liquidity plan, resale support, and investor ownership/distribution terms.
 
-The audited local investor content contains no known conflicting financial value or service-line claim after these corrections. Final release sign-off still depends on production deployment and the live smoke test.
+The audited local investor content contains no known conflicting financial value or service-line claim after these corrections. Production deployment and live smoke verification are complete. This is a consistency and implementation sign-off, subject to the documented workbook exception and commercial/engineering limitations above.
 
 ## 10. PDF artifact identity
 
@@ -147,3 +147,5 @@ The audited local investor content contains no known conflicting financial value
 | PDF size/pages | 1,606,303 bytes; 26 pages |
 | PDF SHA-256 | `bd86c80f2e7d97eaae5038265fcbce8734ed3f1573021dc4a8334a8a561eb49f` |
 | Provenance manifest | `src/smarttec-investor/data/investor-deck.json` binds the model version, source workbook, team, credentials and generation inputs |
+
+Live campus verification on 14 September 2026: all six browser groups passed, covering all 16 rendered views, decoded 3D materials, rapid controls, failed-load retry, render-exception recovery without refresh, browser-history restoration, and mobile/reduced-motion layout.
