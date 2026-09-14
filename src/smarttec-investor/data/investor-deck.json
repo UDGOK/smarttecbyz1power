@@ -1,116 +1,121 @@
 {
   "title": "SmartTec Investor Presentation",
   "filename": "SmartTec-Investor-Presentation-2026-09.pdf",
-  "reviewedAt": "2026-09-13",
-  "financialBasisReviewedAt": "2026-09-13",
+  "reviewedAt": "2026-09-14",
+  "financialBasisReviewedAt": "2026-09-14",
   "edition": "Grid-first shared inference and dedicated GPU compute",
   "pages": 26,
-  "bytes": 1606334,
-  "sha256": "96badc020b53d5801c1a99e7c9e43f658127bd6ee54363739a70440b6b89bb7e",
-  "modelVersion": "6.1.1",
-  "modelSourceSha256": "03824d8e4bc8584b1cf7a74095e50ba1fa21d1c2f68b0b930cbc1ea3f3ad10de",
+  "bytes": 1606224,
+  "sha256": "bb7f1da634855106aa2225b7c8d41a051f91ee73ba8890ec270de6c3c0a54cc8",
+  "modelVersion": "2026.09-target",
+  "modelSourceSha256": "62d227989cd94dc7a187870ab5c604cc6d0aac16c870ad322cf25e0ee5e7a742",
   "financialSource": {
-    "filename": "SmartTec_B300_Investor_Model_v6.1_1.xlsx",
-    "sha256": "60ef7ae93c731fecee74e31241dd5e2ac3cf669bb74a0668d57f77796aa179aa",
-    "workbookSha256": "60ef7ae93c731fecee74e31241dd5e2ac3cf669bb74a0668d57f77796aa179aa",
-    "sizeBytes": 667333,
-    "formulaCount": 26721,
-    "nativeExcelVersion": "16.0",
-    "nativeExcelBuild": 20326,
-    "originalUnchanged": true,
-    "verification": "Native Excel full recalculation on seven disposable copies, save/reopen, formula-cache scan, and independent revenue/cash/NPV/IRR/XIRR checks",
-    "nativeScenarioCopies": [
-      {
-        "scenarioId": "downside",
-        "nativeAuditId": "downside-phase1",
-        "selector": 1,
-        "filename": "01-downside-phase1.xlsx",
-        "sizeBytes": 661061,
-        "sha256": "d22545a6e4abb7e1d5900c588f00e34c6a24257e80498e1b41c81f535a410ba1",
-        "planSheet": "5A Five-Year Plan (Phase 1)"
-      },
-      {
-        "scenarioId": "base",
-        "nativeAuditId": "base-phase1",
-        "selector": 2,
-        "filename": "02-base-phase1.xlsx",
-        "sizeBytes": 666861,
-        "sha256": "9f6a91c2e631f8844596cbc8c2983f1b135886017cde4ffebb11a560144a4736",
-        "planSheet": "5A Five-Year Plan (Phase 1)"
-      },
-      {
-        "scenarioId": "market",
-        "nativeAuditId": "market-phase1",
-        "selector": 3,
-        "filename": "03-market-phase1.xlsx",
-        "sizeBytes": 668714,
-        "sha256": "c3ce4bb02565c7148ca285b8bed23289adb5542588e9169be406846a6fa5cd0f",
-        "planSheet": "5A Five-Year Plan (Phase 1)"
-      },
-      {
-        "scenarioId": "contracted",
-        "nativeAuditId": "contracted-40-36-phase1",
-        "selector": 4,
-        "filename": "04-contracted-40-36-phase1.xlsx",
-        "sizeBytes": 675457,
-        "sha256": "b808b54d8a04cf4f80906a53a790cc9d54a34f89a9df1c42cb7baf04f2b7f974",
-        "planSheet": "5A Five-Year Plan (Phase 1)"
-      },
-      {
-        "scenarioId": "marketplace-heavy",
-        "nativeAuditId": "marketplace-heavy-phase1",
-        "selector": 5,
-        "filename": "05-marketplace-heavy-phase1.xlsx",
-        "sizeBytes": 661157,
-        "sha256": "d43c4783ae25751563eb6f3fed3ddf32980cbcc77f2dbf25c50924a2ab43fac7",
-        "planSheet": "5A Five-Year Plan (Phase 1)"
-      },
-      {
+    "filename": "marketplace-results-2026-09-14.json",
+    "sha256": "046bf4740393a8719e5dc28442fdd26141d2145dcb43d1b5356bf90cbd49ffd2",
+    "baseWorkbook": {
+      "filename": "SmartTec_B300_Investor_Model_v6.1_1.xlsx",
+      "sha256": "60ef7ae93c731fecee74e31241dd5e2ac3cf669bb74a0668d57f77796aa179aa",
+      "workbookSha256": "60ef7ae93c731fecee74e31241dd5e2ac3cf669bb74a0668d57f77796aa179aa",
+      "sizeBytes": 667333,
+      "formulaCount": 26721,
+      "nativeExcelVersion": "16.0",
+      "nativeExcelBuild": 20326,
+      "originalUnchanged": true,
+      "verification": "Native Excel full recalculation on seven disposable copies, save/reopen, formula-cache scan, and independent revenue/cash/NPV/IRR/XIRR checks",
+      "nativeScenarioCopies": [
+        {
+          "scenarioId": "downside",
+          "nativeAuditId": "downside-phase1",
+          "selector": 1,
+          "filename": "01-downside-phase1.xlsx",
+          "sizeBytes": 661061,
+          "sha256": "d22545a6e4abb7e1d5900c588f00e34c6a24257e80498e1b41c81f535a410ba1",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "base",
+          "nativeAuditId": "base-phase1",
+          "selector": 2,
+          "filename": "02-base-phase1.xlsx",
+          "sizeBytes": 666861,
+          "sha256": "9f6a91c2e631f8844596cbc8c2983f1b135886017cde4ffebb11a560144a4736",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "market",
+          "nativeAuditId": "market-phase1",
+          "selector": 3,
+          "filename": "03-market-phase1.xlsx",
+          "sizeBytes": 668714,
+          "sha256": "c3ce4bb02565c7148ca285b8bed23289adb5542588e9169be406846a6fa5cd0f",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "contracted",
+          "nativeAuditId": "contracted-40-36-phase1",
+          "selector": 4,
+          "filename": "04-contracted-40-36-phase1.xlsx",
+          "sizeBytes": 675457,
+          "sha256": "b808b54d8a04cf4f80906a53a790cc9d54a34f89a9df1c42cb7baf04f2b7f974",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "marketplace-heavy",
+          "nativeAuditId": "marketplace-heavy-phase1",
+          "selector": 5,
+          "filename": "05-marketplace-heavy-phase1.xlsx",
+          "sizeBytes": 661157,
+          "sha256": "d43c4783ae25751563eb6f3fed3ddf32980cbcc77f2dbf25c50924a2ab43fac7",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "delayed",
+          "nativeAuditId": "delayed-phase1",
+          "selector": 6,
+          "filename": "06-delayed-phase1.xlsx",
+          "sizeBytes": 664859,
+          "sha256": "3518982568784b2e70741c4fe048cb8ec42a5ee979cf557b5328d88507a51207",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "maximum-base",
+          "nativeAuditId": "base-maximum",
+          "selector": 2,
+          "filename": "07-base-maximum.xlsx",
+          "sizeBytes": 667146,
+          "sha256": "82a7bd0639399573a25170f416be7f3a27920b42829a65bd4825a05950867032",
+          "planSheet": "5B Five-Year Plan (Max)"
+        }
+      ],
+      "scorecardInconsistency": {
         "scenarioId": "delayed",
-        "nativeAuditId": "delayed-phase1",
         "selector": 6,
-        "filename": "06-delayed-phase1.xlsx",
-        "sizeBytes": 664859,
-        "sha256": "3518982568784b2e70741c4fe048cb8ec42a5ee979cf557b5328d88507a51207",
-        "planSheet": "5A Five-Year Plan (Phase 1)"
+        "detailedPlanSource": "'5A Five-Year Plan (Phase 1)'!C79",
+        "detailedHeadlineIrr": -0.05380501348471056,
+        "scorecardSource": "'6 Scorecard'!C81",
+        "scorecardHeadlineIrr": -0.053757173815135895,
+        "headlineIrrDifference": -4.7839669574667454e-05,
+        "detailedInitialCapitalUsd": 6864692.235240253,
+        "scorecardEngineInitialCapitalUsd": 6869080.442303808,
+        "scorecardCapitalOverstatementUsd": 4388.2070635557175,
+        "observedCause": "The scorecard calc_whatif row uses an annualized launch-shortfall approximation, while the detailed selector-6 plan uses the month-by-month 5C launch cash schedule.",
+        "candidateDecision": "Use the fully recalculated selector-6 detailed plan values."
       },
-      {
-        "scenarioId": "maximum-base",
-        "nativeAuditId": "base-maximum",
-        "selector": 2,
-        "filename": "07-base-maximum.xlsx",
-        "sizeBytes": 667146,
-        "sha256": "82a7bd0639399573a25170f416be7f3a27920b42829a65bd4825a05950867032",
-        "planSheet": "5B Five-Year Plan (Max)"
-      }
-    ],
-    "scorecardInconsistency": {
-      "scenarioId": "delayed",
-      "selector": 6,
-      "detailedPlanSource": "'5A Five-Year Plan (Phase 1)'!C79",
-      "detailedHeadlineIrr": -0.05380501348471056,
-      "scorecardSource": "'6 Scorecard'!C81",
-      "scorecardHeadlineIrr": -0.053757173815135895,
-      "headlineIrrDifference": -4.7839669574667454e-05,
-      "detailedInitialCapitalUsd": 6864692.235240253,
-      "scorecardEngineInitialCapitalUsd": 6869080.442303808,
-      "scorecardCapitalOverstatementUsd": 4388.2070635557175,
-      "observedCause": "The scorecard calc_whatif row uses an annualized launch-shortfall approximation, while the detailed selector-6 plan uses the month-by-month 5C launch cash schedule.",
-      "candidateDecision": "Use the fully recalculated selector-6 detailed plan values."
+      "normalizations": [
+        {
+          "scenarioId": "downside",
+          "field": "returns.operatingOnlyIrr",
+          "workbookValue": "IRR not resolved",
+          "candidateValue": null
+        }
+      ]
     },
-    "normalizations": [
-      {
-        "scenarioId": "downside",
-        "field": "returns.operatingOnlyIrr",
-        "workbookValue": "IRR not resolved",
-        "candidateValue": null
-      }
-    ]
+    "verification": "Native Excel recalculation of read-only Base copy with management commercial/timing overrides; independent revenue, fees, opex, tax, site payment, cash, IRR and NPV reconciliation. Original workbook unchanged."
   },
   "teamSourceSha256": "4315828a2d05bd2f83c11985872aca34c17f404d74d13a9e6145fc0c83cd32a9",
   "credentialsSourceSha256": "b9b4b4229b520cdd2f072de6b586a5a31a666d613942738ec9721559b437d45e",
   "currentReturnStatus": "conditional-scenarios",
   "primaryReturnMetric": "headline-project-irr",
-  "builderSourceSha256": "fd4d777ae60e46adb752c0f93819eaf88d962ab24e616751b72fe71532e6d2cf",
-  "exporterSourceSha256": "c8437309e4f46ca049c79250e4a9d5107d93a38696654cbdfdb88d1b09395b8f"
+  "builderSourceSha256": "ee88bbd5eb094b4fb7470288067af5397a1c64bb49a12adeb80c409abfa6ddb8",
+  "exporterSourceSha256": "503566d060453a4ea8f1a8a1e2e1cb1ce0ebeb2a4f49b5e33031dbd04cce3994"
 }

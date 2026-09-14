@@ -1,7 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {model,base,contracted,scenario,assumptions as a,usd,rate,pct,serviceLines} from '../src/smarttec-investor/financial-model.mjs';
+import {usd,rate,pct,serviceLines} from '../src/smarttec-investor/financial-model.mjs';
+import model from '../src/data/investor-model-v6-1.json' with {type:'json'};
+const scenario=id=>{const s=model.scenarios.find(s=>s.id===id);if(!s)throw new Error('Unknown reviewed model scenario');return s;};
+const base=scenario('base'),contracted=scenario('contracted'),a=model.assumptions;
 
 const close=(actual,expected,label,tolerance=0.000001)=>assert.ok(Number.isFinite(actual)&&Number.isFinite(expected)&&Math.abs(actual-expected)<=tolerance,`${label}: ${actual} differs from ${expected}`);
 const sum=values=>values.reduce((total,value)=>total+value,0);
@@ -207,18 +210,8 @@ test('workbook-native cases retain their exact commercial conditions',()=>{
   assert.ok(scenario('delayed').capital.launchTopUpUsd>0);
 });
 
-test('investor annual table separates distributions, operating cash and asset disposal',()=>{
-  const page=readFileSync(new URL('../src/pages/investors/index.astro',import.meta.url),'utf8');
-  assert.match(page,/<th>Modeled distribution<\/th>/);
-  assert.doesNotMatch(page,/<th>Distribution incl\. exit recovery<\/th>/);
-  assert.match(page,/Separate post-sale receivable collection/);
-  assert.match(page,/Headline project IRR:/);
-  const expression=page.match(/Separate net asset-sale cash at exit:\s*\{usd\((s\.annual\.reduce\([\s\S]*?,0\))\)\}/)?.[1];
-  assert.ok(expression,'Net disposal is explicitly shown separately');
-  const displayedNetSale=new Function('s',`return ${expression};`);
-  for(const s of model.scenarios){
-    const expected=sum(s.annual.map(y=>y.resaleUsd+y.resaleTaxUsd));
-    close(displayedNetSale(s),expected,`${s.id}: net asset sale`);
-    assert.ok(displayedNetSale(s)<=sum(s.annual.map(y=>y.resaleUsd)),'sale tax cannot increase proceeds');
-  }
+test('current investor table separates operating cash and exit recovery',()=>{
+ const page=readFileSync(new URL('../src/smarttec-investor/components/TargetEconomics.astro',import.meta.url),'utf8');
+ assert.match(page,/Operating cash after tax \/ site share/);assert.match(page,/Headline cash incl. exit \/ reserve/);
+ assert.match(page,/not an investor distribution schedule/);assert.match(page,/resaleTaxUsd/);
 });

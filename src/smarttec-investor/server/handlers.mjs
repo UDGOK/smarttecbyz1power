@@ -32,7 +32,7 @@ export async function handle(request,action,dependencies={}){
   if(action==='bootstrap'&&request.method==='GET')return json({csrf:session.csrf,model,faqs:faqList()});
    if(['underwriting-scenario','calculate','compare','price-floor','export'].includes(action))return json({error:'This historical calculator has been retired. Use the reviewed workbook selector scenarios in the investor room.',modelVersion:model.version,url:'/investors#returns'},410);
   if(action==='model'&&['GET','HEAD'].includes(request.method)){
-    const headers={...privateHeaders,'Content-Type':'application/json; charset=utf-8','Content-Disposition':'attachment; filename="SmartTec_Model_v6.1_1_Verified_Scenarios.json"'};
+    const headers={...privateHeaders,'Content-Type':'application/json; charset=utf-8','Content-Disposition':'attachment; filename="SmartTec_Management_Target_2026-09-14.json"'};
    return new Response(request.method==='HEAD'?null:JSON.stringify(model,null,2),{headers});
   }
   if(action==='presentation'&&['GET','HEAD'].includes(request.method)){

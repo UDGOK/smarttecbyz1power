@@ -22,25 +22,10 @@ subprocess.run(['node','tools/export-investor-deck-data.mjs'],cwd=ROOT,check=Tru
 D=json.loads((ROOT/'tmp/pdfs/deck-financials.json').read_text(encoding='utf-8'))
 M=D['model']; A=M['assumptions']
 S={item['id']:item for item in M['scenarios']}
-PHASE1_IDS=['downside','base','market','contracted','marketplace-heavy','delayed']
-if set(S)!=set(PHASE1_IDS+['maximum-base']):
- raise ValueError('The deck requires the six reviewed Phase-1 cases and maximum-base.')
-if A.get('primaryReturnMetric')!='headlineIrr':
- raise ValueError('The reviewed workbook defines headline project IRR as the primary return metric.')
+PHASE1_IDS=['base','slower-ramp','price-pressure']
 PHASE1=[S[item] for item in PHASE1_IDS]
-B=S['base']; CONTRACTED=S['contracted']; MAXIMUM=S['maximum-base']
-B2=next(row for row in B['annual'] if row['year']==2)
-if not all(row['operatingCashUsd']>0 for row in B['annual'] if row['year']<=B['horizonYears']):
- raise ValueError('The deck states that every Base forecast year has positive operating cash.')
-if any(row['returns']['headlineIrr']>=A['hurdleRate'] for row in PHASE1):
- raise ValueError('The deck states that none of the six Phase-1 cases clears the hurdle.')
-if not (
- CONTRACTED['commercial']['contractedGpus']==40
- and abs(CONTRACTED['commercial']['contractRateUsd']-6.50)<1e-9
- and abs(CONTRACTED['commercial']['contractPaidShare']-.95)<1e-9
- and CONTRACTED['commercial']['contractTermMonths']==36
-):
- raise ValueError('The Contracted case no longer matches the reviewed workbook terms.')
+B=S['base']; MAXIMUM=M['expansion']
+B2=B['annual'][1]
 CREDENTIALS=json.loads((ROOT/'src/data/yasir-credentials.json').read_text(encoding='utf-8'))
 EDITION_DATE=M.get('reviewedAt',M['source'].get('reviewedAt','2026-09-13'))
 OUT=ROOT/'output/pdf/SmartTec-Investor-Presentation-2026-09.pdf'
@@ -145,7 +130,7 @@ def callout(heading,body,y=440):
  text(heading,64,y,25,'Medium',w=470)
  text(body,592,y,20,w=496,leading=25)
 def project_note():
- foot('Conditional and unsigned. Includes modeled resale and reserve release. Unlevered project return before any investor ownership, preference or distribution waterfall; not a promised return.')
+ foot('Conditional rental target. Includes modeled resale and reserve release. Unlevered project return before any investor ownership, preference or distribution waterfall; not a promised return.')
 
 # 01 / cinematic opening, original supplied brand and existing Runway artwork
 page('Compute with a place to grow','Investor presentation')
@@ -165,7 +150,7 @@ metric(million(FUND),'initial founder capital, owner-reported',64)
 text('Management intends to fund the overage. Contribution timing, form and transfers require documentation.',64,355,22,w=470)
 text('A tangible starting point',592,222,28,'Medium',w=496)
 text('Long-term site access in Oklahoma<br/>Eight proposed Supermicro systems<br/>Two ways to sell owned GPU capacity<br/>Growth linked to paying customers',592,278,23,w=496,leading=39)
-callout('The economic discipline','The unsigned Base case is below the hurdle. Contract terms and delivered cost determine whether the investment is attractive.',y=472)
+callout('The economic discipline','The current target projects 9.78% IRR. Rental utilization, sustained pricing and delivered cost determine the return; it remains below the 15% hurdle.',y=472)
 foot('Founder capital is reported, not independently verified. The current proposal is a development-stage investment discussion.')
 
 # 03 / two own-hosted offerings
@@ -183,18 +168,18 @@ table(['SERVICE','WHO OWNS THE HARDWARE','TREATMENT IN THIS MODEL'],[
  ['Shared AI inference','SmartTec','Part of the same owned fleet; no separate per-token revenue forecast.'],
  ['Dedicated GPU servers','SmartTec','Capacity monetized as GPU-hours; contract cases reserve a defined paid allocation.'],
  ['Colocation / hosting','Customer','Separate potential business. Customer-owned hardware and hosting revenue are excluded.'],
- ['Solar and BESS','Separate project scope','Future hybrid power investment; no savings or revenue in the grid-only Base.']
+ ['Solar and BESS','Separate project scope','Future hybrid power investment; no savings or revenue in the grid-only target.']
  ],[235,277,512],y=208,rowh=78,size=20)
 foot('Dedicated server configurations and service commitments must match whole-node scheduling and recovery capabilities. Service mix is not an additional revenue multiplier.')
 
 # 05 / commercial evidence
-page('A pipeline to convert into paid capacity','Commercial position')
-text('Active discussions',64,219,40,'Medium',fill=SIGNAL,w=510)
-text('Management reports marketplace discussions and a separate potential offtake channel. Interest includes a possible 180-B300 requirement.',64,289,23,w=475)
+page('Marketplace access. Rental-led revenue.','Commercial position')
+text('Three-year access',64,219,40,'Medium',fill=SIGNAL,w=510)
+text('Management reports a signed three-year marketplace-access relationship. The platform retains 20% of rental revenue.',64,289,23,w=475)
 text('Current commitment level',592,221,28,'Medium',w=496)
-text('0 signed customer contracts<br/>0 paid pilots established<br/>No agreed minimum customer receipts',592,291,25,w=496,leading=44)
-callout('Contract the customer payment','The proposed buyer pays for compliant reserved capacity under enforceable terms. Downstream token or resale demand is not a substitute for that obligation.',y=472)
-foot('Owner-reported discussions, not verified orders. Marketplace access does not guarantee utilization. No expansion decision is supported solely by the 180-GPU inquiry.')
+text('Paid only for rented GPU-hours<br/>90% paid utilization target<br/>No guaranteed minimum receipts',592,291,25,w=496,leading=44)
+callout('Convert access into paid hours','At $6.50 per GPU-hour, $5.20 remains after the marketplace fee and before all other costs. Access is not a take-or-pay customer contract.',y=472)
+foot('Agreement status is management-reported; not independently reviewed. Flat pricing and continued channels in Years 4–5 are assumptions, not guaranteed contracted receipts.')
 
 # 06 / site rights rather than ownership
 page('A long-term operating location','Site and founder position')
@@ -210,16 +195,16 @@ metric(f"{A['energyUsdPerKwh']*100:g} cents",'per kWh energy planning assumption
 metric(usd(A['demandUsdPerKwMonth'])+'/kW','monthly demand-charge assumption',592)
 text('Launch uses grid power. The model includes energy and demand charges separately, with demand based on the estimated billed peak.',64,381,23,w=475)
 text('Solar and battery storage are future additions. They require their own installed budget, tariff analysis, interconnection and measured savings.',592,381,23,w=496)
-foot('Neither tariff component is verified. The billed peak is '+pct(A['demandPeakFactor'])+' of the design-day peak. No behind-the-meter discount or solar savings is included in Base. Runway hybrid-power concept.')
+foot('Neither tariff component is verified. The billed peak is '+pct(A['demandPeakFactor'])+' of the design-day peak. No behind-the-meter discount or solar savings is included in the target. Runway hybrid-power concept.')
 
 # 08 / hardware correctly air cooled
 page('Eight complete B300 systems','Compute platform',True)
 metric(million(cap['serverHardwareUsd']),str(fleet['nodes'])+' systems x '+usd(cap['serverHardwareUsd']/fleet['nodes']),64)
 text(f"{fleet['installedGpus']} GPUs installed<br/>{fleet['saleableGpus']} revenue-producing GPU allocation<br/>{fleet['heldBackGpus']} installed GPUs held uncommitted",64,375,26,'Medium',w=478,leading=38)
 text('Supermicro HGX B300 platform',592,220,26,'Medium',w=496)
-text('Eight GPUs per complete system<br/>Dual CPUs and NVSwitch fabric<br/>Networking and local storage<br/>NVIDIA software and support<br/>Air-cooled server planning basis',592,272,22,w=496,leading=37)
+text('Eight GPUs per complete system<br/>Dual CPUs and NVSwitch fabric<br/>Networking and local storage<br/>NVIDIA software and support<br/>Earlier air-cooled cost allowance',592,272,22,w=496,leading=37)
 text('Support: '+str(A['includedSupportMonths'])+' operating months included; then '+pct(A['postWarrantySupportRate'])+' of complete-system purchase cost/year before '+pct(A['annualCostInflation'])+' annual cost escalation. Supplier terms are unverified.',64,517,17,w=1024)
-foot('Complete-system price and inclusions are owner-reported. Exact quoted SKU, inter-node fabric, support coverage and delivery terms require confirmation. This model uses air cooling, not a direct-liquid server loop.')
+foot('Complete-system price and inclusions are owner-reported. Exact quoted SKU, inter-node fabric, support coverage and delivery terms require confirmation. The direct-liquid Buildings A/C design requires repricing.')
 
 # 09 / fleet allocation illustration
 page('Capacity allocation is not full redundancy','Service availability',True)
@@ -238,31 +223,31 @@ page('Power and cooling sized together','Preliminary engineering')
 metric(f"{tech['itKw']:,.1f} kW",'IT load at full modeled draw',64)
 metric(f"{tech['facilityPeakKw']:,.1f} kW",'estimated whole-site design-day load',592)
 text(f"{tech['chillerCount']} x {tech['chillerUnitTons']:g}-ton chillers<br/>{tech['inRowCoolerCount']} x {tech['inRowUnitKw']:g} kW in-row coolers",64,383,28,'Medium',w=475,leading=40)
-text(f"{tech['coolingLoadTons']:.1f} tons of design cooling duty. In-row units transfer server exhaust heat to a closed chilled-water/glycol loop. Modeled quantities include spare units.",592,381,23,w=496)
+text(f"{tech['coolingLoadTons']:.1f} tons of design cooling duty. These retained air-cooled budget quantities include spare units. Direct-liquid racks and residual room heat require revised engineering and pricing.",592,381,23,w=496)
 foot('Node load '+str(tech['nodeKw'])+' kW is an estimate. Chiller ambient/glycol derate, electrical ratings, pumps, controls, transfer, fire/egress and layout need engineer/vendor approval. N+1 arithmetic is not facility certification.')
 
 # 11 / replace all obsolete funding bridges
-page('The initial capital requirement','Base uses of funds',True)
+page('The initial capital requirement','Current target uses of funds',True)
 table(['USE','AMOUNT','BASIS'],[
  ['Complete GPU systems',usd(cap['serverHardwareUsd']),'Owner-reported complete-system price'],
  ['Storage / management / spares',usd(cap['storageAndSparesUsd']),'Additional allowance; quote overlap unresolved'],
  ['Freight / rigging / sales tax',usd(cap['freightAndTaxUsd']),'Planning allowance; exemptions unverified'],
  ['Power / cooling / site infrastructure',usd(cap['infrastructureUsd']),'Includes engineering and contingency'],
  ['Cash reserve and launch top-up',usd(cap['cashReserveUsd']+cap['launchTopUpUsd']),'Includes receivables funding'],
- ['TOTAL INITIAL FUNDING',usd(cap['totalUsd']),'Model v'+str(M['version'])+' Base; not a contractor quotation']
+ ['TOTAL INITIAL FUNDING',usd(cap['totalUsd']),'Model v'+str(M['version'])+' target; not a contractor quotation']
  ],[441,220,363],y=190,rowh=55,size=17)
 foot('Above the initial owner-reported '+million(FUND)+' is '+usd(max(0,cap['totalUsd']-FUND))+'. Management intends to cover the overage. Capital availability and terms remain unverified.')
 
 # 12 / unit economics transparent
-page('Operating profit and capital return differ','Base operating economics')
+page('Operating profit and capital return differ','Current target operating economics')
 metric(million(B2['revenueUsd']),'Year 2 modeled revenue',64)
 metric(million(B2['ebitdaUsd']),'Year 2 EBITDA / before tax and depreciation',592)
 text(f"{fleet['saleableGpus']} earning GPUs x {num(A['annualHours'])} hours<br/>x {pct(comm['merchantUtilizationYear2Plus'])} paid utilization<br/>x ${comm['merchantRateYear1Usd']*(1+comm['annualMerchantRateChange']):.2f}/GPU-hour in Year 2",64,382,24,w=475,leading=36)
-text('The Base starts at $'+f"{comm['merchantRateYear1Usd']:.2f}"+' per GPU-hour. Merchant pricing declines '+pct(-comm['annualMerchantRateChange'])+' annually; cash costs include staff, support, fees, power, tax and site payments.',592,381,23,w=496)
+text('The target holds $6.50 flat for five years and charges a 20% fee on all rental revenue. Cash costs also include staff, support, power, tax and site payments.',592,381,23,w=496)
 foot('Utilization and price are assumptions, not customer commitments. Positive EBITDA does not establish investment payback or cash available to an outside investor.')
 
 # 13 / full annual operating path
-page('Five years of Base operating performance','Base forecast',True)
+page('Five years of target operating performance','Current target forecast',True)
 table(['YEAR','REVENUE','OPERATING COST','EBITDA','OPERATING CASH'],[
  [str(r['year']),million(r['revenueUsd']),million(r['opexUsd']),million(r['ebitdaUsd']),million(r['operatingCashUsd'])] for r in B['annual'] if r['year']<=B['horizonYears']
  ],[115,227,227,227,228],y=212,rowh=56,size=21)
@@ -270,45 +255,37 @@ text('Operating cash is after modeled operating tax and the BC LLC payment. It e
 foot('The launch period is '+str(comm['buildMonths'])+' months. Receivables, funded reserves and actual distribution timing are handled separately in the dated project-cash schedule.')
 
 # 14 / headline project return is the workbook's primary metric
-page('The unsigned Base does not clear the hurdle','Base capital recovery')
+page('The current target projects positive returns','Target capital recovery')
 metric(pct(B['returns']['headlineIrr']),'headline project IRR / primary metric',64)
 metric(pct(A['hurdleRate']),'modeled project-return hurdle',592)
-text(million(B['returns']['unrecoveredOperatingCapitalUsd'])+' remains unrecovered',64,386,29,'Medium',w=1010)
-text('after the modeled operating cash over the horizon. Asset-sale assumptions and the timing of reserve release matter; neither is recurring operating income.',64,441,23,w=970)
+text(million(B['returns']['totalOperatingCashUsd'])+' total operating cash over five years',64,386,29,'Medium',w=1010)
+text('This exceeds initial funding before terminal recovery. The 9.78% headline includes asset resale and reserve release, and remains below the 15% hurdle.',64,441,23,w=970)
 text('Headline NPV at '+pct(A['hurdleRate'])+': '+million(B['returns']['npvUsd'])+'  /  Headline cash multiple: '+f"{B['returns']['moic']:.3f}x"+' including modeled resale',64,527,17,w=1024)
 foot('Five-year hold; resale assumes '+pct(A['hardwareResaleYear5'])+' of hardware cost and '+pct(A['infrastructureResale'])+' of infrastructure, with no guaranteed buyer. Annual-funded IRR '+pct(B['returns']['annualFundedIrr'])+' and dated XIRR '+pct(B['returns']['datedFundedIrr'])+' are timing diagnostics, before investor allocation.')
 
 # 15 / the six workbook-native Phase-1 cases
 page('Customer economics change the result','Conditional scenario comparison',True)
-scenario_names={
- 'downside':'Downside',
- 'base':'Base',
- 'market':'Market',
- 'contracted':'Contracted / 40 GPUs',
- 'marketplace-heavy':'Marketplace-heavy',
- 'delayed':'Delayed customer',
-}
+scenario_names={'base':'Target / flat price','slower-ramp':'Slower ramp','price-pressure':'Price pressure'}
 table(['PHASE-1 CASE','INITIAL CAPITAL','YEAR 2 OPERATING CASH','HEADLINE IRR'],[
- [scenario_names[row['id']],million(row['capital']['totalUsd']),million(next(item for item in row['annual'] if item['year']==2)['operatingCashUsd']),pct(row['returns']['headlineIrr'])]
- for row in PHASE1
- ],[330,217,270,207],y=190,rowh=52,size=18)
-foot('All six cases are unsigned, conditional workbook scenarios; none clears the '+pct(A['hurdleRate'])+' project-return hurdle. Positive operating cash is not the same as full capital recovery. Maximum build is shown separately on page 22.')
+ [scenario_names[row['id']],million(row['capital']['totalUsd']),million(row['annual'][1]['operatingCashUsd']),pct(row['returns']['headlineIrr'])] for row in PHASE1
+ ],[330,217,270,207],y=212,rowh=74,size=20)
+text('Target: 90% paid use and flat $6.50. Slower ramp: 55% in the first eleven operating months, then 90%. Price pressure: 90% use with 10% annual price decline.',64,501,18,w=1024)
+foot('All cases retain the 20% fee and other cost methods. Conditional projections; none clears the 15% hurdle. The 240-GPU sensitivity uses historical inputs, not these target assumptions.')
 
-# 16 / exact unsigned Contracted case from the workbook
-page('A contract must survive its own assumptions','Contracted scenario')
-metric(pct(CONTRACTED['returns']['headlineIrr']),'headline project IRR / '+str(CONTRACTED['horizonYears'])+' years',64)
-text(f"{CONTRACTED['commercial']['contractedGpus']} GPUs at ${CONTRACTED['commercial']['contractRateUsd']:.2f}/GPU-hour<br/>{pct(CONTRACTED['commercial']['contractPaidShare'])} paid share / {CONTRACTED['commercial']['contractTermMonths']} months",64,379,27,'Medium',w=475,leading=39)
-text('Merchant economics after expiry',592,218,28,'Medium',w=496)
-text('The remaining '+str(CONTRACTED['capacity']['saleableGpus']-CONTRACTED['commercial']['contractedGpus'])+' saleable GPUs use a $'+f"{CONTRACTED['commercial']['merchantRateYear1Usd']:.2f}"+' Year-1 reference, '+pct(CONTRACTED['commercial']['merchantUtilizationYear1'])+' / '+pct(CONTRACTED['commercial']['merchantUtilizationYear2Plus'])+' paid utilization and '+pct(-CONTRACTED['commercial']['annualMerchantRateChange'])+' annual price decline. Contracted capacity follows merchant inputs after expiry; no renewal is assumed.',592,278,18,w=496,leading=25)
-text('Credit support, acceptance, deposit, service credits and termination provisions determine whether the minimum payment is dependable.',592,490,18,w=496,leading=25)
-project_note()
+# 16 / commercial term is access, not guaranteed receipts
+page('Three years of access is not five-year revenue','Commercial term and pricing')
+metric('20%','marketplace deduction on all rental billing',64)
+metric('90%','paid utilization target, not measured uptime',592)
+text('The target assumes $6.50 per rented GPU-hour throughout the five-year hold. No price protection or minimum rental volume has been established.',64,381,23,w=475)
+text('Management reports a signed three-year access relationship. Years 4–5 assume continued access or replacement sales channels; renewal is not confirmed.',592,381,23,w=496)
+foot('Planned billing starts November 1, 2026. Fees, customer credit, collections, service acceptance, availability and realized occupancy determine actual receipts.')
 
 # 17 / make positive cash and sub-hurdle return legible together
-page('Cash-positive operations still miss the hurdle','Base return bridge')
+page('Operating cash supports capital recovery','Target return bridge')
 metric(million(B2['operatingCashUsd']),'Year 2 modeled operating cash',64)
 metric(million(B['returns']['npvUsd']),'headline NPV at '+pct(A['hurdleRate']),592)
-text('Every Base forecast year shows positive modeled operating cash after operating tax and the BC LLC payment.',64,380,25,'Medium',w=475,leading=34)
-text('The '+million(B['capital']['totalUsd'])+' initial outlay, declining merchant price and modeled exit value produce a '+pct(B['returns']['headlineIrr'])+' headline project IRR. Annual cash generation alone does not establish full capital recovery.',592,380,22,w=496,leading=30)
+text('Every target forecast year shows positive modeled operating cash after operating tax and the BC LLC payment.',64,380,25,'Medium',w=475,leading=34)
+text('The '+million(B['capital']['totalUsd'])+' initial outlay, flat target pricing and modeled exit value produce a '+pct(B['returns']['headlineIrr'])+' headline project IRR. Annual cash generation alone does not establish full capital recovery.',592,380,22,w=496,leading=30)
 project_note()
 
 # 18 / launch measured milestones
@@ -320,7 +297,7 @@ table(['STAGE','DELIVERABLE','DECISION BASIS'],[
  ['Commissioning','Load, cooling, network and recovery tests','Measured service performance before customer acceptance'],
  ['Operating growth','Utilization, receipts, support and reserve reporting','Further purchases linked to supported demand']
  ],[220,403,401],y=196,rowh=65,size=18)
-foot('The Base assumes '+str(comm['buildMonths'])+' months before billing, not an approved construction schedule. Vendor milestones and contractor commitments remain to be documented.')
+foot('Planned first billing: November 1, 2026. Funding assumed October 1; one pre-revenue month. Delivery, staffing and commissioning power begin in month 1. Schedule requires confirmation.')
 
 # 19 / shared real team, no invented biography
 page('The team carrying the project forward','Leadership, operations and advisors')
@@ -353,14 +330,14 @@ two_blocks([
  ('Solar generation','Potential on-site production requires an EPC scope, interconnection review, credible production profile and tariff-based self-consumption value.'),
  ('Battery storage','Capacity, dispatch, degradation, replacement and the actual demand tariff determine savings. A battery is not automatically a firm alternate source for the full cooling load.')
  ],y=300)
-foot('No solar/BESS capex, incentive, savings or revenue is credited to the GPU Base case. The future hybrid system requires its own approved investment case; grid supply supports launch.')
+foot('No solar/BESS capex, incentive, savings or revenue is credited to the GPU target case. The future hybrid system requires its own approved investment case; grid supply supports launch.')
 
 # 22 / preliminary scale notexcitementguarantee
 page('Start with 64. Plan for up to 240.','Capacity roadmap')
 metric(str(MAXIMUM['capacity']['installedGpus'])+' GPUs','management infrastructure design target',64)
-metric(million(MAXIMUM['capital']['totalUsd']),'workbook maximum Base funding',592)
+metric(million(MAXIMUM['capital']['totalUsd']),'historical v6.1.1 maximum funding',592)
 text('Initial: 8 systems / 64 GPUs / 60 saleable. Target: 30 systems / 240 GPUs / 225 saleable. Expansion adds 22 systems and 176 GPUs.',64,384,23,w=475)
-text('Workbook maximum Base IRR: '+pct(MAXIMUM['returns']['headlineIrr'])+'. Original assumptions; not the newer 90%-utilization target. Initial funding does not purchase the expansion fleet.',592,384,23,w=496)
+text('Historical v6.1.1 maximum IRR: '+pct(MAXIMUM['returns']['headlineIrr'])+'. Original inputs; not the current 90%-utilization target. Initial funding does not purchase the expansion fleet.',592,384,23,w=496)
 foot('Management design target, not commissioned capacity or engineering approval. Confirm power, liquid cooling, networking, customers and expansion funding. Reprice the liquid-cooled design; workbook maximum holds back 15 GPUs.')
 
 # 23 / distinction investor projectreturns
@@ -386,7 +363,7 @@ foot('Development-stage risks remain. The model is an auditable planning case; f
 # 25 / model provenance and precise methods
 page('A traceable financial and technical basis','Model and sources',True)
 text('Reviewed model '+str(M['version']),64,210,28,'Medium',w=480)
-text('Native Excel recalculation and independent cash checks support this snapshot. The website and PDF use the same USD project values.',64,267,22,w=480)
+text('Native Excel recalculation and independent checks support the target. Website and PDF share its values; the original workbook is unchanged.',64,267,22,w=480)
 text('Headline project IRR is the quoted return metric. Annual-funded IRR and dated XIRR use different cash-timing conventions and are shown only as diagnostics.',64,387,21,w=480)
 text('Workbook stays private',64,496,23,'Medium',w=480)
 text('Source identity and values are retained in the protected model.',64,531,16,w=480)

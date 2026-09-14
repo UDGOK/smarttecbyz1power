@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chapters,teamMembers,pitchContact} from '../src/smarttec-investor/data/immersive-pitch.mjs';
-import {model,base,market,contracted,maximum,assumptions as a,headlineIrr,usd,millions} from '../src/smarttec-investor/financial-model.mjs';
+import {model,base,market,downside,maximum,assumptions as a,headlineIrr,usd,millions} from '../src/smarttec-investor/financial-model.mjs';
 import team from '../src/data/team.json' with {type:'json'};
 
 const chapter=id=>chapters.find(c=>c.id===id);
@@ -26,40 +26,16 @@ test('immersive story remains concise, complete and free of missing display valu
   assert.doesNotMatch(JSON.stringify(chapters),/\bundefined\b|\bNaN\b|\bInfinity\b/);
 });
 
-test('immersive figures use headline IRR as the workbook primary return',()=>{
-  assert.equal(a.primaryReturnMetric,'headlineIrr');
-  assert.deepEqual(chapter('fleet').metrics.map(item=>item.value),[
-    String(base.capacity.installedGpus),String(base.capacity.saleableGpus),String(base.capacity.heldBackGpus),usd(base.capital.nodePriceUsd)
-  ]);
-  assert.deepEqual(chapter('investment').metrics.map(item=>item.value),[base,market,contracted,maximum].map(item=>(headlineIrr(item)*100).toFixed(2)+'%'));
-  assert.equal(chapter('funding-bridge').metrics[3].value,usd(base.capital.totalUsd));
-  assert.equal(chapter('founder-capital').metrics[0].value,millions(model.assumptions.initialFounderCapitalUsd));
-  assert.ok(headlineIrr(base)<0);
-  assert.ok(base.annual.every(year=>year.operatingCashUsd>0));
-  assert.match(chapter('investment').lede,/operating cash is positive in every modeled year/);
-  assert.match(chapter('investment').lede,/five-year headline IRR remains negative/);
-  assert.match(chapter('investment').keypoints.join(' '),/No built-in Phase-1 scenario clears the 15% hurdle/);
-  assert.match(chapter('investment').footnote,/Headline project IRR is the workbook primary metric/);
-  assert.match(chapter('investment').footnote,/no scenario return is promised to an investor/i);
-});
-
-test('commercial and service chapters distinguish assumptions from contracted demand',()=>{
-  assert.equal(contracted.commercial.contractedGpus,40);
-  assert.equal(contracted.commercial.contractRateUsd,6.5);
-  assert.equal(contracted.commercial.contractPaidShare,0.95);
-  assert.equal(contracted.commercial.contractTermMonths,36);
-  assert.equal(chapter('commercial').metrics[1].value,usd(base.annual[0].revenueUsd));
-  assert.equal(chapter('commercial').metrics[2].value,'40 GPUs');
-  assert.match(chapter('commercial').metrics[2].note,/\$6\.50.*36 months.*unsigned/);
-  assert.match(chapter('commercial').keypoints.join(' '),/40 reserved GPUs with 20 merchant GPUs/);
-  assert.match(chapter('commercial').footnote,/Gross billing is not collected cash or profit/);
-  assert.deepEqual(chapter('thesis').metrics.map(item=>item.value),['Multi-tenant','Single-tenant','Customer-owned']);
-  assert.match(chapter('thesis').keypoints.join(' '),/do not add colocation revenue/);
-  assert.match(chapter('commercial').keypoints.join(' '),/no capacity is counted twice/);
-  assert.match(chapter('power').lede,/no assumed behind-the-meter savings/);
-  assert.match(chapter('cooling').footnote,/not installed capacity/);
-  assert.match(chapter('cooling').footnote,/direct-liquid concept cannot replace this budget/i);
-  assert.doesNotMatch(JSON.stringify(chapters),/contracted-36|contracted-60|contracted-60-at-650|60 GPUs[^.]*\$7\.50/);
+test('immersive target metrics match current recalculated scenarios',()=>{
+ assert.deepEqual(chapter('investment').metrics.slice(0,3).map(m=>m.value),[base,downside,market].map(s=>(s.returns.headlineIrr*100).toFixed(2)+'%'));
+ assert.equal(chapter('investment').metrics[0].value,'9.78%');
+ assert.equal(chapter('funding-bridge').metrics[3].value,usd(base.capital.totalUsd));
+ assert.match(chapter('investment').keypoints.join(' '),/20%.*15%/);
+ assert.match(chapter('investment').footnote,/not guaranteed investor returns/);
+ assert.match(chapter('commercial').footnote,/not take-or-pay/);
+ assert.deepEqual(chapter('commercial').metrics.map(m=>m.value),['$6.50','90%','20%','$5.20']);
+ assert.match(chapter('delivery').metrics[0].value,/Nov 1, 2026/);
+ assert.match(chapter('fleet').lede,/requires repricing/);
 });
 
 test('immersive team roster matches the existing owner-supplied site roster',()=>{

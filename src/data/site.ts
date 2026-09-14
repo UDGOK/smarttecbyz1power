@@ -15,7 +15,7 @@ export type Evidence =
 export const REVIEWED = '13 September 2026';
 
 /** Public label for the current reviewed workbook revision. */
-export const MODEL_EDITION = 'v6.1.1 · upgraded source revision';
+export const MODEL_EDITION = '14 September management target · v6.1.1 cost basis';
 
 /** Owner-approved campus concept; it does not reprice the versioned investor model. */
 export const campusConcept = {
@@ -301,7 +301,7 @@ export const publicDeployment = {
   reserveNote: 'The four-GPU reserve is a financial allocation within eight complete systems. It is not a complete standby server or a validated failover design.',
   status: 'Proposed — procurement and commissioning ahead',
   ownership: 'Planned SmartTec-owned and operated systems; not a purchased or commissioned fleet',
-  demand: 'Active customer discussions; no signed customer contracts or guaranteed minimum receipts have been established.',
+  demand: 'Management reports signed three-year marketplace access; no signed customer contracts or guaranteed minimum receipts have been established. Payment is only for rented GPU-hours.',
   evidence: 'owner-reported' as Evidence,
 } as const;
 

@@ -1,3 +1,5 @@
+> Historical release record. The financial headline and PDF identity below are superseded by [the 14 September target release](investor-target-release-2026-09-14.md). The original workbook remains unchanged.
+
 # SmartTec investor and website consistency report
 
 Review date: 13 September 2026. Financial basis: upgraded model v6.1.1. All amounts are USD.

@@ -1,0 +1,1140 @@
+{
+  "version": "2026.09-target",
+  "reviewedAt": "2026-09-14",
+  "source": {
+    "filename": "marketplace-results-2026-09-14.json",
+    "sha256": "046bf4740393a8719e5dc28442fdd26141d2145dcb43d1b5356bf90cbd49ffd2",
+    "baseWorkbook": {
+      "filename": "SmartTec_B300_Investor_Model_v6.1_1.xlsx",
+      "sha256": "60ef7ae93c731fecee74e31241dd5e2ac3cf669bb74a0668d57f77796aa179aa",
+      "workbookSha256": "60ef7ae93c731fecee74e31241dd5e2ac3cf669bb74a0668d57f77796aa179aa",
+      "sizeBytes": 667333,
+      "formulaCount": 26721,
+      "nativeExcelVersion": "16.0",
+      "nativeExcelBuild": 20326,
+      "originalUnchanged": true,
+      "verification": "Native Excel full recalculation on seven disposable copies, save/reopen, formula-cache scan, and independent revenue/cash/NPV/IRR/XIRR checks",
+      "nativeScenarioCopies": [
+        {
+          "scenarioId": "downside",
+          "nativeAuditId": "downside-phase1",
+          "selector": 1,
+          "filename": "01-downside-phase1.xlsx",
+          "sizeBytes": 661061,
+          "sha256": "d22545a6e4abb7e1d5900c588f00e34c6a24257e80498e1b41c81f535a410ba1",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "base",
+          "nativeAuditId": "base-phase1",
+          "selector": 2,
+          "filename": "02-base-phase1.xlsx",
+          "sizeBytes": 666861,
+          "sha256": "9f6a91c2e631f8844596cbc8c2983f1b135886017cde4ffebb11a560144a4736",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "market",
+          "nativeAuditId": "market-phase1",
+          "selector": 3,
+          "filename": "03-market-phase1.xlsx",
+          "sizeBytes": 668714,
+          "sha256": "c3ce4bb02565c7148ca285b8bed23289adb5542588e9169be406846a6fa5cd0f",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "contracted",
+          "nativeAuditId": "contracted-40-36-phase1",
+          "selector": 4,
+          "filename": "04-contracted-40-36-phase1.xlsx",
+          "sizeBytes": 675457,
+          "sha256": "b808b54d8a04cf4f80906a53a790cc9d54a34f89a9df1c42cb7baf04f2b7f974",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "marketplace-heavy",
+          "nativeAuditId": "marketplace-heavy-phase1",
+          "selector": 5,
+          "filename": "05-marketplace-heavy-phase1.xlsx",
+          "sizeBytes": 661157,
+          "sha256": "d43c4783ae25751563eb6f3fed3ddf32980cbcc77f2dbf25c50924a2ab43fac7",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "delayed",
+          "nativeAuditId": "delayed-phase1",
+          "selector": 6,
+          "filename": "06-delayed-phase1.xlsx",
+          "sizeBytes": 664859,
+          "sha256": "3518982568784b2e70741c4fe048cb8ec42a5ee979cf557b5328d88507a51207",
+          "planSheet": "5A Five-Year Plan (Phase 1)"
+        },
+        {
+          "scenarioId": "maximum-base",
+          "nativeAuditId": "base-maximum",
+          "selector": 2,
+          "filename": "07-base-maximum.xlsx",
+          "sizeBytes": 667146,
+          "sha256": "82a7bd0639399573a25170f416be7f3a27920b42829a65bd4825a05950867032",
+          "planSheet": "5B Five-Year Plan (Max)"
+        }
+      ],
+      "scorecardInconsistency": {
+        "scenarioId": "delayed",
+        "selector": 6,
+        "detailedPlanSource": "'5A Five-Year Plan (Phase 1)'!C79",
+        "detailedHeadlineIrr": -0.05380501348471056,
+        "scorecardSource": "'6 Scorecard'!C81",
+        "scorecardHeadlineIrr": -0.053757173815135895,
+        "headlineIrrDifference": -4.7839669574667454e-05,
+        "detailedInitialCapitalUsd": 6864692.235240253,
+        "scorecardEngineInitialCapitalUsd": 6869080.442303808,
+        "scorecardCapitalOverstatementUsd": 4388.2070635557175,
+        "observedCause": "The scorecard calc_whatif row uses an annualized launch-shortfall approximation, while the detailed selector-6 plan uses the month-by-month 5C launch cash schedule.",
+        "candidateDecision": "Use the fully recalculated selector-6 detailed plan values."
+      },
+      "normalizations": [
+        {
+          "scenarioId": "downside",
+          "field": "returns.operatingOnlyIrr",
+          "workbookValue": "IRR not resolved",
+          "candidateValue": null
+        }
+      ]
+    },
+    "verification": "Native Excel recalculation of read-only Base copy with management commercial/timing overrides; independent revenue, fees, opex, tax, site payment, cash, IRR and NPV reconciliation. Original workbook unchanged."
+  },
+  "assumptions": {
+    "currency": "USD",
+    "ratesAreFractions": true,
+    "returnBasis": "Unlevered after-tax project cash; not an investor security, financing commitment or guaranteed return",
+    "primaryReturnMetric": "headlineIrr",
+    "annualHours": 8760,
+    "modelStartDate": "2026-10-01",
+    "hurdleRate": 0.15,
+    "powerStrategy": "Grid power at launch; solar and BESS are a separate future investment and are not included in these project returns",
+    "energyUsdPerKwh": 0.095,
+    "demandUsdPerKwMonth": 12,
+    "demandPeakFactor": 0.9,
+    "averagePue": 1.3,
+    "annualCostInflation": 0.03,
+    "includedSupportMonths": 36,
+    "includedSupportRate": 0,
+    "supportStartsAt": "first operating/billing month",
+    "postWarrantySupportRate": 0.05,
+    "supportCostBasis": "Complete B300 system purchase subtotal, excluding separate storage/spares and freight/tax",
+    "phase1InternetAnnualUsd": 48000,
+    "networkBudgetEvidence": "The model uses a $48,000 annual connectivity allowance ($4,000/month). Carrier scope and final bandwidth pricing require a written quote.",
+    "collectionDays": 30,
+    "hardwareResaleYear5": 0.2,
+    "hardwareResaleYear6": 0.15,
+    "infrastructureResale": 0.5,
+    "hardwareDepreciationYears": 5,
+    "infrastructureDepreciationYears": 15,
+    "taxRate": 0.25,
+    "nolDeductionLimit": 0.8,
+    "bcLlcShare": 0.01,
+    "bcLlcBasis": "Positive after-tax accounting income; no payment on losses",
+    "marketplaceShare": 1,
+    "marketplaceCommission": 0.2,
+    "blendedMerchantCommission": 0.2,
+    "cashReserveMonths": 3,
+    "initialFounderCapitalUsd": 6000000,
+    "founderCapitalEvidence": "Owner reported; availability and commitment not independently verified",
+    "hardwarePriceEvidence": "Owner-reported $670,000 per complete eight-GPU node; final supplier quote, exact SKU and support terms require verification",
+    "engineeringStatus": "Preliminary planning estimates; utility service, voltage conversion, thermal design, installed pricing and final design require professional/vendor confirmation",
+    "cashTiming": "Hardware and infrastructure funded at inception; annual operating distributions; final receivable separately dated after sale. This is not a complete monthly life-of-project liquidity forecast.",
+    "resaleEvidence": "Model assumption, not a guaranteed equipment buyback or independent valuation",
+    "npvBasis": "npvUsd discounts the annual headline project cash series at the hurdle. Annual-funded IRR and dated-funded XIRR are separate timing diagnostics.",
+    "sourceSheets": [
+      "2 Inputs",
+      "3 The Build",
+      "4 Capital Needed",
+      "5A Five-Year Plan (Phase 1)",
+      "5B Five-Year Plan (Max)",
+      "5C Launch Months",
+      "6 Scorecard"
+    ],
+    "plannedBillingDate": "2026-11-01"
+  },
+  "timing": {
+    "fundingDateAssumed": "2026-10-01",
+    "firstBillingPlanned": "2026-11-01",
+    "holdEnd": "2031-09-30",
+    "preRevenueMonths": 1,
+    "note": "Delivery, staffing and commissioning power begin in model month 1; compressed schedule requires supplier and contractor confirmation."
+  },
+  "commercialEvidence": {
+    "status": "Management reports signed three-year marketplace access",
+    "payment": "Paid only for rented GPU-hours; no minimum receipts, guaranteed occupancy or protected price",
+    "fee": 0.2,
+    "providerNameWithheld": true,
+    "beyondTerm": "Years 4\u20135 assume continued marketplace access or replacement channels; no renewal established"
+  },
+  "limitations": [
+    "90% is paid utilization, not measured uptime or guaranteed occupancy.",
+    "$6.50 is flat for five years in the target, not a protected contractual price.",
+    "Costs retain the earlier one-building air-cooled budget; direct-liquid Buildings A/C scope requires repricing.",
+    "Resale and reserve release contribute to headline IRR. No investor-specific ownership or waterfall is modeled."
+  ],
+  "scenarios": [
+    {
+      "id": "base",
+      "label": "Management target \u00b7 90% / flat rate",
+      "status": "conditional-management-sensitivity",
+      "horizonYears": 5,
+      "capacity": {
+        "nodes": 8,
+        "installedGpus": 64,
+        "saleableGpus": 60,
+        "heldBackGpus": 4
+      },
+      "technical": {
+        "nodeKw": 15,
+        "itKw": 128.4,
+        "facilityPeakKw": 203.15895592834804,
+        "billedPeakKw": 182.84306033551323,
+        "worstDayPue": 1.582234859255047,
+        "coolingLoadKw": 141.24,
+        "coolingLoadTons": 40.15922661359113,
+        "chillerCount": 2,
+        "chillerUnitTons": 50,
+        "installedCoolingTons": 100,
+        "inRowCoolerCount": 5,
+        "inRowUnitKw": 40,
+        "racks": 4,
+        "preliminaryRequiredFloorSqFt": 591,
+        "allocatedFloorSqFt": 1800,
+        "serviceVoltage": 208,
+        "serviceAmps": 3000,
+        "designChillerCapacityFactor": 0.85,
+        "nPlusOneChillerMargin": 0.05828731237609741
+      },
+      "capital": {
+        "totalUsd": 6977011.212868089,
+        "serverHardwareUsd": 5360000,
+        "nodePriceUsd": 670000,
+        "storageAndSparesUsd": 80000,
+        "freightAndTaxUsd": 163200,
+        "hardwareUsd": 5603200,
+        "infrastructureUsd": 782499.4361103213,
+        "cashReserveUsd": 591311.7767577679,
+        "launchTopUpUsd": 0.0,
+        "founderFundingGapUsd": 977011.2128680889,
+        "infrastructureBreakdown": [
+          {
+            "label": "Racks, power strips, hot-aisle containment",
+            "amountUsd": 48000,
+            "sourceCell": "'4 Capital Needed'!C15"
+          },
+          {
+            "label": "Electrical distribution from the 3,000A main",
+            "amountUsd": 154080,
+            "sourceCell": "'4 Capital Needed'!C16"
+          },
+          {
+            "label": "UPS / battery ride-through",
+            "amountUsd": 141240,
+            "sourceCell": "'4 Capital Needed'!C17"
+          },
+          {
+            "label": "Generator docking station",
+            "amountUsd": 44940,
+            "sourceCell": "'4 Capital Needed'!C18"
+          },
+          {
+            "label": "Daikin Trailblazer chillers, installed (incl. spare)",
+            "amountUsd": 140000,
+            "sourceCell": "'4 Capital Needed'!C19"
+          },
+          {
+            "label": "Pipes, pumps, glycol, controls",
+            "amountUsd": 36143.30395223202,
+            "sourceCell": "'4 Capital Needed'!C20"
+          },
+          {
+            "label": "In-row chilled-water coolers (installed units incl. spare)",
+            "amountUsd": 80000,
+            "sourceCell": "'4 Capital Needed'!C21"
+          },
+          {
+            "label": "Building fit-out",
+            "amountUsd": 108000,
+            "sourceCell": "'4 Capital Needed'!C22"
+          },
+          {
+            "label": "Fiber to the site",
+            "amountUsd": 0,
+            "sourceCell": "'4 Capital Needed'!C23"
+          },
+          {
+            "label": "Engineering, permits, commissioning",
+            "amountUsd": 7524.03303952232,
+            "sourceCell": "'4 Capital Needed'!C25"
+          },
+          {
+            "label": "Contingency (things we haven't thought of)",
+            "amountUsd": 22572.09911856696,
+            "sourceCell": "'4 Capital Needed'!C26"
+          }
+        ]
+      },
+      "commercial": {
+        "merchantRateYear1Usd": 6.5,
+        "annualMerchantRateChange": 0.0,
+        "merchantUtilizationYear1": 0.9,
+        "merchantUtilizationYear2Plus": 0.9,
+        "buildMonths": 1,
+        "contractedGpus": 0,
+        "marketplaceShare": 1,
+        "marketplaceCommission": 0.2,
+        "blendedMerchantCommission": 0.2,
+        "marketplaceAccessMonthsReported": 36,
+        "guaranteedRevenue": false
+      },
+      "annual": [
+        {
+          "year": 1,
+          "operatingMonths": 11.0,
+          "revenueUsd": 2818530.0,
+          "opexUsd": 1189149.2043610718,
+          "ebitdaUsd": 1629380.7956389282,
+          "operatingCashUsd": 1511812.9477484648,
+          "fundedCashUsd": 1508302.9477484643,
+          "headlineCashUsd": 1511812.9477484648,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 563706.0,
+          "operatingTaxUsd": 114143.54164122668,
+          "bcLlcPaymentUsd": 3424.3062492368003
+        },
+        {
+          "year": 2,
+          "operatingMonths": 12.0,
+          "revenueUsd": 3074760.0,
+          "opexUsd": 1266133.5602420042,
+          "ebitdaUsd": 1808626.4397579958,
+          "operatingCashUsd": 1644902.8385068725,
+          "fundedCashUsd": 1644902.8385068725,
+          "headlineCashUsd": 1644902.8385068725,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 614952.0,
+          "operatingTaxUsd": 158954.95267099357,
+          "bcLlcPaymentUsd": 4768.648580129808
+        },
+        {
+          "year": 3,
+          "operatingMonths": 12.0,
+          "revenueUsd": 3074760.0,
+          "opexUsd": 1285669.0070492644,
+          "ebitdaUsd": 1789090.9929507356,
+          "operatingCashUsd": 1630397.7692524816,
+          "fundedCashUsd": 1630397.7692524816,
+          "headlineCashUsd": 1630397.7692524816,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 614952.0,
+          "operatingTaxUsd": 154071.09096917853,
+          "bcLlcPaymentUsd": 4622.132729075356
+        },
+        {
+          "year": 4,
+          "operatingMonths": 12.0,
+          "revenueUsd": 3074760.0,
+          "opexUsd": 1574237.1169274088,
+          "ebitdaUsd": 1500522.8830725912,
+          "operatingCashUsd": 1416135.9476679596,
+          "fundedCashUsd": 1416135.9476679596,
+          "headlineCashUsd": 1416135.9476679596,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 614952.0,
+          "operatingTaxUsd": 81929.06349964242,
+          "bcLlcPaymentUsd": 2457.8719049892725
+        },
+        {
+          "year": 5,
+          "operatingMonths": 12.0,
+          "revenueUsd": 3074760.0,
+          "opexUsd": 1628152.0338585644,
+          "ebitdaUsd": 1446607.9661414356,
+          "operatingCashUsd": 1376104.1218465765,
+          "fundedCashUsd": 3235259.7598307687,
+          "headlineCashUsd": 3231749.759830768,
+          "resaleUsd": 1511889.7180551607,
+          "resaleTaxUsd": -247555.8568287366,
+          "reserveReleaseUsd": 591311.7767577679,
+          "channelFeesUsd": 614952.0,
+          "operatingTaxUsd": 68450.33426685352,
+          "bcLlcPaymentUsd": 2053.510028005606
+        }
+      ],
+      "returns": {
+        "headlineIrr": 0.09775898649120185,
+        "annualFundedIrr": 0.09770896776088,
+        "datedFundedIrr": 0.09757561087608338,
+        "npvUsd": -930164.2758705001,
+        "moic": 1.3522981367157694,
+        "operatingMoic": 1.0863324414676778,
+        "operatingPaybackYears": 4.562284275883143,
+        "unrecoveredOperatingCapitalUsd": 0,
+        "operatingCashSurplusUsd": 602342.4121542666,
+        "totalOperatingCashUsd": 7579353.6250223555
+      }
+    },
+    {
+      "id": "slower-ramp",
+      "label": "Slower ramp \u00b7 55% then 90%",
+      "status": "conditional-management-sensitivity",
+      "horizonYears": 5,
+      "capacity": {
+        "nodes": 8,
+        "installedGpus": 64,
+        "saleableGpus": 60,
+        "heldBackGpus": 4
+      },
+      "technical": {
+        "nodeKw": 15,
+        "itKw": 128.4,
+        "facilityPeakKw": 203.15895592834804,
+        "billedPeakKw": 182.84306033551323,
+        "worstDayPue": 1.582234859255047,
+        "coolingLoadKw": 141.24,
+        "coolingLoadTons": 40.15922661359113,
+        "chillerCount": 2,
+        "chillerUnitTons": 50,
+        "installedCoolingTons": 100,
+        "inRowCoolerCount": 5,
+        "inRowUnitKw": 40,
+        "racks": 4,
+        "preliminaryRequiredFloorSqFt": 591,
+        "allocatedFloorSqFt": 1800,
+        "serviceVoltage": 208,
+        "serviceAmps": 3000,
+        "designChillerCapacityFactor": 0.85,
+        "nPlusOneChillerMargin": 0.05828731237609741
+      },
+      "capital": {
+        "totalUsd": 6909323.65975309,
+        "serverHardwareUsd": 5360000,
+        "nodePriceUsd": 670000,
+        "storageAndSparesUsd": 80000,
+        "freightAndTaxUsd": 163200,
+        "hardwareUsd": 5603200,
+        "infrastructureUsd": 782499.4361103213,
+        "cashReserveUsd": 523624.223642768,
+        "launchTopUpUsd": 0.0,
+        "founderFundingGapUsd": 909323.6597530898,
+        "infrastructureBreakdown": [
+          {
+            "label": "Racks, power strips, hot-aisle containment",
+            "amountUsd": 48000,
+            "sourceCell": "'4 Capital Needed'!C15"
+          },
+          {
+            "label": "Electrical distribution from the 3,000A main",
+            "amountUsd": 154080,
+            "sourceCell": "'4 Capital Needed'!C16"
+          },
+          {
+            "label": "UPS / battery ride-through",
+            "amountUsd": 141240,
+            "sourceCell": "'4 Capital Needed'!C17"
+          },
+          {
+            "label": "Generator docking station",
+            "amountUsd": 44940,
+            "sourceCell": "'4 Capital Needed'!C18"
+          },
+          {
+            "label": "Daikin Trailblazer chillers, installed (incl. spare)",
+            "amountUsd": 140000,
+            "sourceCell": "'4 Capital Needed'!C19"
+          },
+          {
+            "label": "Pipes, pumps, glycol, controls",
+            "amountUsd": 36143.30395223202,
+            "sourceCell": "'4 Capital Needed'!C20"
+          },
+          {
+            "label": "In-row chilled-water coolers (installed units incl. spare)",
+            "amountUsd": 80000,
+            "sourceCell": "'4 Capital Needed'!C21"
+          },
+          {
+            "label": "Building fit-out",
+            "amountUsd": 108000,
+            "sourceCell": "'4 Capital Needed'!C22"
+          },
+          {
+            "label": "Fiber to the site",
+            "amountUsd": 0,
+            "sourceCell": "'4 Capital Needed'!C23"
+          },
+          {
+            "label": "Engineering, permits, commissioning",
+            "amountUsd": 7524.03303952232,
+            "sourceCell": "'4 Capital Needed'!C25"
+          },
+          {
+            "label": "Contingency (things we haven't thought of)",
+            "amountUsd": 22572.09911856696,
+            "sourceCell": "'4 Capital Needed'!C26"
+          }
+        ]
+      },
+      "commercial": {
+        "merchantRateYear1Usd": 6.5,
+        "annualMerchantRateChange": 0.0,
+        "merchantUtilizationYear1": 0.55,
+        "merchantUtilizationYear2Plus": 0.9,
+        "buildMonths": 1,
+        "contractedGpus": 0,
+        "marketplaceShare": 1,
+        "marketplaceCommission": 0.2,
+        "blendedMerchantCommission": 0.2,
+        "marketplaceAccessMonthsReported": 36,
+        "guaranteedRevenue": false
+      },
+      "annual": [
+        {
+          "year": 1,
+          "operatingMonths": 11.0,
+          "revenueUsd": 1722435.0,
+          "opexUsd": 940961.509606072,
+          "ebitdaUsd": 781473.490393928,
+          "operatingCashUsd": 781473.490393928,
+          "fundedCashUsd": 877608.4903939284,
+          "headlineCashUsd": 781473.490393928,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 344487.0,
+          "operatingTaxUsd": 0.0,
+          "bcLlcPaymentUsd": 0.0
+        },
+        {
+          "year": 2,
+          "operatingMonths": 12.0,
+          "revenueUsd": 3074760.0,
+          "opexUsd": 1266133.5602420042,
+          "ebitdaUsd": 1808626.4397579958,
+          "operatingCashUsd": 1741757.7903301956,
+          "fundedCashUsd": 1642112.7903301958,
+          "headlineCashUsd": 1741757.7903301956,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 614952.0,
+          "operatingTaxUsd": 61121.66800097021,
+          "bcLlcPaymentUsd": 5746.981426830041
+        },
+        {
+          "year": 3,
+          "operatingMonths": 12.0,
+          "revenueUsd": 3074760.0,
+          "opexUsd": 1285669.0070492644,
+          "ebitdaUsd": 1789090.9929507356,
+          "operatingCashUsd": 1630397.7692524816,
+          "fundedCashUsd": 1630397.7692524814,
+          "headlineCashUsd": 1630397.7692524816,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 614952.0,
+          "operatingTaxUsd": 154071.09096917853,
+          "bcLlcPaymentUsd": 4622.132729075356
+        },
+        {
+          "year": 4,
+          "operatingMonths": 12.0,
+          "revenueUsd": 3074760.0,
+          "opexUsd": 1574237.1169274088,
+          "ebitdaUsd": 1500522.8830725912,
+          "operatingCashUsd": 1416135.9476679596,
+          "fundedCashUsd": 1416135.9476679596,
+          "headlineCashUsd": 1416135.9476679596,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 614952.0,
+          "operatingTaxUsd": 81929.06349964242,
+          "bcLlcPaymentUsd": 2457.8719049892725
+        },
+        {
+          "year": 5,
+          "operatingMonths": 12.0,
+          "revenueUsd": 3074760.0,
+          "opexUsd": 1628152.0338585644,
+          "ebitdaUsd": 1446607.9661414356,
+          "operatingCashUsd": 1376104.1218465765,
+          "fundedCashUsd": 3167572.2067157687,
+          "headlineCashUsd": 3164062.206715768,
+          "resaleUsd": 1511889.7180551607,
+          "resaleTaxUsd": -247555.8568287366,
+          "reserveReleaseUsd": 523624.223642768,
+          "channelFeesUsd": 614952.0,
+          "operatingTaxUsd": 68450.33426685352,
+          "bcLlcPaymentUsd": 2053.510028005606
+        }
+      ],
+      "returns": {
+        "headlineIrr": 0.0704368487127105,
+        "annualFundedIrr": 0.07068294180348866,
+        "datedFundedIrr": 0.07058359682559967,
+        "npvUsd": -1457970.929969951,
+        "moic": 1.2640639857754823,
+        "operatingMoic": 1.0052892962520963,
+        "operatingPaybackYears": 4.973442809190186,
+        "unrecoveredOperatingCapitalUsd": 0,
+        "operatingCashSurplusUsd": 36545.45973805152,
+        "totalOperatingCashUsd": 6945869.119491141
+      }
+    },
+    {
+      "id": "price-pressure",
+      "label": "Price pressure \u00b7 90% / 10% annual decline",
+      "status": "conditional-management-sensitivity",
+      "horizonYears": 5,
+      "capacity": {
+        "nodes": 8,
+        "installedGpus": 64,
+        "saleableGpus": 60,
+        "heldBackGpus": 4
+      },
+      "technical": {
+        "nodeKw": 15,
+        "itKw": 128.4,
+        "facilityPeakKw": 203.15895592834804,
+        "billedPeakKw": 182.84306033551323,
+        "worstDayPue": 1.582234859255047,
+        "coolingLoadKw": 141.24,
+        "coolingLoadTons": 40.15922661359113,
+        "chillerCount": 2,
+        "chillerUnitTons": 50,
+        "installedCoolingTons": 100,
+        "inRowCoolerCount": 5,
+        "inRowUnitKw": 40,
+        "racks": 4,
+        "preliminaryRequiredFloorSqFt": 591,
+        "allocatedFloorSqFt": 1800,
+        "serviceVoltage": 208,
+        "serviceAmps": 3000,
+        "designChillerCapacityFactor": 0.85,
+        "nPlusOneChillerMargin": 0.05828731237609741
+      },
+      "capital": {
+        "totalUsd": 6977011.212868089,
+        "serverHardwareUsd": 5360000,
+        "nodePriceUsd": 670000,
+        "storageAndSparesUsd": 80000,
+        "freightAndTaxUsd": 163200,
+        "hardwareUsd": 5603200,
+        "infrastructureUsd": 782499.4361103213,
+        "cashReserveUsd": 591311.7767577679,
+        "launchTopUpUsd": 0.0,
+        "founderFundingGapUsd": 977011.2128680889,
+        "infrastructureBreakdown": [
+          {
+            "label": "Racks, power strips, hot-aisle containment",
+            "amountUsd": 48000,
+            "sourceCell": "'4 Capital Needed'!C15"
+          },
+          {
+            "label": "Electrical distribution from the 3,000A main",
+            "amountUsd": 154080,
+            "sourceCell": "'4 Capital Needed'!C16"
+          },
+          {
+            "label": "UPS / battery ride-through",
+            "amountUsd": 141240,
+            "sourceCell": "'4 Capital Needed'!C17"
+          },
+          {
+            "label": "Generator docking station",
+            "amountUsd": 44940,
+            "sourceCell": "'4 Capital Needed'!C18"
+          },
+          {
+            "label": "Daikin Trailblazer chillers, installed (incl. spare)",
+            "amountUsd": 140000,
+            "sourceCell": "'4 Capital Needed'!C19"
+          },
+          {
+            "label": "Pipes, pumps, glycol, controls",
+            "amountUsd": 36143.30395223202,
+            "sourceCell": "'4 Capital Needed'!C20"
+          },
+          {
+            "label": "In-row chilled-water coolers (installed units incl. spare)",
+            "amountUsd": 80000,
+            "sourceCell": "'4 Capital Needed'!C21"
+          },
+          {
+            "label": "Building fit-out",
+            "amountUsd": 108000,
+            "sourceCell": "'4 Capital Needed'!C22"
+          },
+          {
+            "label": "Fiber to the site",
+            "amountUsd": 0,
+            "sourceCell": "'4 Capital Needed'!C23"
+          },
+          {
+            "label": "Engineering, permits, commissioning",
+            "amountUsd": 7524.03303952232,
+            "sourceCell": "'4 Capital Needed'!C25"
+          },
+          {
+            "label": "Contingency (things we haven't thought of)",
+            "amountUsd": 22572.09911856696,
+            "sourceCell": "'4 Capital Needed'!C26"
+          }
+        ]
+      },
+      "commercial": {
+        "merchantRateYear1Usd": 6.5,
+        "annualMerchantRateChange": -0.1,
+        "merchantUtilizationYear1": 0.9,
+        "merchantUtilizationYear2Plus": 0.9,
+        "buildMonths": 1,
+        "contractedGpus": 0,
+        "marketplaceShare": 1,
+        "marketplaceCommission": 0.2,
+        "blendedMerchantCommission": 0.2,
+        "marketplaceAccessMonthsReported": 36,
+        "guaranteedRevenue": false
+      },
+      "annual": [
+        {
+          "year": 1,
+          "operatingMonths": 11.0,
+          "revenueUsd": 2818530.0,
+          "opexUsd": 1189149.2043610718,
+          "ebitdaUsd": 1629380.7956389282,
+          "operatingCashUsd": 1511812.9477484648,
+          "fundedCashUsd": 1508302.9477484643,
+          "headlineCashUsd": 1511812.9477484648,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 563706.0,
+          "operatingTaxUsd": 114143.54164122668,
+          "bcLlcPaymentUsd": 3424.3062492368003
+        },
+        {
+          "year": 2,
+          "operatingMonths": 12.0,
+          "revenueUsd": 2767284.0000000005,
+          "opexUsd": 1204638.3602420045,
+          "ebitdaUsd": 1562645.639757996,
+          "operatingCashUsd": 1462262.0945068726,
+          "fundedCashUsd": 1487885.0945068726,
+          "headlineCashUsd": 1462262.0945068726,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 553456.8000000002,
+          "operatingTaxUsd": 97459.75267099362,
+          "bcLlcPaymentUsd": 2923.792580129809
+        },
+        {
+          "year": 3,
+          "operatingMonths": 12.0,
+          "revenueUsd": 2490555.6,
+          "opexUsd": 1168828.1270492643,
+          "ebitdaUsd": 1321727.4729507358,
+          "operatingCashUsd": 1283380.3556524818,
+          "fundedCashUsd": 1306441.0556524817,
+          "headlineCashUsd": 1283380.3556524818,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 498111.12000000005,
+          "operatingTaxUsd": 37230.21096917859,
+          "bcLlcPaymentUsd": 1116.9063290753577
+        },
+        {
+          "year": 4,
+          "operatingMonths": 12.0,
+          "revenueUsd": 2241500.0400000005,
+          "opexUsd": 1407585.124927409,
+          "ebitdaUsd": 833914.9150725915,
+          "operatingCashUsd": 833914.9150725915,
+          "fundedCashUsd": 854669.5450725914,
+          "headlineCashUsd": 833914.9150725915,
+          "resaleUsd": 0.0,
+          "resaleTaxUsd": 0.0,
+          "reserveReleaseUsd": 0.0,
+          "channelFeesUsd": 448300.00800000015,
+          "operatingTaxUsd": 0.0,
+          "bcLlcPaymentUsd": 0.0
+        },
+        {
+          "year": 5,
+          "operatingMonths": 12.0,
+          "revenueUsd": 2017350.0360000005,
+          "opexUsd": 1416670.0410585646,
+          "ebitdaUsd": 600679.994941436,
+          "operatingCashUsd": 600679.994941436,
+          "fundedCashUsd": 2617048.3200952467,
+          "headlineCashUsd": 2682976.6500952463,
+          "resaleUsd": 1511889.7180551607,
+          "resaleTaxUsd": -20904.83965911805,
+          "reserveReleaseUsd": 591311.7767577679,
+          "channelFeesUsd": 403470.0072000001,
+          "operatingTaxUsd": 0.0,
+          "bcLlcPaymentUsd": 0.0
+        }
+      ],
+      "returns": {
+        "headlineIrr": 0.03461945842101932,
+        "annualFundedIrr": 0.0348031205101651,
+        "datedFundedIrr": 0.034759697318077085,
+        "npvUsd": -1902160.4883717655,
+        "moic": 1.114280416912187,
+        "operatingMoic": 0.815829319211023,
+        "operatingPaybackYears": null,
+        "unrecoveredOperatingCapitalUsd": 1284960.9049462425,
+        "operatingCashSurplusUsd": 0,
+        "totalOperatingCashUsd": 5692050.307921846
+      }
+    }
+  ],
+  "expansion": {
+    "id": "maximum-base",
+    "label": "Preliminary maximum Base build",
+    "status": "preliminary-planning-assumptions",
+    "horizonYears": 5,
+    "capacity": {
+      "nodes": 30,
+      "installedGpus": 240,
+      "saleableGpus": 225,
+      "heldBackGpus": 15
+    },
+    "capital": {
+      "totalUsd": 24848983.836574085,
+      "serverHardwareUsd": 20100000,
+      "nodePriceUsd": 670000,
+      "storageAndSparesUsd": 300000,
+      "freightAndTaxUsd": 612000,
+      "hardwareUsd": 21012000,
+      "infrastructureUsd": 2453892.885413705,
+      "cashReserveUsd": 1383090.9511603802,
+      "launchTopUpUsd": 0,
+      "reserveCostComponentUsd": 645990.95116038,
+      "reserveReceivablesComponentUsd": 737100.0000000001,
+      "founderFundingGapUsd": 18848983.836574085,
+      "infrastructureBreakdown": [
+        {
+          "label": "Racks, power strips, hot-aisle containment",
+          "amountUsd": 180000,
+          "sourceCell": "'4 Capital Needed'!D15"
+        },
+        {
+          "label": "Electrical distribution from the 3,000A main",
+          "amountUsd": 577800,
+          "sourceCell": "'4 Capital Needed'!D16"
+        },
+        {
+          "label": "UPS / battery ride-through",
+          "amountUsd": 529650,
+          "sourceCell": "'4 Capital Needed'!D17"
+        },
+        {
+          "label": "Generator docking station",
+          "amountUsd": 168525,
+          "sourceCell": "'4 Capital Needed'!D18"
+        },
+        {
+          "label": "Daikin Trailblazer chillers, installed (incl. spare)",
+          "amountUsd": 420000,
+          "sourceCell": "'4 Capital Needed'!D19"
+        },
+        {
+          "label": "Pipes, pumps, glycol, controls",
+          "amountUsd": 135537.38982087007,
+          "sourceCell": "'4 Capital Needed'!D20"
+        },
+        {
+          "label": "In-row chilled-water coolers (installed units incl. spare)",
+          "amountUsd": 240000,
+          "sourceCell": "'4 Capital Needed'!D21"
+        },
+        {
+          "label": "Building fit-out",
+          "amountUsd": 108000,
+          "sourceCell": "'4 Capital Needed'!D22"
+        },
+        {
+          "label": "Fiber to the site",
+          "amountUsd": 0,
+          "sourceCell": "'4 Capital Needed'!D23"
+        },
+        {
+          "label": "Engineering, permits, commissioning",
+          "amountUsd": 23595.1238982087,
+          "sourceCell": "'4 Capital Needed'!D25"
+        },
+        {
+          "label": "Contingency (things we haven't thought of)",
+          "amountUsd": 70785.3716946261,
+          "sourceCell": "'4 Capital Needed'!D26"
+        }
+      ]
+    },
+    "technical": {
+      "nodeKw": 15,
+      "itKw": 481.5,
+      "facilityPeakKw": 761.8460847313052,
+      "billedPeakKw": 685.6614762581746,
+      "worstDayPue": 1.582234859255047,
+      "coolingLoadKw": 529.6500000000001,
+      "coolingLoadTons": 150.59709980096676,
+      "chillerCount": 3,
+      "chillerUnitTons": 100,
+      "installedCoolingTons": 300,
+      "inRowCoolerCount": 15,
+      "inRowUnitKw": 40,
+      "racks": 15,
+      "preliminaryRequiredFloorSqFt": 1348,
+      "allocatedFloorSqFt": 1800,
+      "serviceVoltage": 208,
+      "serviceAmps": 3000,
+      "designChillerCapacityFactor": 0.85,
+      "nPlusOneChillerMargin": 0.128839799867837
+    },
+    "commercial": {
+      "merchantRateYear1Usd": 6.5,
+      "annualMerchantRateChange": -0.1,
+      "merchantUtilizationYear1": 0.55,
+      "merchantUtilizationYear2Plus": 0.7,
+      "contractedGpus": 0,
+      "contractRateUsd": 6.5,
+      "contractPaidShare": 0.95,
+      "contractTermMonths": 36,
+      "renewalAssumed": false,
+      "buildMonths": 6,
+      "contractServiceStartMonth": null,
+      "contractServiceEndMonth": null,
+      "contractMonthsBeyondExit": 0,
+      "postContractTreatment": "Expired GPUs revert to merchant utilization, merchant pricing and the merchant fee; no contract renewal assumed",
+      "marketplaceShare": 0.2,
+      "marketplaceCommission": 0.25,
+      "directMerchantCommission": 0.02,
+      "blendedMerchantCommission": 0.066,
+      "contractCommission": 0.02
+    },
+    "returns": {
+      "headlineIrr": 0.004867930155241007,
+      "operatingOnlyIrr": -0.09288479025858043,
+      "annualFundedIrr": 0.004898120292992303,
+      "datedFundedIrr": 0.004892316460609438,
+      "npvUsd": -9014467.175383212,
+      "moic": 1.0170167372808154,
+      "operatingMoic": 0.7464897422976318,
+      "operatingPaybackYears": null,
+      "unrecoveredOperatingCapitalUsd": 6299472.296051879,
+      "laterCapitalCallsUsd": 0,
+      "terminalReceivableUsd": 490328.1337500001,
+      "exitCheck": "OK - no service beyond the exit",
+      "annualFundedNpvUsd": -8965463.24580317,
+      "datedFundedNpvUsd": -8973600.052614182,
+      "fundedMoic": 1.0170167372808152
+    },
+    "annual": [
+      {
+        "year": 1,
+        "operatingMonths": 6,
+        "contractMonths": 0,
+        "includedSupportMonths": 6,
+        "revenueUsd": 3523162.5,
+        "contractRevenueUsd": 0,
+        "expiredContractRevenueUsd": 0,
+        "merchantRevenueUsd": 3523162.5,
+        "opexUsd": 1488464.8956658693,
+        "energyUsd": 214660.6327125,
+        "demandUsd": 65823.50172078476,
+        "supportUsd": 0,
+        "channelFeesUsd": 232528.725,
+        "ebitdaUsd": 2034697.6043341307,
+        "operatingTaxUsd": 0,
+        "bcLlcPaymentUsd": 0,
+        "operatingCashUsd": 2034697.6043341309,
+        "distributionsUsd": 2184603.8543341295,
+        "resaleUsd": 0,
+        "resaleTaxUsd": 0,
+        "reserveReleaseUsd": 0,
+        "headlineCashUsd": 2034697.6043341309,
+        "fundedCashUsd": 2184603.8543341295,
+        "receivablesUsd": 587193.7500000001,
+        "cashFromOperationsUsd": 1447503.8543341309,
+        "capitalCallsUsd": 0,
+        "endingCompanyCashUsd": 645990.9511603802,
+        "terminalCollectionUsd": 0
+      },
+      {
+        "year": 2,
+        "operatingMonths": 12,
+        "contractMonths": 0,
+        "includedSupportMonths": 12,
+        "revenueUsd": 8071245.000000001,
+        "contractRevenueUsd": 0,
+        "expiredContractRevenueUsd": 0,
+        "merchantRevenueUsd": 8071245.000000001,
+        "opexUsd": 2353428.663406515,
+        "energyUsd": 431917.1614485,
+        "demandUsd": 101697.31015861244,
+        "supportUsd": 0,
+        "channelFeesUsd": 532702.17,
+        "ebitdaUsd": 5717816.336593486,
+        "operatingTaxUsd": 67591.17387829529,
+        "bcLlcPaymentUsd": 12842.323036876107,
+        "operatingCashUsd": 5637382.8396783145,
+        "distributionsUsd": 5551972.8396783145,
+        "resaleUsd": 0,
+        "resaleTaxUsd": 0,
+        "reserveReleaseUsd": 0,
+        "headlineCashUsd": 5637382.8396783145,
+        "fundedCashUsd": 5551972.8396783145,
+        "receivablesUsd": 672603.7500000001,
+        "cashFromOperationsUsd": 5551972.8396783145,
+        "capitalCallsUsd": 0,
+        "endingCompanyCashUsd": 645990.9511603797,
+        "terminalCollectionUsd": 0
+      },
+      {
+        "year": 3,
+        "operatingMonths": 12,
+        "contractMonths": 0,
+        "includedSupportMonths": 12,
+        "revenueUsd": 7264120.500000001,
+        "contractRevenueUsd": 0,
+        "expiredContractRevenueUsd": 0,
+        "merchantRevenueUsd": 7264120.500000001,
+        "opexUsd": 2354780.2412087107,
+        "energyUsd": 444874.676291955,
+        "demandUsd": 104748.22946337081,
+        "supportUsd": 0,
+        "channelFeesUsd": 479431.9530000001,
+        "ebitdaUsd": 4909340.25879129,
+        "operatingTaxUsd": 27167.369988185485,
+        "bcLlcPaymentUsd": 5161.800297755244,
+        "operatingCashUsd": 4877011.08850535,
+        "distributionsUsd": 4944271.46350535,
+        "resaleUsd": 0,
+        "resaleTaxUsd": 0,
+        "reserveReleaseUsd": 0,
+        "headlineCashUsd": 4877011.08850535,
+        "fundedCashUsd": 4944271.46350535,
+        "receivablesUsd": 605343.3750000001,
+        "cashFromOperationsUsd": 4944271.46350535,
+        "capitalCallsUsd": 0,
+        "endingCompanyCashUsd": 645990.9511603797,
+        "terminalCollectionUsd": 0
+      },
+      {
+        "year": 4,
+        "operatingMonths": 12,
+        "contractMonths": 0,
+        "includedSupportMonths": 6,
+        "revenueUsd": 6537708.450000001,
+        "contractRevenueUsd": 0,
+        "expiredContractRevenueUsd": 0,
+        "merchantRevenueUsd": 6537708.450000001,
+        "opexUsd": 2912192.812054972,
+        "energyUsd": 458220.91658071365,
+        "demandUsd": 107890.67634727193,
+        "supportUsd": 549095.3175000001,
+        "channelFeesUsd": 431488.7577000001,
+        "ebitdaUsd": 3625515.637945029,
+        "operatingTaxUsd": 0,
+        "bcLlcPaymentUsd": 0,
+        "operatingCashUsd": 3625515.637945029,
+        "distributionsUsd": 3686049.975445029,
+        "resaleUsd": 0,
+        "resaleTaxUsd": 0,
+        "reserveReleaseUsd": 0,
+        "headlineCashUsd": 3625515.637945029,
+        "fundedCashUsd": 3686049.975445029,
+        "receivablesUsd": 544809.0375000001,
+        "cashFromOperationsUsd": 3686049.975445029,
+        "capitalCallsUsd": 0,
+        "endingCompanyCashUsd": 645990.9511603802,
+        "terminalCollectionUsd": 0
+      },
+      {
+        "year": 5,
+        "operatingMonths": 12,
+        "contractMonths": 0,
+        "includedSupportMonths": 0,
+        "revenueUsd": 5883937.605000002,
+        "contractRevenueUsd": 0,
+        "expiredContractRevenueUsd": 0,
+        "merchantRevenueUsd": 5883937.605000002,
+        "opexUsd": 3509033.234940621,
+        "energyUsd": 471967.54407813505,
+        "demandUsd": 111127.39663769008,
+        "supportUsd": 1131136.35405,
+        "channelFeesUsd": 388339.88193000015,
+        "ebitdaUsd": 2374904.3700593812,
+        "operatingTaxUsd": 0,
+        "bcLlcPaymentUsd": 0,
+        "operatingCashUsd": 2374904.3700593812,
+        "distributionsUsd": 3075376.2249697614,
+        "resaleUsd": 5429346.442706852,
+        "resaleTaxUsd": -90116.46817314246,
+        "reserveReleaseUsd": 1383090.9511603802,
+        "headlineCashUsd": 9097225.295753472,
+        "fundedCashUsd": 8904934.333253471,
+        "receivablesUsd": 490328.1337500001,
+        "cashFromOperationsUsd": 2429385.2738093813,
+        "capitalCallsUsd": 0,
+        "endingCompanyCashUsd": 0,
+        "terminalCollectionUsd": 490328.1337500001
+      }
+    ],
+    "datedCash": [
+      {
+        "date": "2027-01-01",
+        "amountUsd": -24848983.836574085,
+        "kind": "initial-capital"
+      },
+      {
+        "date": "2028-01-01",
+        "amountUsd": 2184603.8543341295,
+        "kind": "annual-investor-cash"
+      },
+      {
+        "date": "2029-01-01",
+        "amountUsd": 5551972.8396783145,
+        "kind": "annual-investor-cash"
+      },
+      {
+        "date": "2030-01-01",
+        "amountUsd": 4944271.46350535,
+        "kind": "annual-investor-cash"
+      },
+      {
+        "date": "2031-01-01",
+        "amountUsd": 3686049.975445029,
+        "kind": "annual-investor-cash"
+      },
+      {
+        "date": "2032-01-01",
+        "amountUsd": 8414606.19950347,
+        "kind": "annual-investor-cash"
+      },
+      {
+        "date": "2032-01-31",
+        "amountUsd": 490328.1337500001,
+        "kind": "terminal-receivable"
+      }
+    ]
+  }
+}

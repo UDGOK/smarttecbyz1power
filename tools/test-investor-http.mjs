@@ -13,7 +13,7 @@ import {chapters as pitchChapters} from '../src/smarttec-investor/data/immersive
 import {JSDOM} from 'jsdom';
 import {hashPassword} from '../src/smarttec-investor/server/auth.mjs';
 import {headerSignature} from './header-contract.mjs';
-import {model,base,contracted,usd} from '../src/smarttec-investor/financial-model.mjs';
+import {model,base,usd} from '../src/smarttec-investor/financial-model.mjs';
 const dir=await mkdtemp(join(tmpdir(),'smarttec-http-'));let app,redis;let checks=0;
 try{
 execFileSync(process.env.OPENSSL_BINARY||'openssl',['req','-x509','-newkey','rsa:2048','-nodes','-keyout',join(dir,'key.pem'),'-out',join(dir,'cert.pem'),'-subj','/CN=localhost','-addext','subjectAltName=DNS:localhost,IP:127.0.0.1','-days','1'],{stdio:'ignore'});
@@ -89,7 +89,7 @@ const bootstrap=await(await fetch(origin+'/api/investor/bootstrap',{headers:{Coo
 for(const path of ['concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy']){r=await fetch(origin+'/api/investor/'+path,{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.ok((await r.arrayBuffer()).byteLength>10000);checks++;}
 assert.deepEqual(bootstrap.model,model);assert.equal(bootstrap.sample,undefined);assert.equal(bootstrap.mapData,undefined);assert.equal(bootstrap.mapConfig,undefined);assert.equal(bootstrap.campus,undefined);checks++;
 for(const method of ['GET','HEAD']){
- r=await fetch(origin+'/api/investor/model',{method,headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('content-type'),/application\/json/);assert.match(r.headers.get('content-disposition'),/SmartTec_Model_v6\.1_1_Verified_Scenarios\.json/);
+ r=await fetch(origin+'/api/investor/model',{method,headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('content-type'),/application\/json/);assert.match(r.headers.get('content-disposition'),/SmartTec_Management_Target_2026-09-14\.json/);
  for(const key of ['cache-control','cdn-cache-control','vercel-cdn-cache-control'])assert.match(r.headers.get(key),/no-store/);
  if(method==='HEAD')assert.equal((await r.arrayBuffer()).byteLength,0);else assert.deepEqual(await r.json(),model);checks++;
 }
@@ -102,10 +102,10 @@ r=await fetch(origin+'/api/investor/model',{method:'POST',headers,body:JSON.stri
 const reviewedDOM=new JSDOM(page),reviewedDoc=reviewedDOM.window.document;
 assert.equal(reviewedDoc.querySelector('#inv-main').dataset.modelSource,model.source.sha256);
 assert.equal(reviewedDoc.querySelectorAll('[data-underwriting-option],#inv-scenario-form,#inv-equipment-rows').length,0);
-for(const amount of [usd(base.capital.totalUsd),usd(contracted.capital.totalUsd)])assert.ok(reviewedDoc.body.textContent.includes(amount),amount+' reviewed funding must be present');
+for(const amount of [usd(base.capital.totalUsd),usd(base.annual[1].operatingCashUsd)])assert.ok(reviewedDoc.body.textContent.includes(amount),amount+' reviewed funding must be present');
 assert.ok(reviewedDoc.body.textContent.includes('BC LLC'));assert.ok(reviewedDoc.querySelector('a[href="/api/investor/model"]'));reviewedDOM.window.close();checks++;
 const fundingFAQ=await(await fetch(origin+'/api/investor/faq',{method:'POST',headers,body:JSON.stringify({question:'How much funding is required?'})})).json();
-assert.ok(fundingFAQ.matches.some(f=>f.id==='F17'&&f.answer.includes(usd(base.capital.totalUsd))&&f.answer.includes(usd(contracted.capital.totalUsd))&&f.sourceIds.includes('model-v6.1.1')));checks++;
+assert.ok(fundingFAQ.matches.some(f=>f.id==='F17'&&f.answer.includes(usd(base.capital.totalUsd))&&f.sourceIds.includes('model-v6.1.1')));checks++;
 // Exercise the read-only enhancement and FAQ against the compiled API without live credentials.
 const dom=new JSDOM(page,{url:origin+'/investors',runScripts:'outside-only'}),win=dom.window;
 win.structuredClone=structuredClone;win.matchMedia=()=>({matches:true});win.HTMLElement.prototype.scrollIntoView=function(){};

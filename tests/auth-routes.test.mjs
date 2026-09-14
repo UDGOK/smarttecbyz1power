@@ -33,7 +33,7 @@ test('CSRF required for FAQ and logout',async()=>{const {store,cookie,csrf}=awai
 test('authenticated model GET and HEAD expose only the reviewed snapshot',async()=>{
  const {store,cookie}=await signed();
  const get=await handle(req('model',undefined,{cookie}),'model',{cfg,store});assert.equal(get.status,200);assert.match(get.headers.get('content-type'),/application\/json/);assert.deepEqual(await get.json(),model);
- const head=await handle(req('model',undefined,{cookie},'HEAD'),'model',{cfg,store});assert.equal(head.status,200);assert.equal((await head.arrayBuffer()).byteLength,0);assert.match(head.headers.get('content-disposition'),/SmartTec_Model_v6\.1_1_Verified_Scenarios\.json/);assert.match(head.headers.get('cache-control'),/no-store/);
+ const head=await handle(req('model',undefined,{cookie},'HEAD'),'model',{cfg,store});assert.equal(head.status,200);assert.equal((await head.arrayBuffer()).byteLength,0);assert.match(head.headers.get('content-disposition'),/SmartTec_Management_Target_2026-09-14\.json/);assert.match(head.headers.get('cache-control'),/no-store/);
  const bootstrap=await(await handle(req('bootstrap',undefined,{cookie}),'bootstrap',{cfg,store})).json();assert.deepEqual(bootstrap.model,model);assert.equal(bootstrap.sample,undefined);assert.equal(bootstrap.mapData,undefined);assert.equal(bootstrap.mapConfig,undefined);assert.equal(bootstrap.campus,undefined);
 });
 

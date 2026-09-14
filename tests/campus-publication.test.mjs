@@ -101,7 +101,7 @@ test('public campus and shared entry points distinguish proposed DLC from the fi
  for(const key of keys){assert.ok(page.includes(`data-view="${key}"`));assert.ok(page.includes(`/renders/${key}-2400.webp`),'no-JavaScript render link');}
  assert.match(page,/campusConcept\.budgetBasis/);
  const {campusConcept,MODEL_EDITION}=loadTS('src/data/site.ts');
- assert.equal(MODEL_EDITION,'v6.1.1 · upgraded source revision');
+ assert.equal(MODEL_EDITION,'14 September management target · v6.1.1 cost basis');
  assert.match(campusConcept.budgetBasis,/air-cooled.*one-building/);
  assert.match(campusConcept.budgetBasis,/direct[- ]liquid.*Buildings A and C/i);assert.match(campusConcept.budgetBasis,/repric/i);
  assert.match(page,/islanding[^<]*(?:not established|remain|claim)/i);
