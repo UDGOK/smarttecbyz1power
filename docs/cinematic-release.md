@@ -20,13 +20,13 @@ required.
 | News | Compact energy opening; sourced articles remain the main content. |
 | About | Campus artwork explaining the starting point, delivery approach and roadmap. |
 | Contact | Compact campus opening with the existing inquiry form accessible directly. |
-| Investor room | Matching campus opening and topic controls, followed by the existing protected survey-based model, map, calculator and questions. |
+| Investor room | Matching campus opening and topic controls, followed by the immersive campus experience and curated project questions. |
 | Investor login | Matching public concept backdrop behind the existing protected-access form. No private asset is exposed. |
 | Brand gallery | Compact material backdrop; the official artwork/downloads and unlisted status are retained. |
 
 The cinematic images are AI concept illustrations, not facility photographs,
-survey geometry, installed inventory, or OEM drawings. The investor survey model
-and satellite map remain the appropriate places to inspect project geometry.
+survey geometry, installed inventory, or OEM drawings. The immersive campus page
+documents which elements are source-based and which remain illustrative.
 The new public artwork is separate from the private reference documents/assets.
 
 ## Interaction and performance

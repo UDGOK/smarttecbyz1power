@@ -18,7 +18,14 @@ test('protected download matches the reviewed PDF and fits the function response
 test('published PDF is bound to the canonical reviewed model and its generating code',()=>{
  const model=JSON.parse(readFileSync('src/data/investor-model-v6-1.json','utf8'));
  assert.equal(metadata.currentReturnStatus,'conditional-scenarios');
- assert.equal(metadata.primaryReturnMetric,'dated-funded-project-irr');
+ assert.equal(metadata.primaryReturnMetric,'headline-project-irr');
+ assert.equal(model.assumptions.primaryReturnMetric,'headlineIrr');
+ assert.deepEqual(model.scenarios.map(row=>row.id).sort(),['base','contracted','delayed','downside','market','marketplace-heavy','maximum-base']);
+ const contracted=model.scenarios.find(row=>row.id==='contracted');
+ assert.equal(contracted.commercial.contractedGpus,40);
+ assert.equal(contracted.commercial.contractRateUsd,6.5);
+ assert.equal(contracted.commercial.contractPaidShare,.95);
+ assert.equal(contracted.commercial.contractTermMonths,36);
  assert.equal(metadata.modelVersion,model.version);
  assert.deepEqual(metadata.financialSource,model.source);
  for(const [path,expected] of [['src/data/investor-model-v6-1.json',metadata.modelSourceSha256],['tools/build-investor-deck.py',metadata.builderSourceSha256],['tools/export-investor-deck-data.mjs',metadata.exporterSourceSha256]]){

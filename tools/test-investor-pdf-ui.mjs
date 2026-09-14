@@ -8,7 +8,12 @@ import deck from '../src/smarttec-investor/data/investor-deck.json' with {type:'
 
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 export async function testInvestorPdfUI({origin,cookie}){
-  const browser=await chromium.launch({headless:true,channel:process.env.INVESTOR_QA_BROWSER||undefined});
+  const browser=await chromium.launch({
+    headless:true,
+    ...(process.env.INVESTOR_QA_EXECUTABLE
+      ? {executablePath:process.env.INVESTOR_QA_EXECUTABLE}
+      : {channel:process.env.INVESTOR_QA_BROWSER||undefined}),
+  });
   const output='tmp/pdf-reader',errors=[];let checks=0;
   const split=cookie.indexOf('='),auth={name:cookie.slice(0,split),value:cookie.slice(split+1),url:origin};
   const inlineURL=origin+'/api/investor/presentation?view=inline';

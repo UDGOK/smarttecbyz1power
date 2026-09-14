@@ -12,7 +12,11 @@ read_json = lambda path: json.loads((ROOT / path).read_text(encoding='utf-8'))
 meta = read_json('src/smarttec-investor/data/investor-deck.json')
 model = read_json('src/data/investor-model-v6-1.json')
 scenarios = {row['id']: row for row in model['scenarios']}
+phase1_ids = ['downside', 'base', 'market', 'contracted', 'marketplace-heavy', 'delayed']
+phase1 = [scenarios[item] for item in phase1_ids]
 base = scenarios['base']
+contracted = scenarios['contracted']
+maximum = scenarios['maximum-base']
 assumptions = model['assumptions']
 data = (ROOT / 'output/pdf' / meta['filename']).read_bytes()
 assert hashlib.sha256(data).hexdigest() == meta['sha256']
@@ -20,7 +24,8 @@ assert len(data) == meta['bytes'] < 4_000_000
 assert data == (ROOT / 'output/pdf/SmartTec-Investor-Presentation.pdf').read_bytes()
 assert meta['modelVersion'] == model['version']
 assert meta['financialSource'] == model['source']
-assert meta['primaryReturnMetric'] == 'dated-funded-project-irr'
+assert meta['primaryReturnMetric'] == 'headline-project-irr'
+assert assumptions['primaryReturnMetric'] == 'headlineIrr'
 assert meta['currentReturnStatus'] == 'conditional-scenarios'
 for path, key in [
     ('src/data/investor-model-v6-1.json', 'modelSourceSha256'),
@@ -66,30 +71,57 @@ assert f"{base['technical']['facilityPeakKw']:,.1f} kW" in texts[9]
 assert f"{base['technical']['chillerCount']} x {base['technical']['chillerUnitTons']:g}-ton chillers" in texts[9]
 assert f"{base['technical']['inRowCoolerCount']} x {base['technical']['inRowUnitKw']:g} kW in-row coolers" in texts[9]
 assert '0 signed customer contracts' in texts[4] and '0 paid pilots' in texts[4]
-assert pct(base['returns']['datedFundedIrr']) in texts[13]
+assert pct(base['returns']['headlineIrr']) in texts[13]
 assert pct(assumptions['hurdleRate']) in texts[13]
-assert million(base['returns']['datedFundedNpvUsd']) in texts[13]
-assert f"{base['returns']['fundedMoic']:.3f}x" in texts[13]
+assert million(base['returns']['npvUsd']) in texts[13]
+assert f"{base['returns']['moic']:.3f}x" in texts[13]
 assert pct(assumptions['hardwareResaleYear5']) in texts[13]
 assert pct(assumptions['infrastructureResale']) in texts[13]
 assert 'does not clear the hurdle' in texts[13]
+assert 'primary metric' in texts[13]
+assert pct(base['returns']['annualFundedIrr']) in texts[13]
+assert pct(base['returns']['datedFundedIrr']) in texts[13]
+assert 'timing diagnostics' in texts[13]
 for row in base['annual']:
     for key in ['revenueUsd', 'opexUsd', 'ebitdaUsd', 'operatingCashUsd']:
         assert million(row[key]) in texts[12], (row['year'], key)
-for scenario in scenarios.values():
-    assert pct(scenario['returns']['datedFundedIrr']) in texts[14], scenario['id']
+assert set(scenarios) == set(phase1_ids + ['maximum-base'])
+assert all(scenario['returns']['headlineIrr'] < assumptions['hurdleRate'] for scenario in phase1)
+for scenario in phase1:
+    year2 = next(row for row in scenario['annual'] if row['year'] == 2)
+    assert pct(scenario['returns']['headlineIrr']) in texts[14], scenario['id']
     assert million(scenario['capital']['totalUsd']) in texts[14], scenario['id']
-assert 'none is signed' in texts[14]
-assert str(scenarios['delayed']['commercial']['buildMonths']) + '-month launch delay' in texts[14]
-assert 'six-year forecast' in texts[16]
-assert pct(assumptions['hardwareResaleYear6']) in texts[16]
+    assert million(year2['operatingCashUsd']) in texts[14], scenario['id']
+assert 'All six cases are unsigned' in texts[14]
+assert 'none clears the ' + pct(assumptions['hurdleRate']) in texts[14]
+assert contracted['commercial']['contractedGpus'] == 40
+assert contracted['commercial']['contractRateUsd'] == 6.50
+assert contracted['commercial']['contractPaidShare'] == .95
+assert contracted['commercial']['contractTermMonths'] == 36
+assert pct(contracted['returns']['headlineIrr']) in texts[15]
+assert '40 GPUs at $6.50/GPU-hour' in texts[15]
+assert '95.00% paid share / 36 months' in texts[15]
+assert str(contracted['capacity']['saleableGpus'] - contracted['commercial']['contractedGpus']) + ' saleable GPUs' in texts[15]
+assert '$' + f"{contracted['commercial']['merchantRateYear1Usd']:.2f}" + ' Year-1 reference' in texts[15]
+assert pct(contracted['commercial']['merchantUtilizationYear1']) + ' / ' + pct(contracted['commercial']['merchantUtilizationYear2Plus']) in texts[15]
+assert 'no renewal is assumed' in texts[15]
+assert all(row['operatingCashUsd'] > 0 for row in base['annual'])
+assert million(next(row for row in base['annual'] if row['year'] == 2)['operatingCashUsd']) in texts[16]
+assert million(base['capital']['totalUsd']) in texts[16]
+assert million(base['returns']['npvUsd']) in texts[16]
+assert pct(base['returns']['headlineIrr']) in texts[16]
+assert 'Every Base forecast year shows positive modeled operating cash' in texts[16]
+assert pct(maximum['returns']['headlineIrr']) in texts[21]
 assert 'No solar/BESS capex' in texts[20]
 assert money(assumptions['phase1InternetAnnualUsd'] / 12) + '/month' in texts[19]
 assert 'scope are unconfirmed' in texts[19]
 assert 'No investor waterfall is modeled' in texts[22]
 assert 'Workbook stays private' in texts[24]
+assert 'Headline project IRR is the quoted return metric' in texts[24]
+assert 'Annual-funded IRR and dated XIRR' in texts[24]
+assert 'only as diagnostics' in texts[24]
 all_text = '\n'.join(texts)
-for obsolete in ['$7.274', '$7.022', '$652,800', '225 kW', '28.7%', 'Updated ROI: not established', '72 GPUs', '$604,000']:
+for obsolete in ['$7.274', '$7.022', '$652,800', '225 kW', '28.7%', 'Updated ROI: not established', '72 GPUs', '$604,000', '60 GPUs / $7.50', '60-month reserved-capacity', 'Dated funded IRR is the primary', 'dated funded project IRR']:
     assert obsolete not in all_text, obsolete
 assert '\ufffd' not in all_text
 

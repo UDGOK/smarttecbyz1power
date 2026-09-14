@@ -1,8 +1,8 @@
-# Investor presentation — current v6.1 edition
+# Investor presentation — model v6.1.1 · upgraded source revision
 
-The private investor page, 13-chapter immersive pitch and 26-page PDF use the same reviewed financial snapshot at `src/data/investor-model-v6-1.json`. The current edition is grid-first, with shared inference and dedicated servers on SmartTec-owned hardware plus separately scoped customer-owned colocation.
+The private investor page, 13-chapter immersive pitch and 26-page PDF use the same reviewed financial snapshot at `src/data/investor-model-v6-1.json`. The upgraded source revision is grid-first, with shared inference and dedicated servers on SmartTec-owned hardware plus separately scoped customer-owned colocation. Its financial baseline remains air-cooled and one-building. The approved campus experience illustrates a proposed direct-liquid design across Buildings A and C that requires engineering and repricing before it is included financially.
 
-Primary returns use dated funded project IRR; the negative Base case is shown alongside explicitly unsigned contract sensitivities. Revenue, operating cash, cash distributions, asset disposal and final receivable collection are distinct. See the source-of-truth and model-verification records for assumptions and limitations.
+Primary returns use headline project IRR; annual-funded IRR and dated-funded XIRR are timing diagnostics. The Base case's positive annual operating cash is presented beside its negative five-year headline return, and the Contracted case is explicitly unsigned. Revenue, operating cash, cash distributions, asset disposal and final receivable collection are distinct. See the source-of-truth and model-verification records for assumptions and limitations.
 
 Rebuild with `node tools/export-investor-deck-data.mjs`, then `python tools/build-investor-deck.py`. Validate with `python tools/verify-investor-pdf.py` and the investor-deck unit tests. Render every PDF page with Poppler and inspect it after a layout/content change. Metadata binds the PDF bytes to the canonical model, builder, exporter, roster and credentials hashes.
 

@@ -1,37 +1,41 @@
 # SmartTec source of truth — 13 September 2026
 
-This record replaces the earlier investor deployment and partial-budget narrative. Earlier dated review documents are historical and must not be used to generate live financial copy.
+This record replaces earlier investor deployment and return narratives. Earlier dated reviews are historical and must not supply live financial copy.
 
 ## Financial source
 
-The accepted workbook is `SmartTec_B300_Investor_Model_v6.1.xlsx`, SHA-256 `297c9fa394193d02871016b8f1d9b7586f1d62df4483efd7ea69acaedd421c4e`. Its independently recalculated, reviewed snapshots are in `src/data/investor-model-v6-1.json`. `financial-model.mjs` provides display helpers and current service/evidence records. All published scenario values derive from that snapshot. Do not revive the retired monthly ROI engines or historical calculator presets on live routes.
+The accepted workbook is `SmartTec_B300_Investor_Model_v6.1_1.xlsx`, 667,333 bytes, SHA-256 `60ef7ae93c731fecee74e31241dd5e2ac3cf669bb74a0668d57f77796aa179aa`. The source remained byte-for-byte unchanged during review. Microsoft Excel 16.0 build 20326 fully recalculated seven disposable copies: the six Phase-1 selector cases and the separate maximum-size Base sensitivity. Each reopened read-only with 26,721 populated formula caches and no cached formula errors.
 
-Primary return convention: dated funded project IRR (XIRR), dated NPV at 15%, and funded cash multiple. These include modeled tax, BC LLC payments, cash-retention policy and terminal disposal assumptions; they are not investor-security returns. Headline annual IRR and operating-only IRR are separate metrics and must be labeled when shown.
+The reviewed dataset is `src/data/investor-model-v6-1.json`; `financial-model.mjs` is its display facade. Live investor copy, FAQ answers, immersive pitch, model download and PDF use this dataset. Do not revive retired calculator presets or earlier 60-GPU contract sensitivities.
 
-Base initial funding is $6,934,754.57, with a negative five-year dated IRR. The full-fleet $7.50/60-month sensitivity has different working cash and initial funding of $7,030,329.29. Never pair one case's capital with another case's return without naming both assumptions. Exact data and cash tables control over rounded prose.
+The workbook's quoted return convention is **headline project IRR**, paired with headline NPV at 15% and headline MOIC. Annual-funded IRR and dated-funded XIRR are cash-timing diagnostics. These are unlevered project results before an investor ownership allocation or waterfall.
+
+Base initial funding is **$6,790,216.49**: $5,603,200 hardware, $782,499.44 infrastructure and $404,517.05 opening working cash. Against $6 million of owner-reported founder funding, modeled overage is **$790,216.49**. Base Year-2 operating project cash is **$1,365,505.73**. Every Base year has positive operating cash, yet operating cash alone leaves **$2,557,213.16** of initial capital unrecovered after Year 5. Including modeled terminal recovery, Base headline IRR is **−2.8017%** and headline NPV at 15% is **−$2,981,587.73**. Positive operating cash must never be described as a positive investor return.
+
+The six Phase-1 cases are Downside, Base, Market, Contracted, Marketplace-heavy and Delayed customer. None clears the 15% hurdle. The Contracted case is an unsigned workbook assumption: 40 GPUs at $6.50 per GPU-hour, 95% paid share and 36 months. It is not a customer commitment. The maximum-size Base sensitivity is 30 systems, 240 installed GPUs and 225 saleable GPUs; it needs $24,848,983.84 and has a 0.4868% headline IRR, also below the hurdle.
+
+The selector-6 detailed five-year plan controls the Delayed customer case: $6,864,692.24 initial funding and −5.3805% headline IRR. The workbook Scorecard row uses a simplified launch-shortfall estimate and reports $4,388.21 more initial funding with −5.3757% IRR. Published material uses the detailed plan and discloses this workbook-native inconsistency in the verification report.
 
 ## Services and ownership
 
-- Shared inference capacity: planned multi-tenant GPU capacity using SmartTec-owned equipment.
-- Dedicated GPU servers: planned single-tenant isolation using SmartTec-owned equipment.
-- Colocation: SmartTec houses customer-owned equipment and supplies scoped facility services.
+- Shared inference capacity is planned multi-tenant capacity on SmartTec-owned equipment.
+- Dedicated GPU servers are planned single-tenant server capacity on the same SmartTec-owned fleet.
+- Colocation houses customer-owned equipment under separately scoped facility agreements.
 
-The first two constitute SmartTec-owned server hosting. The B300 financial model covers that owned fleet. No extra revenue is added for colocation, token resale, manufacturing, solar or BESS. Capacity cannot be double-counted across the service offerings. Rates in the model are hypothetical gross billing assumptions, not published tariffs or executed prices.
+The financial model covers the SmartTec-owned B300 fleet. It does not add revenue from colocation, token sales, manufacturing, solar or BESS. Shared and dedicated offerings draw from one inventory and cannot duplicate GPU-hours, power or revenue.
 
 ## Physical and commercial facts
 
-- Development stage: no commissioned B300 inventory, signed customer contract or paid pilot established.
-- Proposed first purchase: eight complete Supermicro eight-B300 systems, 64 total GPUs, 60 saleable and four held back. Four held-back GPUs do not equal a full spare node or proven redundancy.
-- Hardware price: $670,000 per complete system, management-reported. SKU, service inclusions, warranty dates, voltage and air/liquid configuration require supplier confirmation.
-- The reviewed v6.1 financial baseline assumes all eight systems together in one building. The owner-approved campus visualization now illustrates four systems in A and four in C with direct liquid cooling. This spatial allocation remains illustrative, pending measured fit-out and engineering. It has not been repriced into v6.1. Existing-building gross areas are not approved IT floor allocations.
-- The v6.1 budget uses an air-cooled planning basis with new chilled-water room/in-row cooling: two nominal 50-ton chillers and five 40-kW in-row units including spares. The newer owner-approved direct-liquid/two-loop campus study is the current design intent. It requires exact supplier selection, an installed bill of quantities and revised financial analysis; the published v6.1/PDF values remain an explicitly labeled earlier baseline.
-- Grid power at launch. Model energy allowance 9.5 cents/kWh plus $12/billed peak kW/month. Firm tariff, capacity and voltage conversion remain unverified. Solar/BESS form a separate future investment; behind-the-meter savings are excluded from current returns.
-- Internet: $48,000/year Phase-1 model allowance, not a contracted bandwidth package. An earlier $8,075/month carrier option had different/unreconciled scope. Carrier capacity, directional speeds, egress, install and recurring prices need reconciliation before a quote is treated as within this allowance.
-- Founder capital: $6 million available and willingness to fund overage, management-reported; binding terms, availability and transfers not independently verified.
-- BC LLC is the related-party landowner. Management reports a signed 50-year commitment and a 1% annual profit payment. The model pays 1% of positive after-tax accounting income; legal definition and investor rights require reconciliation. Land is not SmartTec-owned investor collateral.
-- 39.39 acres is the current owner-supplied legal parcel area. Historical survey tract labels total 39.21 acres. Neither number should silently replace the other's documentary context.
-- Six-month build and 1 January 2027 workbook start are modeling inputs, not a committed launch date.
+- Development stage: no commissioned B300 inventory, signed customer contract or paid pilot is established.
+- Phase 1: eight complete Supermicro eight-B300 systems, 64 installed GPUs, 60 saleable and four held back in the financial allocation. Four held-back GPUs do not equal a spare eight-GPU node or proven failover.
+- Hardware price: $670,000 per complete system, management-reported. Exact SKU, delivery, voltage, cooling configuration, support, warranty and supplier inclusions require documents.
+- The upgraded workbook retains an air-cooled, one-building financial baseline. The approved campus concept shows a proposed four-plus-four placement in Buildings A and C with direct liquid cooling. That design needs an exact equipment list, engineering and repricing before it replaces the workbook baseline.
+- Grid power at launch: $0.095/kWh plus $12 per billed peak kW per month in the model. Utility capacity, tariff and voltage conversion remain unverified. Solar and BESS are separate future investments; no behind-the-meter saving supports current GPU returns.
+- Internet: $48,000 per year in the Phase-1 model, without a confirmed carrier scope.
+- Founder funding: management reports $6 million available and willingness to cover overage. Transfer evidence and binding contribution terms remain unverified.
+- Site: BC LLC, associated with the CEO, owns the paid-off property. Management reports a signed 50-year commitment and a 1% annual profit payment. The model applies 1% to positive after-tax accounting income; the agreement, definition and investor rights need legal review.
+- Six build months and a 1 January 2027 model start are financial assumptions, not launch commitments.
 
 ## Release evidence
 
-Use `docs/model-v6-1-verification.md` for mathematical checks and `docs/investor-consistency-report-2026-09-13.md` for full-site release scope and limitations. PDF bytes, canonical model hash and source workbook hash must reconcile to deck metadata. No document review, site engineering approval, audited accounts or guaranteed investor outcome is implied by software QA.
+`docs/model-v6-1-verification.md` records the mathematical checks. `docs/investor-consistency-report-2026-09-13.md` records release-wide checks and deployment identity. PDF bytes, model source hash and generating-code hashes must reconcile to deck metadata. Software QA does not certify customer demand, engineering approval, audited accounts or an investment outcome.

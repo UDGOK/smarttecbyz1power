@@ -22,8 +22,25 @@ subprocess.run(['node','tools/export-investor-deck-data.mjs'],cwd=ROOT,check=Tru
 D=json.loads((ROOT/'tmp/pdfs/deck-financials.json').read_text(encoding='utf-8'))
 M=D['model']; A=M['assumptions']
 S={item['id']:item for item in M['scenarios']}
-B=S['base']; MAXIMUM=S['maximum-base']; C36=S['contracted-36']; C60=S['contracted-60']
+PHASE1_IDS=['downside','base','market','contracted','marketplace-heavy','delayed']
+if set(S)!=set(PHASE1_IDS+['maximum-base']):
+ raise ValueError('The deck requires the six reviewed Phase-1 cases and maximum-base.')
+if A.get('primaryReturnMetric')!='headlineIrr':
+ raise ValueError('The reviewed workbook defines headline project IRR as the primary return metric.')
+PHASE1=[S[item] for item in PHASE1_IDS]
+B=S['base']; CONTRACTED=S['contracted']; MAXIMUM=S['maximum-base']
 B2=next(row for row in B['annual'] if row['year']==2)
+if not all(row['operatingCashUsd']>0 for row in B['annual'] if row['year']<=B['horizonYears']):
+ raise ValueError('The deck states that every Base forecast year has positive operating cash.')
+if any(row['returns']['headlineIrr']>=A['hurdleRate'] for row in PHASE1):
+ raise ValueError('The deck states that none of the six Phase-1 cases clears the hurdle.')
+if not (
+ CONTRACTED['commercial']['contractedGpus']==40
+ and abs(CONTRACTED['commercial']['contractRateUsd']-6.50)<1e-9
+ and abs(CONTRACTED['commercial']['contractPaidShare']-.95)<1e-9
+ and CONTRACTED['commercial']['contractTermMonths']==36
+):
+ raise ValueError('The Contracted case no longer matches the reviewed workbook terms.')
 CREDENTIALS=json.loads((ROOT/'src/data/yasir-credentials.json').read_text(encoding='utf-8'))
 EDITION_DATE=M.get('reviewedAt',M['source'].get('reviewedAt','2026-09-13'))
 OUT=ROOT/'output/pdf/SmartTec-Investor-Presentation-2026-09.pdf'
@@ -37,7 +54,7 @@ pdf_buffer=BytesIO()
 c=canvas.Canvas(pdf_buffer,pagesize=(W,H),pageCompression=1,invariant=1)
 c.setTitle('SmartTec by Z1Power | Investor Presentation | September 2026')
 c.setAuthor('SmartTec.dev LLC')
-c.setSubject('Grid-first B300 compute, shared inference and dedicated servers; conditional project economics from the reviewed v6.1 model')
+c.setSubject('Grid-first B300 compute, shared inference and dedicated servers; conditional project economics from the reviewed v'+str(M['version'])+' model')
 c.setViewerPreference('DisplayDocTitle','true')
 PAGE=0; LIGHT=False; TITLES=[]; BOXES=[]; RULES=[]
 usd=lambda n:'-'+usd(-n) if n<0 else '${:,.0f}'.format(n)
@@ -232,7 +249,7 @@ table(['USE','AMOUNT','BASIS'],[
  ['Freight / rigging / sales tax',usd(cap['freightAndTaxUsd']),'Planning allowance; exemptions unverified'],
  ['Power / cooling / site infrastructure',usd(cap['infrastructureUsd']),'Includes engineering and contingency'],
  ['Cash reserve and launch top-up',usd(cap['cashReserveUsd']+cap['launchTopUpUsd']),'Includes receivables funding'],
- ['TOTAL INITIAL FUNDING',usd(cap['totalUsd']),'Model v6.1 Base; not a contractor quotation']
+ ['TOTAL INITIAL FUNDING',usd(cap['totalUsd']),'Model v'+str(M['version'])+' Base; not a contractor quotation']
  ],[441,220,363],y=190,rowh=55,size=17)
 foot('Above the initial owner-reported '+million(FUND)+' is '+usd(max(0,cap['totalUsd']-FUND))+'. Management intends to cover the overage. Capital availability and terms remain unverified.')
 
@@ -252,43 +269,46 @@ table(['YEAR','REVENUE','OPERATING COST','EBITDA','OPERATING CASH'],[
 text('Operating cash is after modeled operating tax and the BC LLC payment. It excludes asset sale proceeds and reserve release.',64,541,17,w=1024)
 foot('The launch period is '+str(comm['buildMonths'])+' months. Receivables, funded reserves and actual distribution timing are handled separately in the dated project-cash schedule.')
 
-# 14 / use dated cash as primary
+# 14 / headline project return is the workbook's primary metric
 page('The unsigned Base does not clear the hurdle','Base capital recovery')
-metric(pct(B['returns']['datedFundedIrr']),'dated funded project IRR',64)
+metric(pct(B['returns']['headlineIrr']),'headline project IRR / primary metric',64)
 metric(pct(A['hurdleRate']),'modeled project-return hurdle',592)
 text(million(B['returns']['unrecoveredOperatingCapitalUsd'])+' remains unrecovered',64,386,29,'Medium',w=1010)
 text('after the modeled operating cash over the horizon. Asset-sale assumptions and the timing of reserve release matter; neither is recurring operating income.',64,441,23,w=970)
-text('Dated NPV at '+pct(A['hurdleRate'])+': '+million(B['returns']['datedFundedNpvUsd'])+'  /  Funded cash multiple: '+f"{B['returns']['fundedMoic']:.3f}x"+' including modeled resale',64,527,17,w=1024)
-foot('Five-year hold; resale assumes '+pct(A['hardwareResaleYear5'])+' of hardware cost and '+pct(A['infrastructureResale'])+' of infrastructure, with no guaranteed buyer. Headline annual IRR '+pct(B['returns']['headlineIrr'])+'; annual funded IRR '+pct(B['returns']['annualFundedIrr'])+'. Dated returns follow modeled cash dates, before investor allocation.')
+text('Headline NPV at '+pct(A['hurdleRate'])+': '+million(B['returns']['npvUsd'])+'  /  Headline cash multiple: '+f"{B['returns']['moic']:.3f}x"+' including modeled resale',64,527,17,w=1024)
+foot('Five-year hold; resale assumes '+pct(A['hardwareResaleYear5'])+' of hardware cost and '+pct(A['infrastructureResale'])+' of infrastructure, with no guaranteed buyer. Annual-funded IRR '+pct(B['returns']['annualFundedIrr'])+' and dated XIRR '+pct(B['returns']['datedFundedIrr'])+' are timing diagnostics, before investor allocation.')
 
-# 15 / comparable scenarios from the canonical data
+# 15 / the six workbook-native Phase-1 cases
 page('Customer economics change the result','Conditional scenario comparison',True)
-table(['CASE','INITIAL CAPITAL','HORIZON','DATED PROJECT IRR'],[
- ['Unsigned Base',million(B['capital']['totalUsd']),str(B['horizonYears'])+' years',pct(B['returns']['datedFundedIrr'])],
- ['60 GPUs / $7.50 / 36 months',million(C36['capital']['totalUsd']),str(C36['horizonYears'])+' years',pct(C36['returns']['datedFundedIrr'])],
- ['60 GPUs / $7.50 / 60 months',million(C60['capital']['totalUsd']),str(C60['horizonYears'])+' years',pct(C60['returns']['datedFundedIrr'])],
- ['60 GPUs / $6.50 / 60 months',million(S['contracted-60-at-650']['capital']['totalUsd']),str(S['contracted-60-at-650']['horizonYears'])+' years',pct(S['contracted-60-at-650']['returns']['datedFundedIrr'])],
- [str(S['delayed']['commercial']['buildMonths'])+'-month launch delay',million(S['delayed']['capital']['totalUsd']),str(S['delayed']['horizonYears'])+' years',pct(S['delayed']['returns']['datedFundedIrr'])],
- ['Maximum build / unsigned',million(MAXIMUM['capital']['totalUsd']),str(MAXIMUM['horizonYears'])+' years',pct(MAXIMUM['returns']['datedFundedIrr'])]
- ],[415,228,166,215],y=201,rowh=48,size=19)
-foot('Contract cases: '+pct(C60['commercial']['contractPaidShare'])+' paid share, '+pct(A['contractCommission'])+' fees, no renewal; none is signed. Merchant fallback: $'+f"{C60['commercial']['merchantRateYear1Usd']:.2f}"+' initial rate, '+pct(-C60['commercial']['annualMerchantRateChange'])+' annual decline, '+pct(C60['commercial']['merchantUtilizationYear2Plus'])+' utilization and '+pct(A['blendedMerchantCommission'])+' fees, including the $6.50 contract case.')
+scenario_names={
+ 'downside':'Downside',
+ 'base':'Base',
+ 'market':'Market',
+ 'contracted':'Contracted / 40 GPUs',
+ 'marketplace-heavy':'Marketplace-heavy',
+ 'delayed':'Delayed customer',
+}
+table(['PHASE-1 CASE','INITIAL CAPITAL','YEAR 2 OPERATING CASH','HEADLINE IRR'],[
+ [scenario_names[row['id']],million(row['capital']['totalUsd']),million(next(item for item in row['annual'] if item['year']==2)['operatingCashUsd']),pct(row['returns']['headlineIrr'])]
+ for row in PHASE1
+ ],[330,217,270,207],y=190,rowh=52,size=18)
+foot('All six cases are unsigned, conditional workbook scenarios; none clears the '+pct(A['hurdleRate'])+' project-return hurdle. Positive operating cash is not the same as full capital recovery. Maximum build is shown separately on page 22.')
 
-# 16 / contracts commercial not theoretical guarantee
-page('A contract must survive its own assumptions','36-month reserved-capacity case')
-metric(pct(C36['returns']['datedFundedIrr']),'dated funded project IRR / '+str(C36['horizonYears'])+' years',64)
-text(f"{C36['commercial']['contractedGpus']} GPUs at ${C36['commercial']['contractRateUsd']:.2f}/hour<br/>{pct(C36['commercial']['contractPaidShare'])} paid share / {C36['commercial']['contractTermMonths']} months",64,379,27,'Medium',w=475,leading=39)
+# 16 / exact unsigned Contracted case from the workbook
+page('A contract must survive its own assumptions','Contracted scenario')
+metric(pct(CONTRACTED['returns']['headlineIrr']),'headline project IRR / '+str(CONTRACTED['horizonYears'])+' years',64)
+text(f"{CONTRACTED['commercial']['contractedGpus']} GPUs at ${CONTRACTED['commercial']['contractRateUsd']:.2f}/GPU-hour<br/>{pct(CONTRACTED['commercial']['contractPaidShare'])} paid share / {CONTRACTED['commercial']['contractTermMonths']} months",64,379,27,'Medium',w=475,leading=39)
 text('Merchant economics after expiry',592,218,28,'Medium',w=496)
-text('The case uses merchant price, utilization and fees after the contract ends. It does not silently renew the customer or preserve the contracted paid share.',592,285,23,w=496)
-text('Credit support, acceptance, deposit, service credits and termination provisions determine whether the minimum payment is dependable.',592,417,22,w=496)
+text('The remaining '+str(CONTRACTED['capacity']['saleableGpus']-CONTRACTED['commercial']['contractedGpus'])+' saleable GPUs use a $'+f"{CONTRACTED['commercial']['merchantRateYear1Usd']:.2f}"+' Year-1 reference, '+pct(CONTRACTED['commercial']['merchantUtilizationYear1'])+' / '+pct(CONTRACTED['commercial']['merchantUtilizationYear2Plus'])+' paid utilization and '+pct(-CONTRACTED['commercial']['annualMerchantRateChange'])+' annual price decline. Contracted capacity follows merchant inputs after expiry; no renewal is assumed.',592,278,18,w=496,leading=25)
+text('Credit support, acceptance, deposit, service credits and termination provisions determine whether the minimum payment is dependable.',592,490,18,w=496,leading=25)
 project_note()
 
-# 17 / term inside real exit horizon
-page('A longer contract needs a longer cash horizon','60-month reserved-capacity case')
-metric(pct(C60['returns']['datedFundedIrr']),'dated funded project IRR / '+str(C60['horizonYears'])+' years',64)
-text(f"{C60['commercial']['contractedGpus']} GPUs / ${C60['commercial']['contractRateUsd']:.2f} per hour<br/>{pct(C60['commercial']['contractPaidShare'])} paid share<br/>{C60['commercial']['contractTermMonths']}-month commitment",64,379,26,'Medium',w=475,leading=37)
-text('Complete the service obligation',592,218,28,'Medium',w=496)
-text('The contract starts after launch and finishes inside the six-year forecast. Remaining operating months revert to merchant terms before the modeled exit.',592,282,23,w=496)
-text('Year-6 hardware resale: '+pct(A['hardwareResaleYear6'])+' of modeled hardware cost. This is an assumption, not a buyer offer or a market valuation.',592,418,22,w=496)
+# 17 / make positive cash and sub-hurdle return legible together
+page('Cash-positive operations still miss the hurdle','Base return bridge')
+metric(million(B2['operatingCashUsd']),'Year 2 modeled operating cash',64)
+metric(million(B['returns']['npvUsd']),'headline NPV at '+pct(A['hurdleRate']),592)
+text('Every Base forecast year shows positive modeled operating cash after operating tax and the BC LLC payment.',64,380,25,'Medium',w=475,leading=34)
+text('The '+million(B['capital']['totalUsd'])+' initial outlay, declining merchant price and modeled exit value produce a '+pct(B['returns']['headlineIrr'])+' headline project IRR. Annual cash generation alone does not establish full capital recovery.',592,380,22,w=496,leading=30)
 project_note()
 
 # 18 / launch measured milestones
@@ -340,8 +360,8 @@ page('Scale follows commitments and engineering','Expansion case')
 metric(str(MAXIMUM['capacity']['installedGpus'])+' GPUs','preliminary service-capacity ceiling',64)
 metric(million(MAXIMUM['capital']['totalUsd']),'maximum-build modeled funding',592)
 text(str(MAXIMUM['capacity']['nodes'])+' systems / '+str(MAXIMUM['capacity']['saleableGpus'])+' earning GPUs. The electrical screen includes cooling, support loads and design margin.',64,384,23,w=475)
-text('Unsigned maximum-build dated project IRR: '+pct(MAXIMUM['returns']['datedFundedIrr'])+'. More GPUs spread fixed costs, but do not create signed demand or guarantee capital recovery.',592,384,23,w=496)
-foot('Maximum is a preliminary screen, not utility or engineer approval. A 60-GPU customer contract does not support the rest of a 225-GPU saleable fleet. Runway campus concept.')
+text('Unsigned maximum-build headline project IRR: '+pct(MAXIMUM['returns']['headlineIrr'])+'. More GPUs spread fixed costs, but do not create signed demand or guarantee capital recovery.',592,384,23,w=496)
+foot('Maximum is a preliminary screen, not utility or engineer approval. The unsigned 40-GPU Contracted case does not support the rest of a 225-GPU saleable fleet. Runway campus concept.')
 
 # 23 / distinction investor projectreturns
 page('Project returns precede investor economics','Participation and governance',True)
@@ -367,7 +387,7 @@ foot('Development-stage risks remain. The model is an auditable planning case; f
 page('A traceable financial and technical basis','Model and sources',True)
 text('Reviewed model '+str(M['version']),64,210,28,'Medium',w=480)
 text('Native Excel recalculation and independent cash checks support this snapshot. The website and PDF use the same USD project values.',64,267,22,w=480)
-text('Dated funded IRR is the primary return shown. Headline accrual IRR and annual funded IRR use different timing conventions and are labeled separately.',64,387,21,w=480)
+text('Headline project IRR is the quoted return metric. Annual-funded IRR and dated XIRR use different cash-timing conventions and are shown only as diagnostics.',64,387,21,w=480)
 text('Workbook stays private',64,496,23,'Medium',w=480)
 text('Source identity and values are retained in the protected model.',64,531,16,w=480)
 text('External context, not project verification',592,211,23,'Medium',w=496)
@@ -402,7 +422,7 @@ meta={
  'pages':PAGE,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest(),
  'modelVersion':M['version'],'modelSourceSha256':D['modelSourceSha256'],'financialSource':M['source'],
  'teamSourceSha256':D['teamSourceSha256'],'credentialsSourceSha256':D['credentialsSourceSha256'],
- 'currentReturnStatus':'conditional-scenarios','primaryReturnMetric':'dated-funded-project-irr',
+ 'currentReturnStatus':'conditional-scenarios','primaryReturnMetric':'headline-project-irr',
  'builderSourceSha256':hashlib.sha256(Path(__file__).read_bytes().replace(b'\r\n',b'\n')).hexdigest(),
  'exporterSourceSha256':hashlib.sha256((ROOT/'tools/export-investor-deck-data.mjs').read_bytes().replace(b'\r\n',b'\n')).hexdigest(),
 }

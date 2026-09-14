@@ -14,11 +14,14 @@ export type Evidence =
 /** The latest public project-record review. Individual target dates stay explicit. */
 export const REVIEWED = '13 September 2026';
 
+/** Public label for the current reviewed workbook revision. */
+export const MODEL_EDITION = 'v6.1.1 · upgraded source revision';
+
 /** Owner-approved campus concept; it does not reprice the versioned investor model. */
 export const campusConcept = {
   href: '/site/campus',
   allocationNote: 'Four systems in A and four in C are illustrated; final allocation and measured fit-out remain subject to design.',
-  budgetBasis: 'Published v6.1 financial scenarios retain the earlier air-cooled, one-building budgeting basis. The direct-liquid campus concept requires updated equipment quotes, design and repricing.',
+  budgetBasis: `Published model ${MODEL_EDITION} retains an air-cooled, one-building financial baseline. The approved campus experience illustrates a proposed direct-liquid design across Buildings A and C; it requires updated equipment quotes, engineering and repricing before it is included financially.`,
 } as const;
 
 export const company = {
@@ -274,17 +277,23 @@ export const network = {
   publicCopy: 'The owner reports the Dobson handoff in Building B; the external route remains unverified. A fiber service option is under review. The management delivery estimate was 4–8 weeks from 10 September 2026 and requires carrier confirmation. The reported 100 Gbps asymmetrical option is not an ordered, commissioned or included service commitment.',
 } as const;
 
+const b300SystemCount = 8;
+const b300GpusPerSystem = 8;
+const b300InstalledGpus = b300SystemCount * b300GpusPerSystem;
+const b300SaleableGpus = 60;
+const b300ReserveGpus = b300InstalledGpus - b300SaleableGpus;
+
 /** Current proposed deployment, separate from the legacy RTX estimator below. */
 export const publicDeployment = {
   gpuModel: 'NVIDIA B300',
   supplier: 'Supermicro',
-  systems: 8,
-  gpusPerSystem: 8,
-  gpus: 64,
-  saleableGpus: 60,
-  reserveGpus: 4,
-  label: '64 B300 GPUs · proposed',
-  systemLabel: '8 complete Supermicro systems',
+  systems: b300SystemCount,
+  gpusPerSystem: b300GpusPerSystem,
+  gpus: b300InstalledGpus,
+  saleableGpus: b300SaleableGpus,
+  reserveGpus: b300ReserveGpus,
+  label: `${b300InstalledGpus} B300 GPUs · proposed`,
+  systemLabel: `${b300SystemCount} complete Supermicro systems`,
   building: 'Buildings A and C in the proposed campus layout',
   buildingNote: campusConcept.allocationNote + ' Gross building area is not usable rack space; equipment, aisles, service access and electrical systems require a measured layout.',
   cooling: 'Direct liquid cooling proposed; exact Supermicro SKU, cooling design and installed scope pending',
@@ -308,7 +317,7 @@ export const compute = {
   servers: 2,
   b300Servers: 1,
   phaseSystems: '2 RTX nodes + 1 B300 node',
-  phaseNote: 'Earlier starter concept: two four-GPU RTX nodes and one B300 node. The current proposal is 64 B300 GPUs in eight Supermicro systems; this RTX example remains only for comparative sizing.',
+  phaseNote: `Earlier starter concept: two four-GPU RTX nodes and one B300 node. The current proposal is ${publicDeployment.gpus} B300 GPUs in ${publicDeployment.systems} Supermicro systems; this RTX example remains only for comparative sizing.`,
   gpusPerServer: 4,
   gpus: 8,
   vramPerGpu: '96 GB',
@@ -455,7 +464,7 @@ export const stages = [
     ground: '#070a0f',
     ruler: '04 / COMPUTE',
     kicker: 'First phase · planned',
-    title: '64 B300 GPUs.\nOne focused start.',
+    title: `${publicDeployment.gpus} B300 GPUs.\nOne focused start.`,
     lede: `${publicDeployment.systemLabel}, proposed across Buildings A and C with direct liquid cooling. The four-plus-four arrangement is illustrative; final allocation, equipment and costs require validation. Procurement follows customer commitments and engineering acceptance.`,
     chrome: 'light' as const,
     scrollVh: 300,

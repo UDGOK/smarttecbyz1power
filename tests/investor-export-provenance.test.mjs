@@ -16,10 +16,12 @@ async function client(){
 
 test('downloaded model retains exact reviewed scenarios, source provenance and private headers',async()=>{
  const send=await client(),response=await send('model');assert.equal(response.status,200);
- assert.match(response.headers.get('content-disposition'),/^attachment; filename="SmartTec_Model_v6\.1_Verified_Scenarios\.json"$/);
+ assert.match(response.headers.get('content-disposition'),/^attachment; filename="SmartTec_Model_v6\.1_1_Verified_Scenarios\.json"$/);
  for(const header of ['cache-control','cdn-cache-control','vercel-cdn-cache-control'])assert.match(response.headers.get(header),/no-store/);
- const snapshot=await response.json();assert.deepEqual(snapshot,model);assert.equal(snapshot.version,'6.1');assert.match(snapshot.source.sha256,/^[a-f0-9]{64}$/i);assert.ok(snapshot.reviewedAt);
- assert.ok(snapshot.scenarios.some(s=>s.id==='base'));assert.ok(snapshot.scenarios.some(s=>s.id==='contracted-60'));
+ const snapshot=await response.json();assert.deepEqual(snapshot,model);assert.equal(snapshot.version,'6.1.1');assert.match(snapshot.source.sha256,/^[a-f0-9]{64}$/i);assert.ok(snapshot.reviewedAt);
+ assert.deepEqual(snapshot.scenarios.map(s=>s.id),['downside','base','market','contracted','marketplace-heavy','delayed','maximum-base']);
+ assert.equal(snapshot.assumptions.primaryReturnMetric,'headlineIrr');
+ assert.equal(snapshot.source.sha256,'60ef7ae93c731fecee74e31241dd5e2ac3cf669bb74a0668d57f77796aa179aa');
 });
 
 test('HEAD describes the same private download without a payload',async()=>{

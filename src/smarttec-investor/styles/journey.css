@@ -96,7 +96,6 @@ html:has(.smarttec-investor){scroll-behavior:smooth;scroll-padding-block:110px 1
 .smarttec-investor .sta-chapters button:hover{color:var(--c-signal)}
 .smarttec-investor .sta-bottom{padding-bottom:2rem}
 .smarttec-investor .sta-status{margin-top:2rem}
-.smarttec-investor .sta-reference{scroll-margin-top:100px}
 
 /* Private entrance carries the same mark, geometry and type as the room. */
 .smarttec-investor .inv-login{max-width:none;min-height:100svh;padding:6rem max(6vw,calc((100vw - 1240px)/2));background:radial-gradient(ellipse at 95% 85%,#326f52,transparent 60%),var(--c-land-shadow)}

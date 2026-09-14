@@ -1,60 +1,71 @@
-# Investor model v6.1 verification
+# Investor model v6.1.1 upgraded-source verification
 
-Reviewed 13 September 2026. The canonical website/deck dataset is `src/data/investor-model-v6-1.json`. Currency is USD; rates in that file are fractions, so `0.15` means 15%. Figures are planning projections, not realized performance or a guarantee of an investor's return.
+Reviewed 13 September 2026. The investor website and deck dataset is `src/data/investor-model-v6-1.json`. Currency is USD; rates in that file are fractions. Results are conditional project projections, not realized performance or a promised investor return.
 
 ## Source and reproducibility
 
-- Workbook: `SmartTec_B300_Investor_Model_v6.1.xlsx`, 479,453 bytes.
-- SHA-256: `297c9fa394193d02871016b8f1d9b7586f1d62df4483efd7ea69acaedd421c4e`.
-- The original workbook remained unchanged. Full recalculation ran in installed Microsoft Excel 16.0, build 20326, on disposable copies; the restored Base copy was saved and reopened successfully.
-- All 26,721 source formulas have cached results and none has a cached error. Source caches and recalculated Base results agree within the documented numerical tolerance; strings and dates agree exactly. Native Excel and independent XIRR calculations differ by less than 0.0000005 percentage points across the exported scenarios.
-- Independent checks reconstructed contracted/merchant revenue, term expiry, operating-cash arithmetic, receivables, funded reserve draws, later calls, distributions, final collections, NPV, IRR and XIRR. Financial reconciliation differences were below $0.000001 in each scenario. The check includes the maximum-build case.
-- Reproduction scripts and full diagnostics are in workspace `analysis/v6-1/native_snapshot.ps1`, `analysis/v6-1/build_snapshot.py`, `analysis/v6-1/native_results.json` and `analysis/v6-1/independent_checks.json`.
+- Workbook: `SmartTec_B300_Investor_Model_v6.1_1.xlsx`, 667,333 bytes.
+- SHA-256: `60ef7ae93c731fecee74e31241dd5e2ac3cf669bb74a0668d57f77796aa179aa`.
+- The source hash was identical before and after review.
+- Microsoft Excel 16.0 build 20326 fully recalculated one disposable copy for each of the six Phase-1 selector values plus a Base maximum-size copy. Every copy was saved, reopened read-only and checked.
+- Every copy contained 26,721 populated formula caches with zero cached errors or missing formula results.
+- Independent checks reconstructed revenue, channel fees, support, EBITDA, operating project cash, reserve and receivables movements, terminal recovery, NPV, IRR and XIRR. Base and maximum-size differences were below one cent; the largest cash-reconciliation difference was $0.000000002.
+- Reproduction records are under workspace `analysis/v6-1-1/` and are excluded from the published website.
 
-## Verified scenario outputs
+## Verified selector outputs
 
-The investor-facing primary return is **dated funded-cash XIRR**, using the funded reserve and placing the final receivable after the asset sale. Headline IRR is the workbook's separate annual accrual convention. NPV below uses the dated funded cash at the 15% hurdle. MOIC is total investor cash received divided by total investor capital contributed; it includes modeled resale. Operating payback excludes resale.
+**Headline project IRR is the workbook's quoted return metric.** Headline NPV uses the same annual project-cash series at the 15% hurdle. Annual-funded IRR and dated-funded XIRR are distribution-timing diagnostics. None of the six Phase-1 selector cases clears 15%.
 
-| Scenario ID | Initial capital | Hold | Headline IRR | Annual funded IRR | Dated funded XIRR | Dated NPV at 15% | MOIC | Operating payback |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| base | $6,934,754.57 | 5 years | −3.1033% | −3.1227% | **−3.1190%** | −$3,089,279 | 0.893× | Not within hold |
-| contracted-36 | $7,030,329.29 | 5 years | 13.4537% | 13.5229% | **13.5081%** | −$257,057 | 1.458× | 3.42 years |
-| contracted-60 | $7,030,329.29 | 6 years | 21.2835% | 21.2718% | **21.2499%** | $1,330,611 | 1.947× | 3.27 years |
-| contracted-60-at-650 | $6,986,792.69 | 6 years | 16.0704% | 16.0621% | **16.0455%** | $215,134 | 1.693× | 3.74 years |
-| delayed | $7,011,274.20 | 5 years | −5.6026% | −5.7197% | **−5.7130%** | −$3,741,310 | 0.793× | Not within hold |
-| maximum-base | $25,155,237.27 | 5 years | 0.2723% | 0.2740% | **0.2737%** | −$9,224,016 | 1.010× | Not within hold |
+| Scenario | Initial funding | Headline project IRR | Annual-funded IRR | Dated-funded XIRR | Headline NPV at 15% | Headline MOIC | Operating capital recovery |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Downside | $6,739,330.84 | −17.5945% | −17.8236% | −17.8045% | −$4,777,677.55 | 0.475× | Not in hold; $5,405,231.13 unrecovered |
+| Base | $6,790,216.49 | −2.8017% | −2.8196% | −2.8162% | −$2,981,587.73 | 0.903× | Not in hold; $2,557,213.16 unrecovered |
+| Market | $6,862,007.11 | 6.6430% | 6.6857% | 6.6772% | −$1,496,759.12 | 1.244× | Not in hold; $84,370.36 unrecovered |
+| Contracted | $6,810,597.71 | 4.3225% | 4.3448% | 4.3399% | −$1,762,140.24 | 1.145× | Not in hold; $942,556.13 unrecovered |
+| Marketplace-heavy | $6,908,758.91 | −7.0613% | −7.1088% | −7.0997% | −$3,681,207.42 | 0.762× | Not in hold; $3,673,990.73 unrecovered |
+| Delayed customer, detailed plan | $6,864,692.24 | −5.3805% | −5.4949% | −5.4884% | −$3,676,770.60 | 0.802× | Not in hold; $3,337,935.52 unrecovered |
+| Maximum-size Base sensitivity | $24,848,983.84 | 0.4868% | 0.4898% | 0.4892% | −$9,014,467.18 | 1.017× | Not in hold; $6,299,472.30 unrecovered |
 
-Base starts after six build months, with a $6.50 merchant GPU-hour reference, 10% annual rate decline, 55% utilization in the first operating year and 70% thereafter. The delayed case begins after 12 build months. Maximum Base is a preliminary engineering sensitivity, not an approved expansion plan.
+The Contracted case assumes 40 GPUs at $6.50 per GPU-hour, 95% paid share and a 36-month term. The remaining 20 saleable GPUs use a $7.50 Year-1 merchant reference, 40% Year-1 and 50% later paid utilization, a 10% annual rate decline and merchant fees. This selector is hypothetical and unsigned. No renewal is assumed.
 
-**Every contracted case is hypothetical and unsigned.** Each assumes 60 paid-capacity GPUs, 95% contracted paid share, 2% contract fees and no renewal. `contracted-36` assumes $7.50 for 36 service months, from model month 7 through 42. `contracted-60` assumes $7.50 for 60 service months, from month 7 through 66, with sale after month 72. `contracted-60-at-650` changes that contract rate to $6.50. These scenarios retain the Contracted preset's merchant fallback: a $7.50 initial merchant reference declining 10% annually, 50% post-term utilization and 6.6% merchant fees. The $6.50 sensitivity does not substitute the Base merchant fallback. Cash capital is recalculated separately for each scenario.
+The workbook contains one internal scenario-display inconsistency. Scorecard row 81 uses a simplified launch-shortfall estimate for Delayed customer and reports $6,869,080.44 initial funding with −5.3757% headline IRR. Recalculating selector 6 in the detailed `5A Five-Year Plan (Phase 1)` produces $6,864,692.24 and −5.3805%. The difference is $4,388.21 of initial funding. The detailed plan follows the full funding rules used by the published annual cash schedule, so the website and deck publish its result. The other five Scorecard Phase-1 IRRs match their detailed selector plans.
 
-The Base plan falls short of the 15% hurdle. The 36-month contracted case also falls short. Longer-term contract sensitivities clearing the hurdle are conditional outputs, not evidence that those contract prices, payment terms, utilization or resale values can be achieved. No investment security, equity split, investor distribution waterfall or actual financing terms have been priced by this unlevered project model.
+## Base capital and annual cash
 
-## Capital and operating assumptions
+| Capital item | Amount |
+| --- | ---: |
+| Eight complete B300 systems | $5,360,000.00 |
+| Shared storage and spares | $80,000.00 |
+| Freight and tax allowance | $163,200.00 |
+| Infrastructure | $782,499.44 |
+| Opening reserve and receivables | $404,517.05 |
+| **Total initial funding** | **$6,790,216.49** |
+| Owner-reported founder funding | $6,000,000.00 |
+| **Modeled overage** | **$790,216.49** |
 
-Base Phase 1 installs eight eight-GPU nodes: 64 GPUs installed, 60 saleable and four held back. Hardware totals **$5,603,200**: $5,360,000 for nodes, $80,000 for storage/management/spares, and $163,200 for freight/rigging/tax. Infrastructure is **$926,139.77**. Launch cash reserve plus receivables is **$405,414.81**, with no additional Base launch shortfall. The delayed case adds a **$96,255.53** launch shortfall to its own $385,678.90 reserve. Owner-reported available founder capital is $6 million, leaving a modeled Base funding gap of $934,754.57; availability and commitment were not independently verified.
+| Year | Gross revenue | Operating expense | EBITDA | Operating project cash | Headline project cash including terminal items |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | $939,510.00 | $513,115.65 | $426,394.35 | $426,394.35 | $426,394.35 |
+| 2 | $2,152,332.00 | $774,635.31 | $1,377,696.69 | $1,365,505.73 | $1,365,505.73 |
+| 3 | $1,937,098.80 | $779,407.36 | $1,157,691.44 | $1,157,691.44 | $1,157,691.44 |
+| 4 | $1,743,388.92 | $932,594.69 | $810,794.23 | $810,794.23 | $810,794.23 |
+| 5 | $1,569,050.03 | $1,096,432.44 | $472,617.59 | $472,617.59 | $2,374,522.64 |
 
-Actual modeled Base Year-1 revenue is **$939,510**, operating expense **$515,749.06**, and operating cash **$423,760.94**. Year 2 revenue is **$2,152,332**, operating expense **$778,334.05**, EBITDA **$1,373,997.95**, and operating cash **$1,362,596.84**. The capital sheet's annual running-cost allowance is used to size the launch reserve; it must not be presented as actual Year-1 ramp-period expense.
+Every Base year has positive operating project cash. The headline investment return remains negative because those annual amounts and terminal recovery do not compensate for the initial $6.79 million within the five-year hold. Published copy states both facts together.
 
-Grid power is the launch strategy. The model assumes **$0.095/kWh**, **$12/kW-month** demand charges and billed peak demand at 90% of modeled worst-day facility load; these are tariff assumptions requiring utility confirmation. Solar/BESS savings and their capital investment are excluded from the six exported project cases. Average modeled PUE is 1.30. Phase 1 models 128.4 kW IT load, 203.159 kW worst-day facility load and 182.843 kW billed demand.
+## Operating assumptions and boundaries
 
-The model's Phase-1 connectivity allowance is **$48,000/year ($4,000/month)**. An earlier management-reported **$8,075/month** carrier option is unconfirmed and its service scope needs reconciliation with this allowance. Neither is an accepted quote for a complete bandwidth commitment. This is a procurement/diligence gap, not an arithmetic error in the supplied workbook. Post-warranty support is 5% of the **complete B300 system purchase subtotal** before escalation; separate storage/spares and freight/tax are excluded from that support-cost basis.
+- Phase 1 models eight eight-GPU nodes: 64 installed, 60 saleable and four held back.
+- Base starts at $6.50 per GPU-hour, 55% paid utilization in Year 1 and 70% thereafter, with a 10% annual rate decline and six build months.
+- Grid power is $0.095/kWh plus $12 per billed peak kW per month. Average PUE is 1.30. Solar/BESS capex and savings are separate.
+- Phase-1 internet is $48,000 per year. Scope, bandwidth, route diversity and actual carrier price are not confirmed.
+- Support is assumed included for 36 operating months, then 5% of the complete-system purchase subtotal annually before 3% cost inflation.
+- Hardware resale is 20% in Year 5; infrastructure recovery is 50%. Neither has a guaranteed buyer.
+- The model retains an air-cooled, one-building financial scope. The approved A/C campus concept uses direct liquid cooling and needs an exact bill of quantities, engineering and repricing.
+- The standalone 600 kW solar / 1,000 kWh BESS worksheet requires $1.13 million, models $67,069.26 first-year net saving, 16.85-year simple payback and −6.6264% pre-tax IRR. It is not included in the GPU Base case.
 
-Preliminary cooling is 40.159 tons of design heat load, two 50-ton chillers and five 40-kW in-row coolers. These are modeled quantities and allowances, not verified equipment selections or an engineered design. Exact server SKU, supply voltage/conversion, utility capacity, equipment derating and installed costs remain subject to supplier/engineering review.
+## Dataset contract
 
-## v6.1 fixes and scope of verification
+Use `returns.headlineIrr`, `returns.npvUsd` and `returns.moic` together for the primary presentation. Use `returns.annualFundedIrr`, `returns.datedFundedIrr`, `returns.annualFundedNpvUsd`, `returns.datedFundedNpvUsd` and `returns.fundedMoic` only as timing diagnostics and label them accordingly. `annual[].operatingCashUsd`, `annual[].distributionsUsd`, receivables, reserve movements and asset disposal are distinct. `annual[].resaleTaxUsd` is a signed cash flow. A null `operatingPaybackYears` means operating cash does not recover capital within the hold.
 
-- Year-end receivables now use the final operating month's invoice. This matters in years when fixed contracts expire: the 36-month case's Year-4 receivable is $119,738.25; the 60-month case's Year-6 receivable is $96,987.98. Neither uses that mixed year's average invoice.
-- The date strip uses model start 1 January 2027, anniversary cash dates, and final collection 30 days after the sale. Five-year terminal collection is 31 January 2032; six-year terminal collection is 31 January 2033. Dated XIRR also reflects actual day counts, including leap days. It remains an annual-distribution model, not a fully monthly cash forecast over the whole hold.
-- The funded reserve is raised at inception. Launch losses draw it down; distributions occur only above the stated reserve target. The target is a distribution policy, not an enforced minimum cash balance. Later annual capital calls equal zero in all six exported cases. The delayed case's initial funded shortfall is not counted as another annual investor contribution.
-- Total-cash conservation is independently verified, but the workbook's same-total-cash check alone does not prove customer collections or intrayear liquidity. The separate launch schedule covers only its first 24 months.
-- Support coverage correctly clips to operating months. In the delivery-start regression at a 2% included support rate, the six-month build has 6/12/12/3 included operating months across Years 1–4. With a 12-month build those become 0/12/12/3; there is no support expense attributed to non-operating Year-1 months.
-- Default hardware resale is 20% of modeled hardware capital in Year 5 and 15% in Year 6; infrastructure resale is 50%. Gross sale proceeds, sale tax and reserve release remain distinct fields. These are assumptions without a guaranteed buyer. The advertised IRRs and MOICs must retain this context.
-
-## Dataset integration contract
-
-Use `returns.datedFundedIrr`, `returns.datedFundedNpvUsd` and `returns.fundedMoic` together for the funded investor-cash presentation. `returns.headlineIrr` and `returns.npvUsd` belong to the separate annual headline method. `annual[].operatingCashUsd` is accrual-derived operating cash; `annual[].distributionsUsd` is the modeled funded-cash distribution before separate terminal receivables and asset disposal. Do not treat these fields as interchangeable. `annual[].resaleTaxUsd` is a signed negative cash flow. A null `operatingPaybackYears` means capital is not recovered from operations within the modeled hold.
-
-All annual and dated cash amounts are exported at source precision. Display rounding is for presentation only; consumers should use the canonical raw values and should not rederive headline financial claims from rounded labels.
-
-`annual[].contractMonths` is normalized to zero when a scenario has no contracted GPUs. The workbook's raw overlap formula calculates potential term months even in merchant-only scenarios; this export normalization changes no financial result.
+All values are exported at source precision; display rounding is presentation only.

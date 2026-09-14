@@ -13,23 +13,12 @@ async function answer(event){
  event.preventDefault();const out=$('#inv-answer');out.replaceChildren(make('p','Searching the reviewed project records…'));
  try{const result=await(await api('faq',{question:$('#inv-question').value})).json();out.replaceChildren(make('p',result.answer));for(const fact of result.matches){const article=make('article','');article.className='inv-answer-item';article.append(make('h3',fact.question),make('p',fact.answer),make('small',fact.status+' · Reviewed '+fact.reviewedAt));for(const source of fact.sources){const label=make('p',source.title);label.className='inv-note';article.append(label);}out.append(article);}}catch(error){out.replaceChildren(make('p',error.message));}
 }
-function initMap(data){
- if(!$('#inv-campus-map'))return;let started=false;
- const start=()=>{if(started)return;started=true;import('./campus-map.mjs').then(module=>module.initCampusMap(data.mapData,data.mapConfig)).catch(()=>{$('#inv-map-status').textContent='Interactive map unavailable in this browser. Use the supplied survey below.';});};
- const reference=$('#sta-reference');if(!reference||reference.open)start();else reference.addEventListener('toggle',()=>{if(reference.open)start();});
-}
-function initSurvey(){
- let zoom=1;const image=$('#inv-survey-image'),box=$('#inv-survey');if(!image||!box)return;
- document.querySelectorAll('[data-survey]').forEach(button=>button.addEventListener('click',()=>{zoom=button.dataset.survey==='all'?1:Math.max(1,Math.min(4,zoom+(button.dataset.survey==='in'?.5:-.5)));image.style.width=zoom*100+'%';}));
- document.querySelectorAll('[data-tract]').forEach(button=>button.addEventListener('click',()=>{zoom=2;image.style.width='200%';const position={1:.09,2:.36,3:.55}[button.dataset.tract];requestAnimationFrame(()=>{box.scrollTop=image.clientHeight*position;box.scrollLeft=image.clientWidth*.07;});}));
-}
 async function init(){
- initSurvey();
  try{boot=await(await api('bootstrap')).json();
   $('#inv-question-form')?.addEventListener('submit',answer);
   const submit=$('#inv-question-form button');if(submit)submit.disabled=false;
   $('#inv-logout')?.addEventListener('click',async()=>{try{await api('logout',{});location.assign('/investors/login');}catch(error){status(error.message);}});
-  initMap(boot);status('Model v'+boot.model.version+' · Reviewed scenarios and project records ready.');
+  status('Model v'+boot.model.version+' · Reviewed scenarios and project records ready.');
  }catch(error){status(error.message);}
 }
 if(document.querySelector('#inv-main'))init();

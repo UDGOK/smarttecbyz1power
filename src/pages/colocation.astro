@@ -1,6 +1,6 @@
 ---
 import Content from '../layouts/Content.astro';
-import { company, site, power, network, publicDeployment as deployment } from '../data/site';
+import { company, site, power, network, publicDeployment as deployment, campusConcept } from '../data/site';
 ---
 <Content
   title={`Colocation and server hosting in Mead | ${company.full}`}
@@ -41,7 +41,7 @@ import { company, site, power, network, publicDeployment as deployment } from '.
       <div>
         <p>Buildings A and C are designated for data-center development. Building B supports batteries, utilities and storage, and is excluded from the {site.dataCenterArea.toLocaleString()} sq ft data-center area.</p>
         <p>Launch is planned on {power.utility} grid power. Management reports shared {power.service} distribution from Building C; customer IT allocations follow engineering review and commissioning. Solar and BESS are a separate later investment.</p>
-        <p>The <a href="/site/campus">new campus study</a> illustrates direct liquid cooling in A and C. The published v6.1 owned-B300 budget retains its earlier air-cooled server basis and requires repricing for that design. Each colocation proposal needs its own equipment, airflow, power and cooling review; customer allocations are separately scoped.</p>
+        <p><a href="/site/campus">Explore the approved campus study.</a> {campusConcept.budgetBasis} Each colocation proposal needs its own equipment, airflow, power and cooling review; customer allocations are separately scoped.</p>
       </div>
       <div class="card">
         <h3>Development milestones</h3>

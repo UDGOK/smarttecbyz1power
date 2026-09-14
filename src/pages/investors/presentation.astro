@@ -2,6 +2,7 @@
 import {pageAccess,privateHeaders} from '../../smarttec-investor/server/auth.mjs';
 import deck from '../../smarttec-investor/data/investor-deck.json';
 import SiteFonts from '../../components/SiteFonts.astro';
+import { campusConcept, MODEL_EDITION } from '../../data/site';
 import '../../styles/tokens.css';
 export const prerender=false;
 Object.entries(privateHeaders).forEach(([key,value])=>Astro.response.headers.set(key,value));
@@ -23,7 +24,7 @@ const pdfURL='/api/investor/presentation?view=inline';
         <a class="pdf-download" href="/api/investor/presentation" download={deck.filename}>Download PDF <span aria-hidden="true">↓</span></a>
       </nav>
     </header>
-    <p class="pdf-baseline">Reviewed v6.1 financial baseline · Earlier one-building, air-cooled scope. The <a href="/site/campus" target="_blank" rel="noopener">new direct-liquid campus concept</a> requires updated equipment quotes and financial review.</p>
+    <p class="pdf-baseline">Reviewed model {MODEL_EDITION}. {campusConcept.budgetBasis} <a href="/site/campus" target="_blank" rel="noopener">Explore the direct-liquid campus concept.</a></p>
     <main class="pdf-document" aria-label="Investor PDF reader">
       <p id="pdf-loading" class="pdf-loading" role="status" hidden>Opening the presentation…</p>
       <iframe id="pdf-frame" title="SmartTec investor presentation PDF" data-pdf-url={pdfURL} data-session-expires={access.session.expires} hidden></iframe>

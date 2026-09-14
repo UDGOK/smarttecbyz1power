@@ -52,13 +52,8 @@
     },
     "survey": {
       "title": "BM Surveying, Inc. — Land Boundary Survey Plat, sheet 1 of 1 dated 28 December 2025",
-      "url": "/api/investor/survey",
+      "url": null,
       "type": "supplied-boundary-survey-copy"
-    },
-    "marked-survey": {
-      "title": "Owner-marked campus survey supplied in this conversation",
-      "url": "/api/investor/marked-survey",
-      "type": "owner-marked-document"
     },
     "economics-review": {
       "title": "SmartTec economic review: editable assumptions, benchmark sources and tested cash-flow engine, 10 September 2026",
@@ -310,20 +305,9 @@
       "answer": "The owner confirmed mark 1 (east) as Building A, mark 2 (middle) as B and mark 3 (west) as C. A and C are the data-center buildings. B is for utility, battery and storage uses. The schematic retains the approximate traced outlines rather than treating them as measured gross floor areas.",
       "status": "owner-reported",
       "sourceIds": [
-        "marked-survey",
         "owner-brief"
       ],
       "reviewedAt": "2026-09-10"
-    },
-    {
-      "id": "F33",
-      "question": "Where are the planned factories, BESS and solar?",
-      "answer": "Owner markings place a 200 × 150 ft inverter factory in northern Tract 1 and a 200 × 150 ft battery assembly factory farther south in that tract. A 2,000 sq ft BESS area is marked south of the data-center buildings on Tract 2. Tract 3 is designated for solar; the owner asks to omit the former greenhouse/pad from the proposed display. Positions are concept placements, not approved construction setbacks.",
-      "status": "owner-proposed",
-      "sourceIds": [
-        "marked-survey"
-      ],
-      "reviewedAt": "2026-09-09"
     }
   ]
 }

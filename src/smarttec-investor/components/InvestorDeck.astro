@@ -1,5 +1,6 @@
 ---
 import deck from '../data/investor-deck.json';
+import { campusConcept, MODEL_EDITION, publicDeployment as deployment } from '../../data/site';
 const size=(deck.bytes/1e6).toFixed(1);
 const reviewed=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(deck.reviewedAt+'T12:00:00Z'));
 ---
@@ -7,7 +8,7 @@ const reviewed=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:
   <div>
     <p class="inv-eyebrow">THE INVESTMENT PRESENTATION</p>
     <h2 id="investor-deck-title">The SmartTec case.<br/>Ready for a closer look.</h2>
-    <p>SmartTec’s proposed 64-B300 deployment, founder funding, customer pipeline and investment framework. Explore the site and power strategy, preliminary capital requirements and terms for prospective participation.</p>
+    <p>SmartTec’s proposed {deployment.gpus}-B300 deployment, founder funding, customer pipeline and investment framework. Explore the site and power strategy, preliminary capital requirements and terms for prospective participation.</p>
   </div>
   <div class="inv-deck-download">
     <a class="inv-pitch-launch" href="/investors/pitch" data-pitch-launch>
@@ -20,8 +21,8 @@ const reviewed=new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'long',year:
     <p class="inv-deck-format">PDF <span>{deck.pages} pages / {size} MB</span></p>
     <a class="inv-button" href="/investors/presentation" target="_blank" rel="noopener noreferrer">Open investor presentation ↗</a>
     <p class="inv-note">Opens in a new tab with full-screen and download controls. <a href="/api/investor/presentation" download={deck.filename}>Download PDF only</a></p>
-    <p class="inv-note">{reviewed} edition. Model v6.1: grid-first costs, capital, cash timing and conditional returns. Customer contracts and final installed costs require verification.</p><p class="inv-note"><strong>Financial baseline:</strong> v6.1 retains the earlier one-building, air-cooled scope. The <a href="/site/campus">new direct-liquid campus study</a> requires revised supplier pricing, installed costs and financial review.</p>
-    <a href="#returns">Compare the reviewed v6.1 scenarios</a>
+    <p class="inv-note">{reviewed} edition. Model {MODEL_EDITION}: grid-first costs, capital, cash timing and conditional returns. Customer contracts and final installed costs require verification.</p><p class="inv-note"><strong>Cooling scope:</strong> {campusConcept.budgetBasis} <a href="/site/campus">Explore the direct-liquid campus study.</a></p>
+    <a href="#returns">Compare the reviewed model scenarios</a>
     <a class="inv-deck-contact" href="mailto:yasir@smarttec.dev?subject=SmartTec%20investment%20diligence">Arrange an investment discussion <span aria-hidden="true">↗</span></a>
   </div>
   <figure class="inv-deck-hero">

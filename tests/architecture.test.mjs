@@ -32,4 +32,5 @@ test('visual components preserve transparent mode labels and lazy GPU work',asyn
  assert.ok(code.includes('poster.alt=c.alt'));assert.ok(code.includes('3D UNAVAILABLE · IMAGE VIEW'));
  const markup=await readFile('src/smarttec-architecture/ArchitecturalCampus.astro','utf8');
  for(const phrase of ['not photographs or renders','id="sta-mode"','aria-pressed','prefers-reduced-motion'])assert.ok(markup.includes(phrase));
+ assert.doesNotMatch(markup,/site-map|survey and satellite reference|reference-panel/);
 });

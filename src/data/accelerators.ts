@@ -1,3 +1,5 @@
+import { publicDeployment as deployment } from './site';
+
 /**
  * Accelerator reference data for the model planner.
  *
@@ -67,7 +69,7 @@ export const accelerators: Accelerator[] = [
     domainSize: 1,
     interconnect: 'PCIe Gen5 — no NVLink',
     status: 'evaluation',
-    statusNote: 'Earlier starter reference. RTX requires a separate workload and commercial case; it is not part of the current 64-B300 proposal.',
+    statusNote: `Earlier starter reference. RTX requires a separate workload and commercial case; it is not part of the current ${deployment.gpus}-B300 proposal.`,
     source: 'https://www.nvidia.com/en-us/data-center/rtx-pro-6000-blackwell-server-edition/',
   },
   {
@@ -95,7 +97,7 @@ export const accelerators: Accelerator[] = [
     domainSize: 8,
     interconnect: 'NVLink — 8-GPU coherent domain',
     status: 'planned',
-    statusNote: 'Current proposal: 64 B300 GPUs in eight complete Supermicro systems. This card uses reference GPU specifications, including Supermicro\'s published up-to-1,100 W TDP (checked 11 September 2026); it does not establish the selected system load or commissioning.',
+    statusNote: `Current proposal: ${deployment.gpus} B300 GPUs in ${deployment.systems} complete Supermicro systems. This card uses reference GPU specifications, including Supermicro's published up-to-1,100 W TDP (checked 11 September 2026); it does not establish the selected system load or commissioning.`,
     source: 'https://www.supermicro.com/en/pressreleases/supermicro-expands-nvidia-blackwell-portfolio-new-4u-and-2-ou-ocp-liquid-cooled',
   },
   {

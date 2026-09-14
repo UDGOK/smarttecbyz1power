@@ -12,12 +12,14 @@
  * this is slow, rate-limited or down, nobody sees an empty page.
  */
 import { collect } from '../../lib/feeds.mjs';
+import snapshot from '../../data/news.json' with { type: 'json' };
 
 export const prerender = false;
 
 export async function GET() {
   try {
-    const data = await collect(60);
+    const live = await collect(60);
+    const data = Array.isArray(live?.items) && live.items.length ? live : snapshot;
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: {
@@ -29,11 +31,12 @@ export async function GET() {
       },
     });
   } catch {
-    return new Response(JSON.stringify({ error: 'feeds unavailable', items: [] }), {
-      status: 502,
+    return new Response(JSON.stringify(snapshot), {
+      status: 200,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        'Cache-Control': 'no-store',
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=3600',
+        'X-SmartTec-News-Source': 'snapshot',
       },
     });
   }

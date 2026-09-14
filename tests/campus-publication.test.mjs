@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile,readdir,stat} from 'node:fs/promises';
 import {join,extname} from 'node:path';
 import {gunzipSync} from 'node:zlib';
+import {loadTS} from './helpers/load-ts.mjs';
 
 const assets='public/assets/campus/2026-09';
 const read=path=>readFile(path,'utf8');
@@ -98,15 +99,16 @@ test('public campus and shared entry points distinguish proposed DLC from the fi
  assert.match(page,/<SiteHeader\b/);assert.match(page,/<SiteFooter\b/);assert.match(page,/<noscript>/);
  assert.equal((page.match(/data-view="/g)||[]).length,16);
  for(const key of keys){assert.ok(page.includes(`data-view="${key}"`));assert.ok(page.includes(`/renders/${key}-2400.webp`),'no-JavaScript render link');}
- assert.match(page,/v6\.1[\s\S]*air-cooled[\s\S]*one-building/);
- assert.match(page,/direct[- ]liquid/i);assert.match(page,/repric/i);
+ assert.match(page,/campusConcept\.budgetBasis/);
+ const {campusConcept,MODEL_EDITION}=loadTS('src/data/site.ts');
+ assert.equal(MODEL_EDITION,'v6.1.1 · upgraded source revision');
+ assert.match(campusConcept.budgetBasis,/air-cooled.*one-building/);
+ assert.match(campusConcept.budgetBasis,/direct[- ]liquid.*Buildings A and C/i);assert.match(campusConcept.budgetBasis,/repric/i);
  assert.match(page,/islanding[^<]*(?:not established|remain|claim)/i);
- assert.match(record,/href:\s*'\/site\/campus'/);assert.match(record,/budgetBasis:[^\n]*v6\.1[^\n]*air-cooled[^\n]*one-building[^\n]*repricing/);
+ assert.match(record,/href:\s*'\/site\/campus'/);assert.match(record,/budgetBasis:[^\n]*MODEL_EDITION[^\n]*air-cooled[^\n]*one-building[^\n]*repricing/);
  assert.match(preview,/campusConcept\.href/);assert.match(preview,/campusConcept\.budgetBasis/);
  assert.match(site,/<CampusPreview\b/);assert.match(investors,/<CampusPreview\b[^>]*id="campus"/);
- assert.match(investors,/smarttec-campus\/private-reference\.mjs/,'private source panel remains independently mounted');
- const reference=await read('src/smarttec-campus/private-reference.mjs');
- assert.match(reference,/import\s*\{\s*mountReferencePanel\s*\}[^\n]*reference-panel\.mjs/);
- assert.match(reference,/mountReferencePanel\(\)/);
+ assert.doesNotMatch(investors,/site-map|private-reference|marked-survey|survey-image|\/api\/investor\/survey/,'retired survey panel is absent from investor room');
+ assert.doesNotMatch(preview,/href="#site-map"|private survey|satellite reference/,'shared campus preview has no retired survey link');
  assert.match(sitemap,/'\/site\/campus'/,'public campus is discoverable in the sitemap');
 });

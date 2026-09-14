@@ -15,7 +15,7 @@
  *
  * Needs playwright available (npx playwright install webkit).
  */
-import { webkit, devices } from 'playwright';
+import { webkit, chromium, devices } from 'playwright';
 
 const BASE = process.argv[2] ?? 'http://localhost:4321';
 const ROUTES = ['/', '/site', '/power', '/colocation', '/compute', '/model-planner', '/news', '/about', '/contact'];
@@ -27,7 +27,9 @@ const check = (name, ok, detail = '') => {
   console.log(`${ok ? '  ok  ' : ' FAIL '} ${name}${detail ? ` — ${detail}` : ''}`);
 };
 
-const browser = await webkit.launch();
+const browser = process.env.QA_BROWSER_EXECUTABLE
+  ? await chromium.launch({ headless: true, executablePath: process.env.QA_BROWSER_EXECUTABLE })
+  : await webkit.launch();
 const page = async (opts) => (await browser.newContext(opts)).newPage();
 const desktop = { viewport: { width: 1440, height: 900 } };
 const phone = { ...devices['iPhone 14'] };
@@ -188,7 +190,7 @@ const phone = { ...devices['iPhone 14'] };
     check(`${label} overlay covers the viewport`, covers);
     let closed = false;
     try {
-      await p.click('#menu-toggle', { timeout: 4000 });
+      await p.click('#site-menu-close', { timeout: 4000 });
       await p.waitForTimeout(800);
       closed = await p.evaluate(() => document.querySelector('#site-menu').hidden);
     } catch { /* the overlay is eating the click — that is the failure */ }
@@ -258,14 +260,14 @@ const phone = { ...devices['iPhone 14'] };
 
 /* 8. The private routes stay private. ----------------------------------
    /investors is password-gated, and the failure that matters is the silent
-   one: a route that quietly starts serving the survey, the knowledge base or
-   the financial model to anyone who types the URL. So this asserts the
+   one: a route that quietly starts serving project records or the financial
+   model to anyone who types the URL. So this asserts the
    negative. Anonymous requests must never come back 200, whatever the reason
    — redirected to login when the room is configured, refused outright when it
    is not. Both are correct; a 200 never is.
 
    It also checks the room stays out of the index. These pages carry owner
-   financials and a survey; a crawler finding them is a disclosure, not a
+   financials and project records; a crawler finding them is a disclosure, not a
    ranking problem. */
 {
   console.log('\nthe investor room refuses anonymous callers');
@@ -279,7 +281,7 @@ const phone = { ...devices['iPhone 14'] };
   // The architectural model and its preview renders live in the server
   // bundle and are served through the same authenticated handler. If any
   // of them ever answers a stranger, the campus concept has leaked.
-  for (const action of ['bootstrap', 'survey', 'survey-image', 'faq',
+  for (const action of ['bootstrap', 'faq',
                         'architecture-model', 'architecture-manufacturing', 'architecture-overview']) {
     const res = await p.request.get(`${BASE}/api/investor/${action}`, { maxRedirects: 0 });
     check(`/api/investor/${action} is gated`, res.status() !== 200, String(res.status()));
@@ -313,12 +315,6 @@ const phone = { ...devices['iPhone 14'] };
   check('login never puts the password in the URL', !gate.url().includes('password='), gate.url());
   check('a rejected password is reported in the page', (await gate.textContent('#login-status'))?.trim().length > 0);
   await gate.close();
-
-  // The survey PDF is served from the server bundle through an authenticated
-  // handler. If it ever appears under /public it becomes a static file that
-  // no session guards.
-  const stray = await p.request.get(`${BASE}/investor-assets/survey.pdf`);
-  check('survey is not a public static file', stray.status() === 404, String(stray.status()));
 
   await p.close();
 }

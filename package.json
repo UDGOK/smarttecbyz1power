@@ -24,7 +24,6 @@
     "astro": "^7.3.2",
     "gsap": "^3.13.0",
     "howler": "^2.2.4",
-    "maplibre-gl": "^6.9.0",
     "three": "^0.180.0"
   },
   "devDependencies": {

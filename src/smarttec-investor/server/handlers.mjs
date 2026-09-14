@@ -6,10 +6,6 @@ import {investorDeckBase64} from './investor-deck.mjs';
 import {pitchMediaResponse} from './pitch-media-response.mjs';
 import deckMetadata from '../data/investor-deck.json' with {type:'json'};
 import {answerQuestion,faqList} from './faq.mjs';
-import mapData from '../data/campus-map.json' with {type:'json'};
-import {markedPdf} from './marked-assets.mjs';
-import campus from '../data/campus.json' with {type:'json'};
-import {surveyPdf,surveyImage} from './survey-assets.mjs';
 export async function handle(request,action,dependencies={}){
  let cfg,store,session;
  try{cfg=dependencies.cfg||config();store=dependencies.store||new RedisStore(cfg);}catch{return json({error:'Private access is not configured.'},503);}
@@ -33,10 +29,10 @@ export async function handle(request,action,dependencies={}){
   const architecture=thermalAsset(action,request.method)||architectureAsset(action,request.method);
   if(architecture)return new Response(architecture.bytes,{headers:{...privateHeaders,'Content-Type':architecture.mime}});
   if(action==='logout'&&request.method==='POST'){await revoke(store,session);return json({ok:true},200,{'Set-Cookie':cookieHeader(cfg,'',0)});}
-  if(action==='bootstrap'&&request.method==='GET')return json({csrf:session.csrf,model,campus,mapData,mapConfig:{satelliteKey:cfg.mapKey||''},faqs:faqList()});
-  if(['underwriting-scenario','calculate','compare','price-floor','export'].includes(action))return json({error:'This historical calculator has been retired. Use the reviewed v6.1 scenarios in the investor room.',modelVersion:model.version,url:'/investors#returns'},410);
+  if(action==='bootstrap'&&request.method==='GET')return json({csrf:session.csrf,model,faqs:faqList()});
+   if(['underwriting-scenario','calculate','compare','price-floor','export'].includes(action))return json({error:'This historical calculator has been retired. Use the reviewed workbook selector scenarios in the investor room.',modelVersion:model.version,url:'/investors#returns'},410);
   if(action==='model'&&['GET','HEAD'].includes(request.method)){
-   const headers={...privateHeaders,'Content-Type':'application/json; charset=utf-8','Content-Disposition':'attachment; filename="SmartTec_Model_v6.1_Verified_Scenarios.json"'};
+    const headers={...privateHeaders,'Content-Type':'application/json; charset=utf-8','Content-Disposition':'attachment; filename="SmartTec_Model_v6.1_1_Verified_Scenarios.json"'};
    return new Response(request.method==='HEAD'?null:JSON.stringify(model,null,2),{headers});
   }
   if(action==='presentation'&&['GET','HEAD'].includes(request.method)){
@@ -46,9 +42,6 @@ export async function handle(request,action,dependencies={}){
    if(inline){headers['X-Investor-Session-Expires']=String(session.expires);headers['X-Frame-Options']='SAMEORIGIN';headers['Content-Security-Policy']=headers['Content-Security-Policy'].replace("frame-ancestors 'none'","frame-ancestors 'self'");}
    return new Response(request.method==='HEAD'?null:bytes,{headers});
   }
-  if(action==='marked-survey'&&request.method==='GET')return new Response(Buffer.from(markedPdf,'base64'),{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="SmartTec_Marked_Layout.pdf"'}});
-  if(action==='survey'&&request.method==='GET')return new Response(Buffer.from(surveyPdf,'base64'),{headers:{...privateHeaders,'Content-Type':'application/pdf','Content-Disposition':'attachment; filename="SmartTec_Boundary_Survey.pdf"'}});
-  if(action==='survey-image'&&request.method==='GET')return new Response(Buffer.from(surveyImage,'base64'),{headers:{...privateHeaders,'Content-Type':'image/png'}});
   if(action==='faq'&&request.method==='POST'){const b=await readJson(request,4096);return json(answerQuestion(b.question));}
   return json({error:'Route or method not supported.'},405);
  }catch(e){if(e.message?.includes('Session')||e.message?.includes('fetch')||e.name==='TimeoutError')return json({error:'Private access is temporarily unavailable.'},503);return json({error:e.message==='Trusted client address unavailable'?'Request cannot be verified.':String(e.message).slice(0,220)},400);}

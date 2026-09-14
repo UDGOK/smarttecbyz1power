@@ -11,7 +11,7 @@ The owner approved the Blender campus experience for publication. The public des
 | Heat rejection | Proposed chiller yard behind B | Closed-loop Daikin at 208V is owner intent, not an accepted model selection or evidence of voltage compatibility or usable capacity. |
 | Fiber | Owner-reported Dobson handoff in B | External and internal routes, carrier service acceptance and diversity remain unverified. Existing service-option wording stays qualified. |
 | Future energy | BESS inside B; solar on Tract 3 | Future BESS connects through PCS on a branch separate from the IT UPS. No islanding, runtime, savings or capacity guarantee is added. |
-| Investor model | Published v6.1 scenarios remain the earlier air-cooled, one-building budget | The DLC campus concept needs updated equipment quotes, design and repricing. No model values, PDF or return calculations were changed by this content pass. |
+| Investor model | Model v6.1.1 · upgraded source revision remains an air-cooled, one-building financial baseline | The direct-liquid campus concept needs updated equipment quotes, engineering and repricing before it is included financially. |
 
 ## Shared copy and page changes
 
@@ -19,7 +19,7 @@ The owner approved the Blender campus experience for publication. The public des
 
 - `campusConcept.href`: `/site/campus`
 - `campusConcept.allocationNote`: “Four systems in A and four in C are illustrated; final allocation and measured fit-out remain subject to design.”
-- `campusConcept.budgetBasis`: “Published v6.1 financial scenarios retain the earlier air-cooled, one-building budgeting basis. The direct-liquid campus concept requires updated equipment quotes, design and repricing.”
+- `campusConcept.budgetBasis`: “Published model v6.1.1 · upgraded source revision retains an air-cooled, one-building financial baseline. The approved campus experience illustrates a proposed direct-liquid design across Buildings A and C; it requires updated equipment quotes, engineering and repricing before it is included financially.”
 
 The shared `publicDeployment.building`, `buildingNote` and `cooling` strings now describe the current concept. The HVAC, future BESS siting, solar tract and home-stage narrative follow the same arrangement. Network data adds `handoff`, `handoffNote` and `handoffEvidence`; it does not turn the reported location into commissioned service.
 
@@ -29,9 +29,9 @@ The shared `publicDeployment.building`, `buildingNote` and `cooling` strings now
 
 ## Completed integration — 13 September 2026
 
-The full experience is published at `/site/campus`, with entry points on the home, site, compute, power, about and colocation pages and in the protected investor room. The site navigation and sitemap include the new route. The private survey remains protected; its historical BESS and solar/storage assignments are explicitly distinguished from the newer concept.
+The full experience is published at `/site/campus`, with entry points on the home, site, compute, power, about and colocation pages and in the protected investor room. The site navigation and sitemap include the new route. The retired private survey/map panel and its downloads are not published or served.
 
-The compute and power visual stories, shared deployment copy, investor room, immersive pitch, facts register and PDF reader now make the same distinction between the current campus concept and the retained v6.1 financial basis. Canonical financial data, return calculations and PDF bytes are unchanged. The release does not claim that the new cooling specification is covered by the earlier equipment price or cooling allowance.
+The compute and power visual stories, shared deployment copy, investor room, immersive pitch, facts register and PDF reader make the same distinction between the approved campus concept and the model v6.1.1 upgraded-source financial baseline. The source revision, canonical financial snapshot and investor materials are versioned together. The release does not claim that the direct-liquid cooling specification is covered by the model's air-cooled equipment price or cooling allowance.
 
 Sixteen rendered views are available before loading 3D. The default image is approximately 246 KB. The interactive model loads on request: approximately 17 MB compressed, compared with the approximately 120 MB source export. The optimized geometry retains the source's 1,401 nodes, 1,374 meshes, 61 materials and 2,129,918 triangles. The browser loads the HDR environment and Three.js only when 3D is requested. Rendering pauses when hidden or offscreen; reduced-motion preferences, fallback images and retry behavior are supported.
 

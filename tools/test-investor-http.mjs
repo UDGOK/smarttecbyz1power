@@ -29,9 +29,9 @@ r=await fetch(origin+'/investors/pitch',{redirect:'manual'});assert.equal(r.stat
 r=await fetch(origin+'/investors/presentation',{redirect:'manual'});assert.equal(r.status,303);assert.equal(r.headers.get('location'),'/investors/login#investor-presentation');assert.match(r.headers.get('cache-control'),/no-store/);assert.equal(r.headers.get('x-frame-options'),'DENY');checks++;
 for(const method of ['GET','HEAD']){r=await fetch(origin+'/api/investor/presentation?view=inline',{method});assert.equal(r.status,401);assert.match(r.headers.get('cache-control'),/no-store/);checks++;}
 r=await fetch(origin+'/investors/login');const login=await r.text();assert.equal(r.status,200);assert.ok(!login.includes('39.21'));assert.ok(!login.includes('scrypt$'));checks++;
-for(const path of ['presentation','bootstrap','model','survey','survey-image','concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy',...pitchMedia.assets.map(asset=>asset.action)]){r=await fetch(origin+'/api/investor/'+path);assert.equal(r.status,401);checks++;}
+for(const path of ['presentation','bootstrap','model','concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy',...pitchMedia.assets.map(asset=>asset.action)]){r=await fetch(origin+'/api/investor/'+path);assert.equal(r.status,401);checks++;}
 r=await fetch(origin+'/api/investor/login',{method:'POST',headers:{Origin:origin,'Content-Type':'application/json'},body:JSON.stringify({password:'integration-password'})});assert.equal(r.status,200,await r.clone().text());const cookie=r.headers.get('set-cookie').split(';')[0];checks++;
-r=await fetch(origin+'/investors',{headers:{Cookie:cookie}});const page=await r.text();assert.equal(r.status,200);assert.ok(page.includes('8460 US 70, Mead, OK 73449'));assert.ok(page.includes('data-model-version="'+model.version+'"'));assert.ok(!page.includes('inv-equipment-rows'));assert.ok(!page.includes('id="inv-calculator"'));assert.ok(r.headers.get('cache-control').includes('no-store'));checks++;
+r=await fetch(origin+'/investors',{headers:{Cookie:cookie}});const page=await r.text();assert.equal(r.status,200);assert.ok(page.includes('8460 US 70, Mead, OK 73449'));assert.ok(page.includes('data-model-version="'+model.version+'"'));assert.ok(!page.includes('inv-equipment-rows'));assert.ok(!page.includes('id="inv-calculator"'));assert.ok(!page.includes('id="site-map"'));assert.ok(!page.includes('Download your marked layout'));assert.ok(!page.includes('/api/investor/survey'));assert.ok(r.headers.get('cache-control').includes('no-store'));checks++;
 assert.equal(r.headers.get('x-frame-options'),'DENY');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);checks++;
 r=await fetch(origin+'/investors/presentation',{headers:{Cookie:cookie}});const readerPage=await r.text();assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.equal(r.headers.get('x-frame-options'),'DENY');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);assert.equal(r.headers.get('x-robots-tag'),'noindex, nofollow');
 const readerDOM=new JSDOM(readerPage),readerDoc=readerDOM.window.document;
@@ -87,9 +87,9 @@ checks++;
 for(const asset of ['/investor-assets/fonts.css','/assets/fonts/GoogleSansCode-Regular.ttf','/assets/fonts/GoogleSansCode-Bold.ttf','/assets/brand/smarttec-lockup-offwhite-green.svg']){r=await fetch(origin+asset);assert.equal(r.status,200);checks++;}
 const bootstrap=await(await fetch(origin+'/api/investor/bootstrap',{headers:{Cookie:cookie}})).json();const headers={Cookie:cookie,Origin:origin,'Content-Type':'application/json','X-CSRF-Token':bootstrap.csrf};
 for(const path of ['concept-manufacturing','concept-compute','concept-energy','module-factory','module-rack','module-energy']){r=await fetch(origin+'/api/investor/'+path,{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('cache-control'),/no-store/);assert.ok((await r.arrayBuffer()).byteLength>10000);checks++;}
-assert.deepEqual(bootstrap.model,model);assert.equal(bootstrap.sample,undefined);checks++;
+assert.deepEqual(bootstrap.model,model);assert.equal(bootstrap.sample,undefined);assert.equal(bootstrap.mapData,undefined);assert.equal(bootstrap.mapConfig,undefined);assert.equal(bootstrap.campus,undefined);checks++;
 for(const method of ['GET','HEAD']){
- r=await fetch(origin+'/api/investor/model',{method,headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('content-type'),/application\/json/);assert.match(r.headers.get('content-disposition'),/SmartTec_Model_v6\.1_Verified_Scenarios\.json/);
+ r=await fetch(origin+'/api/investor/model',{method,headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('content-type'),/application\/json/);assert.match(r.headers.get('content-disposition'),/SmartTec_Model_v6\.1_1_Verified_Scenarios\.json/);
  for(const key of ['cache-control','cdn-cache-control','vercel-cdn-cache-control'])assert.match(r.headers.get(key),/no-store/);
  if(method==='HEAD')assert.equal((await r.arrayBuffer()).byteLength,0);else assert.deepEqual(await r.json(),model);checks++;
 }
@@ -105,7 +105,7 @@ assert.equal(reviewedDoc.querySelectorAll('[data-underwriting-option],#inv-scena
 for(const amount of [usd(base.capital.totalUsd),usd(contracted.capital.totalUsd)])assert.ok(reviewedDoc.body.textContent.includes(amount),amount+' reviewed funding must be present');
 assert.ok(reviewedDoc.body.textContent.includes('BC LLC'));assert.ok(reviewedDoc.querySelector('a[href="/api/investor/model"]'));reviewedDOM.window.close();checks++;
 const fundingFAQ=await(await fetch(origin+'/api/investor/faq',{method:'POST',headers,body:JSON.stringify({question:'How much funding is required?'})})).json();
-assert.ok(fundingFAQ.matches.some(f=>f.id==='F17'&&f.answer.includes(usd(base.capital.totalUsd))&&f.answer.includes(usd(contracted.capital.totalUsd))&&f.sourceIds.includes('model-v6.1')));checks++;
+assert.ok(fundingFAQ.matches.some(f=>f.id==='F17'&&f.answer.includes(usd(base.capital.totalUsd))&&f.answer.includes(usd(contracted.capital.totalUsd))&&f.sourceIds.includes('model-v6.1.1')));checks++;
 // Exercise the read-only enhancement and FAQ against the compiled API without live credentials.
 const dom=new JSDOM(page,{url:origin+'/investors',runScripts:'outside-only'}),win=dom.window;
 win.structuredClone=structuredClone;win.matchMedia=()=>({matches:true});win.HTMLElement.prototype.scrollIntoView=function(){};
@@ -129,7 +129,12 @@ for(const asset of ['/assets/investor/b300-studio.webp','/assets/investor/power-
 }
 assert.match(page,/AI[- ]generated|AI concept|concept illustration/i);checks++;
 if(process.env.INVESTOR_VISUAL_QA==='1'){
- const {chromium}=await import('playwright');const browser=await chromium.launch({headless:true,channel:process.env.INVESTOR_QA_BROWSER||undefined});
+ const {chromium}=await import('playwright');const browser=await chromium.launch({
+  headless:true,
+  ...(process.env.INVESTOR_QA_EXECUTABLE
+   ? {executablePath:process.env.INVESTOR_QA_EXECUTABLE}
+   : {channel:process.env.INVESTOR_QA_BROWSER||undefined}),
+ });
  try{
   await mkdir('tmp/pdfs',{recursive:true});await mkdir('tmp/pitch-review',{recursive:true});await mkdir('tmp/pitch-audio',{recursive:true});
   const context=await browser.newContext({reducedMotion:'no-preference'});const split=cookie.indexOf('=');
@@ -382,7 +387,6 @@ for(const method of ['GET','HEAD']){
 }
 r=await fetch(origin+'/api/investor/presentation?view=unexpected',{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.match(r.headers.get('content-disposition'),/^attachment;/);assert.equal(r.headers.get('x-frame-options'),'DENY');assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);assert.deepEqual(Buffer.from(await r.arrayBuffer()),deckBytes);checks++;
 r=await fetch(origin+'/api/investor/presentation?view=inline',{method:'PUT',headers});assert.equal(r.status,405);assert.ok(!r.headers.get('content-type').includes('application/pdf'));checks++;
-r=await fetch(origin+'/api/investor/survey',{headers:{Cookie:cookie}});assert.equal(r.status,200);assert.equal(r.headers.get('content-type'),'application/pdf');checks++;
 r=await fetch(origin+'/api/investor/logout',{method:'POST',headers,body:'{}'});assert.equal(r.status,200);checks++;
 r=await fetch(origin+'/investors',{headers:{Cookie:cookie},redirect:'manual'});assert.equal(r.status,303);checks++;
 r=await fetch(origin+'/api/investor/presentation',{headers:{Cookie:cookie}});assert.equal(r.status,401);checks++;

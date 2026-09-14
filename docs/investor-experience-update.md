@@ -14,7 +14,7 @@ Branch: `codex/investor-visual-upgrade`. Continue the existing draft PR #3.
 - A floating header, chapter ruler and full-screen seven-chapter index using the homepage's forest, signal-green, typography and motion tokens.
 - A compact Back/Next control that follows the reading position, including inside the long calculator. The desktop header also links directly to Returns.
 - A mobile Explore menu and chapter controls. The prior investor header hid its navigation below 900px.
-- Native scrolling for reading, forms and touch interaction. The existing campus imagery, optional 3D models, survey, calculator and FAQ remain available.
+- Native scrolling for reading, forms and touch interaction. Campus imagery, the immersive campus experience and the curated FAQ remain available.
 
 The real approved logo is already in `public/assets/brand/`. Do not recreate it
 as typed text, stretch it, or substitute an old brand-kit experiment. Its
@@ -39,7 +39,7 @@ is needed. The Astro version and dependencies remain as they were.
 | Script delivery | `astro.config.mjs` | External `investor-journey` chunk required by the existing CSP |
 
 Retain these section IDs: `opportunity`, `campus`, `deployment`, `capital`,
-`returns`, `evidence`, `questions`. Survey reference remains `site-map`.
+`returns`, `evidence`, `questions`. The retired survey/map reference is no longer part of this journey.
 Retain the calculator's input/result IDs and the single `inv-logout` control.
 
 ## Fonts and security
@@ -83,7 +83,7 @@ verified or "triple checked."
 2. At desktop widths, compare the logo, text and floating controls with the homepage. At 320px, 390px and 768px, check that the logo, Explore button and dock fit without horizontal page overflow. Test landscape and 200% zoom.
 3. Open Explore with mouse, touch and keyboard. Tab should stay inside the native dialog; Escape and Close should return focus to Explore. A chapter link should close the menu and move to that chapter. The selected ruler and dock should follow.
 4. Load the labeled calculator illustration, acknowledge its basis, calculate, edit a field, add equipment and export a scenario. Confirm the dock stays on Returns throughout the long form and never hides the focused input or result. A positive or negative result must retain its conditional basis.
-5. Switch every campus image and 3D model, rotate/zoom/reset, open the survey reference and return with browser Back/Forward. Confirm controls and labels recover, and that graphics failures retain the image fallback.
+5. Open the immersive campus experience and return with browser Back/Forward. Confirm controls and labels recover, and that graphics failures retain the image fallback.
 6. Enable reduced motion; navigation should jump without smooth movement and the menu should appear without animation. Print a calculated summary; floating chrome should be absent and the approved logo should print in black.
 7. Check the console for CSP errors, missing fonts/assets and runtime exceptions. Confirm the four known concept scenes load only through authenticated endpoints.
 

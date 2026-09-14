@@ -1,4 +1,6 @@
 // Public UI metadata; assets are served only after authentication.
+import { MODEL_EDITION, publicDeployment as deployment } from '../data/site.ts';
+
 export const chapters = {
   manufacturing: {
     label:'Manufacturing', number:'01', title:'Built around power.',
@@ -9,9 +11,9 @@ export const chapters = {
     modelNote:'Single-hall 3D study. Proposed 150 × 200 ft footprint; appearance and height are illustrative.'
   },
   compute: {
-    label:'First compute', number:'02', title:'Eight systems. One building.',
-    text:'The current proposal is 64 B300 GPUs in eight complete Supermicro systems, together in one building with all-new cooling; the v6.1 budget uses an air-cooled planning basis, with the exact SKU pending. The earlier rack image is illustrative; customer commitments, full costs and engineering acceptance precede procurement.',
-    fact:'64 B300 GPUs · proposed', status:'PROCUREMENT AND COMMISSIONING AHEAD',
+    label:'First compute', number:'02', title:'Eight systems. One focused start.',
+    text:`The current proposal is ${deployment.gpus} B300 GPUs in ${deployment.systems} complete Supermicro systems. The approved campus experience illustrates a proposed four-plus-four allocation across Buildings A and C with direct liquid cooling. Model ${MODEL_EDITION} retains an air-cooled, one-building financial baseline; customer commitments, exact equipment, repricing and engineering acceptance precede procurement.`,
+    fact:deployment.label, status:'PROCUREMENT AND COMMISSIONING AHEAD',
     image:'concept-compute', alt:'AI concept of a small equipment room with one rack and two GPU server chassis; not installed equipment',
     model:'module-rack', target:[0,1.15,0], camera:[2.9,2.2,-4.0], distance:[1.7,12],
     modelNote:'Earlier RTX-only rack study with two illustrative chassis. It does not depict the proposed eight-system B300 fleet, an OEM specification or a surveyed room.'
@@ -26,7 +28,7 @@ export const chapters = {
   },
   cooling: {
     label:'Cooling', number:'04', title:'Two loops. Different duties.',
-    text:'The v6.1 budget assumes two nominal 50-ton chillers and five 40-kW in-row units, including spare units, for an air-cooled planning configuration. This earlier two-loop visual is a separate spatial concept, not the current bill of quantities.',
+    text:`Model ${MODEL_EDITION} retains two nominal 50-ton chillers and five 40-kW in-row units, including spare units, in its air-cooled, one-building financial baseline. The approved direct-liquid A/C campus experience requires engineering and repricing; this older visual is not a current bill of quantities.`,
     fact:'All-new cooling · final design pending', status:'EQUIPMENT STUDY / SITING PENDING',
     image:'thermal-preview', alt:'Geometry-rendered two-loop cooling study with dry coolers, trim chiller, scroll chillers, CDUs, buffer tank and a generator docking pad; not installed equipment',
     model:'thermal-model', target:[2,1,0], camera:[29,25,33], distance:[12,95],
